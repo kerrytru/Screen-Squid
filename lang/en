@@ -1,0 +1,158 @@
+<?php
+include("../reports/reports.php");
+///Reports Headers BEGIN
+$_lang['stLOGINSTRAFFIC']="Traffic users (logins)";
+$_lang['stIPADDRESSTRAFFIC']="Traffic users (IP addresses)";
+$_lang['stSITESTRAFFIC']="Traffic sites";
+$_lang['stTOPSITESTRAFFIC']="Top sites";
+$_lang['stTOPLOGINSTRAFFIC']="Top logins";
+$_lang['stTOPIPTRAFFIC']="Top IP addresses";
+$_lang['stTRAFFICBYHOURS']="Per hour";
+$_lang['stONELOGINTRAFFIC']="Traffic login";
+$_lang['stONELOGINTOPSITESTRAFFIC']="Top sites one login";
+$_lang['stONELOGINTRAFFICBYHOURS']="Traffic login per hour";
+$_lang['stONEIPADRESSTRAFFIC']="Traffic IP address";
+$_lang['stONEIPADDRESSTOPSITESTRAFFIC']="Top sites one IP address";
+$_lang['stONEIPADDRESSTRAFFICBYHOURS']="Traffic IP address per hour";
+$_lang['stLOGINSTRAFFICWIDE']="Traffic logins wide";
+$_lang['stIPADDRESSTRAFFICWIDE']="Traffic IP addresses wide";
+$_lang['stIPADDRESSTRAFFICWITHRESOLVE']="Traffic IP addresses with resolve";
+$_lang['stPOPULARSITES']="Popular sites";
+$_lang['stWHOVISITSITELOGIN']="Who visits (logins) site ";
+$_lang['stWHOVISITSITEIPADDRESS']="Who visits (ipaddress) site ";
+$_lang['stWHODOWNLOADBIGFILES']="Who download big files";
+$_lang['stTRAFFICBYPERIOD']="Traffic by period (per month)";
+$_lang['stTRAFFICBYPERIODDAY']="Traffic by period (per day)";
+$_lang['stTRAFFICBYPERIODDAYNAME']="Traffic by period (day name)";
+$_lang['stVISITINGWEBSITELOGINS']="Visited websites (login)";
+$_lang['stVISITINGWEBSITEIPADDRESS']="Visited websites (IP address)";
+$_lang['stGROUPSTRAFFIC']="Groups traffic";
+$_lang['stONEGROUPTRAFFIC']="Traffic group";
+$_lang['stONEGROUPTOPSITESTRAFFIC']="Top site by group";
+$_lang['stONEGROUPTRAFFICBYHOURS']="One group traffic per hours";
+$_lang['stONEGROUPWHODOWNLOADBIGFILES']="Who download big files in group";
+$_lang['stHTTPSTATUSES']="HTTP statuses";
+$_lang['stHTTPSTATUS']="HTTP status";
+$_lang['stONELOGINIPTRAFFIC']="IP addresses from login";
+$_lang['stONEIPADDRESSLOGINSTRAFFIC']="Logins from IP address";
+$_lang['stLOGINSIPTRAFFIC']="IP addresses from logins";
+$_lang['stIPADDRESSLOGINSTRAFFIC']="Logins from IP addresses";
+$_lang['stFOR']="for";
+$_lang['stIPADDRESSFOR']="(IP addresses) for";
+$_lang['stLOGINSFOR']="(logins) for";
+$_lang['stEXTENDED']="extended";
+$_lang['stBYDAYTIME']="By day time";
+///Reports Headers END
+$_lang['stDAY']="DAY";
+$_lang['stMONTH']="MONTH";
+$_lang['stFASTDATESWITCH']="Fast date switch:";
+
+$_lang['stEXECUTIONTIME']="Page generated in";
+$_lang['stSECONDS']="seconds";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid created by <a href=http://break-people.ru>break-people.ru</a></font>";
+
+$_lang['stLOGIN']="Login";
+$_lang['stLOGINS']="Logins";
+$_lang['stIPADDRESS']="IP address";
+$_lang['stIPADDRESSES']="IP addresses";
+$_lang['stSITE']="Site";
+$_lang['stHOURS']="Hours";
+$_lang['stMEGABYTES']="Megabytes";
+$_lang['stALIAS']="Alias";
+$_lang['stTOTAL']="TOTAL:";
+$_lang['stFROMCACHEMB']="From cache(MB)";
+$_lang['stDIRECTMB']="Direct(MB)";
+$_lang['stFROMCACHEPERCENT']="From cache(%)";
+$_lang['stDIRECTPERCENT']="Direct(%)";
+$_lang['stHOSTNAMERESOLVE']="Resolve";
+$_lang['stREQUESTS']="Requests";
+$_lang['stWHO']="Who?";
+$_lang['stFROMWEBSITE']="Wherefrom (web-site)";
+$_lang['stMONTHYEAR']="Month.Year";
+$_lang['stDAYMONTHYEAR']="Day.Month.Year";
+$_lang['stDAYNAME']="Day name";
+$_lang['stDATEANDTIME']="Date and time";
+$_lang['stWEBSITE']="Web-site";
+$_lang['stGROUP']="Group";
+$_lang['stQUANTITY']="Quantity";
+$_lang['stDATE']="Date";
+$_lang['stQUANTITYIPADDRESS']="Quantity IP addresses";
+$_lang['stQUANTITYLOGIN']="Quantity logins";
+
+$_lang['stREPORTS']="Reports";
+$_lang['stSTATS']="Statistics";
+$_lang['stALIASES']="Aliases";
+$_lang['stGROUPS']="Groups";
+$_lang['stWELCOME']="Welcome to Screen Squid v.";
+$_lang['stDONTFORGET']="<p><b>DON`T FORGET:</b> At first start, create mysql DB with tables, using <a href=createdb/createdb.sql>SQL file</a>). Set up connection to DB in config.php and fetch.pl.</p>";
+$_lang['stALLISOK']="DB Connection established. Click <b>Reports</b> to continue.";
+
+$_lang['stQUANTITYRECORDS']="The number of records in the DB";
+$_lang['stQUANTITYLOGINS']="The number of logins";
+$_lang['stQUANTITYIPADDRESSES']="The number of IP addresses";
+$_lang['stMINDATE']="Minimal date";
+$_lang['stMAXDATE']="Maximal date";
+$_lang['stTRAFFICSUM']="Total counted(MB)";
+
+$_lang['stALIASNAME']="Alias name";
+$_lang['stTYPE']="Type";
+$_lang['stVALUE']="Value";
+$_lang['stADDALIAS']="Add alias";
+$_lang['stFORMADDALIAS']="Add alias form";
+$_lang['stTYPECHECK']="Type (login(unchecked)/IPaddress(checked))";
+$_lang['stADD']="Add";
+
+$_lang['stBACK']="Back";
+$_lang['stSAVE']="Save";
+$_lang['stDELETE']="Delete";
+$_lang['stALIASADDED']="1 alias added";
+$_lang['stALIASUPDATED']="1 alias updated";
+$_lang['stALIASDELETED']="1 alias deleted";
+
+$_lang['stGROUPNAME']="Group name";
+$_lang['stCOMMENT']="Comment";
+$_lang['stADDGROUP']="Add group";
+$_lang['stFORMADDGROUP']="Add group form";
+$_lang['stGROUPADDED']="1 group added";
+$_lang['stGROUPUPDATED']="1 group updated";
+$_lang['stGROUPDELETED']="1 group deleted";
+
+$_lang['stSEARCHSTRING']="Search it";
+$_lang['stSEARCHFORM']="Search form";
+$_lang['stSEARCH']="Search";
+
+$_lang['stGENERAL']="General";
+$_lang['stBYGROUP']="By group";
+$_lang['stFASTSEARCH']="Fast search";
+
+$_lang['stMONDAY']="Mon";
+$_lang['stTUESDAY']="Tue";
+$_lang['stWEDNESDAY']="Wed";
+$_lang['stTHURSDAY']="Thu";
+$_lang['stFRIDAY']="Fri";
+$_lang['stSATURDAY']="Sat";
+$_lang['stSUNDAY']="Sun";
+
+$_lang['stINCLUDE']="Include?";
+$_lang['stQUANTITYALIASES']="Quantity";
+
+$_lang['stWHOVISITSITES']="Who visit sites";
+$_lang['stFROM']="from";
+$_lang['stUNTIL']="until";
+$_lang['stMIME']="MIME type";
+$_lang['stMIMETYPESTRAFFIC']="Traffic by MIME types";
+$_lang['stDOMAINZONESTRAFFIC']="Traffic by domain zones";
+$_lang['stDOMAINZONE']="Domain zone";
+$_lang['stBACKTOGROUPLIST']="Back to group list";
+$_lang['stDASHBOARD']="Dashboard";
+$_lang['stTRAFFICOBJECTS']="Traffic objects";
+
+#новые в 1.9
+
+$_lang['stLOGTABLE']="Logtable";
+$_lang['stLOGDATESTART']="Start";
+$_lang['stLOGDATEEND']="End";
+$_lang['stLOGMESSAGE']="Message";
+$_lang['stTOP']="Top";
+
+?>

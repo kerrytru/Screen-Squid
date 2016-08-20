@@ -1,0 +1,163 @@
+<?php
+
+///Reports Headers BEGIN
+$_lang['stLOGINSTRAFFIC']="Трафик пользователей логины";
+$_lang['stIPADDRESSTRAFFIC']="Трафик пользователей IP адреса";
+$_lang['stSITESTRAFFIC']="Трафик сайтов";
+$_lang['stTOPSITESTRAFFIC']="Топ сайтов по трафику";
+$_lang['stTOPLOGINSTRAFFIC']="Топ пользователей по трафику";
+$_lang['stTOPIPTRAFFIC']="Топ IP адресов по трафику";
+$_lang['stTRAFFICBYHOURS']="Трафик по времени суток";
+$_lang['stONELOGINTRAFFIC']="Трафик пользователя";
+$_lang['stONELOGINTOPSITESTRAFFIC']="Топ сайтов пользователя";
+$_lang['stONELOGINTRAFFICBYHOURS']="Трафик по времени суток пользователя";
+$_lang['stONEIPADRESSTRAFFIC']="Трафик IP адреса";
+$_lang['stONEIPADDRESSTOPSITESTRAFFIC']="Топ сайтов IP адреса";
+$_lang['stONEIPADDRESSTRAFFICBYHOURS']="Трафик по времени суток IP адреса";
+$_lang['stLOGINSTRAFFICWIDE']="Трафик пользователей логины расширенный";
+$_lang['stIPADDRESSTRAFFICWIDE']="Трафик пользователей IP адреса расширенный";
+$_lang['stIPADDRESSTRAFFICWITHRESOLVE']="Трафик IP адреса с резолвом";
+$_lang['stPOPULARSITES']="Популярные сайты";
+$_lang['stWHOVISITSITELOGIN']="Кто посещал (логины) адрес";
+$_lang['stWHOVISITSITEIPADDRESS']="Кто посещал (IP адреса) адрес";
+$_lang['stWHODOWNLOADBIGFILES']="Кто качал большие файлы";
+$_lang['stTRAFFICBYPERIOD']="Трафик по периодам (месяцы)";
+$_lang['stTRAFFICBYPERIODDAY']="Трафик по периодам (дни)";
+$_lang['stTRAFFICBYPERIODDAYNAME']="Трафик по периодам (имя дня)";
+$_lang['stVISITINGWEBSITELOGINS']="Посещения пользователя";
+$_lang['stVISITINGWEBSITEIPADDRESS']="Посещения IP адреса";
+$_lang['stGROUPSTRAFFIC']="Трафик групп";
+$_lang['stONEGROUPTRAFFIC']="Трафик группы";
+$_lang['stONEGROUPTOPSITESTRAFFIC']="Топ сайтов группы";
+$_lang['stONEGROUPTRAFFICBYHOURS']="По времени суток группы";
+$_lang['stONEGROUPWHODOWNLOADBIGFILES']="Кто качал большие файлы в группе";
+$_lang['stHTTPSTATUSES']="HTTP статусы";
+$_lang['stHTTPSTATUS']="HTTP статус";
+$_lang['stONELOGINIPTRAFFIC']="IP адреса логина";
+$_lang['stONEIPADDRESSLOGINSTRAFFIC']="Логины с IP адреса";
+$_lang['stLOGINSIPTRAFFIC']="IP адреса логинов";
+$_lang['stIPADDRESSLOGINSTRAFFIC']="Логины с IP адресов";
+
+
+$_lang['stFOR']="за";
+$_lang['stIPADDRESSFOR']="(IP адреса) за";
+$_lang['stLOGINSFOR']="(логины) за";
+$_lang['stEXTENDED']="расширенный";
+$_lang['stBYDAYTIME']="по времени суток";
+///Reports Headers END
+$_lang['stDAY']="ДЕНЬ";
+$_lang['stMONTH']="МЕСЯЦ";
+$_lang['stFASTDATESWITCH']="Быстрый переход по датам:";
+
+$_lang['stEXECUTIONTIME']="время генерации страницы";
+$_lang['stSECONDS']="сек.";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid создали <a href=http://break-people.ru>break-people.ru</a></font>";
+
+$_lang['stLOGIN']="Логин";
+$_lang['stLOGINS']="Логины";
+$_lang['stIPADDRESS']="IP адрес";
+$_lang['stIPADDRESSES']="IP адреса";
+$_lang['stSITE']="Сайт";
+$_lang['stHOURS']="Часы";
+$_lang['stMEGABYTES']="Мегабайт";
+$_lang['stALIAS']="Алиас";
+$_lang['stTOTAL']="ИТОГО:";
+$_lang['stFROMCACHEMB']="Из кэша(Мегабайт)";
+$_lang['stDIRECTMB']="Напрямую(Мегабайт)";
+$_lang['stFROMCACHEPERCENT']="Из кэша(%)";
+$_lang['stDIRECTPERCENT']="Напрямую(%)";
+$_lang['stHOSTNAMERESOLVE']="Резолв";
+$_lang['stREQUESTS']="Запросов";
+$_lang['stWHO']="Кто?";
+$_lang['stFROMWEBSITE']="Откуда (веб-сайт)";
+$_lang['stMONTHYEAR']="Месяц.Год";
+$_lang['stDAYMONTHYEAR']="День.Месяц.Год";
+$_lang['stDAYNAME']="Название дня";
+$_lang['stDATEANDTIME']="Дата и время";
+$_lang['stWEBSITE']="Веб-сайт";
+$_lang['stGROUP']="Группа";
+$_lang['stQUANTITY']="Количество";
+$_lang['stDATE']="Дата";
+$_lang['stQUANTITYIPADDRESS']="Количество IP адресов";
+$_lang['stQUANTITYLOGIN']="Количество логинов";
+
+$_lang['stREPORTS']="Отчеты";
+$_lang['stSTATS']="Краткая статистика";
+$_lang['stALIASES']="Алиасы";
+$_lang['stGROUPS']="Группы";
+$_lang['stWELCOME']="Добро пожаловать в Screen Squid v.";
+$_lang['stDONTFORGET']="<p><b>НЕ ЗАБЫТЬ:</b> При первом запуске, создать таблицы в базе(любым удобным способом. <a href=createdb/createdb.sql>SQL файл</a>). Настроить подключение к БД MySQL в config.php, а также в fetch.pl. Параметры подключения к базе должны быть ИДЕНТИЧНЫМИ, то есть одинаковыми!</p>
+<p>Это сообщение показывается, если есть какие-то проблемы с подключением к БД и/или таблицы не созданы.</p>";
+$_lang['stALLISOK']="Подключение к БД есть. Для продолжения работы нажми в меню слева - <b>Отчеты</b>";
+
+$_lang['stQUANTITYRECORDS']="Количество записей в базе";
+$_lang['stQUANTITYLOGINS']="Количество логинов";
+$_lang['stQUANTITYIPADDRESSES']="Количество IP адресов";
+$_lang['stMINDATE']="Минимальная дата";
+$_lang['stMAXDATE']="Максимальная дата";
+$_lang['stTRAFFICSUM']="Всего трафика посчитано(Мб)";
+
+$_lang['stALIASNAME']="Имя алиаса";
+$_lang['stTYPE']="Тип";
+$_lang['stVALUE']="Значение";
+$_lang['stADDALIAS']="Добавить алиас";
+$_lang['stFORMADDALIAS']="Форма для добавления алиаса";
+$_lang['stTYPECHECK']="Тип (Логин(без галки)/IPaddress(с галкой))";
+$_lang['stADD']="Добавить";
+
+$_lang['stBACK']="В главное меню";
+$_lang['stSAVE']="Сохранить";
+$_lang['stDELETE']="Удалить";
+$_lang['stALIASADDED']="1 алиас добавлен";
+$_lang['stALIASUPDATED']="1 алиас обновлен";
+$_lang['stALIASDELETED']="1 алиас удален";
+
+$_lang['stGROUPNAME']="Имя группы";
+$_lang['stCOMMENT']="Комментарий";
+$_lang['stADDGROUP']="Добавить группу";
+$_lang['stFORMADDGROUP']="Форма для добавления группы";
+$_lang['stGROUPADDED']="1 группа добавлена";
+$_lang['stGROUPUPDATED']="1 группа обновлена";
+$_lang['stGROUPDELETED']="1 группа удалена";
+
+$_lang['stSEARCHSTRING']="Искать";
+$_lang['stSEARCHFORM']="Форма для поиска";
+$_lang['stSEARCH']="Поиск";
+
+$_lang['stGENERAL']="Общий";
+$_lang['stBYGROUP']="По группам";
+$_lang['stFASTSEARCH']="Быстрый поиск";
+
+$_lang['stMONDAY']="Пн";
+$_lang['stTUESDAY']="Вт";
+$_lang['stWEDNESDAY']="Ср";
+$_lang['stTHURSDAY']="Чт";
+$_lang['stFRIDAY']="Пт";
+$_lang['stSATURDAY']="Сб";
+$_lang['stSUNDAY']="Вс";
+
+$_lang['stINCLUDE']="Вкл.?";
+$_lang['stQUANTITYALIASES']="Кол-во алиасов";
+
+#новые в 1.8
+$_lang['stWHOVISITSITES']="Кто посещал сайты";
+$_lang['stFROM']="с";
+$_lang['stUNTIL']="до";
+$_lang['stMIME']="MIME тип";
+$_lang['stMIMETYPESTRAFFIC']="Трафик по типу контента";
+$_lang['stDOMAINZONESTRAFFIC']="Трафик по доменным зонам";
+$_lang['stDOMAINZONE']="Зона";
+$_lang['stBACKTOGROUPLIST']="Вернуться к списку групп";
+$_lang['stDASHBOARD']="Dashboard";
+$_lang['stTRAFFICOBJECTS']="Объекты трафика";
+
+#новые в 1.9
+
+$_lang['stLOGTABLE']="Лог операций";
+$_lang['stLOGDATESTART']="Начало";
+$_lang['stLOGDATEEND']="Окончание";
+$_lang['stLOGMESSAGE']="Сообщение";
+$_lang['stTOP']="Топ";
+
+
+?>
