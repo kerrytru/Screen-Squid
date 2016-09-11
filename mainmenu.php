@@ -1,5 +1,5 @@
 <?php 
-#build 20160330
+#build 20160911
 ?>
 <html>
 <head>
@@ -100,6 +100,7 @@ echo "
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",38)\">".$_lang['stIPADDRESSLOGINSTRAFFIC']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",45)\">".$_lang['stMIMETYPESTRAFFIC']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",48)\">".$_lang['stDOMAINZONESTRAFFIC']."</a></div>
+<!--<div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",50)\">test</a></div>-->
 
 </div> <!--reports-->
 

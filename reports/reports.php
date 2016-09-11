@@ -1,5 +1,5 @@
 <?php
-#build 20160816
+#build 20160911
 ?>
 <html>
 <head>
@@ -344,7 +344,7 @@ $echoLoginAliasColumn=",aliastbl.name";
 	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	GROUP BY CRC32(login)
+	GROUP BY login
 	ORDER BY null) 
 	AS tmp 
 
@@ -389,7 +389,7 @@ $queryIpaddressTraffic="
 	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	GROUP BY CRC32(ipaddress)
+	GROUP BY ipaddress
 	ORDER BY null) 
 	AS tmp 
 	RIGHT JOIN (SELECT 
@@ -636,7 +636,7 @@ $queryTopLoginsTraffic="
 	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	GROUP BY CRC32(login) 
+	GROUP BY login
 	ORDER BY null) 
 	AS tmp 
 
@@ -668,7 +668,7 @@ $queryTopIpTraffic="
 	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	GROUP BY CRC32(ipaddress) 
+	GROUP BY ipaddress
 	ORDER BY null) 
 	AS tmp
 
@@ -745,7 +745,7 @@ $queryLoginsTrafficWide="
 	    AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	    AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	 GROUP BY CRC32(login) 
+	 GROUP BY login
 	 ORDER BY null) 
 
   UNION 
@@ -767,7 +767,7 @@ $queryLoginsTrafficWide="
 	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	 GROUP BY CRC32(login) 
+	 GROUP BY login 
 	 ORDER BY null) 
 
   UNION 
@@ -782,7 +782,7 @@ $queryLoginsTrafficWide="
 	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	 GROUP BY crc32(login) 
+	 GROUP BY login 
 	 ORDER BY null)) 
 	 AS tmp
 
@@ -817,7 +817,7 @@ $queryIpaddressTrafficWide="
 	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY ipaddress 
 	 ORDER BY null) 
 
   UNION
@@ -838,7 +838,7 @@ $queryIpaddressTrafficWide="
 	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY ipaddress 
 	 ORDER BY null) 
 
   UNION 
@@ -853,7 +853,7 @@ $queryIpaddressTrafficWide="
 	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY ipaddress 
 	 ORDER BY null)) 
 	 AS tmp
 
@@ -882,7 +882,7 @@ $queryIpaddressTrafficWithResolve="
 	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-	GROUP BY CRC32(ipaddress) 
+	GROUP BY ipaddress 
 	ORDER BY null) 
 	AS tmp
 
@@ -1124,7 +1124,7 @@ $queryHttpStatus= "
     AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
     AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-  GROUP BY CRC32(httpstatus) 
+  GROUP BY httpstatus 
   ORDER BY scsq_httpstatus.name asc;";
 
 $queryCountIpaddressOnLogins="
@@ -1232,7 +1232,7 @@ $queryWhoVisitSiteOneHourLogin="
 	   AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 
-	GROUP BY CRC32(login) 
+	GROUP BY login 
 	ORDER BY null) 
 	AS tmp 
 
@@ -1271,7 +1271,7 @@ $queryWhoVisitSiteOneHourIpaddress="
 	  AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	  AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 
-	GROUP BY CRC32(ipaddress) 
+	GROUP BY ipaddress 
 	ORDER BY null) 
 	AS tmp 
 	RIGHT JOIN (SELECT 
@@ -1418,16 +1418,445 @@ UNION
 ;
 ";
 
+$queryTrafficByHoursLogins="
+  SELECT 
+    tmp.s,
+    nofriends.name,
+    tmp.login,
+    tmp.n 
+  FROM ((SELECT 
+	   login,
+	   '100' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=0
+	   AND FROM_UNIXTIME(date,'%k')<1
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '101' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=1
+	   AND FROM_UNIXTIME(date,'%k')<2
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null)  
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '102' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=2
+	   AND FROM_UNIXTIME(date,'%k')<3
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '103' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=3
+	   AND FROM_UNIXTIME(date,'%k')<4
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '104' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=4
+	   AND FROM_UNIXTIME(date,'%k')<5
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '105' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=5
+	   AND FROM_UNIXTIME(date,'%k')<6
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '106' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=6
+	   AND FROM_UNIXTIME(date,'%k')<7
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '107' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=7
+	   AND FROM_UNIXTIME(date,'%k')<8
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '108' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=8
+	   AND FROM_UNIXTIME(date,'%k')<9
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '109' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=9
+	   AND FROM_UNIXTIME(date,'%k')<10
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '110' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=10
+	   AND FROM_UNIXTIME(date,'%k')<11
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '111' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=11
+	   AND FROM_UNIXTIME(date,'%k')<12
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '112' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=12
+	   AND FROM_UNIXTIME(date,'%k')<13
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '113' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=13
+	   AND FROM_UNIXTIME(date,'%k')<14
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '114' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=14
+	   AND FROM_UNIXTIME(date,'%k')<15
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '115' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=15
+	   AND FROM_UNIXTIME(date,'%k')<16
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '116' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=16
+	   AND FROM_UNIXTIME(date,'%k')<17
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '117' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=17
+	   AND FROM_UNIXTIME(date,'%k')<18
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '118' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=18
+	   AND FROM_UNIXTIME(date,'%k')<19
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '119' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=19
+	   AND FROM_UNIXTIME(date,'%k')<20
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '120' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=20
+	   AND FROM_UNIXTIME(date,'%k')<21
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '121' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=21
+	   AND FROM_UNIXTIME(date,'%k')<22
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '122' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=22
+	   AND FROM_UNIXTIME(date,'%k')<23
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+
+  UNION
+
+	(SELECT 
+	   login,
+	   '123' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND FROM_UNIXTIME(date,'%k')>=23
+	   AND FROM_UNIXTIME(date,'%k')<24
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+
+	 GROUP BY login 
+	 ORDER BY null) 
+ 
+	) 
+	 AS tmp
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_logins 
+		     WHERE id NOT IN (".$goodLoginsList.")) 
+		     AS nofriends 
+	 ON tmp.login=nofriends.id 
+
+  ORDER BY nofriends.name asc,tmp.n asc;";
+
+//echo $queryTrafficByHoursLogins;
 
 //===============================================
-
-
-
+//**********************************************
+//**********************************************
+//**********************************************
+//**********************************************
 
 //PARTLY queries for login,ipaddress, http etc
 
-
-
+//**********************************************
+//**********************************************
+//**********************************************
+//**********************************************
 //===============================================
 
 $queryOneLoginTraffic="
@@ -3441,6 +3870,9 @@ echo "<h2>".$_lang['stDOMAINZONESTRAFFIC']." ".$_lang['stFOR']." ".$querydate." 
 
 if($id==49)
 echo "<h2>".$_lang['stDASHBOARD']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==50)
+echo "<h2>по времени суток логины ".$querydate." ".$dayname."</h2>";
 
 
 ///REPORTS HEADERS END
@@ -6451,6 +6883,8 @@ echo "</table>";
 
 }
 
+/////////////// DOMAIN ZONES TRAFFIC REPORT END
+
 ////////////// DASHBOARD REPORT
 
 if($id==49)
@@ -6838,7 +7272,214 @@ echo "<img src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
 
 /////////////// DASHBOARD REPORT END
 
-/////////////// DOMAIN ZONES TRAFFIC REPORT END
+
+/////////////// TRAFFIC BY HOURS LOGINS REPORT
+
+if($id==50)
+{
+
+echo "
+<table id=report_table_id_50 class=sortable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th class=unsortable>
+    логины
+    </th>
+    <th class=unsortable>
+    0
+    </th>
+    <th class=unsortable>
+    1
+    </th>
+    <th class=unsortable>
+    2
+    </th>
+    <th class=unsortable>
+    3
+    </th>
+    <th class=unsortable>
+    4
+    </th>
+    <th class=unsortable>
+    5
+    </th>
+    <th class=unsortable>
+    6
+    </th>
+    <th class=unsortable>
+    7
+    </th>
+    <th class=unsortable>
+    8
+    </th>
+    <th class=unsortable>
+    9
+    </th>
+    <th class=unsortable>
+    10
+    </th>
+    <th class=unsortable>
+    11
+    </th>
+    <th class=unsortable>
+    12
+    </th>
+    <th class=unsortable>
+    13
+    </th>
+    <th class=unsortable>
+    14
+    </th>
+    <th class=unsortable>
+    15
+    </th>
+    <th class=unsortable>
+    16
+    </th>
+    <th class=unsortable>
+    17
+    </th>
+    <th class=unsortable>
+    18
+    </th>
+    <th class=unsortable>
+    19
+    </th>
+    <th class=unsortable>
+    20
+    </th>
+    <th class=unsortable>
+    21
+    </th>
+    <th class=unsortable>
+    22
+    </th>
+    <th class=unsortable>
+    23
+    </th>
+
+</tr>
+";
+
+$result=mysql_query($queryTrafficByHoursLogins) or die (mysql_error());
+
+$HourCounter=0;
+$totalmb=0;
+$loginPrev="";
+$loginCurrent="";
+$numtd=0;
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+$loginCurrent=$line[1];
+if($loginPrev<>$loginCurrent)
+{
+echo "<tr>";
+echo "<td>$numrow</td>";
+echo "<td>$line[1]</td>";
+}
+
+if($line[3]==100)
+{
+echo "<td>$line[0]</td>";
+$numtd++;
+}
+else
+echo "<td>$line[0]</td>";
+$numtd++;
+
+
+if($line[3]==101)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==102)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==103)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==104)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==105)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==106)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==107)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==108)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==109)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==110)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==111)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==112)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==113)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==114)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==115)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==116)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==117)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==118)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==119)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==120)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==121)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==122)
+echo "<td>$line[0]</td>";
+else
+if($line[3]==123)
+echo "<td>$line[0]</td>";
+else
+echo "<td>0</td>";
+
+$loginPrev=$loginCurrent;
+
+if($loginPrev<>$loginCurrent)
+echo "</tr>";
+
+$numrow++;
+
+}
+
+echo "</table>";
+
+
+
+}
+
+/////////////// TRAFFIC BY HOURS REPORT END
+
+
 
 $end=microtime(true);
 
