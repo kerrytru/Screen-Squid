@@ -95,8 +95,8 @@ if($_GET['id']==1) {
   $queryCountRowsTraffic="select count(*) from scsq_traffic";
   $queryCountRowsLogin="select count(*) from scsq_logins";
   $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
-  $queryMinMaxDateTraffic="select min(date),max(date) from scsq_traffic";
-  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_traffic";
+  $queryMinMaxDateTraffic="select min(date),max(date) from scsq_quicktraffic";
+  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic group by crc32('1') order by null";
   $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
   $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
   $queryCountObjectsTraffic3="select count(id) from scsq_traffic where sizeinbytes>5000 and sizeinbytes<=10000";
@@ -112,14 +112,18 @@ if($_GET['id']==1) {
   $MinMaxDateTraffic=mysql_fetch_array($result,MYSQL_NUM);
   $result=mysql_query($querySumSizeTraffic);
   $SumSizeTraffic=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($queryCountObjectsTraffic1);
-  $CountObjects1=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($queryCountObjectsTraffic2);
-  $CountObjects2=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($queryCountObjectsTraffic3);
-  $CountObjects3=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($queryCountObjectsTraffic4);
-  $CountObjects4=mysql_fetch_array($result,MYSQL_NUM);
+
+	if($enableTrafficObjectsInStat==1)
+	{
+	  $result=mysql_query($queryCountObjectsTraffic1);
+	  $CountObjects1=mysql_fetch_array($result,MYSQL_NUM);
+	  $result=mysql_query($queryCountObjectsTraffic2);
+	  $CountObjects2=mysql_fetch_array($result,MYSQL_NUM);
+	  $result=mysql_query($queryCountObjectsTraffic3);
+	  $CountObjects3=mysql_fetch_array($result,MYSQL_NUM);
+	  $result=mysql_query($queryCountObjectsTraffic4);
+	  $CountObjects4=mysql_fetch_array($result,MYSQL_NUM);
+	}
 
   }
 
@@ -158,28 +162,35 @@ if($_GET['id']==1) {
          <td>".$_lang['stTRAFFICSUM']."</td>
          <td>".($SumSizeTraffic[0]/1000000)."</td>
       </tr>
-      <tr>
-         <td colspan=2 align=center><b>".$_lang['stTRAFFICOBJECTS']."</b></td>
-      </tr>
-      <tr>
-         <td> < 1 kB</td>
-         <td>".$CountObjects1[0]."</td>
-      </tr>
-      <tr>
-         <td> > 1 kB & < 5 kB </td>
-         <td>".$CountObjects2[0]."</td>
-      </tr>
-      <tr>
-         <td> > 5 kB & < 10 kB </td>
-         <td>".$CountObjects3[0]."</td>
-      </tr>
-      <tr>
-         <td> > 10 kB </td>
-         <td>".$CountObjects4[0]."</td>
-      </tr>
+";
 
-      </table>
+	if($enableTrafficObjectsInStat==1)
+	{
+	echo "
+	      <tr>
+	         <td colspan=2 align=center><b>".$_lang['stTRAFFICOBJECTS']."</b></td>
+	      </tr>
+	      <tr>
+	         <td> < 1 kB</td>
+	         <td>".$CountObjects1[0]."</td>
+	      </tr>
+	      <tr>
+	         <td> > 1 kB & < 5 kB </td>
+	         <td>".$CountObjects2[0]."</td>
+	      </tr>
+	      <tr>
+	         <td> > 5 kB & < 10 kB </td>
+	         <td>".$CountObjects3[0]."</td>
+	      </tr>
+	      <tr>
+	         <td> > 10 kB </td>
+	         <td>".$CountObjects4[0]."</td>
+	      </tr>
       ";
+	}
+
+echo "</table>";
+
     }  //end GET[id]=1
     else
 
@@ -982,8 +993,8 @@ if($_GET['id']==1) {
       </tr>
    ";
   		$queryLogTable="SELECT
-			FROM_UNIXTIME(datestart,'%Y-%m-%d %H:%m:%s') as d1,
-			FROM_UNIXTIME(dateend,'%Y-%m-%d %H:%m:%s'),
+			FROM_UNIXTIME(datestart,'%Y-%m-%d %H:%i:%s') as d1,
+			FROM_UNIXTIME(dateend,'%Y-%m-%d %H:%i:%s'),
 			message
 		  FROM scsq_logtable order by d1 desc";
 

@@ -1,6 +1,6 @@
 <?php
 
-#build 20160301
+#build 20161023
 #server #0
 $srvname[0]="Proxy0"; #nickname of server
 $db[0] = "test";
@@ -28,7 +28,7 @@ $useIpaddressalias=1;
 
 #Vkluchit regim ne pokazivat druzei. Vkl =1, Vikl=0
 #Включить режим НЕ показывать друзей. Вкл.= 1, выкл.=0
-$enableNofriends=0;
+$enableNofriends=1;
 
 #Spisok druzei. Cherez odin probel. Naprimer, $goodLogins="Vasya Sergey Petr"; S IP adresami takzhe, cherez odin probel
 #Список друзей. Через ОДИН ПРОБЕЛ. Например, $goodLogins="Vasya Sergey Petr"; С IP адресами также, через ОДИН ПРОБЕЛ.
@@ -58,5 +58,9 @@ $enableNoSites=0;
 #Список сайтов исключенных из статистики. Через ОДИН ПРОБЕЛ. Например, $goodSites="vk.me facebook.com ipp".
 $goodSites="";
 
-$vers="1.9b";
+#Pokazivat v kratkoy statistike, statistiku po objectam. Na bolshih viborkah, tormozit otobrazhenie
+$enableTrafficObjectsInStat=0;
+
+
+$vers="1.9.2";
 ?>

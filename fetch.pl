@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 
-
-#build 20160817
+#build 20161023
 
 use DBI; # DBI  Perl!!!
 
@@ -14,7 +13,7 @@ my $db = "test"; # name DB
 #==========================================================
 #Kolichestvo strok, vstavliaemoe za odin INSERT. Mozhno pokrutit bolshe/menshe dlia skorosti
 #Количество строк, вставляемое за один INSERT. Можно покрутить больше/меньше для скорости.
-my $count_lines_for_one_insert=100; #how much INSERT for one 'transaction'
+my $count_lines_for_one_insert=10000; #how much INSERT for one 'transaction'
 #==========================================================
 #Put k access.log. Eto mozhet bit polnii put. Naprimer, /var/log/squid/access.log
 #Путь к файлу access.log(имя может другим). Это может быть и полный путь, например, /var/log/squid/access.log
@@ -32,7 +31,7 @@ my $deleteperiod=100; #days
 #==========================================================
 #Kolichestvo bait, menshe kotorogo dannie ne budut zapisivatsa v bazu. Ukazivaetsia v baitah. Mozhet ispolzovatsa, chtobi ne zapisivat v bazu dannie o bannerah.
 #Количество байт, меньше которого данные не будут записываться в базу. Указывается в байтах. Может использоваться, чтобы не записывать в базу данные о баннерах.
-my $minbytestoparse=0; #bytes, default 0
+my $minbytestoparse=-1; #bytes, default -1
 
 #=======================CONFIGURATION END==============================
 
@@ -79,6 +78,25 @@ $sth->execute; #
 @row=$sth->fetchrow_array;
 $lastdate=$row[0];
 
+
+#get last date in table with data. It used to prevent importing data from log which could be in table yet.
+$sql_getlastdate="select unix_timestamp(from_unixtime(max(date),'%Y-%m-%d')) from scsq_quicktraffic";
+$sth = $dbh->prepare($sql_getlastdate);
+$sth->execute; #
+@row=$sth->fetchrow_array;
+$lastday=$row[0];
+
+if($lastday eq ""){
+$lastday=0;
+}
+
+#clear last date in table with data.
+$sql_clearlastday="delete from scsq_quicktraffic where date>".$lastday."";
+$sth = $dbh->prepare($sql_clearlastday);
+$sth->execute; #
+
+
+
 #clear temptable to be sure, that table have no strange data before import.
 $sql_cleartemptable="truncate scsq_temptraffic";
 $sth = $dbh->prepare($sql_cleartemptable);
@@ -97,7 +115,17 @@ while (my $line=<IN>) {
 #count how much lines in file are parsed
 $countlines=$countlines+1;
 $completed=int(($countlines/$line_count)*100);
-print "Completed: ".$completed."% Parsed line: ".$countlines."\r";
+
+if(time > $seconds+1)
+{
+$seconds=time;
+$insertspeed=$countinsert;
+$countinsert=0;
+}
+$countinsert=$countinsert+1;
+
+print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/sec \r";
+
 
 #split string into items.
   
@@ -159,22 +187,16 @@ $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
 #copy data from temptable to main table
-$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime) select date,scsq_ipaddress.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime from scsq_temptraffic
+$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime from scsq_temptraffic
+LEFT JOIN (select id,name from scsq_ipaddress
+RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
 LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
-LEFT JOIN scsq_ipaddress ON scsq_temptraffic.ipaddress=scsq_ipaddress.name
 LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
 ;";
 $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
-#clear temptable
-$sqltext="truncate scsq_temptraffic;";
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
-
-$sqltext="";
-
-#clear temptable to be sure, that table have no strange data before import.
+#clear temptable.
 $sql_cleartemptable="truncate scsq_temptraffic";
 $sth = $dbh->prepare($sql_cleartemptable);
 $sth->execute; #
@@ -193,6 +215,80 @@ $sqltext="";
 
 #close log file
 close(IN);
+
+#clear scsq_quicktraffic
+#$sqltext="";
+#$sqltext="truncate scsq_quicktraffic;";
+#$sth = $dbh->prepare($sqltext);
+#$sth->execute;
+
+print "\nStarting update scsq_quicktraffic\r";
+break;
+print "\n";
+
+#update scsq_quicktraffic
+$sqltext="";
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par)
+SELECT 
+date,
+tmp2.login,
+tmp2.ipaddress,
+sum(tmp2.sizeinbytes),
+tmp2.st,
+tmp2.httpstatus,
+1
+
+FROM (SELECT 
+IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
+sizeinbytes,
+date,
+login,
+ipaddress,
+httpstatus
+FROM scsq_traffic
+where date>".$lastday."
+
+) as tmp2
+
+GROUP BY CRC32(tmp2.st),FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus
+ORDER BY null;
+";
+print $sqltext;
+$sth = $dbh->prepare($sqltext);
+$sth->execute;
+
+
+#update2 scsq_quicktraffic
+$sqltext="";
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par)
+SELECT 
+tmp2.date,
+'0',
+'0',
+tmp2.sums,
+tmp2.st,
+tmp2.ct,
+2
+
+FROM (SELECT 
+IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
+sum(sizeinbytes) as sums,
+date,
+count(id) as ct
+FROM scsq_traffic
+GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st)
+
+) as tmp2
+
+
+ORDER BY null;
+";
+print $sqltext;
+$sth = $dbh->prepare($sqltext);
+$sth->execute;
+
+
+
 
 
 #print datetime when import ended

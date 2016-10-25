@@ -56,9 +56,9 @@ CREATE TABLE IF NOT EXISTS `scsq_groups` (
 
 CREATE TABLE IF NOT EXISTS `scsq_httpstatus` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(30) DEFAULT NULL,
+  `name` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `scsq_httpstatus` (
 
 CREATE TABLE IF NOT EXISTS `scsq_ipaddress` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(18) DEFAULT NULL,
+  `name` varchar(18) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `scsq_ipaddress` (
 
 CREATE TABLE IF NOT EXISTS `scsq_logins` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
+  `name` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
@@ -96,6 +96,25 @@ CREATE TABLE IF NOT EXISTS `scsq_logtable` (
   `dateend` int(11) DEFAULT NULL,
   `message` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `scsq_quicktraffic`
+--
+
+CREATE TABLE IF NOT EXISTS `scsq_quicktraffic` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` int(11) NOT NULL,
+  `login` int(11) DEFAULT NULL,
+  `ipaddress` int(11) DEFAULT NULL,
+  `site` varchar(300) DEFAULT NULL,
+  `sizeinbytes` int(11) DEFAULT NULL,
+  `httpstatus` int(11) DEFAULT NULL,
+  `par` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `date` (`date`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
@@ -136,9 +155,9 @@ CREATE TABLE IF NOT EXISTS `scsq_sqper_trend10` (
 CREATE TABLE IF NOT EXISTS `scsq_temptraffic` (
   `id` int(12) NOT NULL AUTO_INCREMENT,
   `date` varchar(20) DEFAULT NULL,
-  `ipaddress` varchar(18) DEFAULT NULL,
-  `login` varchar(100) DEFAULT NULL,
-  `httpstatus` varchar(100) DEFAULT NULL,
+  `ipaddress` varchar(18) NOT NULL,
+  `login` varchar(100) NOT NULL,
+  `httpstatus` varchar(100) NOT NULL,
   `sizeinbytes` int(11) DEFAULT NULL,
   `site` varchar(700) DEFAULT NULL,
   `method` varchar(15) DEFAULT NULL,
