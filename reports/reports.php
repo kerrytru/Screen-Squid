@@ -1,5 +1,5 @@
 <?php
-#build 20161022
+#build 20161026
 ?>
 <html>
 <head>
@@ -414,7 +414,7 @@ $queryIpaddressTraffic="
 $querySitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
-	 '0',
+	 scsq_categorylist.category,
 	 '1'
   
   FROM ((SELECT 
@@ -445,14 +445,13 @@ $querySitesTraffic="
 	       GROUP BY CRC32(site)
 	       ORDER BY null
 	      ) as tmp2
- 	       
+ 	  INNER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
 	  
 	 )
  
 
   ORDER BY site asc
 ;";
-
 
 
 $queryTopSitesTraffic="
@@ -1220,98 +1219,6 @@ $queryDomainZonesTraffic="
 		 '-',
 		 sum(sizeinbytes) as s,
 		 LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1) as lastnum
-		 FROM scsq_traffic
-
-	       LEFT  JOIN (SELECT 
-			     id 
-			   FROM scsq_logins 
-			   WHERE id  IN (".$goodLoginsList.")) 
-			   AS tmplogin 
-	       ON tmplogin.id=scsq_traffic.login
-	       LEFT  JOIN (SELECT 
-			     id 
-			   FROM scsq_ipaddress 
-			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
-	       ON tmpipaddress.id=scsq_traffic.ipaddress       	
-
-	       WHERE date>".$datestart." 
-	  	 AND date<".$dateend."
-		 AND tmplogin.id IS NULL 
-	   	 AND tmpipaddress.id IS NULL
-	 	 AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
-		 AND concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1) = LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)
-		 
-	       ORDER BY null
-	      ) )	       
-	 
-	  
-	 
-
-UNION
-
-
- (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traf.site,'/',1),'.',-1),':',1),
-	 tmp.s,
-	 tmp.stn
-  
-  FROM 	(SELECT 
-	  '2' as stn,
-	   tmp3.s,
-	   tmp3.id,
-	   tmp3.login,
-	   tmp3.ipaddress
-
-	 FROM (SELECT 
-		 crc32(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(concat(site,'/'),'/',1),'.',-1),':',1)) as st,
-		 sum(sizeinbytes) as s,
-		 date,
-		 login,
-		 ipaddress,
-		 LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1) as lastnum,
-		 scsq_traffic.id
-	       FROM scsq_traffic
-
-	       LEFT  JOIN (SELECT 
-		 	     id 
-			   FROM scsq_logins 
-			   WHERE id  IN (".$goodLoginsList.")) 
-			   AS tmplogin 
-	       ON tmplogin.id=scsq_traffic.login
-
-	       LEFT  JOIN (SELECT 
-			     id 
-			   FROM scsq_ipaddress 
-			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
-	       ON tmpipaddress.id=scsq_traffic.ipaddress       
-
-	       WHERE date>".$datestart." 
- 	         AND date<".$dateend."
-		 AND tmplogin.id IS NULL 
-	         AND tmpipaddress.id IS NULL
-	   	 AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
-
-	       GROUP BY CRC32(st)
-	       ORDER BY SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(concat(site,'/'),'/',1),'.',-1),':',1) asc
-	      ) as tmp3
-	
-	 WHERE concat('',lastnum * 1) <> lastnum
-
-	 
-
-       ) AS tmp 
-
-	INNER JOIN scsq_traffic AS scsq_traf on scsq_traf.id=tmp.id
-
-  ORDER BY SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traf.site,'/',1),'.',-1),':',1) asc
-)
-;
-";
-
-$queryDomainZonesTraffic="
-	((SELECT 
-		 '-',
-		 sum(sizeinbytes) as s,
-		 LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1) as lastnum
 		 FROM scsq_quicktraffic
 
 	       LEFT  JOIN (SELECT 
@@ -1432,60 +1339,84 @@ ORDER BY nofriends.name
 ;
 ";
 
-//echo $queryTrafficByHoursLogins;
+$queryTrafficByHoursIpaddress="
+SELECT  ipaddress,
+nofriends.name,
+sum(sizeinbytes),
+FROM_UNIXTIME(date,'%k')
+FROM scsq_quicktraffic
+	LEFT JOIN (SELECT 
+	id,
+	name 
+	FROM scsq_ipaddress)
+	AS nofriends 
+	ON scsq_quicktraffic.ipaddress=nofriends.id  
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
 
-/*
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
 
- $queryLoginsTraffic="
-  SELECT 
-    nofriends.name,
-    tmp.s,
-    nofriends.id
-    ".$echoLoginAliasColumn."
-  FROM (SELECT 
-          login,
-          SUM(sizeinbytes) as 's' 
-        FROM scsq_quicktraffic 
-        WHERE  date>".$datestart."
-	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
-	   AND par=1
-	GROUP BY CRC32(login)
-	ORDER BY null) 
-	AS tmp 
-
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_logins 
-		    WHERE id NOT IN (".$goodLoginsList.")) 
-		    AS nofriends 
-	ON tmp.login=nofriends.id  
- 	LEFT JOIN (SELECT 
-		      name,
-		      tableid 
-		   FROM scsq_alias 
-		   WHERE typeid=0) 
-		   AS aliastbl 
-	ON nofriends.id=aliastbl.tableid 
-
-  ".$msgNoZeroTraffic."
-
-  GROUP BY nofriends.name;";
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is  NULL 
+	  AND tmpipaddress.id is  NULL
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+GROUP BY login,FROM_UNIXTIME(date,'%H')
+ORDER BY nofriends.name
+;
+";
 
 
- RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_logins 
-		     WHERE id NOT IN (".$goodLoginsList.")) 
-		     AS nofriends 
-	 ON tmp.login=nofriends.id 
+$queryCategorySitesTraffic="
+  SELECT scsq_categorylist.category,
+	 count(id),
+	 tmp2.s
+  
+  FROM ((SELECT 
+		 sum(sizeinbytes) as s,
+		 date,
+		 login,
+		 ipaddress,
+		 site
+	       FROM scsq_quicktraffic
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_logins 
+			   WHERE id  IN (".$goodLoginsList.")) 
+			   AS tmplogin 
+	       ON tmplogin.id=scsq_quicktraffic.login
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_ipaddress 
+			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
+	       ON tmpipaddress.id=scsq_quicktraffic.ipaddress       	
 
-	 
-	 
+	       WHERE date>".$datestart." 
+	  	 AND date<".$dateend."
+ 		 AND par=1
+		 AND tmplogin.id IS NULL 
+	   	 AND tmpipaddress.id IS NULL
+	 	 AND site NOT IN (".$goodSitesList.")
+	       GROUP BY CRC32(site)
+	       ORDER BY null
+	      ) as tmp2
+	
+	 )
+  INNER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
+  GROUP BY scsq_categorylist.category	  
 
-*/
+;";
+
 
 
 //===============================================
@@ -1504,15 +1435,17 @@ ORDER BY nofriends.name
 
 $queryOneLoginTraffic="
 	SELECT 
-	   site,
-	   SUM(sizeinbytes) AS s 
+	   scsq_quicktraffic.site,
+	   SUM(sizeinbytes) AS s,
+	   scsq_categorylist.category 
 	 FROM scsq_quicktraffic 
+	 INNER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
-	 GROUP BY CRC32(site) 
+	 GROUP BY CRC32(scsq_quicktraffic.site) 
 	 ORDER BY site asc
 ;";
 
@@ -1718,16 +1651,18 @@ $queryVisitingWebsiteByTimeLogin="
 
 $queryOneIpaddressTraffic="
 	 SELECT 
-	   site AS st,
-	   sum(sizeinbytes) AS s 
+	   scsq_quicktraffic.site AS st,
+	   sum(sizeinbytes) AS s,
+	   scsq_categorylist.category 
 	 FROM scsq_quicktraffic 
+	 INNER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
-	 GROUP BY CRC32(site) 	 
-	 ORDER BY site asc;";
+	 GROUP BY CRC32(scsq_quicktraffic.site) 	 
+	 ORDER BY scsq_quicktraffic.site asc;";
 
 
 $queryOneIpaddressTopSitesTraffic="
@@ -3299,7 +3234,10 @@ if($id==49)
 echo "<h2>".$_lang['stDASHBOARD']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 if($id==50)
-echo "<h2>по времени суток логины ".$querydate." ".$dayname."</h2>";
+echo "<h2>".$_lang['stTRAFFICBYHOURSLOGINS']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==51)
+echo "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESS']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 
 ///REPORTS HEADERS END
@@ -3434,6 +3372,9 @@ echo "
     <th class=unsortable>
     ".$_lang['stWHO']."
     </th>
+    <th class=unsortable>
+    ".$_lang['stCATEGORY']."
+    </th>
 </tr>
 ";
 $result=mysql_query($querySitesTraffic) or die (mysql_error());
@@ -3463,6 +3404,8 @@ echo "<td>".$line[1]."</td>";
 echo "<td><a href=javascript:PartlyReportsLogin(18,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(19,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 $totalmb=$totalmb+$line[1];
 
+echo "<td>".$line[2]."</td>";
+
 
 echo "</tr>";
 $numrow++;
@@ -3471,6 +3414,7 @@ echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>
+<td><b>&nbsp;</b></td>
 <td><b>&nbsp;</b></td>
 
 </tr>";
@@ -3810,6 +3754,9 @@ echo "
     <th>
     ".$_lang['stMEGABYTES']."
     </th>
+    <th>
+    ".$_lang['stCATEGORY']."
+    </th>
 </tr>
 ";
 $result=mysql_query($queryOneLoginTraffic) or die (mysql_error());
@@ -3833,7 +3780,7 @@ echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
-
+echo "<td>".$line[2]."</td>";
 
 
 $totalmb=$totalmb+$line[1];
@@ -3844,6 +3791,7 @@ echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>
+<td><b>&nbsp;</b></td>
 </tr>";
 echo "</table>";
 echo "<script>UpdateLeftMenu(1);</script>";
@@ -3988,6 +3936,9 @@ echo "
     <th>
     ".$_lang['stMEGABYTES']."
     </th>
+    <th>
+    ".$_lang['stCATEGORY']."
+    </th>
 </tr>
 ";
 $result=mysql_query($queryOneIpaddressTraffic) or die (mysql_error());
@@ -4010,6 +3961,8 @@ echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
+
+echo "<td>".$line[2]."</td>";
 $totalmb=$totalmb+$line[1];
 echo "</tr>";
 $numrow++;
@@ -4018,6 +3971,7 @@ echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>
+<td><b>&nbsp;</b></td>
 </tr>";
 
 echo "</table>";
@@ -6812,6 +6766,220 @@ echo "</table>";
 
 /////////////// TRAFFIC BY HOURS REPORT END
 
+
+/////////////// TRAFFIC BY HOURS LOGINS REPORT
+
+if($id==51)
+{
+
+echo "
+<table id=report_table_id_51 class=sortable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th class=unsortable>
+    логины
+    </th>
+    <th class=unsortable>
+    0
+    </th>
+    <th class=unsortable>
+    1
+    </th>
+    <th class=unsortable>
+    2
+    </th>
+    <th class=unsortable>
+    3
+    </th>
+    <th class=unsortable>
+    4
+    </th>
+    <th class=unsortable>
+    5
+    </th>
+    <th class=unsortable>
+    6
+    </th>
+    <th class=unsortable>
+    7
+    </th>
+    <th class=unsortable>
+    8
+    </th>
+    <th class=unsortable>
+    9
+    </th>
+    <th class=unsortable>
+    10
+    </th>
+    <th class=unsortable>
+    11
+    </th>
+    <th class=unsortable>
+    12
+    </th>
+    <th class=unsortable>
+    13
+    </th>
+    <th class=unsortable>
+    14
+    </th>
+    <th class=unsortable>
+    15
+    </th>
+    <th class=unsortable>
+    16
+    </th>
+    <th class=unsortable>
+    17
+    </th>
+    <th class=unsortable>
+    18
+    </th>
+    <th class=unsortable>
+    19
+    </th>
+    <th class=unsortable>
+    20
+    </th>
+    <th class=unsortable>
+    21
+    </th>
+    <th class=unsortable>
+    22
+    </th>
+    <th class=unsortable>
+    23
+    </th>
+    <th class=unsortable>
+    TOTAL
+    </th>
+</tr>
+";
+
+$result=mysql_query($queryTrafficByHoursIpadress) or die (mysql_error());
+
+$HourCounter=0;
+$totalmb=0;
+$curLogin=0;
+$prevLogin=0;
+$prevLoginName="";
+$curHour=0;
+$prevHour=0;
+$numrow=1;
+$i=0;
+$totalmb=0;
+while($i<24)
+{
+$arrHourTraffic[$i]=0;
+$hourTotalmb[$i]=0;
+$i++;
+}
+
+
+	
+	while($line = mysql_fetch_array($result,MYSQL_NUM)){
+		$curLogin=$line[0];
+		if($curLogin==$prevLogin or $prevLogin==0){
+			$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+			$prevLogin=$curLogin;
+			$prevLoginName=$line[1];
+		}
+		else{
+			echo "<tr>";
+			echo "<td>$numrow</td>";	
+			echo "<td>$prevLoginName</td>";
+			$i=0;	
+			$totalmb=0;
+			while($i<24) {
+				echo "<td>$arrHourTraffic[$i]</td>";
+				$totalmb=$totalmb+$arrHourTraffic[$i];
+				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
+				$arrHourTraffic[$i]=0;
+				$i++;
+			}
+		$prevLogin=$curLogin;
+		$prevLoginName=$line[1];
+		$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
+		echo "<td>$totalmb</td>";
+		echo "</tr>";
+		$numrow++;
+		}
+}
+$i=0;
+$totalmb=0;
+echo "<tr>";
+echo "<td colspan=2>TOTAL</td>";
+while($i<24)
+{
+echo "<td>$hourTotalmb[$i]</td>";
+$i++;
+$totalmb=$totalmb+$hourTotalmb[$i];
+}
+echo "<td>$totalmb</td>";
+echo "</tr>";
+
+echo "</table>";
+
+
+
+}
+
+/////////////// TRAFFIC BY HOURS REPORT END
+
+/////////////// TRAFFIC BY CATEGORY REPORT
+
+if($id==52)
+{
+echo "
+<table id=report_table_id_48 class=sortable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th>
+    ".$_lang['stCATEGORY']."
+    </th>
+    <th>
+    ".$_lang['stREQUESTS']."
+    </th>
+    <th>
+    ".$_lang['stMEGABYTES']."
+    </th>
+</tr>
+";
+$result=mysql_query($queryCategorySitesTraffic) or die (mysql_error());
+$numrow=1;
+$totalmb=0;
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+echo "<tr>";
+echo "<td>".$numrow."</td>";
+
+
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+
+echo "<td>".$line[0]."</td>";
+echo "<td>".$line[1]."</td>";
+$line[2]=$line[2] / 1000000;
+$line[2]=sprintf("%f",$line[2]); //disable scientific format e.g. 5E-10
+echo "<td>".$line[2]."</td>";
+echo "</tr>";
+$numrow++;
+}
+echo "<tr class=sortbottom>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>";
+echo "</table>";
+
+}
+
+/////////////// DOMAIN ZONES TRAFFIC REPORT END
 
 
 $end=microtime(true);

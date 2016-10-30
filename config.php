@@ -8,7 +8,6 @@ $user[0] = "mysql-user";
 $pass[0] ="pass";
 $address[0] ="127.0.0.1";
 
-
 #server #1
 #$srvname[1]="Proxy1"; #nickname of server
 #$db[1] = "test1";
@@ -62,5 +61,5 @@ $goodSites="";
 $enableTrafficObjectsInStat=0;
 
 
-$vers="1.9.2";
+$vers="1.9.3b";
 ?>

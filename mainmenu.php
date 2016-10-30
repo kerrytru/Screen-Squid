@@ -100,7 +100,9 @@ echo "
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",38)\">".$_lang['stIPADDRESSLOGINSTRAFFIC']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",45)\">".$_lang['stMIMETYPESTRAFFIC']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",48)\">".$_lang['stDOMAINZONESTRAFFIC']."</a></div>
-<div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",50)\">test</a></div>
+<div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",50)\">".$_lang['stTRAFFICBYHOURSLOGINS']."</a></div>
+<div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",51)\">".$_lang['stTRAFFICBYHOURSIPADDRESS']."</a></div>
+<div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",52)\">".$_lang['stTRAFFICBYCATEGORIES']."</a></div>
 
 </div> <!--reports-->
 

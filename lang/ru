@@ -139,7 +139,6 @@ $_lang['stSUNDAY']="Вс";
 $_lang['stINCLUDE']="Вкл.?";
 $_lang['stQUANTITYALIASES']="Кол-во алиасов";
 
-#новые в 1.8
 $_lang['stWHOVISITSITES']="Кто посещал сайты";
 $_lang['stFROM']="с";
 $_lang['stUNTIL']="до";
@@ -151,13 +150,17 @@ $_lang['stBACKTOGROUPLIST']="Вернуться к списку групп";
 $_lang['stDASHBOARD']="Dashboard";
 $_lang['stTRAFFICOBJECTS']="Объекты трафика";
 
-#новые в 1.9
-
 $_lang['stLOGTABLE']="Лог операций";
 $_lang['stLOGDATESTART']="Начало";
 $_lang['stLOGDATEEND']="Окончание";
 $_lang['stLOGMESSAGE']="Сообщение";
 $_lang['stTOP']="Топ";
 
+#новые в 2.0
+
+$_lang['stTRAFFICBYHOURSLOGINS']="Трафик по времени суток логины";
+$_lang['stTRAFFICBYHOURSIPADDRESS']="Трафик по времени суток IP адреса";
+$_lang['stTRAFFICBYCATEGORIES']="Трафик по категориям";
+$_lang['stCATEGORY']="Категория";
 
 ?>

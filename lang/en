@@ -147,12 +147,19 @@ $_lang['stBACKTOGROUPLIST']="Back to group list";
 $_lang['stDASHBOARD']="Dashboard";
 $_lang['stTRAFFICOBJECTS']="Traffic objects";
 
-#новые в 1.9
-
 $_lang['stLOGTABLE']="Logtable";
 $_lang['stLOGDATESTART']="Start";
 $_lang['stLOGDATEEND']="End";
 $_lang['stLOGMESSAGE']="Message";
 $_lang['stTOP']="Top";
+
+#новые в 2.0
+
+$_lang['stTRAFFICBYHOURSLOGINS']="Traffic by hours (logins)";
+$_lang['stTRAFFICBYHOURSIPADDRESS']="Traffic by hours (IP address)";
+$_lang['stTRAFFICBYCATEGORIES']="Traffic by categories";
+$_lang['stCATEGORY']="Category";
+
+
 
 ?>
