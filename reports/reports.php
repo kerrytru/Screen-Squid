@@ -1,6 +1,7 @@
 <?php
-#build 20161026
+#build 20161105
 ?>
+
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -25,6 +26,7 @@ $countPopularSitesLimit=10;
 $countWhoDownloadBigFilesLimit=10;
 
 //======== queries config end
+
 
 
 $start=microtime(true);
@@ -1740,7 +1742,7 @@ $queryWhoVisitPopularSiteIpaddress="
   from (SELECT 
 	  ipaddress,
 	  sum(sizeinbytes) as s 
-	from scsq_traffic 
+	from scsq_quicktraffic 
 	where substring_index(site,'/',1)='".$currentsite."' 
 	  and date>".$datestart." 
 	  and date<".$dateend." 

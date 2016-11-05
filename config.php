@@ -1,24 +1,32 @@
 <?php
 
-#build 20161023
+#build 20161031
 #server #0
 $srvname[0]="Proxy0"; #nickname of server
 $db[0] = "test";
 $user[0] = "mysql-user";
 $pass[0] ="pass";
-$address[0] ="127.0.0.1";
+$address[0] ="127.0.0.1"; //mysql db
+$cfgsquidhost[0]="localhost";
+$cfgsquidport[0] = 3128;
+$cfgcachemgr_passwd[0]="";
+
 
 #server #1
 #$srvname[1]="Proxy1"; #nickname of server
 #$db[1] = "test1";
 #$user[1] = "mysql-user";
 #$pass[1] ="pass";
-#$address[1] ="127.0.0.1";
+#$address[1] ="127.0.0.1"; //mysql
+#$cfgsquidhost[1]="localhost";
+#$cfgsquidport[1] = 3128;
+#$cfgcachemgr_passwd[1]="";
+
 
 #language ru = russian, en = english
 $language="ru";
 
-include_once("lang/".$language."");
+include_once("lang/$language");
 
 #Pokazivat aliasi - logini i/ili IP adresa. Vkl=1, Vikl=0
 #Показывать алиасы логины и/или IP адреса. Вкл=1, выкл=0.
@@ -60,6 +68,17 @@ $goodSites="";
 #Pokazivat v kratkoy statistike, statistiku po objectam. Na bolshih viborkah, tormozit otobrazhenie
 $enableTrafficObjectsInStat=0;
 
+#================Online reports
+# Подключение к Squid
+$squidhost = "localhost";
+$squidport = 3128;
+$cachemgr_passwd="";
+#==========================================================
 
-$vers="1.9.3b";
+#Через сколько секунд обновлять страницу онлайна
+$refreshPeriod=5;
+#==============================
+
+
+$vers="1.9.4";
 ?>

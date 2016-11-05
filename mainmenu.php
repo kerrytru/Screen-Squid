@@ -58,6 +58,11 @@ function toggleview (id1,id2) {
 		(obj1.className=="itemshown") ? obj2.innerHTML="<img border='0' src='img/gray-open.png' alt='[&ndash;]'>" : obj2.innerHTML="<img border='0' src='img/gray-closed.png' alt='[+]'>"; 
 	}
 
+function GoOnlineReport(srv,id)
+{
+parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value;
+}
+
 
 
 </script>
@@ -76,9 +81,22 @@ echo "
 
 <div class='linkindented'><a href=\"javascript:GoReport(".$srv.",49)\">".$_lang['stDASHBOARD']."</a></div>
 
+<!--online reports-->
+
+<div class='linkwithicon1'><a href=\"javascript:toggleview('oreports".$srv."','toggleoreports".$srv."')\" id='toggleoreports".$srv."'><img border='0' src='img/gray-closed.png' alt='[+]'></a>
+<div class='aftericon'><a href=\"javascript:toggleview('oreports".$srv."','toggleoreports".$srv."')\" id='toggleoreports".$srv."'><font color=#000000>".$_lang['stONLINE']."</font></a></div></div>
+
+<div class='itemhidden' id='oreports".$srv."'>
+
+<div class='linkindented1'><a href=\"javascript:GoOnlineReport(".$srv.",1)\">".$_lang['stACTIVEIPADDRESS']."</a></div>
+</div>
+<!--online reports end-->
+
 <div class='linkwithicon1'><a href=\"javascript:toggleview('reports".$srv."','togglereports".$srv."')\" id='togglereports".$srv."'><img border='0' src='img/gray-closed.png' alt='[+]'></a>
 <div class='aftericon'><a href=\"javascript:toggleview('reports".$srv."','togglereports".$srv."')\" id='togglereports".$srv."'><font color=#000000>".$_lang['stREPORTS']."</font></a></div></div>
+
 <div class='itemhidden' id='reports".$srv."'>
+
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",1)\">".$_lang['stLOGINSTRAFFIC']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",2)\">".$_lang['stIPADDRESSTRAFFIC']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",3)\">".$_lang['stSITESTRAFFIC']."</a></div>
@@ -103,8 +121,8 @@ echo "
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",50)\">".$_lang['stTRAFFICBYHOURSLOGINS']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",51)\">".$_lang['stTRAFFICBYHOURSIPADDRESS']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",52)\">".$_lang['stTRAFFICBYCATEGORIES']."</a></div>
-
-</div> <!--reports-->
+</div>
+<!--reports-->
 
 <!-- group reports-->
 
@@ -117,6 +135,7 @@ echo "
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=2\" target=right>".$_lang['stALIASES']."</a></div>
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=3\" target=right>".$_lang['stGROUPS']."</a></div>
 </div> <!--srvname-->
+ 
 ";
 $srv++;
 }

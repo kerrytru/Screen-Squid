@@ -1,5 +1,4 @@
 <?php
-include("../reports/reports.php");
 ///Reports Headers BEGIN
 $_lang['stLOGINSTRAFFIC']="Traffic users (logins)";
 $_lang['stIPADDRESSTRAFFIC']="Traffic users (IP addresses)";
@@ -153,6 +152,7 @@ $_lang['stLOGDATEEND']="End";
 $_lang['stLOGMESSAGE']="Message";
 $_lang['stTOP']="Top";
 
+
 #новые в 2.0
 
 $_lang['stTRAFFICBYHOURSLOGINS']="Traffic by hours (logins)";
@@ -160,6 +160,9 @@ $_lang['stTRAFFICBYHOURSIPADDRESS']="Traffic by hours (IP address)";
 $_lang['stTRAFFICBYCATEGORIES']="Traffic by categories";
 $_lang['stCATEGORY']="Category";
 
-
+$_lang['stACTIVEIPADDRESS']="Active IP address";
+$_lang['stONLINE']="Online";
+$_lang['stREFRESHED']="Refreshed in";
+$_lang['stSPEED']="kb/sec";
 
 ?>

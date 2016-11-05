@@ -163,4 +163,10 @@ $_lang['stTRAFFICBYHOURSIPADDRESS']="Трафик по времени суток
 $_lang['stTRAFFICBYCATEGORIES']="Трафик по категориям";
 $_lang['stCATEGORY']="Категория";
 
+$_lang['stACTIVEIPADDRESS']="Активные IP адреса";
+$_lang['stONLINE']="Онлайн";
+$_lang['stREFRESHED']="Дата обновления";
+$_lang['stSPEED']="Скорость (кБ/сек)";
+
+
 ?>
