@@ -3,6 +3,8 @@
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 
+--
+--
 
 -- --------------------------------------------------------
 
@@ -31,6 +33,20 @@ CREATE TABLE IF NOT EXISTS `scsq_aliasingroups` (
   `aliasid` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `scsq_categorylist`
+--
+
+CREATE TABLE IF NOT EXISTS `scsq_categorylist` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category` varchar(100) NOT NULL,
+  `site` varchar(300) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `site` (`site`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
@@ -129,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `scsq_sqper_activerequests` (
   `sizeinbytes` int(11) NOT NULL,
   `seconds` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
@@ -142,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `scsq_sqper_trend10` (
   `date` int(11) NOT NULL,
   `value` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
