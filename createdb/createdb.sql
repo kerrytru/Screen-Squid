@@ -11,7 +11,6 @@
 --
 -- Table structure for table `scsq_alias`
 --
-
 CREATE TABLE IF NOT EXISTS `scsq_alias` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(90) NOT NULL,
