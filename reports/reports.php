@@ -1,5 +1,5 @@
 <?php
-#build 20161105
+#build 20161111
 ?>
 
 <html>
@@ -1134,7 +1134,13 @@ $queryWhoVisitSiteOneHourLogin="
 		    WHERE id NOT IN (".$goodLoginsList.")) 
 		    AS nofriends 
 	ON tmp.login=nofriends.id  
- 
+ 	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
 
   ".$msgNoZeroTraffic."
 
@@ -3245,7 +3251,7 @@ $repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESS']." ".$_lang['stFOR']." ".$
 echo "<table>";
 echo "<tr>";
 echo "<td valign=middle>".$repheader."</td>";
-echo "<td valign=top>&nbsp;&nbsp;<a href=../output/test.xls><img src='../img/html.png' width=32 height=32 alt='Image'></a></td>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=../output/test.pdf><img src='../img/html.png' width=32 height=32 alt='Image'></a></td>";
 echo "</tr>";
 echo "</table>";
 ///REPORTS HEADERS END
@@ -3254,7 +3260,7 @@ $repbody="";
 
 /////////// LOGINS TRAFFIC REPORT
 
-$file = "../output/test.xls";
+$file = "../output/test.pdf";
 $fileHandle = fopen($file, 'w') or die("Error opening file");
  
  
@@ -3292,7 +3298,7 @@ $repbody=$repbody."<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-$repbody=$repbody."<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+$repbody=$repbody."<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
 $line[1]=$line[1] / 1000000;
 $repbody=$repbody."<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -3313,8 +3319,13 @@ $repbody=$repbody."</tbody></table>";
 
 echo $repbody;
 
-$data ="<html><head></head><body>".$repheader."\n".$repbody."</body></html>";
-fwrite($fileHandle, $data);
+$repbody=preg_replace('~<a\b[^>]*+>|</a\b[^>]*+>~', '', $repbody);
+
+$repbody=preg_replace('~<table~', '<table border=1', $repbody);
+
+
+#$data ="<html><head></head><body>".$repheader."\n".$repbody."</body></html>";
+
  
 fclose($fileHandle); // close the file
 
@@ -3353,7 +3364,7 @@ $totalmb=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -5875,7 +5886,7 @@ echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
 
 if($useLoginalias==1)
-echo "<td>".$line[2]."</td>";
+echo "<td>".$line[3]."</td>";
 echo "</tr>";
 $numrow++;
 }
