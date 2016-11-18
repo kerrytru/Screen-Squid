@@ -1873,7 +1873,7 @@ $queryWhoVisitPopularSiteIpaddress="
 
 $queryVisitingWebsiteByTimeIpaddress="
   SELECT DISTINCT 
-    from_unixtime(tmp.date,'%d-%m-%Y %H:%i:%s') as d,i
+    from_unixtime(tmp.date,'%d-%m-%Y %H:%i:%s') as d,
     site 
   from (SELECT 
 	  date,
