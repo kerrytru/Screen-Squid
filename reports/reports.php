@@ -1,5 +1,5 @@
 <?php
-#build 20161111
+#build 20161118
 ?>
 
 <html>
@@ -1447,7 +1447,7 @@ $queryOneLoginTraffic="
 	   SUM(sizeinbytes) AS s,
 	   scsq_categorylist.category 
 	 FROM scsq_quicktraffic 
-	 INNER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
+	 LEFT OUTER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
@@ -1663,7 +1663,7 @@ $queryOneIpaddressTraffic="
 	   sum(sizeinbytes) AS s,
 	   scsq_categorylist.category 
 	 FROM scsq_quicktraffic 
-	 INNER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
+	 LEFT OUTER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
@@ -3268,8 +3268,7 @@ $fileHandle = fopen($file, 'w') or die("Error opening file");
 if($id==1)
 {
 
-
-$repbody = "
+echo "
 <table id=report_table_id_1 class=sortable>
 <tr>
     <th class=unsortable>
@@ -3282,50 +3281,113 @@ $repbody = "
     ".$_lang['stMEGABYTES']."
     </th>";
 if($useLoginalias==1)
-$repbody=$repbody."<th>".$_lang['stALIAS']."</th>";
-$repbody=$repbody."</tr>";
+echo "<th>".$_lang['stALIAS']."</th>";
+echo "</tr>";
 
 //$result=mysql_unbuffered_query($queryLoginsTraffic) or die (mysql_error());
+
+$pdfbody="";
 
 $result=mysql_query($queryLoginsTraffic) or die (mysql_error());
 
 $numrow=1;
 $totalmb=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-$repbody=$repbody."<tr>";
-$repbody=$repbody."<td>".$numrow."</td>";
+echo "<tr>";
+echo "<td>".$numrow."</td>";
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-$repbody=$repbody."<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
+
+echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
-$repbody=$repbody."<td>".$line[1]."</td>";
+echo "<td>".$line[1]."</td>";
+
 $totalmb=$totalmb+$line[1];
 
+$pdfbody[$numrow]="0 -15 Td [(".$numrow.") (".$line[0].") -20520(".$line[1].")]TJ";
+
 if($useLoginalias==1)
-$repbody=$repbody."<td>".$line[3]."</td>";
-$repbody=$repbody."</tr>";
+echo "<td>".$line[3]."</td>";
+echo "</tr>";
 $numrow++;
+
+
     }
-$repbody=$repbody."<tr class=sortbottom>
+echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>";
 if($useLoginalias==1)
-$repbody=$repbody."<td>&nbsp;</td>";
-$repbody=$repbody."</tr>";
-$repbody=$repbody."</tbody></table>";
+echo "<td>&nbsp;</td>";
+echo "</tr>";
+echo "</tbody></table>";
 
-echo $repbody;
 
-$repbody=preg_replace('~<a\b[^>]*+>|</a\b[^>]*+>~', '', $repbody);
+$dd=$repheader;
 
-$repbody=preg_replace('~<table~', '<table border=1', $repbody);
-
+#$dd="Трафик пользователей логины за 12-11-2013 (Вт)";
 
 #$data ="<html><head></head><body>".$repheader."\n".$repbody."</body></html>";
+$data = "%PDF-1.3
+1 0 obj <</Type /Catalog /Pages 2 0 R>>
+endobj
+2 0 obj <</Type /Pages /Kids [6 0 R 7 0 R] /Count 2>>
+endobj
+3 0 obj<</Font <</F1 4 0 R>>>>
+endobj
+4 0 obj<</Type /Font
+/BaseFont /Arial
+/Subtype /TrueType
+/Encoding /WinAnsiEncoding>>
+endobj
+5 0 obj
+<<  /Length  568  >>
+stream
+2J
+BT
+/F1  12  Tf
+0Tc
+0Tw
+50  712 TD [ (".$dd.") ]  TJ
+0 -20 TD [ () ]  TJ
+0 -15 Td [(zhopa) (zhopa2) -20250(zhopa3)]TJ
+";
+$iii=1;
+while($iii<40)
+{
+$data=$data."
+".$pdfbody[$iii];
+$iii++;
+}
+$data=$data."
+ET
+endstream
+endobj
+";
+$data=$data."
+6 0 obj<</Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents 5 0 R>>
+endobj
+7 0 obj<</Type /Page /Parent 2 0 R /Resources 4 0 R /MediaBox [0 0 500 800] /Contents 5 0 R>>
+endobj
+xref
+0 8
+0000000000 65535 f
+0000000009 00000 n
+0000000056 00000 n
+0000000111 00000 n
+0000000212 00000 n
+0000000250 00000 n
+0000000317 00000 n
+0000000417 00000 n
+trailer <</Size 8/Root 1 0 R>>
+startxref
+406
+%%EOF";
 
+
+fwrite($fileHandle, $data);
  
 fclose($fileHandle); // close the file
 
