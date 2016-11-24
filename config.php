@@ -24,7 +24,7 @@ $cfgcachemgr_passwd[0]="";
 
 
 #language ru = russian, en = english
-$language="ru";
+$language="en";
 
 include_once("lang/$language");
 
@@ -80,5 +80,15 @@ $refreshPeriod=5;
 #==============================
 
 
-$vers="1.9.4";
+//========= queries config
+$countTopSitesLimit=10;
+$countTopLoginLimit=10;
+$countTopIpLimit=10;
+$countPopularSitesLimit=10;
+$countWhoDownloadBigFilesLimit=10;
+
+//======== queries config end
+
+
+$vers="1.9.5";
 ?>

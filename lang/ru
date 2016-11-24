@@ -156,12 +156,14 @@ $_lang['stLOGDATEEND']="Окончание";
 $_lang['stLOGMESSAGE']="Сообщение";
 $_lang['stTOP']="Топ";
 
-#новые в 2.0
+#новые в 1.10
 
 $_lang['stTRAFFICBYHOURSLOGINS']="Трафик по времени суток логины";
 $_lang['stTRAFFICBYHOURSIPADDRESS']="Трафик по времени суток IP адреса";
 $_lang['stTRAFFICBYCATEGORIES']="Трафик по категориям";
 $_lang['stCATEGORY']="Категория";
+$_lang['stTRAFFICBYHOURSLOGINSONESITE']="Трафик по времени суток (логины) адрес";
+$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']="Трафик по времени суток (IP адрес) адрес";
 
 $_lang['stACTIVEIPADDRESS']="Активные IP адреса";
 $_lang['stONLINE']="Онлайн";

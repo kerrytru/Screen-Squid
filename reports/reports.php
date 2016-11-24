@@ -18,16 +18,6 @@ include("../config.php");
  include("../lib/pChart/pChart/pData.class");
  include("../lib/pChart/pChart/pChart.class");
 
-//========= queries config
-$countTopSitesLimit=10;
-$countTopLoginLimit=10;
-$countTopIpLimit=10;
-$countPopularSitesLimit=10;
-$countWhoDownloadBigFilesLimit=10;
-
-//======== queries config end
-
-
 
 $start=microtime(true);
 
@@ -284,7 +274,7 @@ else
 
 #create list of friends
 if($enableNofriends==1) {
-  $friendsTmp=implode("','",explode(" ", $goodLogins));
+  $friends=implode("','",explode(" ", $goodLogins));
   $friendsTmp="where name in  ('".$friendsTmp."')";
   $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
   $result=mysql_query($sqlGetFriendsId) or die(mysql_error());
@@ -447,7 +437,7 @@ $querySitesTraffic="
 	       GROUP BY CRC32(site)
 	       ORDER BY null
 	      ) as tmp2
- 	  INNER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
+ 	  LEFT OUTER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
 	  
 	 )
  
@@ -1384,6 +1374,82 @@ ORDER BY nofriends.name
 ;
 ";
 
+$queryTrafficByHoursLoginsOneSite="
+SELECT  login,
+nofriends.name,
+sum(sizeinbytes),
+FROM_UNIXTIME(date,'%k')
+FROM scsq_quicktraffic
+	LEFT JOIN (SELECT 
+	id,
+	name 
+	FROM scsq_logins)
+	AS nofriends 
+	ON scsq_quicktraffic.login=nofriends.id  
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is  NULL 
+	  AND tmpipaddress.id is  NULL
+	  AND site='".$currentsite."'
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+GROUP BY login,FROM_UNIXTIME(date,'%H')
+ORDER BY nofriends.name
+;
+";
+
+$queryTrafficByHoursIpaddressOneSite="
+SELECT  ipaddress,
+nofriends.name,
+sum(sizeinbytes),
+FROM_UNIXTIME(date,'%k')
+FROM scsq_quicktraffic
+	LEFT JOIN (SELECT 
+	id,
+	name 
+	FROM scsq_ipaddress)
+	AS nofriends 
+	ON scsq_quicktraffic.ipaddress=nofriends.id  
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is  NULL 
+	  AND tmpipaddress.id is  NULL
+	  AND site='".$currentsite."'
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+GROUP BY ipaddress,FROM_UNIXTIME(date,'%H')
+ORDER BY nofriends.name
+;
+";
+
 
 $queryCategorySitesTraffic="
   SELECT scsq_categorylist.category,
@@ -1420,7 +1486,7 @@ $queryCategorySitesTraffic="
 	      ) as tmp2
 	
 	 )
-  INNER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
+  LEFT OUTER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
   GROUP BY scsq_categorylist.category	  
 
 ;";
@@ -3248,6 +3314,16 @@ $repheader= "<h2>".$_lang['stTRAFFICBYHOURSLOGINS']." ".$_lang['stFOR']." ".$que
 if($id==51)
 $repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESS']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
+if($id==52)
+$repheader= "<h2>".$_lang['stTRAFFICBYCATEGORIES']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==53)
+$repheader= "<h2>".$_lang['stTRAFFICBYHOURSLOGINSONESITE']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==54)
+$repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+
 echo "<table>";
 echo "<tr>";
 echo "<td valign=middle>".$repheader."</td>";
@@ -3256,12 +3332,10 @@ echo "</tr>";
 echo "</table>";
 ///REPORTS HEADERS END
 
-$repbody="";
-
 /////////// LOGINS TRAFFIC REPORT
 
 $file = "../output/test.pdf";
-$fileHandle = fopen($file, 'w') or die("Error opening file");
+//$fileHandle = fopen($file, 'w') or die("Error opening file");
  
  
 
@@ -3306,7 +3380,7 @@ echo "<td>".$line[1]."</td>";
 
 $totalmb=$totalmb+$line[1];
 
-$pdfbody[$numrow]="0 -15 Td [(".$numrow.") (".$line[0].") -20520(".$line[1].")]TJ";
+$pdfbody[$numrow]="".$numrow.";".$line[0].";".$line[1]."";
 
 if($useLoginalias==1)
 echo "<td>".$line[3]."</td>";
@@ -3325,71 +3399,6 @@ echo "</tr>";
 echo "</tbody></table>";
 
 
-$dd=$repheader;
-
-#$dd="Трафик пользователей логины за 12-11-2013 (Вт)";
-
-#$data ="<html><head></head><body>".$repheader."\n".$repbody."</body></html>";
-$data = "%PDF-1.3
-1 0 obj <</Type /Catalog /Pages 2 0 R>>
-endobj
-2 0 obj <</Type /Pages /Kids [6 0 R 7 0 R] /Count 2>>
-endobj
-3 0 obj<</Font <</F1 4 0 R>>>>
-endobj
-4 0 obj<</Type /Font
-/BaseFont /Arial
-/Subtype /TrueType
-/Encoding /WinAnsiEncoding>>
-endobj
-5 0 obj
-<<  /Length  568  >>
-stream
-2J
-BT
-/F1  12  Tf
-0Tc
-0Tw
-50  712 TD [ (".$dd.") ]  TJ
-0 -20 TD [ () ]  TJ
-0 -15 Td [(zhopa) (zhopa2) -20250(zhopa3)]TJ
-";
-$iii=1;
-while($iii<40)
-{
-$data=$data."
-".$pdfbody[$iii];
-$iii++;
-}
-$data=$data."
-ET
-endstream
-endobj
-";
-$data=$data."
-6 0 obj<</Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents 5 0 R>>
-endobj
-7 0 obj<</Type /Page /Parent 2 0 R /Resources 4 0 R /MediaBox [0 0 500 800] /Contents 5 0 R>>
-endobj
-xref
-0 8
-0000000000 65535 f
-0000000009 00000 n
-0000000056 00000 n
-0000000111 00000 n
-0000000212 00000 n
-0000000250 00000 n
-0000000317 00000 n
-0000000417 00000 n
-trailer <</Size 8/Root 1 0 R>>
-startxref
-406
-%%EOF";
-
-
-fwrite($fileHandle, $data);
- 
-fclose($fileHandle); // close the file
 
 //mysql_free_result($result);
 
@@ -3429,6 +3438,9 @@ echo "<td>".$numrow."</td>";
 echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
+
+$pdfbody[$numrow]="".$numrow.";".$line[0].";".$line[1]."";
+
 $totalmb=$totalmb+$line[1];
 if($useIpaddressalias==1)
 echo "<td>".$line[3]."</td>";
@@ -3444,6 +3456,7 @@ if($useIpaddressalias==1)
 echo "<td>&nbsp;</td>";
 echo "</tr>";
 echo "</table>";
+
 }
 
 /////////////// IPADDRESS TRAFFIC REPORT END
@@ -3466,6 +3479,9 @@ echo "
     </th>
     <th class=unsortable>
     ".$_lang['stWHO']."
+    </th>
+    <th class=unsortable>
+    ".$_lang['stBYDAYTIME']."
     </th>
     <th class=unsortable>
     ".$_lang['stCATEGORY']."
@@ -3499,6 +3515,9 @@ echo "<td>".$line[1]."</td>";
 echo "<td><a href=javascript:PartlyReportsLogin(18,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(19,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 $totalmb=$totalmb+$line[1];
 
+echo "<td><a href=javascript:PartlyReportsLogin(53,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(54,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
+$totalmb=$totalmb+$line[1];
+
 echo "<td>".$line[2]."</td>";
 
 
@@ -3509,6 +3528,7 @@ echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>
+<td><b>&nbsp;</b></td>
 <td><b>&nbsp;</b></td>
 <td><b>&nbsp;</b></td>
 
@@ -3541,6 +3561,9 @@ echo "
     <th class=unsortable>
     ".$_lang['stWHO']."
     </th>
+    <th class=unsortable>
+    ".$_lang['stBYDAYTIME']."
+    </th>
 </tr>
 ";
 
@@ -3567,6 +3590,8 @@ echo "<td>".$line[1]."</td>";
 #Вроде уже не нужно. В релизе убрать.
 echo "<td><a href=javascript:PartlyReportsLogin(18,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(19,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 
+echo "<td><a href=javascript:PartlyReportsLogin(53,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(54,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
+
 $totalmb=$totalmb+$line[1];
 echo "</tr>";
 $numrow++;
@@ -3575,6 +3600,7 @@ echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>
+<td><b>&nbsp;</b></td>
 <td><b>&nbsp;</b></td>
 </tr>";
 
@@ -4039,6 +4065,7 @@ echo "
 $result=mysql_query($queryOneIpaddressTraffic) or die (mysql_error());
 $numrow=1;
 $totalmb=0;
+
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
@@ -6711,7 +6738,7 @@ echo "
     #
     </th>
     <th class=unsortable>
-    логины
+    ".$_lang['stLOGIN']."
     </th>
     <th class=unsortable>
     0
@@ -6840,6 +6867,29 @@ $i++;
 		$numrow++;
 		}
 }
+
+if($numrow==1){
+echo "<tr>";
+echo "<td>$numrow</td>";	
+echo "<td>$prevLoginName</td>";
+$i=0;	
+$totalmb=0;
+while($i<24) {
+	echo "<td>$arrHourTraffic[$i]</td>";
+	$totalmb=$totalmb+$arrHourTraffic[$i];
+	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
+	$arrHourTraffic[$i]=0;
+	$i++;
+	}
+
+$prevLogin=$curLogin;
+$prevLoginName=$line[1];
+$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
+echo "<td>$totalmb</td>";
+echo "</tr>";
+
+}
+
 $i=0;
 $totalmb=0;
 echo "<tr>";
@@ -6859,10 +6909,10 @@ echo "</table>";
 
 }
 
-/////////////// TRAFFIC BY HOURS REPORT END
+/////////////// TRAFFIC BY HOURS LOGINS REPORT END
 
 
-/////////////// TRAFFIC BY HOURS LOGINS REPORT
+/////////////// TRAFFIC BY HOURS IPADDRESS REPORT
 
 if($id==51)
 {
@@ -6874,7 +6924,7 @@ echo "
     #
     </th>
     <th class=unsortable>
-    логины
+    ".$_lang['stIPADDRESS']."
     </th>
     <th class=unsortable>
     0
@@ -6954,7 +7004,7 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByHoursIpadress) or die (mysql_error());
+$result=mysql_query($queryTrafficByHoursIpaddress) or die (mysql_error());
 
 $HourCounter=0;
 $totalmb=0;
@@ -7003,6 +7053,29 @@ $i++;
 		$numrow++;
 		}
 }
+
+if($numrow==1){
+echo "<tr>";
+echo "<td>$numrow</td>";	
+echo "<td>$prevLoginName</td>";
+$i=0;	
+$totalmb=0;
+while($i<24) {
+	echo "<td>$arrHourTraffic[$i]</td>";
+	$totalmb=$totalmb+$arrHourTraffic[$i];
+	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
+	$arrHourTraffic[$i]=0;
+	$i++;
+	}
+
+$prevLogin=$curLogin;
+$prevLoginName=$line[1];
+$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
+echo "<td>$totalmb</td>";
+echo "</tr>";
+
+}
+
 $i=0;
 $totalmb=0;
 echo "<tr>";
@@ -7022,7 +7095,7 @@ echo "</table>";
 
 }
 
-/////////////// TRAFFIC BY HOURS REPORT END
+/////////////// TRAFFIC BY HOURS IPADDRESS REPORT END
 
 /////////////// TRAFFIC BY CATEGORY REPORT
 
@@ -7075,6 +7148,382 @@ echo "</table>";
 }
 
 /////////////// DOMAIN ZONES TRAFFIC REPORT END
+
+/////////////// TRAFFIC BY HOURS LOGINS ONE SITE REPORT
+
+if($id==53)
+{
+
+echo "
+<table id=report_table_id_50 class=sortable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th class=unsortable>
+    ".$_lang['stLOGIN']."
+    </th>
+    <th class=unsortable>
+    0
+    </th>
+    <th class=unsortable>
+    1
+    </th>
+    <th class=unsortable>
+    2
+    </th>
+    <th class=unsortable>
+    3
+    </th>
+    <th class=unsortable>
+    4
+    </th>
+    <th class=unsortable>
+    5
+    </th>
+    <th class=unsortable>
+    6
+    </th>
+    <th class=unsortable>
+    7
+    </th>
+    <th class=unsortable>
+    8
+    </th>
+    <th class=unsortable>
+    9
+    </th>
+    <th class=unsortable>
+    10
+    </th>
+    <th class=unsortable>
+    11
+    </th>
+    <th class=unsortable>
+    12
+    </th>
+    <th class=unsortable>
+    13
+    </th>
+    <th class=unsortable>
+    14
+    </th>
+    <th class=unsortable>
+    15
+    </th>
+    <th class=unsortable>
+    16
+    </th>
+    <th class=unsortable>
+    17
+    </th>
+    <th class=unsortable>
+    18
+    </th>
+    <th class=unsortable>
+    19
+    </th>
+    <th class=unsortable>
+    20
+    </th>
+    <th class=unsortable>
+    21
+    </th>
+    <th class=unsortable>
+    22
+    </th>
+    <th class=unsortable>
+    23
+    </th>
+    <th class=unsortable>
+    TOTAL
+    </th>
+</tr>
+";
+
+$result=mysql_query($queryTrafficByHoursLoginsOneSite) or die (mysql_error());
+
+$HourCounter=0;
+$totalmb=0;
+$curLogin=0;
+$prevLogin=0;
+$prevLoginName="";
+$curHour=0;
+$prevHour=0;
+$numrow=1;
+$i=0;
+$totalmb=0;
+while($i<24)
+{
+$arrHourTraffic[$i]=0;
+$hourTotalmb[$i]=0;
+$i++;
+}
+
+
+	
+	while($line = mysql_fetch_array($result,MYSQL_NUM)){
+
+		$curLogin=$line[0];
+		if($prevLogin==$curLogin or $prevLogin==0){
+			$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+			$prevLogin=$curLogin;
+			$prevLoginName=$line[1];
+
+		}
+		else{
+			echo "<tr>";
+			echo "<td>$numrow</td>";	
+			echo "<td>$prevLoginName</td>";
+			$i=0;	
+			$totalmb=0;
+			while($i<24) {
+				echo "<td>$arrHourTraffic[$i]</td>";
+				$totalmb=$totalmb+$arrHourTraffic[$i];
+				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
+				$arrHourTraffic[$i]=0;
+				$i++;
+
+			}
+		$prevLogin=$curLogin;
+		$prevLoginName=$line[1];
+		$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
+		echo "<td>$totalmb</td>";
+		echo "</tr>";
+		$numrow++;
+		}
+}
+
+if($numrow==1){
+echo "<tr>";
+echo "<td>$numrow</td>";	
+echo "<td>$prevLoginName</td>";
+$i=0;	
+$totalmb=0;
+while($i<24) {
+	echo "<td>$arrHourTraffic[$i]</td>";
+	$totalmb=$totalmb+$arrHourTraffic[$i];
+	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
+	$arrHourTraffic[$i]=0;
+	$i++;
+	}
+
+$prevLogin=$curLogin;
+$prevLoginName=$line[1];
+$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
+echo "<td>$totalmb</td>";
+echo "</tr>";
+
+}
+
+$i=0;
+$totalmb=0;
+echo "<tr>";
+echo "<td colspan=2>TOTAL</td>";
+while($i<24)
+{
+echo "<td>$hourTotalmb[$i]</td>";
+$i++;
+$totalmb=$totalmb+$hourTotalmb[$i];
+}
+echo "<td>$totalmb</td>";
+echo "</tr>";
+
+echo "</table>";
+
+
+
+}
+
+/////////////// TRAFFIC BY HOURS LOGINS ONE SITE REPORT END
+
+
+/////////////// TRAFFIC BY HOURS IPADDRESS ONE SITE REPORT
+
+if($id==54)
+{
+
+echo "
+<table id=report_table_id_51 class=sortable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th class=unsortable>
+    ".$_lang['stIPADDRESS']."
+    </th>
+    <th class=unsortable>
+    0
+    </th>
+    <th class=unsortable>
+    1
+    </th>
+    <th class=unsortable>
+    2
+    </th>
+    <th class=unsortable>
+    3
+    </th>
+    <th class=unsortable>
+    4
+    </th>
+    <th class=unsortable>
+    5
+    </th>
+    <th class=unsortable>
+    6
+    </th>
+    <th class=unsortable>
+    7
+    </th>
+    <th class=unsortable>
+    8
+    </th>
+    <th class=unsortable>
+    9
+    </th>
+    <th class=unsortable>
+    10
+    </th>
+    <th class=unsortable>
+    11
+    </th>
+    <th class=unsortable>
+    12
+    </th>
+    <th class=unsortable>
+    13
+    </th>
+    <th class=unsortable>
+    14
+    </th>
+    <th class=unsortable>
+    15
+    </th>
+    <th class=unsortable>
+    16
+    </th>
+    <th class=unsortable>
+    17
+    </th>
+    <th class=unsortable>
+    18
+    </th>
+    <th class=unsortable>
+    19
+    </th>
+    <th class=unsortable>
+    20
+    </th>
+    <th class=unsortable>
+    21
+    </th>
+    <th class=unsortable>
+    22
+    </th>
+    <th class=unsortable>
+    23
+    </th>
+    <th class=unsortable>
+    TOTAL
+    </th>
+</tr>
+";
+
+$result=mysql_query($queryTrafficByHoursIpaddressOneSite) or die (mysql_error());
+
+$HourCounter=0;
+$totalmb=0;
+$curLogin=0;
+$prevLogin=0;
+$prevLoginName="";
+$curHour=0;
+$prevHour=0;
+$numrow=1;
+$i=0;
+$totalmb=0;
+while($i<24)
+{
+$arrHourTraffic[$i]=0;
+$hourTotalmb[$i]=0;
+$i++;
+}
+
+
+	
+	while($line = mysql_fetch_array($result,MYSQL_NUM)){
+		$curLogin=$line[0];
+		if($curLogin==$prevLogin or $prevLogin==0){
+			$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+			$prevLogin=$curLogin;
+			$prevLoginName=$line[1];
+		}
+		else{
+			echo "<tr>";
+			echo "<td>$numrow</td>";	
+			echo "<td>$prevLoginName</td>";
+			$i=0;	
+			$totalmb=0;
+			while($i<24) {
+				echo "<td>$arrHourTraffic[$i]</td>";
+				$totalmb=$totalmb+$arrHourTraffic[$i];
+				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
+				$arrHourTraffic[$i]=0;
+				$i++;
+			}
+		$prevLogin=$curLogin;
+		$prevLoginName=$line[1];
+		$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
+		echo "<td>$totalmb</td>";
+		echo "</tr>";
+		$numrow++;
+		}
+}
+
+if($numrow==1){
+echo "<tr>";
+echo "<td>$numrow</td>";	
+echo "<td>$prevLoginName</td>";
+$i=0;	
+$totalmb=0;
+while($i<24) {
+	echo "<td>$arrHourTraffic[$i]</td>";
+	$totalmb=$totalmb+$arrHourTraffic[$i];
+	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
+	$arrHourTraffic[$i]=0;
+	$i++;
+	}
+
+$prevLogin=$curLogin;
+$prevLoginName=$line[1];
+$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
+echo "<td>$totalmb</td>";
+echo "</tr>";
+
+}
+
+
+$i=0;
+$totalmb=0;
+echo "<tr>";
+echo "<td colspan=2>TOTAL</td>";
+while($i<24)
+{
+echo "<td>$hourTotalmb[$i]</td>";
+$i++;
+$totalmb=$totalmb+$hourTotalmb[$i];
+}
+echo "<td>$totalmb</td>";
+echo "</tr>";
+
+echo "</table>";
+
+
+
+}
+
+/////////////// TRAFFIC BY HOURS IPADDRESS REPORT ONE SITE END
+
 
 
 $end=microtime(true);
