@@ -358,7 +358,7 @@ $echoLoginAliasColumn=",aliastbl.name";
 
   GROUP BY nofriends.name;";
 
-echo $queryLoginsTraffic;
+///echo $queryLoginsTraffic;
 
 if($useIpaddressalias==0)
 $echoIpaddressAliasColumn="";
