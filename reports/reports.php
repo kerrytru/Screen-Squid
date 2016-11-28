@@ -275,15 +275,15 @@ else
 #create list of friends
 if($enableNofriends==1) {
   $friends=implode("','",explode(" ", $goodLogins));
-  $friendsTmp="where name in  ('".$friendsTmp."')";
+  $friendsTmp="where name in  ('".$friends."')";
   $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
   $result=mysql_query($sqlGetFriendsId) or die(mysql_error());
   while ($fline = mysql_fetch_array($result,MYSQL_NUM)) {
     $goodLoginsList=$goodLoginsList.",".$fline[0];
   }
-  
-  $friendsTmp=implode("','",explode(" ", $goodIpaddress));
-  $friendsTmp="where name in ('".$friendsTmp."')";
+ $friends=""; 
+ $friends=implode("','",explode(" ", $goodIpaddress));
+ $friendsTmp="where name in ('".$friends."')";
   $sqlGetFriendsId="select id from scsq_ipaddress ".$friendsTmp."";
   $result=mysql_query($sqlGetFriendsId) or die(mysql_error());
   while ($fline = mysql_fetch_array($result,MYSQL_NUM)) {
@@ -358,7 +358,7 @@ $echoLoginAliasColumn=",aliastbl.name";
 
   GROUP BY nofriends.name;";
 
-//echo $queryLoginsTraffic;
+echo $queryLoginsTraffic;
 
 if($useIpaddressalias==0)
 $echoIpaddressAliasColumn="";
@@ -3335,7 +3335,7 @@ echo "</table>";
 /////////// LOGINS TRAFFIC REPORT
 
 $file = "../output/test.pdf";
-//$fileHandle = fopen($file, 'w') or die("Error opening file");
+$fileHandle = fopen($file, 'w') or die("Error opening file");
  
  
 
@@ -3398,6 +3398,147 @@ echo "<td>&nbsp;</td>";
 echo "</tr>";
 echo "</tbody></table>";
 
+///PDF generate
+
+$iii=0;
+$jjj=0;
+$kkk=0;
+$startpos=0;
+$pdfdata=0;
+$pages=round($numrow/30)+1;
+while($kkk<$pages)
+{
+while($jjj<3)
+{
+while($iii<30)
+{
+	if($jjj==0 && $iii==0)
+		$pdfdata=$pdfdata."0 -20 TD [()]TJ";
+	if($jjj==1 && $iii==0)
+		$pdfdata=$pdfdata."50 600 Td [()]TJ";
+	if($jjj==2 && $iii==0)
+		$pdfdata=$pdfdata."250 600 Td [()]TJ";
+
+$cellvalue=explode(";",$pdfbody[$iii+$startpos]);
+$pdfdata=$pdfdata."T* [(".$cellvalue[$jjj].")]TJ";
+$iii++;
+}
+$iii=0;
+$jjj++;
+}
+$startpos=$startpos+30;
+@$epdfdata[$kkk]=$pdfdata;
+$pdfdata="";
+$jjj=0;
+$kkk++;
+}
+
+///generate page number
+$ttt=0;
+$pageObject="";
+while($ttt<$pages)
+{
+$pageObject=$pageObject."".(100+$ttt)." 0 R ";
+$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> endobj ";
+
+$ttt++;
+}
+
+$iii=0;
+
+while($iii<29){
+$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 330 0.5 re f";
+$iii++;
+}
+$iii=0;
+#lastpage lines
+while($iii<($numrow-($pages-1)*30)){
+$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 330 0.5 re f";
+$iii++;
+}
+
+
+$ttt=0;
+
+$repheader=preg_replace('~<h2\b[^>]*+>|</h2\b[^>]*+>~', '', $repheader);
+
+$pdfRepHeader=$repheader;
+
+$data = "%PDF-1.3
+1 0 obj <</Type /Catalog /Pages 2 0 R>>
+endobj
+2 0 obj <</Type /Pages /Kids [".$pageObject."] /Count ".$pages.">>
+endobj
+3 0 obj<</Font <</F1 4 0 R>>>>
+endobj
+4 0 obj<</Type /Font
+/BaseFont /Arial
+/Subtype /TrueType
+/Encoding /WinAnsiEncoding
+>>
+endobj";
+
+while($ttt<$pages)
+{
+$data=$data."
+
+".(10+$ttt)." 0 obj
+<<  /Length  568  >>
+stream
+
+BT
+/F1  18  Tf
+0Tc
+0Tw";
+$data=$data."0  0 TD [ () ]  TJ";
+if($ttt==0)
+$data=$data."50  720 TD [ (".$pdfRepHeader.") ]  TJ";
+else
+$data=$data."50  700 TD [ () ]  TJ";
+
+$data=$data."/F1  12  Tf";
+
+$data=$data.$epdfdata[$ttt];
+
+$data=$data."
+ET";
+if($ttt<($pages-1))
+$data=$data.$pageHorLines;
+else
+$data=$data.$pageLastHorLines;
+
+$data=$data."
+endstream
+endobj
+";
+
+$ttt++;
+}
+
+$data=$data.$pageAnnot."
+
+
+xref
+0 8
+0000000000 65535 f
+0000000009 00000 n
+0000000056 00000 n
+0000000111 00000 n
+0000000212 00000 n
+0000000250 00000 n
+0000000317 00000 n
+0000000417 00000 n
+trailer <</Size 8/Root 1 0 R>>
+startxref
+406
+%%EOF";
+
+
+fwrite($fileHandle, $data);
+ 
+fclose($fileHandle); // close the file
+
+/// PDF generate end
 
 
 //mysql_free_result($result);
@@ -3456,6 +3597,99 @@ if($useIpaddressalias==1)
 echo "<td>&nbsp;</td>";
 echo "</tr>";
 echo "</table>";
+
+
+///PDF generate
+
+$iii=0;
+$jjj=0;
+$kkk=0;
+$startpos=0;
+$pdfdata=0;
+$pages=round($numrow/30)+1;
+
+///generate page number
+$ttt=0;
+$pageObject="";
+while($ttt<$pages)
+{
+$pageObject=$pageObject."".(100+$ttt)." 0 R ";
+$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> endobj ";
+
+$ttt++;
+}
+
+$iii=0;
+
+while($iii<29){
+$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 330 0.5 re f";
+$iii++;
+}
+$iii=0;
+#lastpage lines
+while($iii<($numrow-($pages-1)*30)){
+$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 330 0.5 re f";
+$iii++;
+}
+
+
+$ttt=0;
+
+$repheader=preg_replace('~<h2\b[^>]*+>|</h2\b[^>]*+>~', '', $repheader);
+
+$pdfRepHeader=$repheader;
+
+$data = "%PDF-1.3
+1 0 obj <</Type /Catalog /Pages 2 0 R>>
+endobj
+2 0 obj <</Type /Pages /Kids [100 0 R] /Count 1>>
+endobj
+3 0 obj<</Font <</F1 4 0 R>>>>
+endobj
+4 0 obj<</Type /Font
+/BaseFont /Arial
+/Subtype /TrueType
+/Encoding /WinAnsiEncoding
+>>
+endobj
+
+10 0 obj
+<<  /Length  568  >>
+stream
+
+BT
+/F1  18  Tf
+0  0 TD [ () ]  TJ
+50  720 TD [ (zhopaaaaaaa1) ]  TJ
+ET
+endstream
+endobj
+
+100 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents 10 0 R>> endobj 
+
+xref
+0 8
+0000000000 65535 f
+0000000009 00000 n
+0000000056 00000 n
+0000000111 00000 n
+0000000212 00000 n
+0000000250 00000 n
+0000000317 00000 n
+0000000417 00000 n
+trailer <</Size 8/Root 1 0 R>>
+startxref
+406
+%%EOF";
+
+
+fwrite($fileHandle, $data);
+ 
+fclose($fileHandle); // close the file
+
+/// PDF generate end
+
+
 
 }
 
