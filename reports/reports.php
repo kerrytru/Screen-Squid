@@ -3450,7 +3450,9 @@ $pageObject="";
 while($ttt<$pages)
 {
 $pageObject=$pageObject."".(100+$ttt)." 0 R ";
-$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> endobj ";
+$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> 
+endobj 
+";
 
 $ttt++;
 }
@@ -3458,13 +3460,15 @@ $ttt++;
 $iii=0;
 
 while($iii<29){
-$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f";
+$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
+";
 $iii++;
 }
 $iii=0;
 #lastpage lines
 while($iii<($numrow-($pages-1)*30)){
-$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f";
+$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
+";
 $iii++;
 }
 
@@ -3500,7 +3504,8 @@ stream
 BT
 /F1  18  Tf
 0Tc
-0Tw";
+0Tw
+";
 $data=$data."0  0 TD [ () ]  TJ
 ";
 if($ttt==0)
@@ -3516,7 +3521,8 @@ $data=$data."/F1  12  Tf
 $data=$data.$epdfdata[$ttt];
 
 $data=$data."
-ET";
+ET
+";
 if($ttt<($pages-1))
 $data=$data.$pageHorLines;
 else
@@ -3534,7 +3540,7 @@ $data=$data.$pageAnnot."
 
 
 xref
-0 8
+0 9
 0000000000 65535 f
 0000000009 00000 n
 0000000056 00000 n
@@ -3543,9 +3549,10 @@ xref
 0000000250 00000 n
 0000000317 00000 n
 0000000417 00000 n
-trailer <</Size 8/Root 1 0 R>>
+0000000517 00000 n
+trailer <</Size 9/Root 1 0 R>>
 startxref
-406
+9
 %%EOF";
 
 
@@ -3623,13 +3630,51 @@ $startpos=0;
 $pdfdata=0;
 $pages=round($numrow/30)+1;
 
+while($kkk<$pages)
+{
+while($jjj<3)
+{
+
+
+while($iii<30)
+
+{
+
+	if($jjj==0 && $iii==0)
+		$pdfdata=$pdfdata."0 -20 TD [()]TJ
+";
+	if($jjj==1 && $iii==0)
+		$pdfdata=$pdfdata."50 600 Td [()]TJ
+";
+	if($jjj==2 && $iii==0)
+		$pdfdata=$pdfdata."250 600 Td [()]TJ
+";
+
+$cellvalue=explode(";",$pdfbody[$iii+$startpos]);
+$pdfdata=$pdfdata."T* [(".$cellvalue[$jjj].")]TJ
+";
+$iii++;
+}
+$iii=0;
+$jjj++;
+
+}
+$startpos=$startpos+30;
+@$epdfdata[$kkk]=$pdfdata;
+$pdfdata="";
+$jjj=0;
+$kkk++;
+}
+
 ///generate page number
 $ttt=0;
 $pageObject="";
 while($ttt<$pages)
 {
 $pageObject=$pageObject."".(100+$ttt)." 0 R ";
-$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> endobj ";
+$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> 
+endobj 
+";
 
 $ttt++;
 }
@@ -3637,13 +3682,15 @@ $ttt++;
 $iii=0;
 
 while($iii<29){
-$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f";
+$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
+";
 $iii++;
 }
 $iii=0;
 #lastpage lines
 while($iii<($numrow-($pages-1)*30)){
-$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f";
+$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
+";
 $iii++;
 }
 
@@ -3667,6 +3714,7 @@ endobj
 /Encoding /WinAnsiEncoding
 >>
 endobj";
+
 while($ttt<$pages)
 {
 $data=$data."
@@ -3677,15 +3725,36 @@ stream
 
 BT
 /F1  18  Tf
-0  0 TD [ () ]  TJ
-50  720 TD [ (".$pdfRepHeader.") ]  TJ
-0  -15 Td [ (zhopkaaaaaaaaa1) ]  TJ
-0  -15 Td [ (zhopkaaaaaaddddaaa1) ]  TJ
+0Tc
+0Tw
+";
+$data=$data."0  0 TD [ () ]  TJ
+";
+if($ttt==0)
+$data=$data."50  720 TD [ (".$pdfRepHeader.") ]  TJ
+";
+else
+$data=$data."50  700 TD [ () ]  TJ
+";
 
+$data=$data."/F1  12  Tf
+";
+
+$data=$data.$epdfdata[$ttt];
+
+$data=$data."
 ET
+";
+if($ttt<($pages-1))
+$data=$data.$pageHorLines;
+else
+$data=$data.$pageLastHorLines;
+
+$data=$data."
 endstream
 endobj
 ";
+
 $ttt++;
 }
 
@@ -3693,7 +3762,7 @@ $data=$data.$pageAnnot."
 
 
 xref
-0 8
+0 9
 0000000000 65535 f
 0000000009 00000 n
 0000000056 00000 n
@@ -3702,9 +3771,10 @@ xref
 0000000250 00000 n
 0000000317 00000 n
 0000000417 00000 n
-trailer <</Size 8/Root 1 0 R>>
+0000000517 00000 n
+trailer <</Size 9/Root 1 0 R>>
 startxref
-406
+9
 %%EOF";
 
 
