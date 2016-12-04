@@ -24,7 +24,7 @@ $cfgcachemgr_passwd[0]="";
 
 
 #language ru = russian, en = english
-$language="en";
+$language="ru";
 
 include_once("lang/$language");
 
@@ -35,7 +35,7 @@ $useIpaddressalias=1;
 
 #Vkluchit regim ne pokazivat druzei. Vkl =1, Vikl=0
 #Включить режим НЕ показывать друзей. Вкл.= 1, выкл.=0
-$enableNofriends=1;
+$enableNofriends=0;
 
 #Spisok druzei. Cherez odin probel. Naprimer, $goodLogins="Vasya Sergey Petr"; S IP adresami takzhe, cherez odin probel
 #Список друзей. Через ОДИН ПРОБЕЛ. Например, $goodLogins="Vasya Sergey Petr"; С IP адресами также, через ОДИН ПРОБЕЛ.
@@ -51,7 +51,7 @@ $goodIpaddress="";
 $enableUseiconv=0;
 
 #Show login/ipaddress if it have no traffic in partly reports. 1 - enable, 0 - disable
-$showZeroTrafficInReports=1;
+$showZeroTrafficInReports=0;
 
 #Pokazivat dni nedeli v otchetah.
 #Показывать дни недели в отчетах
@@ -90,5 +90,5 @@ $countWhoDownloadBigFilesLimit=10;
 //======== queries config end
 
 
-$vers="1.9.5";
+$vers="1.9.6";
 ?>

@@ -18,6 +18,8 @@ include("../config.php");
  include("../lib/pChart/pChart/pData.class");
  include("../lib/pChart/pChart/pChart.class");
 
+// Include the main TCPDF library (search for installation path).
+include("../lib/tcpdf/tcpdf.php");
 
 $start=microtime(true);
 
@@ -3328,21 +3330,19 @@ echo "<table>";
 echo "<tr>";
 echo "<td valign=middle>".$repheader."</td>";
 if($id==1 or $id==2)
-echo "<td valign=top>&nbsp;&nbsp;<a href=../output/test.pdf><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=../output/report.pdf><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
 echo "</tr>";
 echo "</table>";
+
 ///REPORTS HEADERS END
 
 /////////// LOGINS TRAFFIC REPORT
 
-$file = "../output/test.pdf";
-$fileHandle = fopen($file, 'w') or die("Error opening file");
  
- 
+$pdfbody=""; 
 
 if($id==1)
 {
-
 echo "
 <table id=report_table_id_1 class=sortable>
 <tr>
@@ -3359,194 +3359,109 @@ if($useLoginalias==1)
 echo "<th>".$_lang['stALIAS']."</th>";
 echo "</tr>";
 
+
+
 //$result=mysql_unbuffered_query($queryLoginsTraffic) or die (mysql_error());
 
-$pdfbody="";
 
 $result=mysql_query($queryLoginsTraffic) or die (mysql_error());
 
 $numrow=1;
 $totalmb=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
 
 if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+	$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-
 $totalmb=$totalmb+$line[1];
 
-$pdfbody[$numrow]="".$numrow.";".$line[0].";".$line[1]."";
-
+echo "<tr>
+	<td>".$numrow."</td>
+	<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>
+	<td>".$line[1]."</td>";
 if($useLoginalias==1)
-echo "<td>".$line[3]."</td>";
+echo 	"<td>".$line[3]."</td>";
 echo "</tr>";
+
+@$pdfbody[$numrow]=$line[0].";".(round($line[1],2));
+
 $numrow++;
 
-
     }
+
 echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>";
+	<td>&nbsp;</td>
+	<td><b>".$_lang['stTOTAL']."</b></td>
+	<td><b>".$totalmb."</b></td>";
 if($useLoginalias==1)
-echo "<td>&nbsp;</td>";
-echo "</tr>";
-echo "</tbody></table>";
+echo 	"<td>&nbsp;</td>";
+echo "</tr>
 
-///PDF generate
+</tbody>
+</table>";
 
-$iii=0;
-$jjj=0;
-$kkk=0;
-$startpos=0;
-$pdfdata=0;
-$pages=round($numrow/30)+1;
+//PDF
 
-while($kkk<$pages)
+// create new PDF document
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+// set margins
+$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+// set font
+$pdf->SetFont('dejavusans', '', 10);
+
+// add a page
+$pdf->AddPage();
+
+$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
+if($useLoginalias==1)
 {
-while($jjj<3)
-{
-
-
-while($iii<30)
-
-{
-
-	if($jjj==0 && $iii==0)
-		$pdfdata=$pdfdata."0 -20 TD [()]TJ
-";
-	if($jjj==1 && $iii==0)
-		$pdfdata=$pdfdata."50 600 Td [()]TJ
-";
-	if($jjj==2 && $iii==0)
-		$pdfdata=$pdfdata."250 600 Td [()]TJ
-";
-
-$cellvalue=explode(";",$pdfbody[$iii+$startpos]);
-$pdfdata=$pdfdata."T* [(".$cellvalue[$jjj].")]TJ
-";
-$iii++;
+$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(80, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(50, 5, '', '', "<b>".$_lang['stALIAS']."</b>", 1, 0, 0, true, 'C', true);
 }
-$iii=0;
-$jjj++;
-
-}
-$startpos=$startpos+30;
-@$epdfdata[$kkk]=$pdfdata;
-$pdfdata="";
-$jjj=0;
-$kkk++;
-}
-
-///generate page number
-$ttt=0;
-$pageObject="";
-while($ttt<$pages)
-{
-$pageObject=$pageObject."".(100+$ttt)." 0 R ";
-$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> 
-endobj 
-";
-
-$ttt++;
-}
-
-$iii=0;
-
-while($iii<29){
-$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
-";
-$iii++;
-}
-$iii=0;
-#lastpage lines
-while($iii<($numrow-($pages-1)*30)){
-$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
-";
-$iii++;
-}
-
-
-$ttt=0;
-
-$repheader=preg_replace('~<h2\b[^>]*+>|</h2\b[^>]*+>~', '', $repheader);
-
-$pdfRepHeader=$repheader;
-
-$data = "%PDF-1.3
-1 0 obj <</Type /Catalog /Pages 2 0 R>>
-endobj
-2 0 obj <</Type /Pages /Kids [".$pageObject."] /Count ".$pages.">>
-endobj
-3 0 obj<</Font <</F1 4 0 R>>>>
-endobj
-4 0 obj<</Type /Font
-/BaseFont /Arial
-/Subtype /TrueType
-/Encoding /WinAnsiEncoding
->>
-endobj";
-
-while($ttt<$pages)
-{
-$data=$data."
-
-".(10+$ttt)." 0 obj
-<<  /Length  568  >>
-stream
-
-BT
-/F1  18  Tf
-0 Tc
-0 Tw
-";
-$data=$data."0  0 TD [ () ]  TJ
-";
-if($ttt==0)
-$data=$data."50  720 TD [ (".$pdfRepHeader.") ]  TJ
-";
 else
-$data=$data."50  700 TD [ () ]  TJ
-";
+{
+$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(130, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
+}
+$pdf->Ln(5);
 
-$data=$data."/F1  12  Tf
-";
+$i=1;
 
-$data=$data.$epdfdata[$ttt];
-
-$data=$data."
-ET
-";
-if($ttt<($pages-1))
-$data=$data.$pageHorLines;
+while ($i<$numrow) {
+$row=explode(';',$pdfbody[$i]);
+if($useLoginalias==1)
+{
+$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(80, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
+$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(50, 5, '', '', $row[2], 1, 0, 0, true, 'L', true);
+}
 else
-$data=$data.$pageLastHorLines;
-
-$data=$data."
-endstream
-endobj
-";
-
-$ttt++;
+{
+$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(130, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
+$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
 }
 
-$data=$data.$pageAnnot."
+$pdf->Ln(5);
+if(($i % 46) ==0)
+$pdf->AddPage();
+$i++;
+}
 
-trailer <</Size 9/Root 1 0 R>>
-%%EOF";
+//Close and output PDF document
+$pdf->Output("../output/report.pdf", 'F');
 
 
-fwrite($fileHandle, $data);
- 
-fclose($fileHandle); // close the file
-
-/// PDF generate end
+//PDF END
 
 
 //mysql_free_result($result);
@@ -3564,196 +3479,106 @@ if($id==2)
 echo "
 <table id=report_table_id_2 class=sortable>
 <tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
+	<th class=unsortable>#</th>
+	<th>".$_lang['stIPADDRESS']."</th>
+	<th>".$_lang['stMEGABYTES']."</th>
 ";
 if($useIpaddressalias==1)
-echo "<th>".$_lang['stALIAS']."</th>";
+echo 	"<th>".$_lang['stALIAS']."</th>";
 echo "</tr>";
 
 $result=mysql_query($queryIpaddressTraffic) or die (mysql_error());
 $numrow=1;
 $totalmb=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
+
 $line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
 
-$pdfbody[$numrow]="".$numrow.";".$line[0].";".$line[1]."";
+echo "<tr>";
+echo	"<td>".$numrow."</td>";
+echo	"<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
+echo 	"<td>".$line[1]."</td>";
 
-$totalmb=$totalmb+$line[1];
+
 if($useIpaddressalias==1)
-echo "<td>".$line[3]."</td>";
+echo	"<td>".$line[3]."</td>";
 echo "</tr>";
 
+@$pdfbody[$numrow]=$line[0].";".(round($line[1],2)).";".$line[3];
+$totalmb=$totalmb+$line[1];
 $numrow++;
 }
 echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>";
+	<td>&nbsp;</td>
+	<td><b>".$_lang['stTOTAL']."</b></td>
+	<td><b>".$totalmb."</b></td>";
 if($useIpaddressalias==1)
-echo "<td>&nbsp;</td>";
+echo	"<td>&nbsp;</td>";
 echo "</tr>";
 echo "</table>";
 
 
-///PDF generate
+//PDF
 
-$iii=0;
-$jjj=0;
-$kkk=0;
-$startpos=0;
-$pdfdata=0;
-$pages=round($numrow/30)+1;
+// create new PDF document
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
-while($kkk<$pages)
+// set margins
+$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+// set font
+$pdf->SetFont('dejavusans', '', 10);
+
+// add a page
+$pdf->AddPage();
+
+$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
+if($useIpaddressalias==1)
 {
-while($jjj<3)
-{
-
-
-while($iii<30)
-
-{
-
-	if($jjj==0 && $iii==0)
-		$pdfdata=$pdfdata."0 -20 TD [()]TJ
-";
-	if($jjj==1 && $iii==0)
-		$pdfdata=$pdfdata."50 600 Td [()]TJ
-";
-	if($jjj==2 && $iii==0)
-		$pdfdata=$pdfdata."250 600 Td [()]TJ
-";
-
-$cellvalue=explode(";",$pdfbody[$iii+$startpos]);
-$pdfdata=$pdfdata."T* [(".$cellvalue[$jjj].")]TJ
-";
-$iii++;
+$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(80, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(50, 5, '', '', "<b>".$_lang['stALIAS']."</b>", 1, 0, 0, true, 'C', true);
 }
-$iii=0;
-$jjj++;
-
-}
-$startpos=$startpos+30;
-@$epdfdata[$kkk]=$pdfdata;
-$pdfdata="";
-$jjj=0;
-$kkk++;
-}
-
-///generate page number
-$ttt=0;
-$pageObject="";
-while($ttt<$pages)
-{
-$pageObject=$pageObject."".(100+$ttt)." 0 R ";
-$pageAnnot=$pageAnnot."".(100+$ttt)." 0 obj << /Type /Page /Parent 2 0 R /Resources 3 0 R /MediaBox [0 0 500 800] /Contents ".(10+$ttt)." 0 R>> 
-endobj 
-";
-
-$ttt++;
-}
-
-$iii=0;
-
-while($iii<29){
-$pageHorLines=$pageHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
-";
-$iii++;
-}
-$iii=0;
-#lastpage lines
-while($iii<($numrow-($pages-1)*30)){
-$pageLastHorLines=$pageLastHorLines."0 0 0 rg 45 ".(655-$iii*20)." 430 0.5 re f
-";
-$iii++;
-}
-
-
-$ttt=0;
-
-$repheader=preg_replace('~<h2\b[^>]*+>|</h2\b[^>]*+>~', '', $repheader);
-
-$pdfRepHeader=$repheader;
-
-$data = "%PDF-1.3
-1 0 obj <</Type /Catalog /Pages 2 0 R>>
-endobj
-2 0 obj <</Type /Pages /Kids [".$pageObject."] /Count ".$pages.">>
-endobj
-3 0 obj<</Font <</F1 4 0 R>>>>
-endobj
-4 0 obj<</Type /Font
-/BaseFont /Arial
-/Subtype /TrueType
-/Encoding /WinAnsiEncoding
->>
-endobj";
-
-while($ttt<$pages)
-{
-$data=$data."
-
-".(10+$ttt)." 0 obj
-<<  /Length  568  >>
-stream
-
-BT
-/F1  18  Tf
-0 Tc
-0 Tw
-";
-$data=$data."0  0 TD [ () ]  TJ
-";
-if($ttt==0)
-$data=$data."50  720 TD [ (".$pdfRepHeader.") ]  TJ
-";
 else
-$data=$data."50  700 TD [ () ]  TJ
-";
+{
+$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(130, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
+}
+$pdf->Ln(5);
 
-$data=$data."/F1  12  Tf
-";
+$i=1;
 
-$data=$data.$epdfdata[$ttt];
-
-$data=$data."
-ET
-";
-if($ttt<($pages-1))
-$data=$data.$pageHorLines;
+while ($i<$numrow) {
+$row=explode(';',$pdfbody[$i]);
+if($useIpaddressalias==1)
+{
+$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(80, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
+$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(50, 5, '', '', $row[2], 1, 0, 0, true, 'L', true);
+}
 else
-$data=$data.$pageLastHorLines;
-
-$data=$data."
-endstream
-endobj
-";
-
-$ttt++;
+{
+$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(130, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
+$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
 }
 
-$data=$data.$pageAnnot."
-trailer <</Size 9/Root 1 0 R>>
-%%EOF";
+$pdf->Ln(5);
+if(($i % 46) ==0)
+$pdf->AddPage();
+$i++;
+}
+
+//Close and output PDF document
+$pdf->Output("../output/report.pdf", 'F');
 
 
-fwrite($fileHandle, $data);
- 
-fclose($fileHandle); // close the file
-
-/// PDF generate end
+//PDF END
 
 
 
@@ -7120,6 +6945,7 @@ echo "
 
 $result=mysql_query($queryTrafficByHoursLogins) or die (mysql_error());
 
+
 $HourCounter=0;
 $totalmb=0;
 $curLogin=0;
@@ -7138,19 +6964,29 @@ $i++;
 }
 
 
-	
-	while($line = mysql_fetch_array($result,MYSQL_NUM)){
-		$curLogin=$line[0];
-		if($curLogin==$prevLogin or $prevLogin==0){
-			$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
-			$prevLogin=$curLogin;
-			$prevLoginName=$line[1];
-		}
-		else{
+@$arrayLine="";
+$j=0;
+
+while($line = mysql_fetch_array($result,MYSQL_NUM)){
+@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
+$j++;
+}
+
+$k=0;
+
+while($k<$j)
+{
+$line=explode(';',$arrayLine[$k]);
+$line1=explode(';',$arrayLine[$k+1]);
+if($line[1]==$line1[1])
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+else
+{
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
-			echo "<td>$numrow</td>";	
-			echo "<td>$prevLoginName</td>";
-			$i=0;	
+			echo "<td>".$numrow."</td>";	
+			echo "<td>".$line[1]."</td>";
+			$i=0;
 			$totalmb=0;
 			while($i<24) {
 				echo "<td>$arrHourTraffic[$i]</td>";
@@ -7159,35 +6995,13 @@ $i++;
 				$arrHourTraffic[$i]=0;
 				$i++;
 			}
-		$prevLogin=$curLogin;
-		$prevLoginName=$line[1];
-		$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
 		echo "<td>$totalmb</td>";
 		echo "</tr>";
-		$numrow++;
-		}
+$numrow++;
+
 }
 
-if($numrow==1){
-echo "<tr>";
-echo "<td>$numrow</td>";	
-echo "<td>$prevLoginName</td>";
-$i=0;	
-$totalmb=0;
-while($i<24) {
-	echo "<td>$arrHourTraffic[$i]</td>";
-	$totalmb=$totalmb+$arrHourTraffic[$i];
-	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-	$arrHourTraffic[$i]=0;
-	$i++;
-	}
-
-$prevLogin=$curLogin;
-$prevLoginName=$line[1];
-$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
+$k++;
 }
 
 $i=0;
@@ -7323,20 +7137,29 @@ $hourTotalmb[$i]=0;
 $i++;
 }
 
+@$arrayLine="";
+$j=0;
 
-	
-	while($line = mysql_fetch_array($result,MYSQL_NUM)){
-		$curLogin=$line[0];
-		if($curLogin==$prevLogin or $prevLogin==0){
-			$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
-			$prevLogin=$curLogin;
-			$prevLoginName=$line[1];
-		}
-		else{
+while($line = mysql_fetch_array($result,MYSQL_NUM)){
+@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
+$j++;
+}
+
+$k=0;
+
+while($k<$j)
+{
+$line=explode(';',$arrayLine[$k]);
+$line1=explode(';',$arrayLine[$k+1]);
+if($line[1]==$line1[1])
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+else
+{
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
-			echo "<td>$numrow</td>";	
-			echo "<td>$prevLoginName</td>";
-			$i=0;	
+			echo "<td>".$numrow."</td>";	
+			echo "<td>".$line[1]."</td>";
+			$i=0;
 			$totalmb=0;
 			while($i<24) {
 				echo "<td>$arrHourTraffic[$i]</td>";
@@ -7345,35 +7168,13 @@ $i++;
 				$arrHourTraffic[$i]=0;
 				$i++;
 			}
-		$prevLogin=$curLogin;
-		$prevLoginName=$line[1];
-		$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
 		echo "<td>$totalmb</td>";
 		echo "</tr>";
-		$numrow++;
-		}
+$numrow++;
+
 }
 
-if($numrow==1){
-echo "<tr>";
-echo "<td>$numrow</td>";	
-echo "<td>$prevLoginName</td>";
-$i=0;	
-$totalmb=0;
-while($i<24) {
-	echo "<td>$arrHourTraffic[$i]</td>";
-	$totalmb=$totalmb+$arrHourTraffic[$i];
-	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-	$arrHourTraffic[$i]=0;
-	$i++;
-	}
-
-$prevLogin=$curLogin;
-$prevLoginName=$line[1];
-$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
+$k++;
 }
 
 $i=0;
@@ -7560,22 +7361,29 @@ $hourTotalmb[$i]=0;
 $i++;
 }
 
+@$arrayLine="";
+$j=0;
 
-	
-	while($line = mysql_fetch_array($result,MYSQL_NUM)){
+while($line = mysql_fetch_array($result,MYSQL_NUM)){
+@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
+$j++;
+}
 
-		$curLogin=$line[0];
-		if($prevLogin==$curLogin or $prevLogin==0){
-			$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
-			$prevLogin=$curLogin;
-			$prevLoginName=$line[1];
+$k=0;
 
-		}
-		else{
+while($k<$j)
+{
+$line=explode(';',$arrayLine[$k]);
+$line1=explode(';',$arrayLine[$k+1]);
+if($line[1]==$line1[1])
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+else
+{
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
-			echo "<td>$numrow</td>";	
-			echo "<td>$prevLoginName</td>";
-			$i=0;	
+			echo "<td>".$numrow."</td>";	
+			echo "<td>".$line[1]."</td>";
+			$i=0;
 			$totalmb=0;
 			while($i<24) {
 				echo "<td>$arrHourTraffic[$i]</td>";
@@ -7583,37 +7391,14 @@ $i++;
 				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
 				$arrHourTraffic[$i]=0;
 				$i++;
-
 			}
-		$prevLogin=$curLogin;
-		$prevLoginName=$line[1];
-		$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
 		echo "<td>$totalmb</td>";
 		echo "</tr>";
-		$numrow++;
-		}
+$numrow++;
+
 }
 
-if($numrow==1){
-echo "<tr>";
-echo "<td>$numrow</td>";	
-echo "<td>$prevLoginName</td>";
-$i=0;	
-$totalmb=0;
-while($i<24) {
-	echo "<td>$arrHourTraffic[$i]</td>";
-	$totalmb=$totalmb+$arrHourTraffic[$i];
-	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-	$arrHourTraffic[$i]=0;
-	$i++;
-	}
-
-$prevLogin=$curLogin;
-$prevLoginName=$line[1];
-$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
+$k++;
 }
 
 $i=0;
@@ -7749,20 +7534,29 @@ $hourTotalmb[$i]=0;
 $i++;
 }
 
+@$arrayLine="";
+$j=0;
 
-	
-	while($line = mysql_fetch_array($result,MYSQL_NUM)){
-		$curLogin=$line[0];
-		if($curLogin==$prevLogin or $prevLogin==0){
-			$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
-			$prevLogin=$curLogin;
-			$prevLoginName=$line[1];
-		}
-		else{
+while($line = mysql_fetch_array($result,MYSQL_NUM)){
+@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
+$j++;
+}
+
+$k=0;
+
+while($k<$j)
+{
+$line=explode(';',$arrayLine[$k]);
+$line1=explode(';',$arrayLine[$k+1]);
+if($line[1]==$line1[1])
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+else
+{
+$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
-			echo "<td>$numrow</td>";	
-			echo "<td>$prevLoginName</td>";
-			$i=0;	
+			echo "<td>".$numrow."</td>";	
+			echo "<td>".$line[1]."</td>";
+			$i=0;
 			$totalmb=0;
 			while($i<24) {
 				echo "<td>$arrHourTraffic[$i]</td>";
@@ -7771,35 +7565,13 @@ $i++;
 				$arrHourTraffic[$i]=0;
 				$i++;
 			}
-		$prevLogin=$curLogin;
-		$prevLoginName=$line[1];
-		$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
 		echo "<td>$totalmb</td>";
 		echo "</tr>";
-		$numrow++;
-		}
+$numrow++;
+
 }
 
-if($numrow==1){
-echo "<tr>";
-echo "<td>$numrow</td>";	
-echo "<td>$prevLoginName</td>";
-$i=0;	
-$totalmb=0;
-while($i<24) {
-	echo "<td>$arrHourTraffic[$i]</td>";
-	$totalmb=$totalmb+$arrHourTraffic[$i];
-	$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-	$arrHourTraffic[$i]=0;
-	$i++;
-	}
-
-$prevLogin=$curLogin;
-$prevLoginName=$line[1];
-$arrHourTraffic[$line[3]]=round($line[2]/(1024*1024),2);
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
+$k++;
 }
 
 
