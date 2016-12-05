@@ -6985,7 +6985,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td>".$line[1]."</td>";
+			echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
@@ -7158,7 +7158,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td>".$line[1]."</td>";
+			echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
@@ -7382,7 +7382,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td>".$line[1]."</td>";
+			echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
@@ -7555,7 +7555,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td>".$line[1]."</td>";
+			echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
