@@ -189,7 +189,8 @@ $cmd.="\r\n";
 //echo $cmd;
 
  $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
-  fwrite($fp, $cmd); 
+if($fp) {
+ fwrite($fp, $cmd); 
 $count=0;
 #если будет ошибка при получении данных, установить в 1.
 $errCheck=0;
@@ -200,13 +201,12 @@ $errCheck=0;
 $tmp=fgets($fp,2048);
 
 
-if((trim($tmp)!="HTTP/1.0 200 OK")&&($count==0)){
+if(preg_match("/HTTP/1.0 200 OK/",$tmp)){
 echo "Error: No connection to Squid";
 $errCheck=1;
 break;
 }
 
-#print $tmp;
 preg_match("/(peer|remote):(.+)/",$tmp,$match);
 if(($match[2] != "")&&($ipaddress=="")){
 $ipaddress=$match[2];
@@ -347,17 +347,11 @@ $countValues++;
 //pChart Graph 
  // Dataset definition 
  $DataSet = new pData;
-# $DataSet->AddPoint(array(1,4,3,4,3,3,2,1,0,7,4,3,2,3,3,5,1,0,7),"Serie1");
  $DataSet->AddPoint($arrValues,"Serie1");
-# $DataSet->AddPoint(array("00:00-01:00","01:00-02:00","02:00-03:00","00:03-04:00","04:00-05:00","05:00-06:00","06:00-07:00","08:00-09:00","10:00-11:00","11:00-12:00","12:00-13:00","13:00-14:00","14:00-15:00","15:00-16:00","16:00-17:00","17:00-18:00","18:00-19:00","19:00-20:00","20:00-21:00","21:00-22:00","22:00-23:00","23:00-24:00"),"Serie2");
 
-# $DataSet->AddPoint(array(1,4,2,6,2,3,0,1,5,1,2,4,5,2,1,0,6,4,2),"Serie2");
-#$DataSet->AddPoint(array(1,2,3),"Serie5");
-  
 $DataSet->AddAllSeries();
 $DataSet->SetAbsciseLabelSerie();
  $DataSet->SetSerieName("Traffic","Serie1");
-# $DataSet->SetSerieName("February","Serie2");
 
  // Initialise the graph
  $Test = new pChart(700,230);
@@ -368,7 +362,6 @@ $DataSet->SetAbsciseLabelSerie();
  $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
  $Test->drawGraphArea(255,255,255,TRUE);
  $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
-# $Test->drawGrid(4,TRUE,230,230,230,50);
 
  // Draw the 0 line
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
@@ -381,13 +374,17 @@ $DataSet->SetAbsciseLabelSerie();
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
  $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
-# $Test->drawTitle(50,22,"Example 2",50,50,50,585);
  $Test->Render("../lib/pChart/pictures/trend".$start.".png");
 
 echo "<img src='../lib/pChart/pictures/trend".$start.".png' alt='Image'>";
 
 ///pChart Graph END
 } ///if no error. errCheck=0
+
+} // if(fp)
+
+else
+echo "Error: No connection to Squid. Not open listening port";
 
 }
 
