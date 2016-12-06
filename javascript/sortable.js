@@ -13,6 +13,13 @@ var image_up = "arrow-up.gif";
 var image_down = "arrow-down.gif";
 var image_none = "arrow-none.gif";
 
+/* some fix */
+var s=window.location.pathname;
+var page = s.split("/").pop();
+if(page=="right.php")
+image_path = "img/";
+
+
 /* Don't change anything below this unless you know what you're doing */
 addEvent(window, "load", sortables_init);
 
