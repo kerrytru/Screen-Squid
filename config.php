@@ -68,13 +68,6 @@ $goodSites="";
 #Pokazivat v kratkoy statistike, statistiku po objectam. Na bolshih viborkah, tormozit otobrazhenie
 $enableTrafficObjectsInStat=0;
 
-#================Online reports
-# Подключение к Squid
-$squidhost = "localhost";
-$squidport = 3128;
-$cachemgr_passwd="";
-#==========================================================
-
 #Через сколько секунд обновлять страницу онлайна
 $refreshPeriod=5;
 #==============================
