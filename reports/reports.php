@@ -1,5 +1,5 @@
 <?php
-#build 20161118
+#build 20161208
 ?>
 
 <html>
@@ -3421,7 +3421,7 @@ $pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
 if($useLoginalias==1)
 {
 $pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(80, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(80, 5, '', '', "<b>".$_lang['stLOGIN']."</b>", 1, 0, 0, true, 'C', true);
 $pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
 $pdf->writeHTMLCell(50, 5, '', '', "<b>".$_lang['stALIAS']."</b>", 1, 0, 0, true, 'C', true);
 }
