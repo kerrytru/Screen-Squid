@@ -1,5 +1,5 @@
 <?php
-#build 20161208
+#build 20161214
 ?>
 
 <html>
@@ -74,51 +74,99 @@ function LeftRightDateSwitch(idReport, dom,lr)
 function FastDateSwitch(idReport, dom)
 {
   if(window.document.fastdateswitch_form.date_field.value=='')
-    parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&login='+window.document.fastdateswitch_form.login_field_hidden.value+'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value+'&ip='+window.document.fastdateswitch_form.ip_field_hidden.value+'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value+'&site='+window.document.fastdateswitch_form.site_field_hidden.value+'&group='+window.document.fastdateswitch_form.group_field_hidden.value+'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value+'&typeid='+window.document.fastdateswitch_form.typeid_field_hidden.value
+    parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
++'&date='+window.document.fastdateswitch_form.date_field_hidden.value
++'&dom='+dom
++'&login='+window.document.fastdateswitch_form.login_field_hidden.value
++'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
++'&ip='+window.document.fastdateswitch_form.ip_field_hidden.value
++'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
++'&site='+window.document.fastdateswitch_form.site_field_hidden.value
++'&group='+window.document.fastdateswitch_form.group_field_hidden.value
++'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value
++'&typeid='+window.document.fastdateswitch_form.typeid_field_hidden.value
 +'&httpstatus='+window.document.fastdateswitch_form.httpstatus_field_hidden.value
 +'&httpname='+window.document.fastdateswitch_form.httpname_field_hidden.value
 +'&loiid='+window.document.fastdateswitch_form.loiid_field_hidden.value
 +'&loiname='+window.document.fastdateswitch_form.loiname_field_hidden.value;
   else
-    parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field.value+'&dom='+dom+'&login='+window.document.fastdateswitch_form.login_field_hidden.value+'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value+'&ip='+window.document.fastdateswitch_form.ip_field_hidden.value+'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value+'&site='+window.document.fastdateswitch_form.site_field_hidden.value+'&group='+window.document.fastdateswitch_form.group_field_hidden.value+'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value+'&typeid='+window.document.fastdateswitch_form.typeid_field_hidden.value
+    parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
++'&date='+window.document.fastdateswitch_form.date_field.value
++'&dom='+dom
++'&login='+window.document.fastdateswitch_form.login_field_hidden.value
++'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
++'&ip='+window.document.fastdateswitch_form.ip_field_hidden.value
++'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
++'&site='+window.document.fastdateswitch_form.site_field_hidden.value
++'&group='+window.document.fastdateswitch_form.group_field_hidden.value
++'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value
++'&typeid='+window.document.fastdateswitch_form.typeid_field_hidden.value
 +'&httpstatus='+window.document.fastdateswitch_form.httpstatus_field_hidden.value
 +'&httpname='+window.document.fastdateswitch_form.httpname_field_hidden.value
 +'&loiid='+window.document.fastdateswitch_form.loiid_field_hidden.value
 +'&loiname='+window.document.fastdateswitch_form.loiname_field_hidden.value;
 }
 
-function PartlyReportsLogin(idReport, dom, login,loginname,site)
+/*
+JS function to open reports page with some additional parameters.
+idReport - id of report
+dom - day or month report
+id - id login or id ipaddress or id group
+idname - visible name login(Yoda) or name ipaddress(172.16.120.33) or name group(StarWars club)
+idsign - login (0) or ipaddress (1) or group login (2) or group ipaddress (4) or httpstatus id >4
+par1 - sitename if report need it or httpstatus name
+
+
+*/
+function GoPartlyReports(idReport, dom, id,idname,idsign,par1)
 {
-  parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&login='+login+'&loginname='+loginname+'&site='+site;
-}
+	if(idsign==0)
+	{
+		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+
+		'&date='+window.document.fastdateswitch_form.date_field_hidden.value
+		+'&dom='+dom
+		+'&login='+id
+		+'&loginname='+idname
+		+'&site='+par1;
+	}
+	if(idsign==1)
+	{
+		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
+		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
+		+'&dom='+dom
+		+'&ip='+id
+		+'&ipname='+idname
+		+'&site='+par1;
+	}
+	if(idsign==3)
+	{
+		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
+		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
+		+'&dom='+dom
+		+'&group='+id
+		+'&groupname='+idname
+		+'&typeid=0';
+	}
+	if(idsign==4)
+	{
+		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
+		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
+		+'&dom='+dom
+		+'&group='+id
+		+'&groupname='+idname
+		+'&typeid=1';
+	}
+	if(idsign>4)
+	{
+		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
+		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
+		+'&dom='+dom
+		+'&httpstatus='+id
+		+'&httpname='+idname
+		+'&loiid='+idsign
+		+'&loiname='+par1;
+	}
 
-function PartlyReportsIpaddress(idReport, dom, ip,ipname,site)
-{
-  parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&ip='+ip+'&ipname='+ipname+'&site='+site;
-}
-
-function GoGroupReportsLogin(idReport, dom, group,groupname)
-{
-  parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&group='+group+'&groupname='+groupname+'&typeid=0';
-
-}
-
-function GoGroupReportsIpaddress(idReport, dom, group,groupname)
-{
-  parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&group='+group+'&groupname='+groupname+'&typeid=1';
-
-
-}
-
-function GoHttpStatusReport(idReport, dom, httpstatus,httpname,loiid,loiname)
-{
-  parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
-+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
-+'&dom='+dom
-+'&httpstatus='+httpstatus
-+'&httpname='+httpname
-+'&loiid='+loiid
-+'&loiname='+loiname;
 }
 
 
@@ -3378,7 +3426,7 @@ $totalmb=$totalmb+$line[1];
 
 echo "<tr>
 	<td>".$numrow."</td>
-	<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>
+	<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>
 	<td>".$line[1]."</td>";
 if($useLoginalias==1)
 echo 	"<td>".$line[3]."</td>";
@@ -3496,7 +3544,7 @@ $line[1]=$line[1] / 1000000;
 
 echo "<tr>";
 echo	"<td>".$numrow."</td>";
-echo	"<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
+echo	"<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</a></td>";
 echo 	"<td>".$line[1]."</td>";
 
 
@@ -3635,12 +3683,10 @@ $line[1]=$line[1] / 1000000;
 $line[1]=sprintf("%f",$line[1]); //disable scientific format e.g. 5E-10
 echo "<td>".$line[1]."</td>";
 
-#В поле логин/ip адрес, воткнул stn(1,2) чтобы разбирать в частичных отчетах.
-#вроде уже ненужно. В релизе убрать
-echo "<td><a href=javascript:PartlyReportsLogin(18,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(19,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(18,'".$dayormonth."','".$line[3]."','','0','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','".$line[3]."','','1','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 $totalmb=$totalmb+$line[1];
 
-echo "<td><a href=javascript:PartlyReportsLogin(53,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(54,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(53,'".$dayormonth."','".$line[3]."','','0','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','".$line[3]."','','1','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 $totalmb=$totalmb+$line[1];
 
 echo "<td>".$line[2]."</td>";
@@ -3713,9 +3759,9 @@ $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 #В поле логин/ip адрес, воткнул stn(1,2) чтобы разбирать в частичных отчетах
 #Вроде уже не нужно. В релизе убрать.
-echo "<td><a href=javascript:PartlyReportsLogin(18,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(19,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(18,'".$dayormonth."','".$line[3]."','','0','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','".$line[3]."','','1','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 
-echo "<td><a href=javascript:PartlyReportsLogin(53,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(54,'".$dayormonth."','".$line[3]."','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(53,'".$dayormonth."','".$line[3]."','','0','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','".$line[3]."','','1','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 
 $totalmb=$totalmb+$line[1];
 echo "</tr>";
@@ -3763,7 +3809,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -3807,7 +3853,7 @@ $totalmb=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -3938,7 +3984,7 @@ if($HourCounter<$line[0])
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
 echo "<td>0</td>";
-echo "<td><a href=javascript:PartlyReportsLogin(41,'".$dayormonth."','1','','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(42,'".$dayormonth."','1','','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
 echo "</tr>";
 $arrHourMb[$HourCounter]=0;
 }
@@ -3952,7 +3998,7 @@ echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
-echo "<td><a href=javascript:PartlyReportsLogin(41,'".$dayormonth."','1','','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(42,'".$dayormonth."','1','','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
 echo "</tr>";
 $arrHourMb[$HourCounter]=$line[1];
 
@@ -3965,7 +4011,7 @@ while($HourCounter<24)
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
 echo "<td>0</td>";
-echo "<td><a href=javascript:PartlyReportsLogin(41,'".$dayormonth."','1','','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(42,'".$dayormonth."','1','','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
 echo "</tr>";
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
@@ -4426,7 +4472,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</a></td>";
 $trafficmb=$line[1];
 echo "<td>".$trafficmb."</td>";
 }
@@ -4554,7 +4600,7 @@ if($line[3]==1)
 {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
 $trafficmb=$line[1];
 echo "<td>".$trafficmb."</td>";
 }
@@ -4638,7 +4684,7 @@ $totalmb=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "<td>".gethostbyaddr($line[0])."</td>";
@@ -4708,7 +4754,7 @@ echo "<td>".$line[1]."</td>";
 $line[2]=$line[2] / 1000000;
 echo "<td>".$line[2]."</td>";
 # в поле логин/ipaddress javascript функций = 1 - это костыль для обработки имен сайтов по 1 варианту
-echo "<td><a href=javascript:PartlyReportsLogin(18,'".$dayormonth."','1','','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:PartlyReportsIpaddress(19,'".$dayormonth."','1','','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(18,'".$dayormonth."','1','','0','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','1','','1','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 
 
 echo "</tr>";
@@ -4764,7 +4810,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[3]."','".$line[0]."','')>".$line[0]."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[3]."','".$line[0]."','0','')>".$line[0]."</a></td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -4818,7 +4864,7 @@ $totalmb=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[3]."','".$line[0]."','')>".$line[0]."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[3]."','".$line[0]."','1','')>".$line[0]."</a></td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 if($useIpaddressalias==1)
@@ -4878,8 +4924,8 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[4]."','".$line[0]."','')>".$line[0]."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[5]."','".$line[1]."','')>".$line[1]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[4]."','".$line[0]."','0','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[5]."','".$line[1]."','1','')>".$line[1]."</td>";
 $line[2]=$line[2] / 1000000;
 echo "<td>".$line[2]."</td>";
 $totalmb=$totalmb+$line[2];
@@ -5067,9 +5113,9 @@ while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 if($line[3]==0)
-echo "<td><a href=\"javascript:GoGroupReportsLogin(25,'".$dayormonth."','".$line[2]."','".$line[0]."')\">".$line[0]."</td>";
+echo "<td><a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','".$line[2]."','".$line[0]."','3','')\">".$line[0]."</td>";
 if($line[3]==1)
-echo "<td><a href=\"javascript:GoGroupReportsIpaddress(25,'".$dayormonth."','".$line[2]."','".$line[0]."')\">".$line[0]."</td>";
+echo "<td><a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','".$line[2]."','".$line[0]."','4','')\">".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -5126,10 +5172,10 @@ if($typeid==0)
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>";
 }
 if($typeid==1)
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
 
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
@@ -5249,9 +5295,9 @@ if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
 if($typeid==0)
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</a></td>";
 if($typeid==1)
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</a></td>";
 
 if(($useLoginalias==1)&&($typeid==0))
 echo "<td>".$line[4]."</td>";
@@ -5480,8 +5526,8 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=\"javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[4]."','".$line[0]."','')\">".$line[0]."</td>";
-echo "<td><a href=\"javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[5]."','".$line[1]."','')\">".$line[1]."</td>";
+echo "<td><a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','".$line[4]."','".$line[0]."','0','')\">".$line[0]."</td>";
+echo "<td><a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','".$line[5]."','".$line[1]."','1','')\">".$line[1]."</td>";
 $line[2]=$line[2] / 1000000;
 echo "<td>".$line[2]."</td>";
 $totalmb=$totalmb+$line[2];
@@ -5531,7 +5577,7 @@ echo "<td>".$numrow."</td>";
 
 echo "<td>".$line[0]."</td>";
 echo "<td>".$line[1]."</td>";
-echo "<td><a href=javascript:GoHttpStatusReport(31,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoHttpStatusReport(32,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$_lang['stIPADDRESSES']."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(31,'".$dayormonth."','".$line[2]."','".$line[0]."','5','')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(32,'".$dayormonth."','".$line[2]."','".$line[0]."','5','')>".$_lang['stIPADDRESSES']."</a></td>";
 
 echo "</tr>";
 $numrow++;
@@ -5573,7 +5619,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:GoHttpStatusReport(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','".$line[2]."','".$line[0]."')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','".$line[2]."','".$line[0]."')>".$line[0]."</td>";
 echo "<td>".$line[1]."</td>";
 if($useLoginalias==1)
 echo "<td>".$line[3]."</td>";
@@ -5614,7 +5660,7 @@ while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 
-echo "<td><a href=javascript:GoHttpStatusReport(34,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','".$line[2]."','".$line[0]."')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(34,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','".$line[2]."','".$line[0]."')>".$line[0]."</td>";
 echo "<td>".$line[1]."</td>";
 if($useIpaddressalias==1)
 echo "<td>".$line[3]."</td>";
@@ -5727,7 +5773,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -5784,7 +5830,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -5840,8 +5886,8 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
-echo "<td><a href=javascript:PartlyReportsLogin(35,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[1]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(35,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[1]."</td>";
 
 if($useLoginalias==1)
 echo "<td>".$line[3]."</td>";
@@ -5887,8 +5933,8 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[0]."</td>";
-echo "<td><a href=javascript:PartlyReportsIpaddress(36,'".$dayormonth."','".$line[2]."','".$line[0]."','')>".$line[1]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
+echo "<td><a href=javascript:GoPartlyReports(36,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[1]."</td>";
 if($useIpaddressalias==1)
 echo "<td>".$line[3]."</td>";
 echo "</tr>";
@@ -6094,7 +6140,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsLogin(43,'".$dayormonth."','".$line[2]."','".$line[0]."','".$currenthour."')>".$line[0]."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(43,'".$dayormonth."','".$line[2]."','".$line[0]."','0','".$currenthour."')>".$line[0]."</a></td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -6152,7 +6198,7 @@ echo "<td>".$numrow."</td>";
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:PartlyReportsIpaddress(44,'".$dayormonth."','".$line[2]."','".$line[0]."','".$currenthour."')>".$line[0]."</a></td>";
+echo "<td><a href=javascript:GoPartlyReports(44,'".$dayormonth."','".$line[2]."','".$line[0]."','1','".$currenthour."')>".$line[0]."</a></td>";
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
@@ -6985,7 +7031,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
+			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
@@ -7158,7 +7204,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
+			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
@@ -7382,7 +7428,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:PartlyReportsLogin(8,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
+			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
@@ -7555,7 +7601,7 @@ else
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:PartlyReportsIpaddress(11,'".$dayormonth."','".$line[0]."','".$line[1]."','')>".$line[1]."</td>";
+			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
 			$i=0;
 			$totalmb=0;
 			while($i<24) {
