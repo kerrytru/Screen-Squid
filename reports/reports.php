@@ -1,5 +1,5 @@
 <?php
-#build 20161214
+#build 20161221
 ?>
 
 <html>
@@ -118,15 +118,16 @@ par1 - sitename if report need it or httpstatus name
 
 
 */
-function GoPartlyReports(idReport, dom, id,idname,idsign,par1)
+function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 {
+
 	if(idsign==0)
 	{
 		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+
 		'&date='+window.document.fastdateswitch_form.date_field_hidden.value
 		+'&dom='+dom
 		+'&login='+id
-		+'&loginname='+idname
+		+'&loginname='+idname;
 		+'&site='+par1;
 	}
 	if(idsign==1)
@@ -3386,134 +3387,35 @@ echo "</table>";
 
 /////////// LOGINS TRAFFIC REPORT
 
- 
-$pdfbody=""; 
+
 
 if($id==1)
 {
-echo "
-<table id=report_table_id_1 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>";
-if($useLoginalias==1)
-echo "<th>".$_lang['stALIAS']."</th>";
-echo "</tr>";
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
 
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
 
-
-//$result=mysql_unbuffered_query($queryLoginsTraffic) or die (mysql_error());
-
-
+$colh[0]=3+$useLoginalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryLoginsTraffic) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+$colr[2]="<td><a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0',0,'')\">line0</a></td>";
 
-if($enableUseiconv==1)
-	$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
 
-$line[1]=$line[1] / 1000000;
-$totalmb=$totalmb+$line[1];
-
-echo "<tr>
-	<td>".$numrow."</td>
-	<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>
-	<td>".$line[1]."</td>";
-if($useLoginalias==1)
-echo 	"<td>".$line[3]."</td>";
-echo "</tr>";
-
-@$pdfbody[$numrow]=$line[0].";".(round($line[1],2));
-
-$numrow++;
-
-    }
-
-echo "<tr class=sortbottom>
-	<td>&nbsp;</td>
-	<td><b>".$_lang['stTOTAL']."</b></td>
-	<td><b>".$totalmb."</b></td>";
-if($useLoginalias==1)
-echo 	"<td>&nbsp;</td>";
-echo "</tr>
-
-</tbody>
-</table>";
-
-//PDF
-
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-// set margins
-$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-
-// set font
-$pdf->SetFont('dejavusans', '', 10);
-
-// add a page
-$pdf->AddPage();
-
-$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
-if($useLoginalias==1)
-{
-$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(80, 5, '', '', "<b>".$_lang['stLOGIN']."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(50, 5, '', '', "<b>".$_lang['stALIAS']."</b>", 1, 0, 0, true, 'C', true);
-}
-else
-{
-$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(130, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
-}
-$pdf->Ln(5);
-
-$i=1;
-
-while ($i<$numrow) {
-$row=explode(';',$pdfbody[$i]);
-if($useLoginalias==1)
-{
-$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(80, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
-$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(50, 5, '', '', $row[2], 1, 0, 0, true, 'L', true);
-}
-else
-{
-$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(130, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
-$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
-}
-
-$pdf->Ln(5);
-if(($i % 46) ==0)
-$pdf->AddPage();
-$i++;
-}
-
-//Close and output PDF document
-$pdf->Output("../output/report.pdf", 'F');
-
-
-//PDF END
-
-
-//mysql_free_result($result);
-
+$makepdf=1;
 }
 
 /////////// LOGINS TRAFFIC REPORT END
@@ -3523,113 +3425,31 @@ $pdf->Output("../output/report.pdf", 'F');
 
 if($id==2)
 {
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stIPADDRESS'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
 
-echo "
-<table id=report_table_id_2 class=sortable>
-<tr>
-	<th class=unsortable>#</th>
-	<th>".$_lang['stIPADDRESS']."</th>
-	<th>".$_lang['stMEGABYTES']."</th>
-";
-if($useIpaddressalias==1)
-echo 	"<th>".$_lang['stALIAS']."</th>";
-echo "</tr>";
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
 
+$colh[0]=3+$useIpaddressalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryIpaddressTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 
-$line[1]=$line[1] / 1000000;
+$colr[2]="<td><a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0',1,'')\">line0</a></td>";
 
-echo "<tr>";
-echo	"<td>".$numrow."</td>";
-echo	"<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</a></td>";
-echo 	"<td>".$line[1]."</td>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
 
-
-if($useIpaddressalias==1)
-echo	"<td>".$line[3]."</td>";
-echo "</tr>";
-
-@$pdfbody[$numrow]=$line[0].";".(round($line[1],2)).";".$line[3];
-$totalmb=$totalmb+$line[1];
-$numrow++;
-}
-echo "<tr class=sortbottom>
-	<td>&nbsp;</td>
-	<td><b>".$_lang['stTOTAL']."</b></td>
-	<td><b>".$totalmb."</b></td>";
-if($useIpaddressalias==1)
-echo	"<td>&nbsp;</td>";
-echo "</tr>";
-echo "</table>";
-
-
-//PDF
-
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-// set margins
-$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-
-// set font
-$pdf->SetFont('dejavusans', '', 10);
-
-// add a page
-$pdf->AddPage();
-
-$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
-if($useIpaddressalias==1)
-{
-$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(80, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(50, 5, '', '', "<b>".$_lang['stALIAS']."</b>", 1, 0, 0, true, 'C', true);
-}
-else
-{
-$pdf->writeHTMLCell(25, 5, '', '', "<b>#</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(130, 5, '', '', "<b>".$_lang['stIPADDRESS']."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', "<b>".$_lang['stMEGABYTES']."</b>", 1, 0, 0, true, 'C', true);
-}
-$pdf->Ln(5);
-
-$i=1;
-
-while ($i<$numrow) {
-$row=explode(';',$pdfbody[$i]);
-if($useIpaddressalias==1)
-{
-$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(80, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
-$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(50, 5, '', '', $row[2], 1, 0, 0, true, 'L', true);
-}
-else
-{
-$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(130, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
-$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
-}
-
-$pdf->Ln(5);
-if(($i % 46) ==0)
-$pdf->AddPage();
-$i++;
-}
-
-//Close and output PDF document
-$pdf->Output("../output/report.pdf", 'F');
-
-
-//PDF END
-
-
-
+$makepdf=1;
 }
 
 /////////////// IPADDRESS TRAFFIC REPORT END
@@ -7643,6 +7463,157 @@ echo "</table>";
 /////////////// TRAFFIC BY HOURS IPADDRESS REPORT ONE SITE END
 
 
+/////universal table
+
+$numrow=1;
+$totalmb=0;
+
+//PARSE SQL
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$line[1]=$line[1] / 1000000;
+@$rows[$numrow]=implode(";;",$line);
+$numrow++;
+}
+
+///TABLE HEADER
+echo "<table id=report_table_id class=sortable>
+	<tr>";
+
+for($i=1;$i<=$colh[0];$i++)
+echo $colh[$i];
+echo "	</tr>";
+
+
+//TABLE BODY
+
+for($i=1;$i<$numrow;$i++) {
+$line=explode(';;',$rows[$i]);
+
+$totalmb=$totalmb+$line[1];
+
+echo "<tr>
+	<td>".$i."</td>";
+if(preg_match("/javascript/i", $colr[2])){
+$resultcolr=$colr[2];
+$resultcolr=preg_replace("/line2/i", $line[2], $resultcolr);
+$resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
+echo $resultcolr;
+}
+else
+echo "<td>".$line[0]."</td>";
+echo "	<td>".$line[1]."</td>";
+if(($useIpaddressalias==1 or $useLoginalias==1)and $colh[0]==4)
+echo 	"<td>".$line[3]."</td>";
+
+echo "</tr>";
+}
+
+///TABLE FOOTER
+
+echo "<tr class=sortbottom>";
+
+for($i=1;$i<=$colh[0];$i++){
+if (preg_match("/totalmb/i", $colf[$i])) {
+echo preg_replace("/totalmb/i", $totalmb, $colf[$i]);
+$colftext[$i]=$totalmb;
+}
+else
+echo $colf[$i];
+}
+
+echo "	</tr>";
+
+echo "</table>";
+
+///universal table end
+
+
+
+//// GENERATE PDF FILE
+
+if($makepdf==1)
+{
+//PDF
+
+// create new PDF document
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+// set margins
+$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+// set font
+$pdf->SetFont('dejavusans', '', 10);
+
+// add a page
+$pdf->AddPage();
+
+$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
+if(($useIpaddressalias==1 or $useLoginalias==1)and $colh[0]==4)
+{
+$pdf->writeHTMLCell(25, 5, '', '', "<b>".$colhtext[1]."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(80, 5, '', '', "<b>".$colhtext[2]."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', "<b>".$colhtext[3]."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(50, 5, '', '', "<b>".$colhtext[4]."</b>", 1, 0, 0, true, 'C', true);
+}
+else
+{
+$pdf->writeHTMLCell(25, 5, '', '', "<b>".$colhtext[1]."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(130, 5, '', '',"<b>".$colhtext[2]."</b>", 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', "<b>".$colhtext[3]."</b>", 1, 0, 0, true, 'C', true);
+}
+$pdf->Ln(5);
+
+$i=1;
+
+while ($i<$numrow) {
+$row=explode(';;',$rows[$i]);
+if(($useIpaddressalias==1 or $useLoginalias==1)and $colh[0]==4)
+{
+$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(80, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
+$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(50, 5, '', '', $row[2], 1, 0, 0, true, 'L', true);
+}
+else
+{
+$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
+$pdf->writeHTMLCell(130, 5, '', '', $row[0], 1, 0, 0, true, 'L', true);
+$pdf->writeHTMLCell(30, 5, '', '', $row[1], 1, 0, 0, true, 'R', true);
+}
+
+$pdf->Ln(5);
+if(($i % 46) ==0)
+$pdf->AddPage();
+$i++;
+}
+
+if(($useIpaddressalias==1 or $useLoginalias==1)and $colh[0]==4)
+{
+$pdf->writeHTMLCell(25, 5, '', '', $colftext[1], 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(80, 5, '', '', $colftext[2], 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(50, 5, '', '', $colftext[4], 1, 0, 0, true, 'C', true);
+}
+else
+{
+$pdf->writeHTMLCell(25, 5, '', '', $colftext[1], 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(130, 5, '', '', $colftext[2], 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'C', true);
+}
+
+//Close and output PDF document
+$pdf->Output("../output/report.pdf", 'F');
+
+
+//PDF END
+
+}
+
+/// GENERATE PDF FILE END
 
 $end=microtime(true);
 
@@ -7653,8 +7624,6 @@ echo "<br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)." ".$
 echo $_lang['stCREATORS'];
 
 ///mysql_disconnect();
-
-
 
 ?>
 
