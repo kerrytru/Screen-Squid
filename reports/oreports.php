@@ -1,10 +1,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../javascript/example.css"/>
 
 <?php
 
-#build 20151031
+#build 20161222
 
 include("../config.php");
 
@@ -31,7 +32,7 @@ else
 $id=0;
 
 
-if($id==1)
+if($id==1||$id==2)
 echo '<META HTTP-EQUIV="REFRESH" CONTENT="'.$refreshPeriod.'">'; ///обновление страницы в секундах
 
 echo "
@@ -62,6 +63,7 @@ parent.left.location.href='../left.php?id='+id;
 
 
 </script>
+<script type="text/javascript" src="../javascript/sortable.js"></script>
 
 
 
@@ -116,7 +118,7 @@ $db=$db[$srv];
 //querys for reports
 
 
-$queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,sum((sizeinbytes/1024)/seconds) as s from scsq_sqper_activerequests group by ipaddr;";
+$queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,sum((sizeinbytes/1024)/seconds) as s,username from scsq_sqper_activerequests group by ipaddr;";
 
 
 
@@ -168,6 +170,19 @@ echo "<h2>".$_lang['stACTIVEIPADDRESS']."</h2>";
 
 ///REPORTS HEADERS END
 
+#если тренды не открывали более 5 минут, таблица очищается
+$sqltext="select max(date) from scsq_sqper_trend10";
+$result=mysql_query($sqltext) or die (mysql_error());
+$linedate = mysql_fetch_array($result,MYSQL_NUM);
+$resdate=$nowtimestamp - $linedate[0];
+
+if($resdate>=60)
+{
+$sqltext="truncate scsq_sqper_trend10";
+$result=mysql_query($sqltext) or die (mysql_error());
+}
+
+
 
 /////////// ACTIVE USERS REPORT
 
@@ -211,8 +226,15 @@ preg_match("/(peer|remote):(.+)/",$tmp,$match);
 if(($match[2] != "")&&($ipaddress=="")){
 $ipaddress=$match[2];
 $ipaddress=trim($ipaddress);
-#preg_match("s/^\s+//",$ipaddress,$ipaddress);
 }
+
+preg_match("/username(.+)/",$tmp,$match);
+if(($match[1] != "")&&($username=="")){
+$username=$match[1];
+$username=trim($username);
+}
+else
+$username="";
 
 preg_match("/uri(.+)/",$tmp,$match);
 if(($match[1] != "")&&($site == "")){
@@ -240,19 +262,12 @@ $seconds=1;
 }
 
 
-#preg_match("/^(http:\/\/(www\.)?)?([\S]+)/i",$site,$match);
-
-
-#@matches=($site=~ /^(http:\/\/(www\.)?)?([\S]+)/i);
-
-	$sqltext="INSERT INTO scsq_sqper_activerequests (date,ipaddress,site,sizeinbytes,seconds) VALUES";
-	$sqltext=$sqltext."($nowtimestamp,'$ipaddress','$site','$size','$seconds')";
+	$sqltext="INSERT INTO scsq_sqper_activerequests (date,ipaddress,username,site,sizeinbytes,seconds) VALUES";
+	$sqltext=$sqltext."($nowtimestamp,'$ipaddress','$username','$site','$size','$seconds')";
 	$result=mysql_query($sqltext) or die (mysql_error());
 	$sqltext="";
 
-
-#print $ipaddress." ".$site." ".$size." ".$seconds;
-#printf (" %6.2f kb/sec\n",$speedres);
+$username="";
 $ipaddress="";
 $site="";
 $size="";
@@ -271,13 +286,16 @@ $result=mysql_query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from sc
 $lastUpdateDate = mysql_fetch_array($result,MYSQL_NUM);
 echo "
 <p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />
-<table id=report_table_id_1 class=sortable border=1>
+<table id=report_table_id_10 class=sortable>
 <tr>
     <th class=unsortable>
     #
     </th>
     <th>
     ".$_lang['stIPADDRESS']."
+    </th>
+    <th>
+    ".$_lang['stLOGIN']."
     </th>
     <th>
     ".$_lang['stSPEED']."
@@ -296,6 +314,7 @@ if($line[0]=='')
 echo "<td>::1</td>";
 else
 echo "<td>".$line[0]."</td>";
+echo "<td>".$line[2]."</td>"; //username
 $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
@@ -304,6 +323,7 @@ $totalspeed+=$line[1];
     }
 echo "<tr>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>".$_lang['stTOTAL']."</td>
 <td>".$totalspeed."</td>
 </tr>
@@ -311,7 +331,7 @@ echo "<tr>
 
 echo "</table>";
 #trend totalspeed
-   $sqltext="INSERT INTO scsq_sqper_trend10 (date,value) VALUES ($nowtimestamp,$totalspeed)";
+   $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$totalspeed,1)";
 mysql_query($sqltext) or die (mysql_error());
 
 
@@ -319,24 +339,13 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-#если тренды не открывали более 5 минут, таблица очищается
-$sqltext="select max(date) from scsq_sqper_trend10";
-$result=mysql_query($sqltext) or die (mysql_error());
-$linedate = mysql_fetch_array($result,MYSQL_NUM);
-$resdate=$nowtimestamp - $linedate[0];
-
-if($resdate>=60)
-{
-$sqltext="truncate scsq_sqper_trend10";
-$result=mysql_query($sqltext) or die (mysql_error());
-}
 
 
 
    $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
 $result=mysql_query($sqltext) or die (mysql_error());
 
-   $sqltext="select value from (select value,date from scsq_sqper_trend10 order by date desc limit 30) as tmp order by date asc";
+   $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=1 order by date desc limit 30) as tmp order by date asc";
 $result=mysql_query($sqltext) or die (mysql_error());
 
 $countValues=0;
@@ -389,6 +398,319 @@ echo "Error: No connection to Squid. Not open listening port";
 }
 
 /////////// ACTIVE USERS REPORT END
+
+/////////// GENERAL HEALTH REPORT
+
+if($id==2)
+{
+ 
+$cmd = "GET cache_object://".$squidhost."/info HTTP/1.0\r\n";
+if($cachemgr_passwd!="") 
+$cmd.="Authorization: Basic ".base64_encode("cachemgr:$cachemgr_passwd")."\r\n";
+$cmd.="\r\n";
+
+//echo $cmd;
+
+ $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
+
+if($fp) {
+ fwrite($fp, $cmd); 
+$count=0;
+#если будет ошибка при получении данных, установить в 1.
+$errCheck=0;
+
+ while(!feof($fp)) 
+  { 
+  $allsize=0;
+$tmp=fgets($fp,2048);
+///echo $tmp;
+
+if(preg_match("/HTTP/1.0 200 OK/",$tmp)){
+echo "Error: No connection to Squid";
+$errCheck=1;
+break;
+}
+preg_match("/UP Time:(.+) /",$tmp,$match);
+if(($match[1] != "")&&($uptime=="")){
+$uptime=$match[1];
+}
+
+preg_match("/CPU Usage:(.+)%/",$tmp,$match);
+if(($match[1] != "")&&($cpuusage == "")){
+$cpuusage=$match[1];
+}
+
+$count++;
+  }
+ 
+  fclose($fp); 
+
+///basic authenticator 
+$cmd = "GET cache_object://".$squidhost."/basicauthenticator HTTP/1.0\r\n";
+if($cachemgr_passwd!="") 
+$cmd.="Authorization: Basic ".base64_encode("cachemgr:$cachemgr_passwd")."\r\n";
+$cmd.="\r\n";
+
+//echo $cmd;
+
+ $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
+
+ fwrite($fp, $cmd); 
+$count=0;
+#если будет ошибка при получении данных, установить в 1.
+$errCheck=0;
+
+ while(!feof($fp)) 
+  { 
+  $allsize=0;
+$tmp=fgets($fp,2048);
+///echo $tmp;
+
+preg_match("/queue length:(.+)/",$tmp,$match);
+if(($match[1] != "")&&($basicqlength=="")){
+$basicqlength=$match[1];
+}
+
+preg_match("/avg service time:(.+)/",$tmp,$match);
+if(($match[1] != "")&&($basicavgsvc == "")){
+$basicavgsvc=$match[1];
+}
+
+$count++;
+  }
+ 
+  fclose($fp); 
+
+///basic authenticator end
+
+///digest authenticator 
+$cmd = "GET cache_object://".$squidhost."/digestauthenticator HTTP/1.0\r\n";
+if($cachemgr_passwd!="") 
+$cmd.="Authorization: Basic ".base64_encode("cachemgr:$cachemgr_passwd")."\r\n";
+$cmd.="\r\n";
+
+//echo $cmd;
+
+ $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
+
+ fwrite($fp, $cmd); 
+$count=0;
+#если будет ошибка при получении данных, установить в 1.
+$errCheck=0;
+
+ while(!feof($fp)) 
+  { 
+  $allsize=0;
+$tmp=fgets($fp,2048);
+///echo $tmp;
+
+preg_match("/queue length:(.+)/",$tmp,$match);
+if(($match[1] != "")&&($digestqlength=="")){
+$digestqlength=$match[1];
+}
+
+preg_match("/avg service time:(.+)/",$tmp,$match);
+if(($match[1] != "")&&($digestavgsvc == "")){
+$digestavgsvc=$match[1];
+}
+
+$count++;
+  }
+ 
+  fclose($fp); 
+
+///digest authenticator end
+
+///negotiate authenticator 
+$cmd = "GET cache_object://".$squidhost."/negotiateauthenticator HTTP/1.0\r\n";
+if($cachemgr_passwd!="") 
+$cmd.="Authorization: Basic ".base64_encode("cachemgr:$cachemgr_passwd")."\r\n";
+$cmd.="\r\n";
+
+//echo $cmd;
+
+ $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
+
+ fwrite($fp, $cmd); 
+$count=0;
+#если будет ошибка при получении данных, установить в 1.
+$errCheck=0;
+
+ while(!feof($fp)) 
+  { 
+  $allsize=0;
+$tmp=fgets($fp,2048);
+///echo $tmp;
+
+preg_match("/queue length:(.+)/",$tmp,$match);
+if(($match[1] != "")&&($negqlength=="")){
+$negqlength=$match[1];
+}
+
+preg_match("/avg service time:(.+)/",$tmp,$match);
+if(($match[1] != "")&&($negavgsvc == "")){
+$negavgsvc=$match[1];
+}
+
+$count++;
+  }
+ 
+  fclose($fp); 
+
+///negotiate authenticator end
+
+
+
+if($errCheck==0)
+{
+
+///$result=mysql_query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests") or die (mysql_error());
+///$lastUpdateDate = mysql_fetch_array($result,MYSQL_NUM);
+echo "
+<table id=report_table_id_10 class=sortable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th  class=unsortable>
+    Параметр
+    </th>
+    <th  class=unsortable>
+    Значение
+    </th>
+
+</tr>
+";
+$numrow=1;
+
+$totalspeed=0;
+
+$upt[0]=floor(($uptime/3600)/24); //days
+$upt[1]=floor(($uptime-$upt[0]*86400)/3600); ///hours
+$upt[2]=floor(($uptime-($upt[1]*3600))/60); //mins
+$upt[3]=$upt[0]."_days_".$upt[1]."_hours_".$upt[2]."_min";
+
+echo "	<tr>
+		<td>1</td>
+		<td>UP time</td>
+		<td>".$upt[3]."</td>
+	</tr>
+	<tr>
+		<td>2</td>
+		<td>CPU Usage (%)</td> 
+		<td>".($cpuusage*100)."</td>
+	</tr>
+	<tr>
+		<td colspan=3>Basic Authenticator</td>
+	</tr>
+	<tr>
+		<td>3</td>
+		<td>Queue length:</td>
+		<td>".$basicqlength."</td>
+	</tr>
+	<tr>
+		<td>4</td>
+		<td>avg service time:</td>
+		<td>".$basicavgsvc."</td>
+	</tr>
+	<tr>
+		<td colspan=3>Digest Authenticator</td>
+	</tr>
+	<tr>
+		<td>3</td>
+		<td>Queue length:</td>
+		<td>".$digestqlength."</td>
+	</tr>
+	<tr>
+		<td>4</td>
+		<td>avg service time:</td>
+		<td>".$digestavgsvc."</td>
+	</tr>
+	<tr>
+		<td colspan=3>Negotiate Authenticator</td>
+	</tr>
+	<tr>
+		<td>5</td>
+		<td>Queue length:</td>
+		<td>".$negqlength."</td>
+	</tr>
+	<tr>
+		<td>6</td>
+		<td>avg service time:</td>
+		<td>".$negavgsvc."</td>
+	</tr>
+";
+
+echo "</table>";
+#trend cpuusage
+$cpuusage=$cpuusage*100;
+   $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$cpuusage,2)";
+mysql_query($sqltext) or die (mysql_error());
+
+
+foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+   unlink($filename);
+}
+
+
+
+
+   $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
+$result=mysql_query($sqltext) or die (mysql_error());
+
+   $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=2 order by date desc limit 30) as tmp order by date asc";
+$result=mysql_query($sqltext) or die (mysql_error());
+
+$countValues=0;
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+$arrValues[$countValues]=$line[0];
+$countValues++;
+}
+//pChart Graph 
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrValues,"Serie1");
+
+$DataSet->AddAllSeries();
+$DataSet->SetAbsciseLabelSerie();
+ $DataSet->SetSerieName("CPU Usage","Serie1");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
+# $Test->setFixedScale(-2,8);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(50,30,585,200);
+ $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
+ $Test->drawGraphArea(255,255,255,TRUE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
+
+ // Draw the 0 line
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
+ $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
+
+ // Draw the cubic curve graph
+ $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
+
+ // Finish the graph
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->Render("../lib/pChart/pictures/trend".$start.".png");
+
+echo "<img src='../lib/pChart/pictures/trend".$start.".png' alt='Image'>";
+
+///pChart Graph END
+} ///if no error. errCheck=0
+
+} // if(fp)
+
+else
+echo "Error: No connection to Squid. Not open listening port";
+
+}
+
+/////////// GENERAL HEALTH REPORT END
 
 
 
