@@ -3,14 +3,12 @@
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 
---
---
-
 -- --------------------------------------------------------
 
 --
 -- Table structure for table `scsq_alias`
 --
+
 CREATE TABLE IF NOT EXISTS `scsq_alias` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(90) NOT NULL,
@@ -18,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `scsq_alias` (
   `tableid` varchar(50) NOT NULL,
   `password` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
@@ -139,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `scsq_quicktraffic` (
 CREATE TABLE IF NOT EXISTS `scsq_sqper_activerequests` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date` int(11) DEFAULT NULL,
+  `username` varchar(100) DEFAULT NULL,
   `ipaddress` varchar(30) NOT NULL,
   `site` varchar(800) NOT NULL,
   `sizeinbytes` int(11) NOT NULL,
@@ -156,6 +155,7 @@ CREATE TABLE IF NOT EXISTS `scsq_sqper_trend10` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date` int(11) NOT NULL,
   `value` int(11) NOT NULL,
+  `par` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
