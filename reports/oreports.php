@@ -115,16 +115,27 @@ $user=$user[$srv];
 $pass=$pass[$srv];
 $db=$db[$srv];
 
-//querys for reports
+$friendsLogin="0";
+$friendsIpaddress="0";
+
+#create list of friends
+if($enableNofriends==1) {
+if($goodLogins!="")
+  $friendsLogin=implode("','",explode(" ", $goodLogins));
+if($goodIpaddress!="")
+  $friendsIpaddress=implode("','",explode(" ", $goodIpaddress));
+}
 
 
-$queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,sum((sizeinbytes/1024)/seconds) as s,username from scsq_sqper_activerequests group by ipaddr;";
-
-
+$queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,
+			sum((sizeinbytes/1024)/seconds) as s,
+			username 
+		   from scsq_sqper_activerequests 
+		   where substring_index(ipaddress,':',1) not IN ('".$friendsIpaddress."')
+		     AND username not IN ('".$friendsLogin."')
+		   group by ipaddr;";
 
 //querys for reports end
-
-
 
 mysql_connect("$address", "$user", "$pass") or die(mysql_error());
 mysql_select_db($db);
