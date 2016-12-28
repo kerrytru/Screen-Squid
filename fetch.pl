@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#build 20161023
+#build 20161228
 
 use DBI; # DBI  Perl!!!
 
@@ -13,7 +13,7 @@ my $db = "test"; # name DB
 #==========================================================
 #Kolichestvo strok, vstavliaemoe za odin INSERT. Mozhno pokrutit bolshe/menshe dlia skorosti
 #Количество строк, вставляемое за один INSERT. Можно покрутить больше/меньше для скорости.
-my $count_lines_for_one_insert=10000; #how much INSERT for one 'transaction'
+my $count_lines_for_one_insert=100; #how much INSERT for one 'transaction'
 #==========================================================
 #Put k access.log. Eto mozhet bit polnii put. Naprimer, /var/log/squid/access.log
 #Путь к файлу access.log(имя может другим). Это может быть и полный путь, например, /var/log/squid/access.log
@@ -276,6 +276,7 @@ sum(sizeinbytes) as sums,
 date,
 count(id) as ct
 FROM scsq_traffic
+where date>".$lastday."
 GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st)
 
 ) as tmp2
