@@ -1,5 +1,5 @@
 <?php 
-#build 20160330
+#build 20161218
 ?>
 <html>
 <head>
@@ -89,6 +89,7 @@ echo "
 <div class='itemhidden' id='oreports".$srv."'>
 
 <div class='linkindented1'><a href=\"javascript:GoOnlineReport(".$srv.",1)\">".$_lang['stACTIVEIPADDRESS']."</a></div>
+<div class='linkindented1'><a href=\"javascript:GoOnlineReport(".$srv.",2)\">System</a></div>
 </div>
 <!--online reports end-->
 

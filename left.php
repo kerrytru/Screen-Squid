@@ -1,5 +1,5 @@
 <?php
-#build 20160313
+#build 20161218
 include("config.php");
 
 if(isset($_GET['srv']))
@@ -24,6 +24,7 @@ function TwoByOne(frame1, frame2)
 parent.left.location.href=frame1;
 parent.right.location.href=frame2;
 }
+
 
 function GoReport(srv,id)
 {
