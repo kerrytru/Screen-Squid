@@ -64,9 +64,6 @@ function toggleview (id1,id2) {
 
 <body>
 <br />
-<ul>
-  <li><b>Screen Squid v.<?php echo $vers; ?></b>
-</ul>
 <?php
 
 if(isset($_GET['srv']))

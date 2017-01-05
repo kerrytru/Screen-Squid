@@ -1,16 +1,13 @@
 <?php
-#build 20161221
-?>
+#build 20170105
 
-<html>
+$header='<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="../javascript/example.css"/>
 </head>
 <body>
-
-<?php
-
+';
 
 include("../config.php");
 
@@ -21,6 +18,17 @@ include("../config.php");
 // Include the main TCPDF library (search for installation path).
 include("../lib/tcpdf/tcpdf.php");
 
+
+if(!isset($_GET['pdf']))
+{
+echo $header;
+$makepdf=0;
+}
+else
+$makepdf=1;
+
+
+
 $start=microtime(true);
 
 if(isset($_GET['srv']))
@@ -29,7 +37,11 @@ else
   $srv=0;
 
 // Javascripts
+
+if(!isset($_GET['pdf']))
+{
 ?>
+
 
 <script language=JavaScript>
 
@@ -182,6 +194,7 @@ function UpdateLeftMenu(id)
 
 
 <?php
+}
 // Javascripts END
 
 
@@ -811,8 +824,8 @@ $queryIpaddressTrafficWithResolve="
 
   ORDER BY nofriends.name asc;";
 
-//OLD
-$queryPopularSitesOld="
+
+$queryPopularSites="
   SELECT SUBSTRING_INDEX(scsq_traffic.site,'/',1) as stt,
 	 tmp.c,
 	 tmp.s 
@@ -850,27 +863,6 @@ $queryPopularSitesOld="
   ORDER BY tmp.c desc 
   LIMIT ".$countPopularSitesLimit.";";
 
-$queryPopularSites=$queryPopularSitesOld;
-
-//NEW
-$queryPopularSites="
-SELECT 
-	  site AS st,
-	  sum(httpstatus) as sct,
-	  sum(sizeinbytes) as s
-  	FROM scsq_quicktraffic 
-	WHERE date>".$datestart." 
-	  AND date<".$dateend." 
-	  AND par=2
-	GROUP BY site
-
-ORDER BY sct desc
-LIMIT ".$countPopularSitesLimit.";";
-
-
-
-///echo $queryPopularSites;
-//echo $querySitesTraffic;
 
 $queryWhoDownloadBigFiles="
   SELECT 
@@ -3171,6 +3163,8 @@ $id=0;
 
 ///CALENDAR
 
+if(!isset($_GET['pdf'])){
+
 ?>
 
 
@@ -3205,7 +3199,7 @@ $id=0;
 <a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','r')">>></a>
 
 <?php
-
+}
 ///CALENDAR END
 
 ///REPORTS HEADERS
@@ -3374,19 +3368,18 @@ $repheader= "<h2>".$_lang['stTRAFFICBYHOURSLOGINSONESITE']." <b>".$currentsite."
 if($id==54)
 $repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
-
+if(!isset($_GET['pdf'])){
 echo "<table>";
 echo "<tr>";
 echo "<td valign=middle>".$repheader."</td>";
 if($id==1 or $id==2)
-echo "<td valign=top>&nbsp;&nbsp;<a href=../output/report.pdf><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php??srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date']."&dom=".$_GET['dom']."&login=".$_GET['login']."&loginname=".$_GET['loginname']."&ip=".$_GET['ip']."&ipname".$_GET['ipname']."=&site=".$_GET['site']."&group=".$_GET['group']."&groupname=".$_GET['groupname']."&typeid=".$_GET['typeid']."&httpstatus=".$_GET['httpstatus']."&httpname=".$_GET['httpname']."&loiid=".$_GET['loiid']."&loiname=".$_GET['loiname']."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
 echo "</tr>";
 echo "</table>";
-
+}
 ///REPORTS HEADERS END
 
 /////////// LOGINS TRAFFIC REPORT
-
 
 
 if($id==1)
@@ -3415,7 +3408,7 @@ $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
 $colf[4]="<td>".$colftext[4]."</td>";
 
-$makepdf=1;
+//$makepdf=1;
 }
 
 /////////// LOGINS TRAFFIC REPORT END
@@ -7473,9 +7466,13 @@ while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / 1000000;
+$totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);
 $numrow++;
 }
+
+if($makepdf==0)
+{
 
 ///TABLE HEADER
 echo "<table id=report_table_id class=sortable>
@@ -7491,7 +7488,6 @@ echo "	</tr>";
 for($i=1;$i<$numrow;$i++) {
 $line=explode(';;',$rows[$i]);
 
-$totalmb=$totalmb+$line[1];
 
 echo "<tr>
 	<td>".$i."</td>";
@@ -7528,7 +7524,7 @@ echo "	</tr>";
 echo "</table>";
 
 ///universal table end
-
+}
 
 
 //// GENERATE PDF FILE
@@ -7591,22 +7587,24 @@ $pdf->AddPage();
 $i++;
 }
 
+$colftext[3]=round($totalmb,2);
+
 if(($useIpaddressalias==1 or $useLoginalias==1)and $colh[0]==4)
 {
 $pdf->writeHTMLCell(25, 5, '', '', $colftext[1], 1, 0, 0, true, 'C', true);
 $pdf->writeHTMLCell(80, 5, '', '', $colftext[2], 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'R', true);
 $pdf->writeHTMLCell(50, 5, '', '', $colftext[4], 1, 0, 0, true, 'C', true);
 }
 else
 {
 $pdf->writeHTMLCell(25, 5, '', '', $colftext[1], 1, 0, 0, true, 'C', true);
 $pdf->writeHTMLCell(130, 5, '', '', $colftext[2], 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'C', true);
+$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'R', true);
 }
 
 //Close and output PDF document
-$pdf->Output("../output/report.pdf", 'F');
+$pdf->Output("../output/report.pdf", 'D');
 
 
 //PDF END

@@ -194,7 +194,7 @@ echo "</table>";
     }  //end GET[id]=1
     else
 
-      if($_GET['id']==2) {
+      if($_GET['id']==2) {  //aliases
 
         if(isset($_GET['actid'])) //action ID.
           $actid=$_GET['actid'];
@@ -301,10 +301,10 @@ echo "</table>";
              $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
            else
              $line[1]="<b><font color=red>".$_lang['stLOGIN']."</font></b>";
-
            echo "
            <tr>
              <td>".$numrow."</td>
+
              <td align=center><a href=right.php?srv=".$srv."&id=2&actid=3&aliasid=".$line[3].">".$line[0]."&nbsp;</a></td>
              <td align=center>".$line[1]."</td>
              <td>".$line[4]."&nbsp;</td>

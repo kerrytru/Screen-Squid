@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#build 20161228
+#build 20170105
 
 use DBI; # DBI  Perl!!!
 
@@ -260,21 +260,19 @@ $sth->execute;
 
 #update2 scsq_quicktraffic
 $sqltext="";
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par)
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par)
 SELECT 
 tmp2.date,
 '0',
 '0',
 tmp2.sums,
 tmp2.st,
-tmp2.ct,
 2
 
 FROM (SELECT 
 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
 sum(sizeinbytes) as sums,
-date,
-count(id) as ct
+date
 FROM scsq_traffic
 where date>".$lastday."
 GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st)

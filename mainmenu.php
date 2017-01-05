@@ -1,5 +1,5 @@
 <?php 
-#build 20161218
+#build 20170105
 ?>
 <html>
 <head>
@@ -69,6 +69,10 @@ parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+pa
 
 
 <body>
+<br />
+<ul>
+  <li><b>Screen Squid v.<?php echo $vers; ?></b>
+</ul>
 <br />
 <?php
 $srv=0;
