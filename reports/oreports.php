@@ -5,7 +5,7 @@
 
 <?php
 
-#build 20161222
+#build 20170109
 
 include("../config.php");
 
@@ -221,73 +221,51 @@ $count=0;
 #если будет ошибка при получении данных, установить в 1.
 $errCheck=0;
 
+$ptmp="";
+
  while(!feof($fp)) 
   { 
   $allsize=0;
 $tmp=fgets($fp,2048);
+$ptmp.=$tmp;
+//echo $tmp;
+}
 
-
-if(preg_match("/HTTP/1.0 200 OK/",$tmp)){
+if(preg_match("/HTTP/1.0 200 OK/",$ptmp)){
 echo "Error: No connection to Squid";
 $errCheck=1;
 break;
 }
 
-preg_match("/(peer|remote):(.+)/",$tmp,$match);
-if(($match[2] != "")&&($ipaddress=="")){
-$ipaddress=$match[2];
-$ipaddress=trim($ipaddress);
-}
+preg_match_all("/username(.+)/",$ptmp,$match);
+preg_match_all("/(peer|remote):(.+)/",$ptmp,$matchpeer);
+preg_match_all("/uri(.+)/",$ptmp,$matchuri);
+preg_match_all("/out\.size(.+)/",$ptmp,$matchsize);
+preg_match_all("/\((.+)seconds/",$ptmp,$matchsec);
 
-preg_match("/username(.+)/",$tmp,$match);
-if(($match[1] != "")&&($username=="")){
-$username=$match[1];
-$username=trim($username);
-}
-else
-$username="";
-
-preg_match("/uri(.+)/",$tmp,$match);
-if(($match[1] != "")&&($site == "")){
-$site=$match[1];
-#preg_match("s/^\s+//",$site,$site);
-}
-
-preg_match("/out\.size(.+)/",$tmp,$match);
-if(($match[1] != "")&&($size == "")){
-$size=trim($match[1]);
-}
-
-preg_match("/\((.+)seconds/",$tmp,$match);
-if(($match[1] != "")&&($seconds == "")){
-$seconds=trim($match[1]);
-}
-
-
-if($seconds != "") {
-$seconds=$seconds;
-
-if($seconds == 0) {
-#костыль чтобы избежать деления на ноль
-$seconds=1;
-}
-
-
+for ($i=0; $i< count($match[1]); $i++) {
+if($matchsec[1][$i]==0)
+$matchsec[1][$i]=1;
+$ipaddress=trim($matchpeer[2][$i]);
+$username=$match[1][$i];
+$site=$matchuri[1][$i];
+$size=$matchsize[1][$i];
+$seconds=$matchsec[1][$i];
 	$sqltext="INSERT INTO scsq_sqper_activerequests (date,ipaddress,username,site,sizeinbytes,seconds) VALUES";
 	$sqltext=$sqltext."($nowtimestamp,'$ipaddress','$username','$site','$size','$seconds')";
 	$result=mysql_query($sqltext) or die (mysql_error());
 	$sqltext="";
+}
 
-$username="";
-$ipaddress="";
-$site="";
-$size="";
-$seconds="";
+/*
+while(preg_match("/username(.*?)/",$ptmp,$match))
+{
+echo $match[1];
+echo "<br />";
 
 }
-$count++;
-  }
- 
+*/
+
   fclose($fp); 
 
 if($errCheck==0)
@@ -321,6 +299,7 @@ $totalspeed=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
+
 if($line[0]=='')
 echo "<td>::1</td>";
 else
@@ -609,7 +588,7 @@ echo "	<tr>
 	<tr>
 		<td>2</td>
 		<td>CPU Usage (%)</td> 
-		<td>".($cpuusage*100)."</td>
+		<td>".($cpuusage)."</td>
 	</tr>
 	<tr>
 		<td colspan=3>Basic Authenticator</td>
@@ -674,7 +653,7 @@ $result=mysql_query($sqltext) or die (mysql_error());
 
 $countValues=0;
 while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-$arrValues[$countValues]=$line[0];
+$arrValues[$countValues]=$line[0]/100;
 $countValues++;
 }
 //pChart Graph 
@@ -688,7 +667,7 @@ $DataSet->SetAbsciseLabelSerie();
 
  // Initialise the graph
  $Test = new pChart(700,230);
-# $Test->setFixedScale(-2,8);
+ $Test->setFixedScale(0,100);
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
  $Test->setGraphArea(50,30,585,200);
  $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);

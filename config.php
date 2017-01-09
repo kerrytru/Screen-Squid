@@ -83,5 +83,5 @@ $countWhoDownloadBigFilesLimit=10;
 //======== queries config end
 
 
-$vers="1.9.6";
+$vers="1.10";
 ?>
