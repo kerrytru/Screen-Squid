@@ -3442,7 +3442,6 @@ $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
 $colf[4]="<td>".$colftext[4]."</td>";
 
-$makepdf=1;
 }
 
 /////////////// IPADDRESS TRAFFIC REPORT END
@@ -3570,8 +3569,7 @@ echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 $line[1]=$line[1] / 1000000;
 echo "<td>".$line[1]."</td>";
-#В поле логин/ip адрес, воткнул stn(1,2) чтобы разбирать в частичных отчетах
-#Вроде уже не нужно. В релизе убрать.
+
 echo "<td><a href=javascript:GoPartlyReports(18,'".$dayormonth."','".$line[3]."','','0','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','".$line[3]."','','1','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
 
 echo "<td><a href=javascript:GoPartlyReports(53,'".$dayormonth."','".$line[3]."','','0','".$line[0]."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','".$line[3]."','','1','".$line[0]."')>".$_lang['stIPADDRESSES']."</a></td>";
@@ -3597,89 +3595,62 @@ echo "</table>";
 
 if($id==5)
 {
-echo "
-<table id=report_table_id_5 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    </tr>
-";
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
 
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=3+$useLoginalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryTopLoginsTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
 
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$colr[2]="<td><a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0',0,'')\">line0</a></td>";
 
-echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$numrow++;
-}
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-</tr>";
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
+
+//$makepdf=1;
 }
 
 /////////////// TOP LOGINS TRAFFIC REPORT END
-
-
 
 /////////////// TOP IPADDRESS TRAFFIC REPORT
 
 if($id==6)
 {
-echo "
-<table id=report_table_id_6 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-</tr>
-";
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stIPADDRESS'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
 
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=3+$useIpaddressalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryTopIpTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$numrow++;
-    }
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-</tr>";
 
-echo "</table>";
+$colr[2]="<td><a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0',1,'')\">line0</a></td>";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
 
 }
 
@@ -3847,58 +3818,39 @@ echo "</table>";
 
 if($id==8)
 {
-echo "
-<table id=report_table_id_8 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stSITE']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stCATEGORY']."
-    </th>
-</tr>
-";
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stSITE'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=4;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryOneLoginTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
 
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$colr[2]="<td>line0</a></td>";
 
-
+/*
 $tmpLine=explode(':',$line[0]);
 
 if($tmpLine[1]==443)
 echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
 else
 echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+*/
 
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
 
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-echo "<td>".$line[2]."</td>";
-
-
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$numrow++;
-            }
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td><b>&nbsp;</b></td>
-</tr>";
-echo "</table>";
 echo "<script>UpdateLeftMenu(1);</script>";
 }
 
@@ -4029,58 +3981,39 @@ echo "</table>";
 
 if($id==11)
 {
-echo "
-<table id=report_table_id_11 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stSITE']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stCATEGORY']."
-    </th>
-</tr>
-";
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stSITE'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=4;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryOneIpaddressTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
+$colr[2]="<td>line0</a></td>";
 
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-
+/*
 $tmpLine=explode(':',$line[0]);
 
 if($tmpLine[1]==443)
 echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
 else
 echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+*/
 
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
 
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-
-echo "<td>".$line[2]."</td>";
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$numrow++;
-        }
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td><b>&nbsp;</b></td>
-</tr>";
-
-echo "</table>";
 echo "<script>UpdateLeftMenu(2);</script>";
 }
 
@@ -7500,8 +7433,11 @@ echo $resultcolr;
 else
 echo "<td>".$line[0]."</td>";
 echo "	<td>".$line[1]."</td>";
-if(($useIpaddressalias==1 or $useLoginalias==1)and $colh[0]==4)
+if($id<3 and ($useIpaddressalias==1 or $useLoginalias==1)and $colh[0]==4)
 echo 	"<td>".$line[3]."</td>";
+
+if($id==8 or $id=11)
+echo 	"<td>".$line[2]."</td>";
 
 echo "</tr>";
 }
