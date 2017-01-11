@@ -5,7 +5,7 @@
 
 <?php
 
-#build 20170109
+#build 20170111
 
 include("../config.php");
 
@@ -133,7 +133,7 @@ $queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,
 		   from scsq_sqper_activerequests 
 		   where substring_index(ipaddress,':',1) not IN ('".$friendsIpaddress."')
 		     AND username not IN ('".$friendsLogin."')
-		   group by ipaddr;";
+		   group by ipaddr,username;";
 
 //querys for reports end
 
