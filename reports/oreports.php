@@ -132,7 +132,7 @@ $queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,
 			username 
 		   from scsq_sqper_activerequests 
 		   where substring_index(ipaddress,':',1) not IN ('".$friendsIpaddress."')
-		     AND username not IN ('".$friendsLogin."')
+		     AND trim(username) not IN ('".$friendsLogin."')
 		   group by ipaddr,username;";
 
 //querys for reports end
@@ -354,7 +354,7 @@ $DataSet->SetAbsciseLabelSerie();
 
  // Initialise the graph
  $Test = new pChart(700,230);
-# $Test->setFixedScale(-2,8);
+ $Test->setFixedScale(0,$bandwidth/8*1000);
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
  $Test->setGraphArea(50,30,585,200);
  $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);

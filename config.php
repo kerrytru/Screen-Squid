@@ -1,6 +1,6 @@
 <?php
 
-#build 20161031
+#build 20170114
 #server #0
 $srvname[0]="Proxy0"; #nickname of server
 $db[0] = "test";
@@ -70,6 +70,10 @@ $enableTrafficObjectsInStat=0;
 
 #Через сколько секунд обновлять страницу онлайна
 $refreshPeriod=5;
+
+#ширина канала для онлайна в мегабитах. 
+$bandwidth=10;
+
 #==============================
 
 
