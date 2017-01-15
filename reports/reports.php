@@ -914,8 +914,8 @@ $queryPopularSites="
 $queryWhoDownloadBigFiles="
   SELECT 
     scsq_log.name,
-    scsq_ip.name, 
     tmp.sizeinbytes,
+    scsq_ip.name, 
     scsq_traf.site,
     scsq_log.id,
     scsq_ip.id 
@@ -1792,6 +1792,7 @@ $queryWhoVisitPopularSiteLogin="
 $queryVisitingWebsiteByTimeLogin="
   SELECT 
     DISTINCT FROM_UNIXTIME(tmp.date,'%d-%m-%Y %H:%i:%s') AS d,
+    '0',
     site 
   FROM (SELECT 
 	  date,
@@ -2031,6 +2032,7 @@ $queryWhoVisitPopularSiteIpaddress="
 $queryVisitingWebsiteByTimeIpaddress="
   SELECT DISTINCT 
     from_unixtime(tmp.date,'%d-%m-%Y %H:%i:%s') as d,
+    '0',
     site 
   from (SELECT 
 	  date,
@@ -2316,12 +2318,19 @@ $queryGroupsTraffic="
   order by gname;";
 
 
+
 if(($typeid==0)&&($useLoginalias==0))
+$useAliasColumn="";
+if(($typeid==0)&&($useLoginalias==1))
+$useAliasColumn=",scsq_alias.name";
+
+if($typeid==0)
 $queryOneGroupTraffic="
   SELECT 
     scsq_logins.name,
     tmp2.s as s1,
     tmp2.login 
+    ".$useAliasColumn."
   FROM (SELECT 
 	  id,
 	  name 
@@ -2347,45 +2356,18 @@ $queryOneGroupTraffic="
 
 	ORDER BY scsq_logins.name asc;";
 
-if(($typeid==0)&&($useLoginalias==1))
-$queryOneGroupTraffic="
-  SELECT 
-    scsq_logins.name,
-    tmp2.s as s1,
-    tmp2.login,
-    scsq_alias.name 
-  FROM (SELECT 
-	  id,
-	  name 
-	FROM scsq_groups 
-	where typeid=0 
-	  and id='".$currentgroupid."') 
-	AS tmp 
-	
-	LEFT JOIN scsq_aliasingroups ON tmp.id=scsq_aliasingroups.groupid 
-	LEFT JOIN scsq_alias ON scsq_alias.id=scsq_aliasingroups.aliasid 
-	LEFT JOIN (SELECT 
-		     sum(sizeinbytes) as s,
-		     login 
-		   FROM scsq_quicktraffic 
-		   WHERE scsq_quicktraffic.date>".$datestart." 
-		     and scsq_quicktraffic.date<".$dateend." 
-	             AND site NOT IN (".$goodSitesList.")
-
-		   GROUP BY crc32(login)) 
-		   tmp2 
-	ON tmp2.login=scsq_alias.tableid 
-
-	LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
-
-  ORDER BY scsq_logins.name asc;";
-
 if(($typeid==1)&&($useIpaddressalias==0))
+$useAliasColumn="";
+if(($typeid==1)&&($useIpaddressalias==1))
+$useAliasColumn=",scsq_alias.name";
+
+if($typeid==1)
 $queryOneGroupTraffic="
   SELECT 
     scsq_ipaddress.name,
     tmp2.s as s1,
-    tmp2.ipaddress 
+    tmp2.ipaddress
+    ".$useAliasColumn."
   FROM (SELECT 
 	  id,
 	  name 
@@ -2396,7 +2378,7 @@ $queryOneGroupTraffic="
 
 	LEFT JOIN scsq_aliasingroups ON tmp.id=scsq_aliasingroups.groupid 
 	LEFT JOIN scsq_alias on scsq_alias.id=scsq_aliasingroups.aliasid 
-	LEFT JOIN (SELECT n.
+	LEFT JOIN (SELECT
 		     sum(sizeinbytes) as s,
 		     ipaddress 
 		   FROM scsq_quicktraffic 
@@ -2412,51 +2394,24 @@ $queryOneGroupTraffic="
 
   ORDER BY scsq_ipaddress.name asc;";
 
-if(($typeid==1)&&($useIpaddressalias==1))
-$queryOneGroupTraffic="
-  SELECT 
-    scsq_ipaddress.name,
-    tmp2.s as s1,
-    tmp2.ipaddress,
-    scsq_alias.name 
-  FROM (SELECT 
-	  id,
-	  name 
-	FROM scsq_groups 
-	WHERE typeid=1 
-	  and id='".$currentgroupid."') 
-	AS tmp 
-
-	LEFT JOIN scsq_aliasingroups ON tmp.id=scsq_aliasingroups.groupid 
-	LEFT JOIN scsq_alias ON scsq_alias.id=scsq_aliasingroups.aliasid 
-	LEFT JOIN (SELECT 
-		     sum(sizeinbytes) as s,
-		     ipaddress 
-		   FROM scsq_quicktraffic 
-		   WHERE scsq_quicktraffic.date>".$datestart." 
-		     and scsq_quicktraffic.date<".$dateend." 
-          	     AND site NOT IN (".$goodSitesList.")
-		
-		   GROUP BY crc32(ipaddress)) 
-		   tmp2 
-	ON tmp2.ipaddress=scsq_alias.tableid 
-
-	LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
-
-  ORDER BY scsq_ipaddress.name asc;";
-
-
 if(($typeid==0)&&($useLoginalias==0))
+$useAliasColumn="";
+if(($typeid==0)&&($useLoginalias==1))
+$useAliasColumn=",tmp.al";
+
+if($typeid==0)
 $queryOneGroupTrafficWide="
   SELECT 
     nofriends.name,
     tmp.s,
     tmp.login,
     tmp.n 
+    ".$useAliasColumn."
   FROM ((SELECT 
 	   login,
 	   '2' as n,
-	   sum(sizeinbytes) as s 
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
 	 FROM scsq_quicktraffic
 
 	 RIGHT JOIN (SELECT 
@@ -2495,7 +2450,8 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   login,
 	   '3' as n,
-	   sum(sizeinbytes) as s 
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
 	 FROM scsq_quicktraffic
 
 	 RIGHT JOIN (SELECT 
@@ -2535,7 +2491,8 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   login,
 	   '1' as n,
-	   sum(sizeinbytes) as s 
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
 	 from scsq_quicktraffic 
 
 	 RIGHT JOIN (select 
@@ -2573,150 +2530,24 @@ $queryOneGroupTrafficWide="
 
   ORDER BY nofriends.name asc,tmp.n asc;";
 
-
-if(($typeid==0)&&($useLoginalias==1))
-$queryOneGroupTrafficWide="
-  SELECT 
-    nofriends.name,
-    tmp.s,
-    tmp.login,
-    tmp.n, 
-    tmp.al 
-  FROM ((SELECT 
-	   login,
-	   '2' as n,
-	   sum(sizeinbytes) as s, 
-	   listaliases.name as al 
-	 FROM scsq_quicktraffic
-
-	 RIGHT JOIN (select 
-		       * 
-		     from scsq_alias) 
-		     AS listaliases 
-	 ON listaliases.tableid=scsq_quicktraffic.login
-
-	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_groups 
-		     where typeid=0 
-		       and id='".$currentgroupid."') 
-		     AS curgroup  
-	 ON scsq_aliasingroups.groupid=curgroup.id
-
-	 ,scsq_httpstatus 
-
-	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
-	    or  scsq_httpstatus.name like '%TCP_IMS_HIT%' 
-	    or  scsq_httpstatus.name like '%TCP_MEM_HIT%' 
-	    or  scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
-	    or  scsq_httpstatus.name like '%UDP_HIT%') 
-	   and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	   and  date>".$datestart." 
-	   and  date<".$dateend." 
-           AND site NOT IN (".$goodSitesList.")
-
-	 GROUP BY crc32(login) 
-	 ORDER BY null) 
-
-  UNION 
-
-	(SELECT 
-	   login,
-	   '3' as n,
-	   sum(sizeinbytes) as s, 
-	   listaliases.name as al 
-	 FROM scsq_quicktraffic
-
-	 RIGHT JOIN (select 
-			* 
-		     from scsq_alias) 
-		     AS listaliases 
-	 ON listaliases.tableid=scsq_quicktraffic.login
-
-	 RIGHT JOIN scsq_aliasingroups ON listaliases.id=scsq_aliasingroups.aliasid 
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_groups 
-		     WHERE typeid=0 
-		       and id='".$currentgroupid."') 
-		     AS curgroup  
-	 ON scsq_aliasingroups.groupid=curgroup.id
-
-	 ,scsq_httpstatus 
-
-	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
-	   and  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
-	   and  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
-	   and  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
-	   and  scsq_httpstatus.name not like '%UDP_HIT%') 
-	   and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	   and  date>".$datestart." 
-	   and  date<".$dateend." 
-           AND site NOT IN (".$goodSitesList.")
-
-	 GROUP BY crc32(login) 
-	 ORDER BY null) 
-
-  UNION 
-
-	(SELECT 
-	   login,
-	   '1' as n,
-	   sum(sizeinbytes) as s , 
-	   listaliases.name as al 
-	 FROM scsq_quicktraffic 
-
-	 RIGHT JOIN (select 
-		       * 
-		     from scsq_alias) 
-		     AS listaliases 
-	 ON listaliases.tableid=scsq_quicktraffic.login
-
-	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_groups 
-		     where typeid=0 
-		       and id='".$currentgroupid."') 
-		     AS curgroup 
-	 ON scsq_aliasingroups.groupid=curgroup.id
-
-	 WHERE date>".$datestart." 
-	   and date<".$dateend."  
-           AND site NOT IN (".$goodSitesList.")
-
-	 GROUP BY crc32(login) 
-	 ORDER BY null)) 
-	 as tmp
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_logins 
-		     where id NOT IN (".$goodLoginsList.")) 
-		     AS nofriends 
-	 ON tmp.login=nofriends.id
-
-  ORDER BY nofriends.name asc,tmp.n asc;";
-
 if(($typeid==1)&&($useIpaddressalias==0))
+$useAliasColumn="";
+if(($typeid==1)&&($useIpaddressalias==1))
+$useAliasColumn=",tmp.al";
+
+if($typeid==1)
 $queryOneGroupTrafficWide="
   SELECT 
     nofriends.name,
     tmp.s,
     tmp.ipaddress,
     tmp.n 
+    ".$useAliasColumn."
   FROM ((SELECT 
 	   ipaddress,
 	   '2' as n,
-	   sum(sizeinbytes) as s 
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al  
 	 FROM scsq_quicktraffic
 
 	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
@@ -2752,7 +2583,8 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   ipaddress,
 	   '3' as n,
-	   sum(sizeinbytes) as s 
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
 	 FROM scsq_quicktraffic
 
 	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
@@ -2788,7 +2620,8 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   ipaddress,
 	   '1' as n,
-	   sum(sizeinbytes) as s 
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
 	 FROM scsq_quicktraffic 
 
 	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
@@ -2821,129 +2654,6 @@ $queryOneGroupTrafficWide="
 	 ON tmp.ipaddress=nofriends.id
 
   ORDER BY nofriends.name asc,tmp.n asc;";
-
-
-if(($typeid==1)&&($useIpaddressalias==1))
-$queryOneGroupTrafficWide="
-  SELECT 
-    nofriends.name,
-    tmp.s,
-    tmp.ipaddress,
-    tmp.n, 
-    tmp.al 
-  FROM ((SELECT 
-	   ipaddress,
-	   '2' as n,
-	   sum(sizeinbytes) as s, 
-	   listaliases.name as al 
-	 FROM scsq_quicktraffic
-
-	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
-
-	 RIGHT JOIN scsq_aliasingroups ON listaliases.id=scsq_aliasingroups.aliasid 
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_groups 
-		     WHERE typeid=1 
-		       and id='".$currentgroupid."') 
-		     AS curgroup 
-	 ON scsq_aliasingroups.groupid=curgroup.id
-
-	,scsq_httpstatus 
-
-	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
-	    or  scsq_httpstatus.name like '%TCP_IMS_HIT%' 
-	    or  scsq_httpstatus.name like '%TCP_MEM_HIT%' 
-	    or  scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
-	    or  scsq_httpstatus.name like '%UDP_HIT%') 
-	   and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	   and  date>".$datestart." 
-	   and  date<".$dateend." 
-           AND site NOT IN (".$goodSitesList.")
-
-	 GROUP BY CRC32(ipaddress) 
-	 ORDER BY null) 
-
-  UNION 
-
-	(SELECT 
-	   ipaddress,
-	   '3' as n,
-	   sum(sizeinbytes) as s, 
-	   listaliases.name as al 
-	 FROM scsq_quicktraffic
-
-	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
-
-	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_groups 
-		     WHERE typeid=1 
-		       and id='".$currentgroupid."') 
-		     AS curgroup  
-	 ON scsq_aliasingroups.groupid=curgroup.id
-
-	,scsq_httpstatus 
-
-
-	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
-	   and  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
-	   and  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
-	   and  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
-	   and  scsq_httpstatus.name not like '%UDP_HIT%') 
-	   and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	   and  date>".$datestart." 
-	   and  date<".$dateend."  
-           AND site NOT IN (".$goodSitesList.")
-
-	 GROUP BY crc32(ipaddress) 
-	 ORDER BY null) 
-
-  UNION 
-
-	(SELECT 
-	   ipaddress,
-	   '1' as n,
-	   sum(sizeinbytes) as s ,
-	   listaliases.name as al 
-	 FROM scsq_traffic 
-
-	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
-
-	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_groups 
-		     WHERE typeid=1 
-		       and id='".$currentgroupid."') 
-		     AS curgroup 
-	 ON scsq_aliasingroups.groupid=curgroup.id
-
-	 WHERE date>".$datestart." 
-	   and date<".$dateend."  
-           AND site NOT IN (".$goodSitesList.")
-	 
-	 GROUP BY CRC32(ipaddress) 
-	 ORDER BY null)) 
-	 AS tmp
-
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_ipaddress 
-		     WHERE id NOT IN (".$goodIpaddressList.")) 
-		     AS nofriends 
-	 ON tmp.ipaddress=nofriends.id
-
-  ORDER BY nofriends.name asc,tmp.n asc;";
-
 
 if($typeid==0)
 $queryOneGroupTopSitesTraffic="
@@ -2986,7 +2696,7 @@ $queryOneGroupTopSitesTraffic="
 	   ipaddress 
 	 FROM scsq_quicktraffic 
 
-	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
 
 	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
 
@@ -3094,8 +2804,8 @@ if($typeid==0)
 $queryOneGroupWhoDownloadBigFiles="
   SELECT 
     scsq_logins.name,
-    scsq_ipaddress.name,
     sizeinbytes,site,
+    scsq_ipaddress.name,
     login,
     ipaddress 
   FROM (SELECT 
@@ -3140,8 +2850,8 @@ if($typeid==1)
 $queryOneGroupWhoDownloadBigFiles="
   SELECT 
     scsq_logins.name, 
-    scsq_ipaddress.name, 
     sizeinbytes,
+    scsq_ipaddress.name, 
     site,
     login,
     ipaddress 
@@ -4490,56 +4200,34 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==18)
 {
-echo $queryWhoVisitPopularSiteLogin;
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
 
-echo "
-<table id=report_table_id_18 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-";
-if($useLoginalias==1)
-echo "<th>".$_lang['stALIAS']."</th>";
 
-echo "</tr>";
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=3+$useLoginalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 
 $result=mysql_query($queryWhoVisitPopularSiteLogin) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
+$colr[1]="numrow";
+$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line3','line0','0','')>line0</a>";
+$colr[3]="line1";
+$colr[4]="line2";
 
-#перекодировка в UTF-8 если включена опция.
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-
-echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[3]."','".$line[0]."','0','')>".$line[0]."</a></td>";
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-$totalmb=$totalmb+$line[1];
-
-if($useLoginalias==1)
-echo "<td>".$line[2]."</td>";
-echo "</tr>";
-$numrow++;
-}
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>";
-if($useLoginalias==1)
-echo "<td>&nbsp;</td>";
-echo "</tr>";
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// WHO VISIT POPULAR SITE LOGIN REPORT END
@@ -4548,52 +4236,34 @@ echo "</table>";
 
 if($id==19)
 {
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stIPADDRESS'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
 
 
-echo "
-<table id=report_table_id_19 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-";
-if($useIpaddressalias==1)
-echo "<th>".$_lang['stALIAS']."</th>";
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
 
-echo "</tr>
-";
+$colh[0]=3+$useIpaddressalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 
 $result=mysql_query($queryWhoVisitPopularSiteIpaddress) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[3]."','".$line[0]."','1','')>".$line[0]."</a></td>";
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-if($useIpaddressalias==1)
-echo "<td>".$line[2]."</td>";
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$numrow++;
-}
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>";
-if($useIpaddressalias==1)
-echo "<td>&nbsp;</td>";
+$colr[1]="numrow";
+$colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line3','line0','1','')>line0</a>";
+$colr[3]="line1";
+$colr[4]="line2";
 
-echo "</tr>";
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// WHO VISIT POPULAR SITE IPADDRESS REPORT END
@@ -4602,57 +4272,40 @@ echo "</table>";
 
 if($id==20)
 {
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stIPADDRESS'];
+$colhtext[4]=$_lang['stMEGABYTES'];
+$colhtext[5]=$_lang['stFROMWEBSITE'];
 
 
-echo "
-<table id=report_table_id_20 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stFROMWEBSITE']."
-    </th>
-</tr>
-";
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]=$_lang['stTOTAL'];
+$colftext[4]="totalmb";
+$colftext[5]="&nbsp;";
+
+$colh[0]=5;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
 
 $result=mysql_query($queryWhoDownloadBigFiles) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
+$colr[1]="numrow";
+$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
+$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
+$colr[4]="line1";
+$colr[5]="line3";
 
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
-echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[4]."','".$line[0]."','0','')>".$line[0]."</td>";
-echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[5]."','".$line[1]."','1','')>".$line[1]."</td>";
-$line[2]=$line[2] / 1000000;
-echo "<td>".$line[2]."</td>";
-$totalmb=$totalmb+$line[2];
-echo "<td><a href='http://".$line[3]."' target=blank>".$line[3]."</a></td>";
-echo "</tr>";
-$numrow++;
-}
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td>&nbsp;</td>
-</tr>";
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
 }
 
 /////////////// WHO DOWNLOAD BIG FILES REPORT END
@@ -4661,57 +4314,35 @@ echo "</table>";
 
 if($id==21)
 {
-echo "
-<table id=report_table_id_21 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stMONTHYEAR']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stWHO']."
-    </th>
-</tr>
-";
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stMONTHYEAR'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stWHO'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=4;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 
 $result=mysql_query($queryTrafficByPeriod) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line1";
+$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','$dateTmp')>Логины</a> / 
+<a href=javascript:LeftRightDateSwitch(2,'month','$dateTmp')>IP адреса</a>";
 
 
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td>".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-$explodeTmp=explode(".", $line[0]);
-$dateTmp="1-".$explodeTmp[0]."-".$explodeTmp[1];
-echo "<td><a href=javascript:LeftRightDateSwitch(1,'month','$dateTmp')>Логины</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'month','$dateTmp')>IP адреса</a></td>";
-
-echo "</tr>";
-
-$totalmb=$totalmb+$line[1];
-$numrow++;
-}
-
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td><b>&nbsp;</b></td>
-
-</tr>";
-
-echo "</table>";
-
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// TRAFFIC BY PERIOD REPORT END
@@ -4720,40 +4351,28 @@ echo "</table>";
 
 if($id==22)
 {
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stDATEANDTIME'];
+$colhtext[3]=$_lang['stWEBSITE'];
 
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
 
-echo "
-<table id=report_table_id_22 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stDATEANDTIME']."
-    </th>
-    <th>
-    ".$_lang['stWEBSITE']."
-    </th>
-</tr>
-";
+$colh[0]=3;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
 
 $result=mysql_query($queryVisitingWebsiteByTimeLogin) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td>".$line[0]."</td>";
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line2";
 
-if($enableUseiconv==1)
-$line[1]=iconv("CP1251","UTF-8",urldecode($line[1]));
-
-echo "<td><a href='http://".$line[1]."' target=blank>".$line[1]."</a></td>";
-echo "</tr>";
-$numrow++;
-}
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// VISITING WEBSITE BY TIME REPORT LOGIN END
@@ -4762,40 +4381,28 @@ echo "</table>";
 
 if($id==23)
 {
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stDATEANDTIME'];
+$colhtext[3]=$_lang['stWEBSITE'];
 
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
 
-echo "
-<table id=report_table_id_23 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stDATEANDTIME']."
-    </th>
-    <th>
-    ".$_lang['stWEBSITE']."
-    </th>
-</tr>
-";
+$colh[0]=3;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryVisitingWebsiteByTimeIpaddress) or die (mysql_error());
+$result=mysql_query($queryGroupsTraffic) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td>".$line[0]."</td>";
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line2";
 
-if($enableUseiconv==1)
-$line[1]=iconv("CP1251","UTF-8",urldecode($line[1]));
-
-echo "<td><a href='http://".$line[1]."' target=blank>".$line[1]."</a></td>";
-echo "</tr>";
-$numrow++;
-}
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// VISITING WEBSITE BY TIME REPORT IPADDRESS END
@@ -4804,42 +4411,29 @@ echo "</table>";
 
 if($id==24)
 {
-echo "
-<table id=report_table_id_24 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stGROUP']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>";
-echo "</tr>";
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stGROUP'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+
+$colh[0]=3;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
 
 $result=mysql_query($queryGroupsTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-if($line[3]==0)
-echo "<td><a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','".$line[2]."','".$line[0]."','3','')\">".$line[0]."</td>";
-if($line[3]==1)
-echo "<td><a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','".$line[2]."','".$line[0]."','4','')\">".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$numrow++;
-    }
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>";
-echo "</tr>";
-echo "</table>";
+
+$colr[1]="numrow";
+$colr[2]="<a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','line2','line0',3+line3,'')\">line0</a>";
+$colr[3]="line1";
+
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////// GROUPS TRAFFIC REPORT END
@@ -4850,67 +4444,40 @@ echo "</table>";
 
 if($id==25)
 {
-echo "
-<table id=report_table_id_25 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-";
+$colhtext[1]="#";
 if($typeid==0)
-echo $_lang['stLOGIN'];
-if($typeid==1)
-echo $_lang['stIPADDRESS'];
-echo "</th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>";
-if(($useLoginalias==1)&&($typeid==0))
-echo "<th>".$_lang['stALIAS']."</th>";
-if(($useIpaddressalias==1)&&($typeid==1))
-echo "<th>".$_lang['stALIAS']."</th>";
-echo "</tr>";
+$colhtext[2]=$_lang['stLOGIN'];
+else
+$colhtext[2]=$_lang['stIPADDRESS'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+if($typeid==0)
+$colh[0]=3+$useLoginalias;
+else
+$colh[0]=3+$useIpaddressalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 
 $result=mysql_query($queryOneGroupTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
 
-if($typeid==0)
-{
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$colr[1]="numrow";
+$colr[2]="<a href=\"javascript:GoPartlyReports(8+3*$typeid,'".$dayormonth."','line2','line0',0+$typeid,'')\">line0</a>";
+$colr[3]="line1";
+$colr[4]="line3";
 
-echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</td>";
-}
-if($typeid==1)
-echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-$totalmb=$totalmb+$line[1];
-
-if(($useLoginalias==1)&&($typeid==0))
-echo "<td>".$line[3]."</td>";
-if(($useIpaddressalias==1)&&($typeid==1))
-echo "<td>".$line[3]."</td>";
-
-echo "</tr>";
-$numrow++;
-    }
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>";
-if(($useLoginalias==1)&&($typeid==0))
-echo "<td>&nbsp;</td>";
-if(($useIpaddressalias==1)&&($typeid==1))
-echo "<td>&nbsp;</td>";
-echo "</tr>";
-echo "</table>";
 echo "<script>UpdateLeftMenu(4);</script>";
 }
 
@@ -4970,7 +4537,6 @@ $totalincachemb=0;
 $totaloutcachemb=0;
 $totalincachepc=0;
 $totaloutcachepc=0;
-
 
 $result=mysql_query($queryOneGroupTrafficWide) or die (mysql_error());
 
@@ -5081,55 +4647,33 @@ echo "</table>";
 
 if($id==27)
 {
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stSITE'];
+$colhtext[3]=$_lang['stMEGABYTES'];
 
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
 
-echo "
-<table id=report_table_id_27 class=sortable>
-
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stSITE']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-</tr>
-";
-
-$result=mysql_query($queryOneGroupTopSitesTraffic) or die (mysql_error());
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-
-$tmpLine=explode(':',$line[0]);
-
+$colh[0]=3;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+/*
 if($tmpLine[1]==443)
 echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
 else
 echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+*/
+$result=mysql_query($queryOneGroupTopSitesTraffic) or die (mysql_error());
 
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line1";
 
-$line[1]=$line[1] / 1000000;
-echo "<td>".$line[1]."</td>";
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$numrow++;
-    }
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-</tr>";
-
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// ONE GROUP TOP SITES TRAFFIC REPORT END
@@ -5204,57 +4748,44 @@ echo "</table>";
 
 if($id==29)
 {
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stIPADDRESS'];
+$colhtext[4]=$_lang['stMEGABYTES'];
+$colhtext[5]=$_lang['stFROMWEBSITE'];
 
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]=$_lang['stTOTAL'];
+$colftext[4]="totalmb";
+$colftext[5]="&nbsp;";
 
-echo "
-<table id=report_table_id_29 class=sortable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stFROMWEBSITE']."
-    </th>
-</tr>
-";
+$colh[0]=5;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
 
+/*
+if($tmpLine[1]==443)
+echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+else
+echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+*/
 $result=mysql_query($queryOneGroupWhoDownloadBigFiles) or die (mysql_error());
 
-$numrow=1;
-$totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-#перекодировка в UTF-8 если включена опция.
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$colr[1]="numrow";
+$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')\">line0</a>";
+$colr[3]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line5','line1','1','')\">line2</a>";
+$colr[4]="line1";
+$colr[5]="line3";
 
-echo "<td><a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','".$line[4]."','".$line[0]."','0','')\">".$line[0]."</td>";
-echo "<td><a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','".$line[5]."','".$line[1]."','1','')\">".$line[1]."</td>";
-$line[2]=$line[2] / 1000000;
-echo "<td>".$line[2]."</td>";
-$totalmb=$totalmb+$line[2];
-echo "<td><a href='http://".$line[3]."' target=blank>".$line[3]."</a></td>";
-echo "</tr>";
-$numrow++;
-}
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td>&nbsp;</td>
-</tr>";
-echo "</table>";
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
 }
 
 /////////////// ONE GROUP WHO DOWNLOAD BIG FILES REPORT END
@@ -7396,6 +6927,8 @@ $resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
 $resultcolr=preg_replace("/line1/i", $line[1], $resultcolr);
 $resultcolr=preg_replace("/line2/i", $line[2], $resultcolr);
 $resultcolr=preg_replace("/line3/i", $line[3], $resultcolr);
+$resultcolr=preg_replace("/line4/i", $line[4], $resultcolr);
+$resultcolr=preg_replace("/line5/i", $line[5], $resultcolr);
 $resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
 
 echo 	"<td>".$resultcolr."</td>";
