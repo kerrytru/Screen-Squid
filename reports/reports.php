@@ -1,5 +1,5 @@
 <?php
-#build 20170117
+#build 20170119
 
 $header='<html>
 <head>
@@ -606,6 +606,7 @@ $queryTopLoginsTraffic="
     nofriends.name,
     tmp.s,
     login 
+    ".$echoLoginAliasColumn."
   FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) AS s 
@@ -624,6 +625,13 @@ $queryTopLoginsTraffic="
 		    FROM scsq_logins 
 		    WHERE id NOT IN (".$goodLoginsList.")) AS nofriends 
 	ON tmp.login=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
 
   WHERE tmp.s !=0
 
@@ -636,6 +644,7 @@ $queryTopIpTraffic="
     nofriends.name,
     tmp.s,
     ipaddress 
+    ".$echoIpaddressAliasColumn."
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s 
@@ -656,6 +665,13 @@ $queryTopIpTraffic="
 		    WHERE id NOT IN (".$goodIpaddressList.")) 
 		    AS nofriends 
 	ON tmp.ipaddress=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
 
   WHERE tmp.s !=0
 
