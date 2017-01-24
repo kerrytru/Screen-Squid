@@ -1,5 +1,5 @@
 <?php
-#build 20170119
+#build 20170124
 
 $header='<html>
 <head>
@@ -67,7 +67,7 @@ function LeftRightDateSwitch(idReport, dom,lr)
   
   if(mp1l<10) mp1l='0'+mp1l;
   
-  if(mp1r<10) mp1r='0'+mpid1r;
+  if(mp1r<10) mp1r='0'+mp1r;
 
   ldate=leftdate.getDate()+'-'+mp1l+'-'+leftdate.getFullYear();
   rdate=rightdate.getDate()+'-'+mp1r+'-'+rightdate.getFullYear();
