@@ -67,7 +67,7 @@ function LeftRightDateSwitch(idReport, dom,lr)
   
   if(mp1l<10) mp1l='0'+mp1l;
   
-  if(mp1r<10) mp1r='0'+mp1r;
+  if(mp1r<10) mp1r='0'+mpid1r;
 
   ldate=leftdate.getDate()+'-'+mp1l+'-'+leftdate.getFullYear();
   rdate=rightdate.getDate()+'-'+mp1r+'-'+rightdate.getFullYear();
@@ -124,7 +124,7 @@ idReport - id of report
 dom - day or month report
 id - id login or id ipaddress or id group
 idname - visible name login(Yoda) or name ipaddress(172.16.120.33) or name group(StarWars club)
-idsign - login (0) or ipaddress (1) or group login (2) or group ipaddress (4) or httpstatus id >4
+idsign - login (0) or ipaddress (1) or group login (3) or group ipaddress (4) or httpstatus id >4
 par1 - sitename if report need it or httpstatus name
 
 
@@ -3270,8 +3270,8 @@ $colr[0]=1;
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-$colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line[3]','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+$colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 $colr[6]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -3323,8 +3323,8 @@ $colr[0]=1;
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-$colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line[3]','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+$colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -4237,6 +4237,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
+
 
 $result=mysql_query($queryWhoVisitPopularSiteLogin) or die (mysql_error());
 
