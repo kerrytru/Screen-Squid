@@ -1,5 +1,5 @@
 <?php
-#build 20170124
+#build 20170125
 
 $header='<html>
 <head>
@@ -516,7 +516,8 @@ $queryIpaddressTraffic="
 
 $querySitesTraffic="
   SELECT tmp2.site,
-	 tmp2.s
+	 tmp2.s,
+	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2)
   
   FROM ((SELECT 
 		 sum(sizeinbytes) as s,
@@ -560,8 +561,7 @@ $querySitesTraffic="
 $queryTopSitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
-	 '0',
-	 '1'
+	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2)
   
   FROM ((SELECT 
 		 sum(sizeinbytes) as s,
@@ -3270,9 +3270,9 @@ $colr[0]=1;
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 $colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-$colr[6]="line2";
+$colr[6]="line4"; ///category
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -3323,7 +3323,7 @@ $colr[0]=1;
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 $colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 
 
