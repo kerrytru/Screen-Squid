@@ -377,14 +377,6 @@ else
   $msgNoZeroTraffic=" where tmp.s!=0 ";
 
 
-///common querys reports
-
-$queryMaxLengthAliasName="select max(length(name)) from scsq_alias where typeid=0";
-
-
-///common querys reports end
-
-
 //querys for reports
 
 if($useLoginalias==0)
@@ -3183,7 +3175,6 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryLoginsTraffic) or die (mysql_error());
-$resultmax=mysql_query($queryMaxLengthAliasName) or die (mysql_error());
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="numrow";
