@@ -1,5 +1,5 @@
 <?php
-#build 20170125
+#build 20170126
 
 $header='<html>
 <head>
@@ -377,6 +377,14 @@ else
   $msgNoZeroTraffic=" where tmp.s!=0 ";
 
 
+///common querys reports
+
+$queryMaxLengthAliasName="select max(length(name)) from scsq_alias where typeid=0";
+
+
+///common querys reports end
+
+
 //querys for reports
 
 if($useLoginalias==0)
@@ -411,7 +419,7 @@ $echoLoginAliasColumn=",aliastbl.name";
 	ON tmp.login=nofriends.id  
  	LEFT JOIN (SELECT 
 		      name,
-		      tableid 
+		      tableid		      
 		   FROM scsq_alias 
 		   WHERE typeid=0) 
 		   AS aliastbl 
@@ -3175,6 +3183,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysql_query($queryLoginsTraffic) or die (mysql_error());
+$resultmax=mysql_query($queryMaxLengthAliasName) or die (mysql_error());
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="numrow";
@@ -3182,7 +3191,8 @@ $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line
 $colr[3]="line1";
 $colr[4]="line3";
 
-
+$row = mysql_fetch_array($resultmax,MYSQL_NUM);
+$collength[4]=$row[0];
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
@@ -6778,6 +6788,7 @@ if($makepdf==1)
 {
 //PDF
 
+$pdff="";
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
@@ -6785,28 +6796,22 @@ $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8',
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
 $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->SetHeaderData('','', '', 'powered by TCPDF');
+$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', 8));
 
 // set font
 $pdf->SetFont('dejavusans', '', 10);
 
-// add a page
-$pdf->AddPage();
+$pdff.="<table border=\"1\" cellpadding=\"2\" width=\"100%\" >";
 
-$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
 if($colh[0]==4)
 {
-$pdf->writeHTMLCell(25, 5, '', '', "<b>".$colhtext[1]."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(80, 5, '', '', "<b>".$colhtext[2]."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', "<b>".$colhtext[3]."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(50, 5, '', '', "<b>".$colhtext[4]."</b>", 1, 0, 0, true, 'C', true);
+$pdff.="<tr><th width=\"5%\" align=\"center\">".$colhtext[1]."</th><th width=\"30%\" align=\"center\">".$colhtext[2]."</th><th width=\"20%\" align=\"center\">".$colhtext[3]."</th><th width=\"45%\" align=\"center\">".$colhtext[4]."</th></tr>";
 }
-if($colh[0]==3)
+if(($colh[0]==3)or($colh[0]==5))
 {
-$pdf->writeHTMLCell(25, 5, '', '', "<b>".$colhtext[1]."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(130, 5, '', '',"<b>".$colhtext[2]."</b>", 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', "<b>".$colhtext[3]."</b>", 1, 0, 0, true, 'C', true);
+$pdff.="<tr><th width=\"5%\" align=\"center\">".$colhtext[1]."</th><th width=\"60%\" align=\"center\">".$colhtext[2]."</th><th width=\"30%\" align=\"center\">".$colhtext[3]."</th></tr>";
 }
-$pdf->Ln(5);
 
 $i=1;
 
@@ -6821,29 +6826,23 @@ $resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
 $resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
 $resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
 $resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
+if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
+$resultcolr[$j]=$matches[2];
+//HTML array in $matches[1]
 }
 
 if($colh[0]==4)
 {
-$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(80, 5, '', '', $resultcolr[2], 1, 0, 0, true, 'L', true);
-$pdf->writeHTMLCell(30, 5, '', '', $resultcolr[3], 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(50, 5, '', '', $resultcolr[4], 1, 0, 0, true, 'R', true);
+$pdff.="<tr><td>".$i."</td><td>".$resultcolr[2]."</td><td align=\"right\">".$resultcolr[3]."</td><td>".$resultcolr[4]."</td></tr>";
 }
-if($colh[0]==3)
+if(($colh[0]==3)or($colh[0]==5))
 {
-$pdf->writeHTMLCell(25, 5, '', '', $i, 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(130, 5, '', '', $resultcolr[2], 1, 0, 0, true, 'L', true);
-$pdf->writeHTMLCell(30, 5, '', '', $resultcolr[3], 1, 0, 0, true, 'R', true);
+$pdff.="<tr><td>".$i."</td><td>".$resultcolr[2]."</td><td align=\"right\">".$resultcolr[3]."</td></tr>";
 }
 
 for($j=1;$j<=$colh[0];$j++)
 $resultcolr[$j]="";
 
-
-$pdf->Ln(5);
-if(($i % 46) ==0)
-$pdf->AddPage();
 $i++;
 }
 
@@ -6853,19 +6852,23 @@ preg_replace("/totalmb/i", $totalmb, $colf[$i]);
 $colftext[$i]=round($totalmb,2);
 }
 }
+
+
 if($colh[0]==4)
 {
-$pdf->writeHTMLCell(25, 5, '', '', $colftext[1], 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(80, 5, '', '', $colftext[2], 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'R', true);
-$pdf->writeHTMLCell(50, 5, '', '', $colftext[4], 1, 0, 0, true, 'R', true);
+$pdff.="<tr><td>".$colftext[1]."</td><td>".$colftext[2]."</td><td align=\"right\">".$colftext[3]."</td><td>".$colftext[4]."</td></tr>";
 }
-if($colh[0]==3)
+if(($colh[0]==3)or($colh[0]==5))
 {
-$pdf->writeHTMLCell(25, 5, '', '', $colftext[1], 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(130, 5, '', '', $colftext[2], 1, 0, 0, true, 'C', true);
-$pdf->writeHTMLCell(30, 5, '', '', $colftext[3], 1, 0, 0, true, 'R', true);
+$pdff.="<tr><td>".$colftext[1]."</td><td>".$colftext[2]."</td><td align=\"right\">".$colftext[3]."</td></tr>";
 }
+
+$pdff.="</table>";
+// add a page
+$pdf->AddPage();
+
+$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
+$pdf->writeHTML($pdff, true, false, true, false, 'L');
 
 //Close and output PDF document
 $pdf->Output("../output/report.pdf", 'D');
@@ -6874,6 +6877,8 @@ $pdf->Output("../output/report.pdf", 'D');
 //PDF END
 
 }
+
+//echo $pdff;
 
 /// GENERATE PDF FILE END
 
