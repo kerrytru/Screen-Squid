@@ -1,5 +1,5 @@
 <?php
-#build 20160313
+#build 20170127
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -1027,10 +1027,13 @@ echo "<br /><br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)
 
 echo $_lang['stCREATORS'];
 
+$newdate=strtotime(date("d-m-Y"))-86400;
+$newdate=date("d-m-Y",$newdate);
+
 
 ?>
 <form name=fastdateswitch_form>
-    <input type="hidden" name=date_field_hidden value="<?php echo date('d-m-Y'); ?>">
+    <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
     <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
     <input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
     <input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
