@@ -1,6 +1,6 @@
 <?php
 
-#build 20170114
+#build 20170115
 #server #0
 $srvname[0]="Proxy0"; #nickname of server
 $db[0] = "test";
