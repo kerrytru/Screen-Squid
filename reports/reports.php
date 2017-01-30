@@ -1,5 +1,5 @@
 <?php
-#build 20170126
+#build 20170130
 
 $header='<html>
 <head>
@@ -5663,7 +5663,7 @@ if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / 1000000;
 
-$arrLine0[$numrow-1]=$line[0];
+$arrLine0[$numrow-1]=$line[0]." ";
 $arrLine1[$numrow-1]=$line[1];
 
 
@@ -5683,10 +5683,6 @@ $numrow++;
  // Dataset definition 
  $DataSet = new pData;
  $DataSet->AddPoint($arrLine1,"Serie1");
-// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
-
-/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
-
  $DataSet->AddPoint($arrLine0,"Serie2");
 
  $DataSet->AddAllSeries();
@@ -5716,9 +5712,6 @@ echo "<img src='../lib/pChart/pictures/toplogins".$start.".png' alt='Image'>";
 /// pchart top logins end
 
 ///top ipaddress
-
-
-
 
 $numrow=1;
 while ($numrow<$countTopIpLimit)

@@ -1066,7 +1066,7 @@
        $Value2 = $Value[$DataDescription["Position"]];
        $Position  = imageftbbox($this->FontSize,0,$this->FontName,$Value2);
        $TextWidth = $Position[2]-$Position[0];
-       $TextHeight = $Position[1]-$Position[7];
+       $TextHeight = $Position[1]-$Position[7]+5;
        if ( $TextWidth > $MaxWidth) { $MaxWidth = $TextWidth; }
 
        $MaxHeight = $MaxHeight + $TextHeight + 4;
@@ -1082,7 +1082,7 @@
       {
        $Value2     = $Value[$DataDescription["Position"]];
        $Position   = imageftbbox($this->FontSize,0,$this->FontName,$Value2);
-       $TextHeight = $Position[1]-$Position[7];
+       $TextHeight = $Position[1]-$Position[7]+5;
        $this->drawFilledRectangle($XPos+10,$YPos+$YOffset-6,$XPos+14,$YPos+$YOffset-2,$this->Palette[$ID]["R"],$this->Palette[$ID]["G"],$this->Palette[$ID]["B"]);
 
        imagettftext($this->Picture,$this->FontSize,0,$XPos+22,$YPos+$YOffset,$C_TextColor,$this->FontName,$Value2);

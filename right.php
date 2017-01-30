@@ -73,7 +73,7 @@ echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
 
 $start=microtime(true);
 
-$connectionStatus=mysql_connect("$address","$user","$pass") or die("error");
+$connectionStatus=mysql_connect("$address","$user","$pass") or die(mysql_error());
 mysql_select_db($db);
 
 
