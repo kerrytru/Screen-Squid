@@ -6,7 +6,7 @@ $srvname[0]="Proxy0"; #nickname of server
 $db[0] = "test";
 $user[0] = "mysql-user";
 $pass[0] ="pass";
-$address[0] ="127.0.0.1"; //mysql db
+$address[0] ="localhost"; //mysql db
 $cfgsquidhost[0]="localhost";
 $cfgsquidport[0] = 3128;
 $cfgcachemgr_passwd[0]="";
@@ -74,6 +74,10 @@ $refreshPeriod=5;
 #ширина канала для онлайна в мегабитах. 
 $bandwidth=10;
 
+#тип графика. 0 - линия, 1 - гистограмма. Согласно каждого графика. 
+$graphtype['trafficbyhours']=0;
+
+
 #==============================
 
 
@@ -87,5 +91,5 @@ $countWhoDownloadBigFilesLimit=10;
 //======== queries config end
 
 
-$vers="1.10";
+$vers="1.11b";
 ?>

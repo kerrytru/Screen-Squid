@@ -3450,22 +3450,52 @@ $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
 
-//pChart Graph 
- // Dataset definition 
+if($graphtype['trafficbyhours']==1)
+{
+// Dataset definition 
  $DataSet = new pData;
-# $DataSet->AddPoint(array(1,4,3,4,3,3,2,1,0,7,4,3,2,3,3,5,1,0,7),"Serie1");
  $DataSet->AddPoint($arrHourMb,"Serie1");
-# $DataSet->AddPoint(array("00:00-01:00","01:00-02:00","02:00-03:00","00:03-04:00","04:00-05:00","05:00-06:00","06:00-07:00","08:00-09:00","10:00-11:00","11:00-12:00","12:00-13:00","13:00-14:00","14:00-15:00","15:00-16:00","16:00-17:00","17:00-18:00","18:00-19:00","19:00-20:00","20:00-21:00","21:00-22:00","22:00-23:00","23:00-24:00"),"Serie2");
 
-# $DataSet->AddPoint(array(1,4,2,6,2,3,0,1,5,1,2,4,5,2,1,0,6,4,2),"Serie2");
+ $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
  $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
+ $DataSet->RemoveSerie("Serie3");
+ $DataSet->SetAbsciseLabelSerie("Serie3");
  $DataSet->SetSerieName("Traffic","Serie1");
-# $DataSet->SetSerieName("February","Serie2");
+ $DataSet->SetYAxisName("Megabytes");
 
  // Initialise the graph
  $Test = new pChart(700,230);
-# $Test->setFixedScale(-2,8);
+ $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(120,20,675,190);
+ $Test->drawGraphArea(213,217,221,FALSE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
+ $Test->drawGraphAreaGradient(163,203,167,50);
+ $Test->drawGrid(4,TRUE,230,230,230,20);
+
+ // Draw the bar chart
+ $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
+
+ // Draw the legend
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
+
+ // Render the picture
+ $Test->addBorder(2);
+}
+
+if($graphtype['trafficbyhours']==0)
+{
+//pChart Graph 
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie();
+ $DataSet->SetSerieName("Traffic","Serie1");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
  $Test->setGraphArea(50,30,585,200);
  $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
@@ -3485,7 +3515,8 @@ $HourCounter++;
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
  $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
-# $Test->drawTitle(50,22,"Example 2",50,50,50,585);
+}
+
  $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
 
 echo "<img src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
