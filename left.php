@@ -1,5 +1,5 @@
 <?php
-#build 20161218
+#build 20170131
 include("config.php");
 
 if(isset($_GET['srv']))
@@ -112,6 +112,7 @@ if($idmenu==4)
       <li><a href=\"javascript:GoReport(".$srv.",27)\">".$_lang['stTOPSITESTRAFFIC']."</a>
       <li><a href=\"javascript:GoReport(".$srv.",28)\">".$_lang['stTRAFFICBYHOURS']."</a>
       <li><a href=\"javascript:GoReport(".$srv.",29)\">".$_lang['stWHODOWNLOADBIGFILES']."</a>
+      <li><a href=\"javascript:GoReport(".$srv.",55)\">".$_lang['stPOPULARSITES']."</a>
       <li><a href='mainmenu.php'>".$_lang['stBACK']."</a>
     </ul>";
 ?>
