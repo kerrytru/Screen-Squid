@@ -1,5 +1,5 @@
 <?php
-#build 20170130
+#build 20170131
 
 $header='<html>
 <head>
@@ -1817,9 +1817,6 @@ $queryVisitingWebsiteByTimeLogin="
 	WHERE login=".$currentloginid." 
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT LIKE '%.js%' 
-	  AND site NOT LIKE '%.css%' 
-	  AND sizeinbytes>8192
           AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
   
@@ -2057,9 +2054,6 @@ $queryVisitingWebsiteByTimeIpaddress="
 	where ipaddress=".$currentipaddressid." 
 	  and date>".$datestart." 
 	  and date<".$dateend." 
-	  and site not like '%.js%' 
-	  and site not like '%.css%' 
-	  and sizeinbytes>8192  
           AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 	
@@ -2820,8 +2814,9 @@ if($typeid==0)
 $queryOneGroupWhoDownloadBigFiles="
   SELECT 
     scsq_logins.name,
-    sizeinbytes,site,
+    sizeinbytes,
     scsq_ipaddress.name,
+    site,
     login,
     ipaddress 
   FROM (SELECT 
@@ -2831,7 +2826,7 @@ $queryOneGroupWhoDownloadBigFiles="
 	  ipaddress 
 	FROM scsq_traffic
 
-	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_traffic.login
+	RIGHT JOIN (select * from scsq_alias where typeid=0) as listaliases  ON listaliases.tableid=scsq_traffic.login
 
 	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
 
@@ -2858,7 +2853,7 @@ $queryOneGroupWhoDownloadBigFiles="
 
   WHERE scsq_logins.id=tmp.login 
     and scsq_ipaddress.id=tmp.ipaddress
-
+  GROUP BY site
   ORDER BY sizeinbytes desc 
   LIMIT ".$countWhoDownloadBigFilesLimit.";";
 
@@ -2878,14 +2873,14 @@ $queryOneGroupWhoDownloadBigFiles="
 	  ipaddress 
 	FROM scsq_traffic
 
-	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_traffic.ipaddress
+	RIGHT JOIN (select * from scsq_alias where typeid=1) as listaliases  ON listaliases.tableid=scsq_traffic.ipaddress
 
 	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
 	RIGHT JOIN (SELECT 
 		      id,
 		      name 
 		    FROM scsq_groups 
-		    where typeid=1 
+		    where typeid=1
 		      and id='".$currentgroupid."') 
 		    as curgroup  
 	ON scsq_aliasingroups.groupid=curgroup.id
@@ -2918,8 +2913,116 @@ $queryOneGroupWhoDownloadBigFiles="
 
 	WHERE scsq_logins.id=tmp.login 
 	  and scsq_ipaddress.id=tmp.ipaddress
-
   order by sizeinbytes desc limit ".$countWhoDownloadBigFilesLimit.";";
+
+
+if($typeid==0)
+$queryOneGroupPopularSites="
+  SELECT SUBSTRING_INDEX(scsq_traffic.site,'/',1) as stt,
+	 tmp.s,
+	 tmp.c
+  FROM (SELECT 
+	  CRC32(SUBSTRING_INDEX(site,'/',1)) AS st,
+	  count(*) AS c,
+	  sum(sizeinbytes) AS s,
+	  scsq_traffic.id
+	  
+	FROM scsq_traffic 
+
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_traffic.login
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    where typeid=0 
+		      and id='".$currentgroupid."') 
+		    as curgroup  
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) as tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL
+	  AND tmpipaddress.id is NULL
+          AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+          AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+   
+
+	GROUP BY st
+	ORDER BY null) 
+	AS tmp 
+  JOIN scsq_traffic ON tmp.id=scsq_traffic.id
+  WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
+  ORDER BY tmp.c desc 
+  LIMIT ".$countPopularSitesLimit.";";
+
+#разность запросов в typeid и ON listaliases.tableid=scsq_traffic.login(ipaddress). костыль 
+if($typeid==1)
+$queryOneGroupPopularSites="
+  SELECT SUBSTRING_INDEX(scsq_traffic.site,'/',1) as stt,
+	 tmp.s,
+	 tmp.c
+  FROM (SELECT 
+	  CRC32(SUBSTRING_INDEX(site,'/',1)) AS st,
+	  count(*) AS c,
+	  sum(sizeinbytes) AS s,
+	  scsq_traffic.id
+	  
+	FROM scsq_traffic 
+
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_traffic.ipaddress
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    where typeid=1 
+		      and id='".$currentgroupid."') 
+		    as curgroup  
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) as tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL
+	  AND tmpipaddress.id is NULL
+          AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+          AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+   
+
+	GROUP BY st
+	ORDER BY null) 
+	AS tmp 
+  JOIN scsq_traffic ON tmp.id=scsq_traffic.id
+  WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
+  ORDER BY tmp.c desc 
+  LIMIT ".$countPopularSitesLimit.";";
+
 
 //querys for group reports end
 
@@ -4448,7 +4551,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryGroupsTraffic) or die (mysql_error());
+$result=mysql_query($queryVisitingWebsiteByTimeIpaddress) or die (mysql_error());
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4831,7 +4934,7 @@ $result=mysql_query($queryOneGroupWhoDownloadBigFiles) or die (mysql_error());
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')\">line0</a>";
-$colr[3]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line5','line1','1','')\">line2</a>";
+$colr[3]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')\">line2</a>";
 $colr[4]="line1";
 $colr[5]="line3";
 
@@ -6712,6 +6815,58 @@ echo "</table>";
 }
 
 /////////////// TRAFFIC BY HOURS IPADDRESS REPORT ONE SITE END
+
+/////////////// GROUP POPULAR SITES REPORT
+
+if($id==55)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stSITE'];
+$colhtext[3]=$_lang['stREQUESTS'];
+$colhtext[4]=$_lang['stMEGABYTES'];
+$colhtext[5]=$_lang['stWHO'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]=$_lang['stTOTAL'];
+$colftext[4]="totalmb";
+$colftext[5]="&nbsp;";
+
+$colh[0]=5;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
+
+/*
+$tmpLine=explode(':',$line[0]);
+
+if($tmpLine[1]==443)
+echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+else
+echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+*/
+
+$result=mysql_query($queryOneGroupPopularSites) or die (mysql_error());
+
+$colr[0]=1;
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line2";
+$colr[4]="line1";
+$colr[5]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','1','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','1','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
+
+}
+
+/////////////// ONE GROUP POPULAR SITES REPORT END
 
 
 /////universal table
