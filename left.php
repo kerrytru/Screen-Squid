@@ -1,5 +1,5 @@
 <?php
-#build 20170131
+#build 20170203
 include("config.php");
 
 if(isset($_GET['srv']))
@@ -87,7 +87,7 @@ if($idmenu==1)
       <li><a href=\"javascript:GoPartlyReport(".$srv.",22)\">".$_lang['stVISITINGWEBSITELOGINS'] ." ".$_lang['stBYDAYTIME']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",35)\">".$_lang['stONELOGINIPTRAFFIC']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",46)\">".$_lang['stMIMETYPESTRAFFIC']."</a>
-
+      <li><a href=\"javascript:GoPartlyReport(".$srv.",56)\">".$_lang['stPOPULARSITES']."</a>
       <li><a href='mainmenu.php'>".$_lang['stBACK']."</a>
     </ul>";
 
@@ -100,6 +100,7 @@ if($idmenu==2)
       <li><a href=\"javascript:GoPartlyReport(".$srv.",23)\">".$_lang['stVISITINGWEBSITEIPADDRESS']." ".$_lang['stBYDAYTIME']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",36)\">".$_lang['stONEIPADDRESSLOGINSTRAFFIC']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",47)\">".$_lang['stMIMETYPESTRAFFIC']."</a>
+      <li><a href=\"javascript:GoPartlyReport(".$srv.",57)\">".$_lang['stPOPULARSITES']."</a>
       <li><a href='mainmenu.php'>".$_lang['stBACK']."</a>
     </ul>";
 
