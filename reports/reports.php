@@ -264,9 +264,15 @@ $dayname="";
 
 
 if(isset($_GET['loginname']))
+{
   $currentlogin=$_GET['loginname'];
+  $currentmime=$_GET['loginname'];
+}
 else
+{
   $currentlogin="";
+  $currentmime="";
+}
 
 if(isset($_GET['login']))
   $currentloginid=$_GET['login'];
@@ -1847,6 +1853,7 @@ $queryOneLoginPopularSites="
   ORDER BY tmp.c desc 
   LIMIT ".$countPopularSitesLimit.";";
 
+
 $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
@@ -2294,6 +2301,54 @@ $queryOneIpaddressMimeTypesTraffic="
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
   GROUP BY mime
   ORDER BY s desc ";
+
+$queryOneMime="
+  SELECT 
+    scsq_log.name,
+    tmp.sizeinbytes,
+    scsq_ip.name, 
+    scsq_traf.site,
+    scsq_log.id,
+    scsq_ip.id 
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	LEFT OUTER JOIN (SELECT 
+			   scsq_logins.id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   scsq_ipaddress.id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND mime='".$currentmime."'
+  	ORDER BY sizeinbytes desc 
+  	)
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+";
+
 
 
 //partly queries end
@@ -3296,6 +3351,9 @@ $repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentlogin."</b> ".$_lang[
 
 if($id==57)
 $repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==58)
+$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 
 
@@ -5646,7 +5704,8 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $result=mysql_query($queryMimeTypesTraffic) or die (mysql_error());
 
 $colr[1]="numrow";
-$colr[2]="line0";
+$colr[2]="<a href=\"javascript:GoPartlyReports(58,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
+//$colr[2]="line0";
 $colr[3]="line1";
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -7015,6 +7074,48 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// ONE IPADDRESS POPULAR SITES REPORT END
+
+/////////////// ONE MIME SITES REPORT
+
+if($id==58)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stIPADDRESS'];
+$colhtext[4]=$_lang['stMEGABYTES'];
+$colhtext[5]=$_lang['stFROMWEBSITE'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]=$_lang['stTOTAL'];
+$colftext[4]="totalmb";
+$colftext[5]="&nbsp;";
+
+$colh[0]=5;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
+
+$result=mysql_query($queryOneMime) or die (mysql_error());
+
+$colr[1]="numrow";
+$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
+$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
+$colr[4]="line1";
+$colr[5]="line3";
+
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
+}
+
+/////////////// ONE MIME SITES REPORT END
 
 
 /////universal table

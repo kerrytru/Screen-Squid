@@ -170,5 +170,7 @@ $_lang['stONLINE']="Онлайн";
 $_lang['stREFRESHED']="Дата обновления";
 $_lang['stSPEED']="Скорость (кБ/сек)";
 
+$_lang['stCONTENT']="Контент";
+
 
 ?>
