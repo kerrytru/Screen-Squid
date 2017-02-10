@@ -1125,9 +1125,10 @@ $queryHttpStatus= "
 $queryCountIpaddressOnLogins="
   SELECT 
     scsq_logins.name,
-    count(*) AS ct,
+    '',
     scsq_logins.id,
-    tmp2.name 
+    tmp2.name,
+    count(*) AS ct 
   FROM (SELECT DISTINCT 
 	  login, 
 	  ipaddress 
@@ -1165,9 +1166,10 @@ $queryCountIpaddressOnLogins="
 $queryCountLoginsOnIpaddress="
   SELECT
     scsq_ipaddress.name,
-    count(*) AS ct,
+    '',
     scsq_ipaddress.id,
-    tmp2.name 
+    tmp2.name,
+    count(*) AS ct 
   FROM (SELECT DISTINCT 
 	  login, 
 	  ipaddress 
@@ -3734,7 +3736,7 @@ if($graphtype['trafficbyhours']==0)
 
  $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
 
-echo "<img src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+echo "<img id=\"\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
 
 ///pChart Graph END
 
@@ -5332,7 +5334,7 @@ $result=mysql_query($queryCountIpaddressOnLogins) or die (mysql_error());
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(35,'".$dayormonth."','line2','line0','0','')>line1</a>";
+$colr[3]="<a href=javascript:GoPartlyReports(35,'".$dayormonth."','line2','line0','0','')>line4</a>";
 $colr[4]="line3";
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -5367,7 +5369,7 @@ $result=mysql_query($queryCountLoginsOnIpaddress) or die (mysql_error());
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0','1','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(36,'".$dayormonth."','line2','line0','1','')>line1</a>";
+$colr[3]="<a href=javascript:GoPartlyReports(36,'".$dayormonth."','line2','line0','1','')>line4</a>";
 $colr[4]="line3";
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -5885,7 +5887,7 @@ $HourCounter++;
  $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
  $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
 
-echo "<img src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+echo "<img id=\"\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
 
 ///pChart Graph BY HOURS END
 
@@ -5953,7 +5955,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/toplogins".$start.".png");
 
-echo "<img src='../lib/pChart/pictures/toplogins".$start.".png' alt='Image'>";
+echo "<img id=\"\" src='../lib/pChart/pictures/toplogins".$start.".png' alt='Image'>";
 
 
 /// pchart top logins end
@@ -6025,7 +6027,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/topips".$start.".png");
 
-echo "<img src='../lib/pChart/pictures/topips".$start.".png' alt='Image'>";
+echo "<img id=\"\" src='../lib/pChart/pictures/topips".$start.".png' alt='Image'>";
 
 
 /// pchart top ip end
@@ -6101,7 +6103,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
 
-echo "<img src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
+echo "<img id=\"\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
 
 
 /// pchart top sites end
@@ -6173,7 +6175,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
 
-echo "<img src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
+echo "<img id=\"\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
 
 
 /// pchart top popular end
