@@ -293,6 +293,9 @@ else
 if(isset($_GET['site']))
 {
   $currentsite=$_GET['site'];
+  $currentlogin=$_GET['site'];
+  $currentipaddress=$_GET['site'];
+
 //костыль для отчетов 41 и 42 и 43 и 44
 $currenthour=$_GET['site'];
 }
@@ -2351,7 +2354,93 @@ $queryOneMime="
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
 ";
 
+$queryOneMimeOneLogin="
+  SELECT 
+    scsq_traf.site,
+    tmp.sizeinbytes
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	LEFT OUTER JOIN (SELECT 
+			   scsq_logins.id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   scsq_ipaddress.id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
 
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND mime='".$currentmime."'
+	  AND login=".$currentloginid."
+  	ORDER BY sizeinbytes desc 
+  	)
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+";
+
+$queryOneMimeOneIpaddress="
+  SELECT 
+    scsq_traf.site,
+    tmp.sizeinbytes
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	LEFT OUTER JOIN (SELECT 
+			   scsq_logins.id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   scsq_ipaddress.id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND mime='".$currentmime."'
+	  AND ipaddress=".$currentipaddressid."
+  	ORDER BY sizeinbytes desc 
+  	)
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+";
 
 //partly queries end
 
@@ -3356,6 +3445,12 @@ $repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentipaddress."</b> ".$_l
 
 if($id==58)
 $repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==59)
+$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==60)
+$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 
 
@@ -5707,7 +5802,6 @@ $result=mysql_query($queryMimeTypesTraffic) or die (mysql_error());
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(58,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
-//$colr[2]="line0";
 $colr[3]="line1";
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -5737,7 +5831,8 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $result=mysql_query($queryOneLoginMimeTypesTraffic) or die (mysql_error());
 
 $colr[1]="numrow";
-$colr[2]="line0";
+$colr[2]="<a href=\"javascript:GoPartlyReports(59,'".$dayormonth."','".$currentloginid."','line0',0,'".$currentlogin."')\">line0</a>";
+//$colr[2]="line0";
 $colr[3]="line1";
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -5768,7 +5863,8 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $result=mysql_query($queryOneIpaddressMimeTypesTraffic) or die (mysql_error());
 
 $colr[1]="numrow";
-$colr[2]="line0";
+$colr[2]="<a href=\"javascript:GoPartlyReports(60,'".$dayormonth."','".$currentipaddressid."','line0',0,'".$currentipaddress."')\">line0</a>";
+//$colr[2]="line0";
 $colr[3]="line1";
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -7118,6 +7214,72 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 }
 
 /////////////// ONE MIME SITES REPORT END
+
+/////////////// ONE MIME LOGIN SITES REPORT
+
+if($id==59)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stFROMWEBSITE'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+
+$colh[0]=3;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+
+$result=mysql_query($queryOneMimeOneLogin) or die (mysql_error());
+
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line1";
+
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+}
+
+/////////////// ONE MIME LOGIN SITES REPORT END
+
+
+/////////////// ONE MIME IPADDRESS SITES REPORT
+
+if($id==60)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stFROMWEBSITE'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+
+$colh[0]=3;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+
+$result=mysql_query($queryOneMimeOneIpaddress) or die (mysql_error());
+
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line1";
+
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+}
+
+/////////////// ONE MIME IPADDRESS SITES REPORT END
+
 
 
 /////universal table
