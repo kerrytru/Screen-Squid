@@ -1,5 +1,5 @@
 <?php
-#build 20170203
+#build 20170210
  
 $header='<html>
 <head>
@@ -7292,6 +7292,7 @@ while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / 1000000;
+
 $totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);
 $numrow++;
@@ -7314,7 +7315,10 @@ echo "	</tr>";
 for($i=1;$i<$numrow;$i++) {
 $line=explode(';;',$rows[$i]);
 $line[1]=sprintf("%f",$line[1]);  //disable scientific format, like 5E-10
-
+if($roundTrafficDigit>=0){
+$line[1]=round($line[1],$roundTrafficDigit);
+$totalmb=round($totalmb,$roundTrafficDigit);
+}
 echo "<tr>";
 
 for($j=1;$j<=$colh[0];$j++){
