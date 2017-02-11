@@ -3831,7 +3831,7 @@ if($graphtype['trafficbyhours']==0)
 
  $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
 
-echo "<img id=\"\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
 
 ///pChart Graph END
 
@@ -5983,7 +5983,7 @@ $HourCounter++;
  $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
  $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
 
-echo "<img id=\"\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
 
 ///pChart Graph BY HOURS END
 
@@ -6051,7 +6051,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/toplogins".$start.".png");
 
-echo "<img id=\"\" src='../lib/pChart/pictures/toplogins".$start.".png' alt='Image'>";
+echo "<img id=\"toplogins\" src='../lib/pChart/pictures/toplogins".$start.".png' alt='Image'>";
 
 
 /// pchart top logins end
@@ -6123,7 +6123,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/topips".$start.".png");
 
-echo "<img id=\"\" src='../lib/pChart/pictures/topips".$start.".png' alt='Image'>";
+echo "<img id=\"topips\" src='../lib/pChart/pictures/topips".$start.".png' alt='Image'>";
 
 
 /// pchart top ip end
@@ -6199,7 +6199,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
 
-echo "<img id=\"\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
+echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
 
 
 /// pchart top sites end
@@ -6271,7 +6271,7 @@ $numrow++;
 
  $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
 
-echo "<img id=\"\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
+echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
 
 
 /// pchart top popular end
