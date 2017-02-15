@@ -169,8 +169,10 @@ $_lang['stACTIVEIPADDRESS']="Активные IP адреса";
 $_lang['stONLINE']="Онлайн";
 $_lang['stREFRESHED']="Дата обновления";
 $_lang['stSPEED']="Скорость (кБ/сек)";
-
 $_lang['stCONTENT']="Контент";
+
+$_lang['stSTART']="Пуск";
+$_lang['stSTOP']="Стоп";
 
 
 ?>

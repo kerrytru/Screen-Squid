@@ -31,9 +31,16 @@ $id=$_GET['id'];
 else
 $id=0;
 
+if (isset($_GET['norefresh']))
+$norefresh=$_GET['norefresh'];
+else
+$norefresh=0;
 
+
+if($norefresh==0){
 if($id==1||$id==2)
 echo '<META HTTP-EQUIV="REFRESH" CONTENT="'.$refreshPeriod.'">'; ///обновление страницы в секундах
+}
 
 echo "
 </head>
@@ -208,6 +215,8 @@ $sqltext="ALTER TABLE scsq_sqper_activerequests AUTO_INCREMENT = 1 ;";
 $result=mysql_query($sqltext) or die (mysql_error());
 
 $cmd = "GET cache_object://".$squidhost."/active_requests HTTP/1.0\r\n";
+//$cmd = "GET cache_object://".$squidhost."/active_requests";
+
 if($cachemgr_passwd!="") 
 $cmd.="Authorization: Basic ".base64_encode("cachemgr:$cachemgr_passwd")."\r\n";
 $cmd.="\r\n";
@@ -215,6 +224,7 @@ $cmd.="\r\n";
 //echo $cmd;
 
  $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
+
 if($fp) {
  fwrite($fp, $cmd); 
 $count=0;
@@ -228,7 +238,6 @@ $ptmp="";
   $allsize=0;
 $tmp=fgets($fp,2048);
 $ptmp.=$tmp;
-//echo $tmp;
 }
 
 if(preg_match("/HTTP/1.0 200 OK/",$ptmp)){
@@ -270,7 +279,7 @@ echo "<br />";
 
 if($errCheck==0)
 {
-
+echo "<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&norefresh=1>".$_lang['stSTOP']."</a>";
 $result=mysql_query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests") or die (mysql_error());
 $lastUpdateDate = mysql_fetch_array($result,MYSQL_NUM);
 echo "

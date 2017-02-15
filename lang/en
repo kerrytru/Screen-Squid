@@ -169,4 +169,6 @@ $_lang['stREFRESHED']="Refreshed in";
 $_lang['stSPEED']="kb/sec";
 
 $_lang['stCONTENT']="Content";
+$_lang['stSTART']="Start";
+$_lang['stSTOP']="Stop";
 ?>
