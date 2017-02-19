@@ -174,5 +174,7 @@ $_lang['stCONTENT']="Контент";
 $_lang['stSTART']="Пуск";
 $_lang['stSTOP']="Стоп";
 
+$_lang['stINSPECT']="Наблюдение";
+
 
 ?>

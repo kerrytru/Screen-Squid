@@ -279,11 +279,52 @@ echo "<br />";
 
 if($errCheck==0)
 {
-echo "<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&norefresh=1>".$_lang['stSTOP']."</a>";
+$getInspLines=$_GET['insp'];
+///add to inspect
+if(isset($_GET['iadd']))
+$getInspLines=$getInspLines.",".$_GET['iadd'];
+///delete from inspect
+if(isset($_GET['idel']))
+$getInspLines=str_replace($_GET['idel'], "", $getInspLines);
+//delete trash from inspect like double commas
+$getInspLines=str_replace(",,", ",", $getInspLines);
+
+if(isset($_GET['insp']))
+$_GET['insp']=$getInspLines;
+//show inspect table if we had something to show
+if(($_GET['insp']!=",")&&(isset($_GET['insp']))&&(strlen($_GET['insp'])>0)){
+$showInspectTable=1;
+$inspLines=explode(",",$getInspLines);
+}
+else
+$showInspectTable=0;
+
+
+echo "<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=1>".$_lang['stSTOP']."</a>";
 $result=mysql_query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests") or die (mysql_error());
 $lastUpdateDate = mysql_fetch_array($result,MYSQL_NUM);
+
+$result=mysql_query($queryActiveUsers) or die (mysql_error());
+$numrow=1;
+$totalspeed=0;
+$insptotalspeed=0; //total speed for inspected table
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+if($line[0]=='')
+$line[0]="::1";
+
+@$rows[$numrow]=implode(";;",$line);
+$numrow++;
+}
+
+echo "<p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />";
+
+#inspect table
+
+if($showInspectTable) {
 echo "
-<p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />
 <table id=report_table_id_10 class=sortable>
 <tr>
     <th class=unsortable>
@@ -298,26 +339,79 @@ echo "
     <th>
     ".$_lang['stSPEED']."
     </th>
-
+    <th>
+    ".$_lang['stINSPECT']."
+    </th>
 </tr>
 ";
-$result=mysql_query($queryActiveUsers) or die (mysql_error());
-$numrow=1;
 
-$totalspeed=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+for($i=1;$i<$numrow;$i++) {
+
+$line=explode(';;',$rows[$i]);
+
+if(in_array($line[0],$inspLines))
+{
 echo "<tr>";
-echo "<td>".$numrow."</td>";
-
-if($line[0]=='')
-echo "<td>::1</td>";
-else
+echo "<td>".$i."</td>";
 echo "<td>".$line[0]."</td>";
 echo "<td>".$line[2]."</td>"; //username
 $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
+echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&idel=".$line[0].">".$_lang['stDELETE']."</a></td>";
 echo "</tr>";
-$numrow++;
+$insptotalspeed+=$line[1];
+}
+    }
+echo "<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>".$_lang['stTOTAL']."</td>
+<td>".$insptotalspeed."</td>
+<td>&nbsp;</td>
+</tr>
+";
+
+echo "</table>";
+echo "<br />";
+}
+#inspect table end
+
+
+echo "
+<table id=report_table_id_10 class=sortable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th>
+    ".$_lang['stIPADDRESS']."
+    </th>
+    <th>
+    ".$_lang['stLOGIN']."
+    </th>
+    <th>
+    ".$_lang['stSPEED']."
+    </th>
+    <th>
+    ".$_lang['stINSPECT']."
+    </th>
+</tr>
+";
+
+for($i=1;$i<$numrow;$i++) {
+
+$line=explode(';;',$rows[$i]);
+echo "<tr>";
+echo "<td>".$i."</td>";
+echo "<td>".$line[0]."</td>";
+echo "<td>".$line[2]."</td>"; //username
+$line[1]=round($line[1],2);
+echo "<td>".$line[1]."</td>";
+echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&iadd=".$line[0].">".$_lang['stADD']."</a></td>";
+
+
+
+echo "</tr>";
 $totalspeed+=$line[1];
     }
 echo "<tr>
@@ -325,10 +419,13 @@ echo "<tr>
 <td>&nbsp;</td>
 <td>".$_lang['stTOTAL']."</td>
 <td>".$totalspeed."</td>
+<td>&nbsp;</td>
 </tr>
 ";
 
 echo "</table>";
+
+
 #trend totalspeed
    $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$totalspeed,1)";
 mysql_query($sqltext) or die (mysql_error());
