@@ -258,6 +258,7 @@ $matchsec[1][$i]=1;
 $ipaddress=trim($matchpeer[2][$i]);
 $username=$match[1][$i];
 $site=$matchuri[1][$i];
+$site=preg_replace("/\'/i", "&quot;", $site);
 $size=$matchsize[1][$i];
 $seconds=$matchsec[1][$i];
 	$sqltext="INSERT INTO scsq_sqper_activerequests (date,ipaddress,username,site,sizeinbytes,seconds) VALUES";
