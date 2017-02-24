@@ -1,5 +1,5 @@
 <?php
-#build 20170210
+#build 20170224
  
 $header='<html>
 <head>
@@ -293,7 +293,9 @@ else
 if(isset($_GET['site']))
 {
   $currentsite=$_GET['site'];
+if($currentlogin=="")
   $currentlogin=$_GET['site'];
+if($currentipaddress=="")
   $currentipaddress=$_GET['site'];
 
 //костыль для отчетов 41 и 42 и 43 и 44
@@ -2293,6 +2295,8 @@ $queryOneLoginMimeTypesTraffic="
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
   GROUP BY mime
   ORDER BY s desc ";
+
+
 
 $queryOneIpaddressMimeTypesTraffic="
 	SELECT 

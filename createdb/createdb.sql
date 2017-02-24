@@ -3,6 +3,9 @@
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 
+--
+--
+
 -- --------------------------------------------------------
 
 --
@@ -16,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `scsq_alias` (
   `tableid` varchar(50) NOT NULL,
   `password` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -29,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `scsq_aliasingroups` (
   `groupid` int(4) NOT NULL,
   `aliasid` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -43,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `scsq_categorylist` (
   `site` varchar(300) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `site` (`site`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -57,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `scsq_groups` (
   `typeid` int(2) NOT NULL,
   `comment` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -69,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `scsq_httpstatus` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -81,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `scsq_ipaddress` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(18) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -93,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `scsq_logins` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -107,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `scsq_logtable` (
   `dateend` int(11) DEFAULT NULL,
   `message` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -126,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `scsq_quicktraffic` (
   `par` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `date` (`date`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -143,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `scsq_sqper_activerequests` (
   `sizeinbytes` int(11) NOT NULL,
   `seconds` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -175,6 +178,7 @@ CREATE TABLE IF NOT EXISTS `scsq_temptraffic` (
   `site` varchar(700) DEFAULT NULL,
   `method` varchar(15) DEFAULT NULL,
   `mime` varchar(100) DEFAULT NULL,
+  `numproxy` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `date` (`date`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -195,9 +199,10 @@ CREATE TABLE IF NOT EXISTS `scsq_traffic` (
   `site` varchar(700) DEFAULT NULL,
   `method` varchar(15) DEFAULT NULL,
   `mime` varchar(100) DEFAULT NULL,
+  `numproxy` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `date` (`date`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
