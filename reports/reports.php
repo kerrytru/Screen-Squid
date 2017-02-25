@@ -2448,8 +2448,12 @@ $queryOneMimeOneIpaddress="
 
 //partly queries end
 
+//************************************
+//************************************
 //querys for group reports
-
+//************************************
+//************************************
+//************************************
 
 $queryGroupsTraffic="
   SELECT
@@ -3456,6 +3460,14 @@ $repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentlo
 if($id==60)
 $repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
+if($id==61)
+$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==62)
+$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==63)
+$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 
 if(!isset($_GET['pdf'])){
@@ -5948,23 +5960,53 @@ $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
 
-//pChart Graph BY hours
- // Dataset definition 
+if($graphtype['trafficbyhours']==1)
+{
+// Dataset definition 
  $DataSet = new pData;
-# $DataSet->AddPoint(array(1,4,3,4,3,3,2,1,0,7,4,3,2,3,3,5,1,0,7),"Serie1");
  $DataSet->AddPoint($arrHourMb,"Serie1");
 
-# $DataSet->AddPoint(array("00:00-01:00","01:00-02:00","02:00-03:00","00:03-04:00","04:00-05:00","05:00-06:00","06:00-07:00","08:00-09:00","10:00-11:00","11:00-12:00","12:00-13:00","13:00-14:00","14:00-15:00","15:00-16:00","16:00-17:00","17:00-18:00","18:00-19:00","19:00-20:00","20:00-21:00","21:00-22:00","22:00-23:00","23:00-24:00"),"Serie2");
-
-# $DataSet->AddPoint(array(1,4,2,6,2,3,0,1,5,1,2,4,5,2,1,0,6,4,2),"Serie2");
+ $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
  $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
+ $DataSet->RemoveSerie("Serie3");
+ $DataSet->SetAbsciseLabelSerie("Serie3");
  $DataSet->SetSerieName("Traffic","Serie1");
-# $DataSet->SetSerieName("February","Serie2");
+ $DataSet->SetYAxisName("Megabytes");
 
  // Initialise the graph
  $Test = new pChart(700,230);
-# $Test->setFixedScale(-2,8);
+ $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(120,20,675,190);
+ $Test->drawGraphArea(213,217,221,FALSE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
+ $Test->drawGraphAreaGradient(163,203,167,50);
+ $Test->drawGrid(4,TRUE,230,230,230,20);
+
+ // Draw the bar chart
+ $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
+
+ // Draw the legend
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
+
+ // Render the picture
+ $Test->addBorder(2);
+}
+
+if($graphtype['trafficbyhours']==0)
+{
+
+//pChart Graph BY hours
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie();
+ $DataSet->SetSerieName("Traffic","Serie1");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
  $Test->setGraphArea(50,30,585,200);
  $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
@@ -5985,7 +6027,9 @@ $HourCounter++;
  $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
  $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
  $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
+}
  $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
+
 
 echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
 
@@ -7283,6 +7327,800 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// ONE MIME IPADDRESS SITES REPORT END
+
+////////////// ONE LOGIN DASHBOARD REPORT
+
+if($id==61)
+{
+
+//delete graph if exists
+
+foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+   unlink($filename);
+}
+
+$result=mysql_query($queryOneLoginTrafficByHours) or die (mysql_error());
+
+$HourCounter=0;
+$totalmb=0;
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+while($HourCounter<24)
+{
+if($HourCounter<$line[0])
+{
+$arrHourMb[$HourCounter]=0;
+}
+if($HourCounter==$line[0])
+break;
+
+$HourCounter++;
+}
+$line[1]=$line[1] / 1000000;
+$arrHourMb[$HourCounter]=$line[1];
+$totalmb=$totalmb+$line[1];
+$HourCounter++;
+}
+
+while($HourCounter<24)
+{
+$arrHourMb[$HourCounter]=0;
+$HourCounter++;
+}
+
+if($graphtype['trafficbyhours']==1)
+{
+// Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+
+ $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
+ $DataSet->AddAllSeries();
+ $DataSet->RemoveSerie("Serie3");
+ $DataSet->SetAbsciseLabelSerie("Serie3");
+ $DataSet->SetSerieName("Traffic","Serie1");
+ $DataSet->SetYAxisName("Megabytes");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
+ $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(120,20,675,190);
+ $Test->drawGraphArea(213,217,221,FALSE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
+ $Test->drawGraphAreaGradient(163,203,167,50);
+ $Test->drawGrid(4,TRUE,230,230,230,20);
+
+ // Draw the bar chart
+ $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
+
+ // Draw the legend
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
+
+ // Render the picture
+ $Test->addBorder(2);
+}
+
+if($graphtype['trafficbyhours']==0)
+{
+
+//pChart Graph BY hours
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie();
+ $DataSet->SetSerieName("Traffic","Serie1");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(50,30,585,200);
+ $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
+ $Test->drawGraphArea(255,255,255,TRUE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
+ $Test->drawGrid(4,TRUE,230,230,230,50);
+
+ // Draw the 0 line
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
+ $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
+
+ // Draw the cubic curve graph
+ $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
+
+ // Finish the graph
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
+}
+ $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
+
+echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+
+///pChart Graph BY HOURS END
+
+///top sites
+
+$numrow=1;
+while ($numrow<$countTopSitesLimit)
+{
+$arrLine0[$numrow-1]="NO DATA";
+$arrLine1[$numrow-1]=0;
+$numrow++;
+}
+
+$result=mysql_query($queryOneLoginTopSitesTraffic) or die (mysql_error());
+$numrow=1;
+$totalmb=0;
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+if($line[3]=='2')
+$line[0]=$line[2];
+
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$line[1]=$line[1] / 1000000;
+
+$arrLine0[$numrow-1]=$line[0];
+$arrLine1[$numrow-1]=$line[1];
+
+
+if($numrow==$countTopSitesLimit)
+break;
+
+$numrow++;
+}
+
+
+//top sites end
+
+
+/// pchart top sites
+
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrLine1,"Serie1");
+// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+
+/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
+
+ $DataSet->AddPoint($arrLine0,"Serie2");
+
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie("Serie2");
+
+ // Initialise the graph
+ $Test = new pChart(700,400);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+
+ // Draw the pie chart
+ $Test->AntialiasQuality = 0;
+ $Test->setShadowProperties(2,2,200,200,200);
+ $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
+ $Test->clearShadow();
+
+ $Test->drawTitle(50,22,$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")",50,50,50,585);
+
+
+ $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
+
+ $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
+
+echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
+
+
+/// pchart top sites end
+
+///top popular
+
+$numrow=1;
+while ($numrow<$countPopularSitesLimit)
+{
+$arrLine0[$numrow-1]="NO DATA";
+$arrLine1[$numrow-1]=0;
+$numrow++;
+}
+
+$result=mysql_query($queryOneLoginPopularSites) or die (mysql_error());
+$numrow=1;
+$totalmb=0;
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$line[1]=$line[1];
+
+$arrLine0[$numrow-1]=$line[0];
+$arrLine1[$numrow-1]=$line[1];
+
+
+if($numrow==$countPopularSitesLimit)
+break;
+
+$numrow++;
+}
+
+
+//top popular end
+
+
+/// pchart top popular
+
+
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrLine1,"Serie1");
+// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+
+/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
+
+ $DataSet->AddPoint($arrLine0,"Serie2");
+
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie("Serie2");
+
+ // Initialise the graph
+ $Test = new pChart(700,400);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+
+ // Draw the pie chart
+ $Test->AntialiasQuality = 0;
+ $Test->setShadowProperties(2,2,200,200,200);
+ $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
+ $Test->clearShadow();
+
+ $Test->drawTitle(50,22,$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")",50,50,50,585);
+
+ $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
+
+ $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
+
+echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
+
+
+/// pchart top popular end
+
+
+}
+
+/////////////// ONE LOGIN DASHBOARD REPORT END
+
+
+////////////// ONE IPADDRESS DASHBOARD REPORT
+
+if($id==62)
+{
+
+//delete graph if exists
+
+foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+   unlink($filename);
+}
+
+$result=mysql_query($queryOneIpaddressTrafficByHours) or die (mysql_error());
+
+$HourCounter=0;
+$totalmb=0;
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+while($HourCounter<24)
+{
+if($HourCounter<$line[0])
+{
+$arrHourMb[$HourCounter]=0;
+}
+if($HourCounter==$line[0])
+break;
+
+$HourCounter++;
+}
+$line[1]=$line[1] / 1000000;
+$arrHourMb[$HourCounter]=$line[1];
+$totalmb=$totalmb+$line[1];
+$HourCounter++;
+}
+
+while($HourCounter<24)
+{
+$arrHourMb[$HourCounter]=0;
+$HourCounter++;
+}
+
+if($graphtype['trafficbyhours']==1)
+{
+// Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+
+ $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
+ $DataSet->AddAllSeries();
+ $DataSet->RemoveSerie("Serie3");
+ $DataSet->SetAbsciseLabelSerie("Serie3");
+ $DataSet->SetSerieName("Traffic","Serie1");
+ $DataSet->SetYAxisName("Megabytes");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
+ $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(120,20,675,190);
+ $Test->drawGraphArea(213,217,221,FALSE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
+ $Test->drawGraphAreaGradient(163,203,167,50);
+ $Test->drawGrid(4,TRUE,230,230,230,20);
+
+ // Draw the bar chart
+ $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
+
+ // Draw the legend
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
+
+ // Render the picture
+ $Test->addBorder(2);
+}
+
+if($graphtype['trafficbyhours']==0)
+{
+
+
+//pChart Graph BY hours
+
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie();
+ $DataSet->SetSerieName("Traffic","Serie1");
+# $DataSet->SetSerieName("February","Serie2");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(50,30,585,200);
+ $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
+ $Test->drawGraphArea(255,255,255,TRUE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
+ $Test->drawGrid(4,TRUE,230,230,230,50);
+
+ // Draw the 0 line
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
+ $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
+
+ // Draw the cubic curve graph
+ $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
+
+ // Finish the graph
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
+}
+ $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
+
+echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+
+///pChart Graph BY HOURS END
+
+
+///top sites
+
+$numrow=1;
+while ($numrow<$countTopSitesLimit)
+{
+$arrLine0[$numrow-1]="NO DATA";
+$arrLine1[$numrow-1]=0;
+$numrow++;
+}
+
+$result=mysql_query($queryOneIpaddressTopSitesTraffic) or die (mysql_error());
+$numrow=1;
+$totalmb=0;
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+if($line[3]=='2')
+$line[0]=$line[2];
+
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$line[1]=$line[1] / 1000000;
+
+$arrLine0[$numrow-1]=$line[0];
+$arrLine1[$numrow-1]=$line[1];
+
+
+if($numrow==$countTopSitesLimit)
+break;
+
+$numrow++;
+}
+
+
+//top sites end
+
+
+/// pchart top sites
+
+
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrLine1,"Serie1");
+// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+
+/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
+
+ $DataSet->AddPoint($arrLine0,"Serie2");
+
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie("Serie2");
+
+ // Initialise the graph
+ $Test = new pChart(700,400);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+
+ // Draw the pie chart
+ $Test->AntialiasQuality = 0;
+ $Test->setShadowProperties(2,2,200,200,200);
+ $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
+ $Test->clearShadow();
+
+ $Test->drawTitle(50,22,$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")",50,50,50,585);
+
+
+ $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
+
+ $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
+
+echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
+
+
+/// pchart top sites end
+
+///top popular
+
+$numrow=1;
+while ($numrow<$countPopularSitesLimit)
+{
+$arrLine0[$numrow-1]="NO DATA";
+$arrLine1[$numrow-1]=0;
+$numrow++;
+}
+
+$result=mysql_query($queryOneIpaddressPopularSites) or die (mysql_error());
+$numrow=1;
+$totalmb=0;
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$line[1]=$line[1];
+
+$arrLine0[$numrow-1]=$line[0];
+$arrLine1[$numrow-1]=$line[1];
+
+
+if($numrow==$countPopularSitesLimit)
+break;
+
+$numrow++;
+}
+
+
+//top popular end
+
+
+/// pchart top popular
+
+
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrLine1,"Serie1");
+ $DataSet->AddPoint($arrLine0,"Serie2");
+
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie("Serie2");
+
+ // Initialise the graph
+ $Test = new pChart(700,400);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+
+ // Draw the pie chart
+ $Test->AntialiasQuality = 0;
+ $Test->setShadowProperties(2,2,200,200,200);
+ $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
+ $Test->clearShadow();
+
+ $Test->drawTitle(50,22,$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")",50,50,50,585);
+
+ $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
+
+ $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
+
+echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
+
+
+/// pchart top popular end
+
+
+}
+
+/////////////// ONE IPADDRESS DASHBOARD REPORT END
+
+
+////////////// ONE GROUP DASHBOARD REPORT
+
+if($id==63)
+{
+
+//delete graph if exists
+
+foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+   unlink($filename);
+}
+
+$result=mysql_query($queryOneGroupTrafficByHours) or die (mysql_error());
+
+$HourCounter=0;
+$totalmb=0;
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+while($HourCounter<24)
+{
+if($HourCounter<$line[0])
+{
+$arrHourMb[$HourCounter]=0;
+}
+if($HourCounter==$line[0])
+break;
+
+$HourCounter++;
+}
+$line[1]=$line[1] / 1000000;
+$arrHourMb[$HourCounter]=$line[1];
+$totalmb=$totalmb+$line[1];
+$HourCounter++;
+}
+
+while($HourCounter<24)
+{
+$arrHourMb[$HourCounter]=0;
+$HourCounter++;
+}
+
+if($graphtype['trafficbyhours']==1)
+{
+// Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+
+ $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
+ $DataSet->AddAllSeries();
+ $DataSet->RemoveSerie("Serie3");
+ $DataSet->SetAbsciseLabelSerie("Serie3");
+ $DataSet->SetSerieName("Traffic","Serie1");
+ $DataSet->SetYAxisName("Megabytes");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
+ $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(120,20,675,190);
+ $Test->drawGraphArea(213,217,221,FALSE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
+ $Test->drawGraphAreaGradient(163,203,167,50);
+ $Test->drawGrid(4,TRUE,230,230,230,20);
+
+ // Draw the bar chart
+ $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
+
+ // Draw the legend
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
+
+ // Render the picture
+ $Test->addBorder(2);
+}
+
+if($graphtype['trafficbyhours']==0)
+{
+
+//pChart Graph BY hours
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrHourMb,"Serie1");
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie();
+ $DataSet->SetSerieName("Traffic","Serie1");
+
+ // Initialise the graph
+ $Test = new pChart(700,230);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->setGraphArea(50,30,585,200);
+ $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
+ $Test->drawGraphArea(255,255,255,TRUE);
+ $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
+ $Test->drawGrid(4,TRUE,230,230,230,50);
+
+ // Draw the 0 line
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
+ $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
+
+ // Draw the cubic curve graph
+ $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
+
+ // Finish the graph
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
+ $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
+}
+ $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
+
+echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+
+///pChart Graph BY HOURS END
+
+///top sites
+
+$numrow=1;
+while ($numrow<$countTopSitesLimit)
+{
+$arrLine0[$numrow-1]="NO DATA";
+$arrLine1[$numrow-1]=0;
+$numrow++;
+}
+
+$result=mysql_query($queryOneGroupTopSitesTraffic) or die (mysql_error());
+$numrow=1;
+$totalmb=0;
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+if($line[3]=='2')
+$line[0]=$line[2];
+
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$line[1]=$line[1] / 1000000;
+
+$arrLine0[$numrow-1]=$line[0];
+$arrLine1[$numrow-1]=$line[1];
+
+
+if($numrow==$countTopSitesLimit)
+break;
+
+$numrow++;
+}
+
+
+//top sites end
+
+
+/// pchart top sites
+
+
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrLine1,"Serie1");
+ $DataSet->AddPoint($arrLine0,"Serie2");
+
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie("Serie2");
+
+ // Initialise the graph
+ $Test = new pChart(700,400);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+
+ // Draw the pie chart
+ $Test->AntialiasQuality = 0;
+ $Test->setShadowProperties(2,2,200,200,200);
+ $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
+ $Test->clearShadow();
+
+ $Test->drawTitle(50,22,$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")",50,50,50,585);
+
+
+ $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
+
+ $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
+
+echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
+
+
+/// pchart top sites end
+
+///top popular
+
+$numrow=1;
+while ($numrow<$countPopularSitesLimit)
+{
+$arrLine0[$numrow-1]="NO DATA";
+$arrLine1[$numrow-1]=0;
+$numrow++;
+}
+
+$result=mysql_query($queryOneGroupPopularSites) or die (mysql_error());
+$numrow=1;
+$totalmb=0;
+
+while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+
+if($enableUseiconv==1)
+$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+$line[1]=$line[1];
+
+$arrLine0[$numrow-1]=$line[0];
+$arrLine1[$numrow-1]=$line[1];
+
+
+if($numrow==$countPopularSitesLimit)
+break;
+
+$numrow++;
+}
+
+
+//top popular end
+
+
+/// pchart top popular
+
+
+ // Dataset definition 
+ $DataSet = new pData;
+ $DataSet->AddPoint($arrLine1,"Serie1");
+ $DataSet->AddPoint($arrLine0,"Serie2");
+
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie("Serie2");
+
+ // Initialise the graph
+ $Test = new pChart(700,400);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
+ $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+
+ // Draw the pie chart
+ $Test->AntialiasQuality = 0;
+ $Test->setShadowProperties(2,2,200,200,200);
+ $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
+ $Test->clearShadow();
+
+ $Test->drawTitle(50,22,$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")",50,50,50,585);
+
+ $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
+
+ $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
+
+echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
+
+
+/// pchart top popular end
+
+
+}
+
+/////////////// ONE GROUP DASHBOARD REPORT END
 
 
 

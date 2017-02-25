@@ -81,6 +81,7 @@ else
 if($idmenu==1)
   echo "
     <ul>
+      <li><a href=\"javascript:GoPartlyReport(".$srv.",61)\">".$_lang['stDASHBOARD']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",8)\">".$_lang['stONELOGINTRAFFIC']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",9)\">".$_lang['stTOPSITESTRAFFIC']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",10)\">".$_lang['stTRAFFICBYHOURS']."</a>
@@ -94,6 +95,7 @@ if($idmenu==1)
 if($idmenu==2)
   echo "
     <ul>
+      <li><a href=\"javascript:GoPartlyReport(".$srv.",62)\">".$_lang['stDASHBOARD']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",11)\">".$_lang['stONEIPADRESSTRAFFIC']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",12)\">".$_lang['stTOPSITESTRAFFIC']."</a>
       <li><a href=\"javascript:GoPartlyReport(".$srv.",13)\">".$_lang['stTRAFFICBYHOURS']."</a>
@@ -108,6 +110,7 @@ if($idmenu==2)
 if($idmenu==4)
   echo "
     <ul>
+      <li><a href=\"javascript:GoReport(".$srv.",63)\">".$_lang['stDASHBOARD']."</a>
       <li><a href=\"javascript:GoReport(".$srv.",25)\">".$_lang['stONEGROUPTRAFFIC']."</a>
       <li><a href=\"javascript:GoReport(".$srv.",26)\">".$_lang['stONEGROUPTRAFFIC']." ".$_lang['stEXTENDED']."</a>
       <li><a href=\"javascript:GoReport(".$srv.",27)\">".$_lang['stTOPSITESTRAFFIC']."</a>
