@@ -1,5 +1,5 @@
 <?php
-#build 20170127
+#build 20170501
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -73,9 +73,12 @@ echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
 
 $start=microtime(true);
 
-$connectionStatus=mysql_connect("$address","$user","$pass") or die(mysql_error());
-mysql_select_db($db);
+///$connectionStatus=mysqli_connect($address,$user,$pass,$db) or die(mysqli_connect_error());
+$connection=mysqli_connect("$address","$user","$pass","$db");
 
+///mysqli_select_db($db);
+
+///echo $connection;
 
 if($enableNofriends==1) {
   $friendsTmp=implode("','",explode(" ", $goodLogins));
@@ -102,27 +105,33 @@ if($_GET['id']==1) {
   $queryCountObjectsTraffic3="select count(id) from scsq_traffic where sizeinbytes>5000 and sizeinbytes<=10000";
   $queryCountObjectsTraffic4="select count(id) from scsq_traffic where sizeinbytes>10000";
 
-  $result=mysql_query($queryCountRowsTraffic);
-  $CountRowsTraffic=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($queryCountRowsLogin);
-  $CountRowsLogin=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($queryCountRowsIpaddress);
-  $CountRowsIpaddress=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($queryMinMaxDateTraffic);
-  $MinMaxDateTraffic=mysql_fetch_array($result,MYSQL_NUM);
-  $result=mysql_query($querySumSizeTraffic);
-  $SumSizeTraffic=mysql_fetch_array($result,MYSQL_NUM);
+  $result=mysqli_query($connection,$queryCountRowsTraffic, MYSQLI_USE_RESULT);
+
+  $CountRowsTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
+  mysqli_free_result($result);
+  $result=mysqli_query($connection,$queryCountRowsLogin, MYSQLI_USE_RESULT);
+  $CountRowsLogin=mysqli_fetch_array($result,MYSQLI_NUM);
+  mysqli_free_result($result);
+  $result=mysqli_query($connection,$queryCountRowsIpaddress, MYSQLI_USE_RESULT);
+  $CountRowsIpaddress=mysqli_fetch_array($result,MYSQLI_NUM);
+  mysqli_free_result($result);
+  $result=mysqli_query($connection,$queryMinMaxDateTraffic, MYSQLI_USE_RESULT);
+  $MinMaxDateTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
+  mysqli_free_result($result);
+  $result=mysqli_query($connection,$querySumSizeTraffic, MYSQLI_USE_RESULT);
+  $SumSizeTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
+  mysqli_free_result($result);
 
 	if($enableTrafficObjectsInStat==1)
 	{
-	  $result=mysql_query($queryCountObjectsTraffic1);
-	  $CountObjects1=mysql_fetch_array($result,MYSQL_NUM);
-	  $result=mysql_query($queryCountObjectsTraffic2);
-	  $CountObjects2=mysql_fetch_array($result,MYSQL_NUM);
-	  $result=mysql_query($queryCountObjectsTraffic3);
-	  $CountObjects3=mysql_fetch_array($result,MYSQL_NUM);
-	  $result=mysql_query($queryCountObjectsTraffic4);
-	  $CountObjects4=mysql_fetch_array($result,MYSQL_NUM);
+	  $result=mysqli_query($connection,$queryCountObjectsTraffic1);
+	  $CountObjects1=mysqli_fetch_array($result,MYSQLI_NUM);
+	  $result=mysqli_query($connection,$queryCountObjectsTraffic2);
+	  $CountObjects2=mysqli_fetch_array($result,MYSQLI_NUM);
+	  $result=mysqli_query($connection,$queryCountObjectsTraffic3);
+	  $CountObjects3=mysqli_fetch_array($result,MYSQLI_NUM);
+	  $result=mysqli_query($connection,$queryCountObjectsTraffic4);
+	  $CountObjects4=mysqli_fetch_array($result,MYSQLI_NUM);
 	}
 
   }
@@ -274,13 +283,13 @@ echo "</table>";
 
 ///SQL querys end
 
-//mysql_connect($address,$user,$pass);
-//mysql_select_db($db);
+//mysqli_connect($address,$user,$pass);
+//mysqli_select_db($db);
 
 ///надо добавить обработку ошибки подключения к БД
 
         if(!isset($_GET['actid'])) {
-          $result=mysql_query($queryAllAliases);
+          $result=mysqli_query($connection,$queryAllAliases,MYSQLI_USE_RESULT);
           $numrow=1;
 	 
           echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
@@ -296,7 +305,7 @@ echo "</table>";
          	  </tr>
           ";
 
-         while($line = mysql_fetch_row($result)) {
+         while($line = mysqli_fetch_row($result)) {
            if($line[1]=="1")
              $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
            else
@@ -310,19 +319,21 @@ echo "</table>";
              <td>".$line[4]."&nbsp;</td>
              <td>";
 	   $i=0;
-	   $splitgroupsname=split(',',$line[5]);
-	   $splitgroupsid=split(',',$line[6]);
+	   $splitgroupsname=explode(',',$line[5]);
+	   $splitgroupsid=explode(',',$line[6]);
 	   foreach($splitgroupsname as $val) {
 	     echo "<a href=right.php?srv=".$srv."&id=3&actid=3&groupid=".$splitgroupsid[$i].">".$val."</a>&nbsp";
 	     $i++;
-	   }
+	  
+	 }
 
 	   echo "</td>
            </tr>
            ";
            $numrow++;
           }  //end while
-         echo "</table>";
+	mysqli_free_result($result);         
+	echo "</table>";
          echo "<br />";
          echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
          echo "<br />";
@@ -339,7 +350,7 @@ echo "</table>";
            '.$_lang['stVALUE'].':<br /> 
            ';
 
-          $result=mysql_query($queryAllLoginsToAdd);
+          $result=mysqli_query($connection,$queryAllLoginsToAdd,MYSQLI_USE_RESULT);
           $numrow=1;
 
           echo "<table id='loginsTable' class=sortable style='display:table;'>";
@@ -348,7 +359,7 @@ echo "</table>";
 		    <th>".$_lang['stLOGIN']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		</tr>";
-          while($line = mysql_fetch_row($result)) {
+          while($line = mysqli_fetch_row($result)) {
             echo "
             <tr>
               <td >".$numrow."</td>
@@ -359,8 +370,9 @@ echo "</table>";
             $numrow++;
           }
           echo "</table>";
+	  mysqli_free_result($result);
 
-          $result=mysql_query($queryAllIpaddressToAdd);
+          $result=mysqli_query($connection,$queryAllIpaddressToAdd,MYSQLI_USE_RESULT);
           $numrow=1;
 
           echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
@@ -370,7 +382,7 @@ echo "</table>";
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		</tr>";
 
-          while($line = mysql_fetch_row($result)) {
+          while($line = mysqli_fetch_row($result)) {
             echo "
               <tr>
                 <td >".$numrow."</td>
@@ -380,7 +392,10 @@ echo "</table>";
             ";
             $numrow++;
           }
-          echo "</table>";
+
+	  mysqli_free_result($result);
+                
+	  echo "</table>";
           echo '
             <input type="submit" value="'.$_lang['stADD'].'"><br />
             </form>
@@ -400,17 +415,18 @@ echo "</table>";
 
           $sql="INSERT INTO scsq_alias (name, typeid,tableid) VALUES ('$name', '$typeid','$tableid')";
 
-          if (!mysql_query($sql)) {
-            die('Error: ' . mysql_error());
+          if (!mysqli_query($connection,$sql)) {
+            die('Error: ' . mysqli_error());
           }
           echo "".$_lang['stALIASADDED']."<br /><br />";
           echo "<a href=right.php?srv=".$srv."&id=2 target=right>".$_lang['stBACK']."</a>";
         }
 
         if($actid==3) { ///Редактирование алиаса
-          $result=mysql_query($queryOneAlias);
-          $line=mysql_fetch_row($result);
-
+	  
+	  $result=mysqli_query($connection,$queryOneAlias,MYSQLI_USE_RESULT);
+          $line=mysqli_fetch_row($result);
+	  mysqli_free_result($result);
           if($line[1]==1)
             $isChecked="checked";
           else
@@ -423,9 +439,8 @@ echo "</table>";
             '.$_lang['stALIASNAME'].': <input type="text" name="name" value="'.$line[0].'"><br />
             '.$_lang['stVALUE'].':<br /> 
           ';
-#Удалено 20150903     '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid" '.$isChecked.' ><br />
 
-          $result=mysql_query($queryAllLogins);
+          $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);
           $numrow=1;
 
           if($isChecked=="checked")
@@ -438,7 +453,7 @@ echo "</table>";
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 	        </tr>";
 
-          while($line = mysql_fetch_row($result)) {
+          while($line = mysqli_fetch_row($result)) {
             echo "<tr>";
             echo "<td >".$numrow."</td>";
             echo "<td >".$line[1]."</td>";
@@ -450,8 +465,8 @@ echo "</table>";
             $numrow++;
           }
           echo "</table>";
-        
-          $result=mysql_query($queryAllIpaddress);
+          mysqli_free_result($result);
+          $result=mysqli_query($connection,$queryAllIpaddress,MYSQLI_USE_RESULT);
           $numrow=1;
 
           if($isChecked=="checked")
@@ -463,7 +478,7 @@ echo "</table>";
 		    <th>".$_lang['stIPADDRESS']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 	        </tr>";
-          while($line = mysql_fetch_row($result)) {
+          while($line = mysqli_fetch_row($result)) {
             echo "<tr>";
 	    echo "<td >".$numrow."</td>";
 	    echo "<td >".$line[1]."</td>";
@@ -474,6 +489,7 @@ echo "</table>";
 	    echo "</tr>";
             $numrow++;
           }
+	  mysqli_free_result($result);
           echo "</table>";
 
           echo '
@@ -486,8 +502,8 @@ echo "</table>";
         }
         if($actid==4) { //сохранение изменений UPDATE
  
-          if (!mysql_query($queryUpdateOneAlias)) {
-            die('Error: ' . mysql_error());
+          if (!mysqli_query($connection,$queryUpdateOneAlias)) {
+            die('Error: ' . mysqli_error());
           }
           echo "".$_lang['stALIASUPDATED']."<br /><br />";
           echo "<a href=right.php?srv=".$srv."&id=2 target=right>".$_lang['stBACK']."</a>";
@@ -495,11 +511,11 @@ echo "</table>";
 
         if($actid==5) { //удаление DELETE
         
-          if (!mysql_query($queryDeleteOneAlias)) {
-            die('Error: ' . mysql_error());
+          if (!mysqli_query($connection,$queryDeleteOneAlias)) {
+            die('Error: ' . mysqli_error());
           }
-          if (!mysql_query($queryDeleteOneAliasFromGroup)) {
-            die('Error: ' . mysql_error());
+          if (!mysqli_query($onnection,$queryDeleteOneAliasFromGroup)) {
+            die('Error: ' . mysqli_error());
           }
           
 	  echo "".$_lang['stALIASDELETED']."<br /><br />";
@@ -508,8 +524,9 @@ echo "</table>";
         } //удаление
       } ///end if($_GET['id']==2
 
-        else
-          if($_GET['id']==3) {
+else
+
+         if($_GET['id']==3) {
 
             if(isset($_GET['actid'])) //action ID.
               $actid=$_GET['actid'];
@@ -567,7 +584,7 @@ echo "</table>";
             $queryDeleteOneGroup="delete from scsq_groups where id='".$groupid."'";
 
             if(!isset($_GET['actid'])) {
-              $result=mysql_query($queryAllGroups);
+              $result=mysqli_query($connection,$queryAllGroups,MYSQLI_USE_RESULT);
               $numrow=1;
               echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
               echo "<br /><br />";
@@ -581,7 +598,7 @@ echo "</table>";
 
               </tr>";
 
-              while($line = mysql_fetch_row($result)) {
+              while($line = mysqli_fetch_row($result)) {
                 if($line[1]=="1")
                   $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
                 else
@@ -601,6 +618,7 @@ echo "</table>";
               echo "<br />";
               echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
               echo "<br />";
+		mysqli_free_result($result);
             }
 
             if($actid==1) {
@@ -612,7 +630,7 @@ echo "</table>";
                 '.$_lang['stCOMMENT'].': <input type="text" name="comment"><br />
                 '.$_lang['stVALUE'].':<br />';
 
-                $result=mysql_query($queryAllLogins);
+                $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);
                 $numrow=1;
 
               echo "<table id='loginsTable' class=sortable style='display:table;'>";
@@ -622,7 +640,7 @@ echo "</table>";
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = mysql_fetch_row($result)) {
+              while($line = mysqli_fetch_row($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -631,9 +649,10 @@ echo "</table>";
                   </tr>";
                 $numrow++;
               }
+	      mysqli_free_result($result);
               echo "</table>";
 
-              $result=mysql_query($queryAllIpaddress);
+              $result=mysqli_query($connection,$queryAllIpaddress,MYSQLI_USE_RESULT);
               $numrow=1;
 
               echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
@@ -642,7 +661,7 @@ echo "</table>";
 		    <th>".$_lang['stALIAS']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
-              while($line = mysql_fetch_row($result)) {
+              while($line = mysqli_fetch_row($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -651,7 +670,8 @@ echo "</table>";
                   </tr>";
                 $numrow++;
               }
-              echo "</table>";
+              mysqli_free_result($result);
+	      echo "</table>";
 
               echo '
                 <input type="submit" value="'.$_lang['stADD'].'"><br />
@@ -676,14 +696,14 @@ echo "</table>";
 
               $sql="INSERT INTO scsq_groups (name, typeid,comment) VALUES ('$name', '$typeid','$comment')";
 
-              if (!mysql_query($sql)) {
-                die('Error: ' . mysql_error());
+              if (!mysqli_query($connection,$sql)) {
+                die('Error: ' . mysqli_error());
               }
 
               $sql="select id from scsq_groups where name='".$name."';";
-              $result=mysql_query($sql);
-              $newid=mysql_fetch_row($result);
-
+              $result=mysqli_query($connection,$sql,MYSQLI_USE_RESULT);
+              $newid=mysqli_fetch_row($result);
+	      mysqli_free_result($result);
               $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
 
               if($typeid==0) {
@@ -700,17 +720,16 @@ echo "</table>";
                 $sql=$sql.";";
               }
 
-              mysql_query($sql);
+              mysqli_query($connection,$sql);
 
               echo "".$_lang['stGROUPADDED']."<br /><br />";
               echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a>";
             }
 
             if($actid==3) { ///Редактирование группы
-
-              $result=mysql_query($queryOneGroup);
-              $line=mysql_fetch_row($result);
-
+              $result=mysqli_query($connection,$queryOneGroup,MYSQLI_USE_RESULT);
+              $line=mysqli_fetch_row($result);
+	      mysqli_free_result($result);
               if($line[1]==1)
                 $isChecked="checked";
               else
@@ -723,8 +742,8 @@ echo "</table>";
                '.$_lang['stCOMMENT'].': <input type="text" name="comment" value="'.$line[3].'"><br />
                '.$_lang['stVALUE'].':<br />';
 
-               $result=mysql_query($queryAllLogins);
-               $result1=mysql_query($queryGroupMembers);
+               $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);
+               $result1=mysqli_query($connection,$queryGroupMembers,MYSQLI_USE_RESULT);
 
                $numrow=1;
 
@@ -738,10 +757,10 @@ echo "</table>";
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
                $groupmembers=array();
-               while($line = mysql_fetch_row($result1))
+               while($line = mysqli_fetch_row($result1))
                  $groupmembers[]= $line[0];
-
-               while($line = mysql_fetch_row($result)) {
+	       mysqli_free_result($result1);
+               while($line = mysqli_fetch_row($result)) {
                  echo "<tr>";
 		 echo "<td >".$numrow."</td>";
 		 echo "<td >".$line[1]."</td>";
@@ -753,9 +772,10 @@ echo "</table>";
                    ;
                  $numrow++;
                }
+	       mysqli_free_result($result);
                echo "</table>";
-
-               $result=mysql_query($queryAllIpaddress);
+	       mysqli_free_result($result);
+               $result=mysqli_query($connection,$queryAllIpaddress,MYSQLI_USE_RESULT);
                $numrow=1;
 
                if($isChecked=="checked")
@@ -767,7 +787,7 @@ echo "</table>";
 		    <th>".$_lang['stALIAS']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
-               while($line = mysql_fetch_row($result)) {
+               while($line = mysqli_fetch_row($result)) {
 
                  echo "<tr>";
 		 echo "<td >".$numrow."</td>";
@@ -780,7 +800,8 @@ echo "</table>";
 
                  $numrow++;
                }
-               echo "</table>";
+               mysqli_free_result($result);
+	       echo "</table>";
 
                echo '
                  <input type="submit" value="'.$_lang['stSAVE'].'"><br />
@@ -793,13 +814,13 @@ echo "</table>";
 
             if($actid==4) { //сохранение изменений UPDATE
 
-              if (!mysql_query($queryUpdateOneGroup)) {
-                die('Error: ' . mysql_error());
+              if (!mysqli_query($connection,$queryUpdateOneGroup)) {
+                die('Error: ' . mysqli_error());
               }
 
               $sql="delete from scsq_aliasingroups where groupid='".$groupid."';";
 
-              mysql_query($sql) or die();
+              mysqli_query($connection,$sql) or die();
 
               $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
 
@@ -819,7 +840,7 @@ echo "</table>";
                 $sql=$sql.";";
               }
 
-              mysql_query($sql);
+              mysqli_query($connection,$sql);
 
               echo "".$_lang['stGROUPUPDATED']."<br /><br />";
               echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a>";
@@ -827,12 +848,12 @@ echo "</table>";
 
             if($actid==5) {//удаление DELETE
 
-              if (!mysql_query($queryDeleteOneGroup)) {
-                die('Error: ' . mysql_error());
+              if (!mysqli_query($connection,$queryDeleteOneGroup)) {
+                die('Error: ' . mysqli_error());
               }
               $sql="delete from scsq_aliasingroups where groupid='".$groupid."';";
 
-              mysql_query($sql) or die();
+              mysqli_query($connection,$sql) or die();
 
               echo "".$_lang['stGROUPDELETED']."<br /><br />";
               echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a><br />";
@@ -841,11 +862,11 @@ echo "</table>";
 
             if($actid==6) { ///Просмотр группы
 
-              $result=mysql_query($queryOneGroupList);
+              $result=mysqli_query($connection,$queryOneGroupList,MYSQLI_USE_RESULT);
 
 	      $numrow=1;
 
-               while($line = mysql_fetch_row($result)) {
+               while($line = mysqli_fetch_row($result)) {
 		 if($numrow==1) {
 		   echo "".$_lang['stGROUPNAME']." : <b>".$line[0]."</b><br /><br />";
                    echo "<table id='OneGroupList' class=sortable >";
@@ -860,6 +881,7 @@ echo "</table>";
 		 echo "</tr>";
                  $numrow++;
                }
+	       mysqli_free_result($result);
                echo "</table>";
 	       echo "<br />";
                echo "<a href=right.php?srv=".$srv."&id=3>".$_lang['stBACKTOGROUPLIST']."</a>";
@@ -868,7 +890,7 @@ echo "</table>";
 
           } ///end GET[id]=3
 
-          else
+else
 
             if($_GET['id']==4) { ///быстрый поиск
            
@@ -934,16 +956,17 @@ echo "</table>";
                       </th>
                     </tr>";
 
-                  $result=mysql_query($queryForFindstr) or die (mysql_error());
+                  $result=mysqli_query($connection,$queryForFindstr,MYSQLI_USE_RESULT) or die (mysqli_error());
                   $numrow=1;
 
-                  while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+                  while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td><a href=javascript:PartlyReportsLogin(8,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
+		  mysqli_free_result($result);
                   echo "</table>";
                 }
 
@@ -963,16 +986,17 @@ echo "</table>";
                       </th>
                     </tr>";
 
-                  $result=mysql_query($queryForFindstr) or die (mysql_error());
+                  $result=mysqli_query($connection,$queryForFindstr,MYSQLI_USE_RESULT) or die (mysqli_error());
                   $numrow=1;
 
-                  while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+                  while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td><a href=javascript:PartlyReportsIpaddress(11,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
+		  mysqli_free_result($result);
                   echo "</table>";
 
                 }
@@ -999,10 +1023,10 @@ echo "</table>";
 		  FROM scsq_logtable order by d1 desc";
 
 
-                  $result=mysql_query($queryLogTable) or die (mysql_error());
+                  $result=mysqli_query($connection,$queryLogTable,MYSQLI_USE_RESULT) or die (mysqli_error());
                   $numrow=1;
 
-                  while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+                  while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td>".$line[0]."</td>";
@@ -1011,13 +1035,16 @@ echo "</table>";
                     echo "</tr>";
                     $numrow++;
                   }
+		  mysqli_free_result($result);
                   echo "</table>";
 
     }  //end GET[id]=5
+
             else
 
             echo $_lang['stALLISOK'];
- } 
+
+ } /// end GET[id]=1 
 
 $end=microtime(true);
 
@@ -1030,6 +1057,8 @@ echo $_lang['stCREATORS'];
 $newdate=strtotime(date("d-m-Y"))-86400;
 $newdate=date("d-m-Y",$newdate);
 
+  mysqli_free_result($result);
+  mysqli_close($link);
 
 ?>
 <form name=fastdateswitch_form>

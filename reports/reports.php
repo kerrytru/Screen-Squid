@@ -1,5 +1,5 @@
 <?php
-#build 20170224
+#build 20170501
  
 $header='<html>
 <head>
@@ -196,17 +196,12 @@ function UpdateLeftMenu(id)
 }
 // Javascripts END
 
-
-
 $address=$address[$srv];
 $user=$user[$srv];
 $pass=$pass[$srv];
 $db=$db[$srv];
 
-
-mysql_connect("$address", "$user", "$pass") or die(mysql_error());
-mysql_select_db($db);
-
+$connection=mysqli_connect("$address","$user","$pass","$db");
 
 
 if(isset($_GET['date']))
@@ -214,7 +209,7 @@ if(isset($_GET['date']))
 else
   $querydate=date("d-m-Y");
 
-list($day,$month,$year) = split('[/.-]', $querydate);
+list($day,$month,$year) = explode('[/.-]', $querydate);
 
 if(isset($_GET['dom']))
   $dayormonth=$_GET['dom'];
@@ -351,18 +346,20 @@ if($enableNofriends==1) {
   $friends=implode("','",explode(" ", $goodLogins));
   $friendsTmp="where name in  ('".$friends."')";
   $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
-  $result=mysql_query($sqlGetFriendsId) or die(mysql_error());
-  while ($fline = mysql_fetch_array($result,MYSQL_NUM)) {
+  $result=mysqli_query($connection,$sqlGetFriendsId,MYSQLI_USE_RESULT);
+  while ($fline = mysqli_fetch_array($result,MYSQLI_NUM)) {
     $goodLoginsList=$goodLoginsList.",".$fline[0];
   }
+ mysqli_free_result($result);
  $friends=""; 
  $friends=implode("','",explode(" ", $goodIpaddress));
  $friendsTmp="where name in ('".$friends."')";
   $sqlGetFriendsId="select id from scsq_ipaddress ".$friendsTmp."";
-  $result=mysql_query($sqlGetFriendsId) or die(mysql_error());
-  while ($fline = mysql_fetch_array($result,MYSQL_NUM)) {
+  $result=mysqli_query($connection,$sqlGetFriendsId,MYSQLI_USE_RESULT);
+  while ($fline = mysqli_fetch_array($result,MYSQLI_NUM)) {
     $goodIpaddressList=$goodIpaddressList.",".$fline[0];
   }
+ mysqli_free_result($result);
  
 }
 else {
@@ -3502,7 +3499,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=mysql_query($queryLoginsTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryLoginsTraffic,MYSQLI_USE_RESULT);
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="numrow";
@@ -3510,7 +3507,7 @@ $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line
 $colr[3]="line1";
 $colr[4]="line3";
 
-$row = mysql_fetch_array($resultmax,MYSQL_NUM);
+$row = mysqli_fetch_array($resultmax,MYSQLI_NUM);
 $collength[4]=$row[0];
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -3543,7 +3540,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=mysql_query($queryIpaddressTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryIpaddressTraffic,MYSQLI_USE_RESULT);
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="numrow";
@@ -3586,14 +3583,14 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 $colh[6]="<th>".$colhtext[6]."</th>";
 
-$result=mysql_query($querySitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$querySitesTraffic,MYSQLI_USE_RESULT);
 
-/*
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 
 $colr[0]=1; 
 $colr[1]="numrow";
@@ -3640,14 +3637,14 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
 
-$result=mysql_query($queryTopSitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryTopSitesTraffic,MYSQLI_USE_RESULT);
 
-/*
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 $colr[0]=1;
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -3685,7 +3682,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=mysql_query($queryTopLoginsTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryTopLoginsTraffic,MYSQLI_USE_RESULT);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -3721,7 +3718,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=mysql_query($queryTopIpTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryTopIpTraffic,MYSQLI_USE_RESULT);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -3749,11 +3746,11 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysql_query($queryTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -3777,6 +3774,8 @@ while($HourCounter<24)
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
+
+mysqli_free_result($result);
 
 if($graphtype['trafficbyhours']==1)
 {
@@ -3867,11 +3866,11 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -3912,6 +3911,9 @@ echo "</tr>";
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
+
+mysqli_free_result($result);
+
 echo "<tr class=sortbottom>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>
@@ -3938,20 +3940,20 @@ $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 
 $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysql_query($queryOneLoginTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -3979,20 +3981,20 @@ $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 
 $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysql_query($queryOneLoginTopSitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginTopSitesTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4022,11 +4024,11 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryOneLoginTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -4060,6 +4062,9 @@ echo "<td>0</td>";
 echo "</tr>";
 $HourCounter++;
 }
+
+mysqli_free_result($result);
+
 echo "<tr class=sortbottom>
 <td><b>".$_lang['stTOTAL']."</b></td>
 <td><b>".$totalmb."</b></td>
@@ -4082,20 +4087,20 @@ $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 
 $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysql_query($queryOneIpaddressTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4123,20 +4128,20 @@ $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 
 $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysql_query($queryOneIpaddressTopSitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressTopSitesTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4165,11 +4170,11 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryOneIpaddressTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressTrafficByHours,MYSQLI_USE_RESULT);
 $totalmb=0;
 $HourCounter=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -4259,8 +4264,8 @@ $totalincachepc=0;
 $totaloutcachepc=0;
 
 
-$result=mysql_query($queryLoginsTrafficWide) or die (mysql_error());
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+$result=mysqli_query($connection,$queryLoginsTrafficWide,MYSQLI_USE_RESULT);
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 
 if(($line[3]==1)&&($havemarker>0))
@@ -4391,8 +4396,8 @@ $totalincachepc=0;
 $totaloutcachepc=0;
 
 
-$result=mysql_query($queryIpaddressTrafficWide) or die (mysql_error());
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+$result=mysqli_query($connection,$queryIpaddressTrafficWide,MYSQLI_USE_RESULT);
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 
 if(($line[3]==1)&&($havemarker>0))
@@ -4457,6 +4462,7 @@ $totaloutcachemb=$totaloutcachemb+$outcachemb;
 echo "</tr>";
 }
 
+mysqli_free_result($result);
 
 echo "<tr class=sortbottom>";
 echo "<td>&nbsp;</td>";
@@ -4498,10 +4504,10 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryIpaddressTrafficWithResolve) or die (mysql_error());
+$result=mysqli_query($connection,$queryIpaddressTrafficWithResolve,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
@@ -4512,6 +4518,9 @@ echo "</tr>";
 $numrow++;
 $totalmb=$totalmb+$line[1];
 }
+
+mysqli_free_result($result);
+
 echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td><b>".$_lang['stTOTAL']."</b></td>
@@ -4548,16 +4557,16 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
 
-$result=mysql_query($queryPopularSites) or die (mysql_error());
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
+
+$result=mysqli_query($connection,$queryPopularSites,MYSQLI_USE_RESULT);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -4599,7 +4608,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
 
-$result=mysql_query($queryWhoVisitPopularSiteLogin) or die (mysql_error());
+$result=mysqli_query($connection,$queryWhoVisitPopularSiteLogin,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line3','line0','0','')>line0</a>";
@@ -4635,7 +4644,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryWhoVisitPopularSiteIpaddress) or die (mysql_error());
+$result=mysqli_query($connection,$queryWhoVisitPopularSiteIpaddress,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line3','line0','1','')>line0</a>";
@@ -4674,7 +4683,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
-$result=mysql_query($queryWhoDownloadBigFiles) or die (mysql_error());
+$result=mysqli_query($connection,$queryWhoDownloadBigFiles,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
@@ -4712,7 +4721,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryTrafficByPeriod) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByPeriod,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4746,7 +4755,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryVisitingWebsiteByTimeLogin) or die (mysql_error());
+$result=mysqli_query($connection,$queryVisitingWebsiteByTimeLogin,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4776,7 +4785,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryVisitingWebsiteByTimeIpaddress) or die (mysql_error());
+$result=mysqli_query($connection,$queryVisitingWebsiteByTimeIpaddress,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4806,7 +4815,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryGroupsTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryGroupsTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','line2','line0',3+line3,'')\">line0</a>";
@@ -4848,7 +4857,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryOneGroupTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneGroupTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(8+3*$typeid,'".$dayormonth."','line2','line0',0+$typeid,'')\">line0</a>";
@@ -4920,9 +4929,9 @@ $totaloutcachemb=0;
 $totalincachepc=0;
 $totaloutcachepc=0;
 
-$result=mysql_query($queryOneGroupTrafficWide) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneGroupTrafficWide,MYSQLI_USE_RESULT);
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 
 if(($line[3]==1)&&($havemarker>0))
@@ -5019,6 +5028,7 @@ echo "<td><b>".(round($totaloutcachemb/$totaltrafficmb*100,2))."</b></td>";
 
 echo "</tr>";
 echo "</table>";
+mysqli_free_result($result);
 
 }
 
@@ -5041,13 +5051,13 @@ $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-/*
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
-$result=mysql_query($queryOneGroupTopSitesTraffic) or die (mysql_error());
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
+$result=mysqli_query($connection,$queryOneGroupTopSitesTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -5077,11 +5087,11 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryOneGroupTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneGroupTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -5122,6 +5132,8 @@ echo "<tr class=sortbottom>
 
 echo "</table>";
 
+mysqli_free_result($result);
+
 }
 
 /////////////// ONE GROUP TRAFFIC BY HOURS REPORT END
@@ -5149,13 +5161,13 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
-/*
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
-$result=mysql_query($queryOneGroupWhoDownloadBigFiles) or die (mysql_error());
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
+$result=mysqli_query($connection,$queryOneGroupWhoDownloadBigFiles,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')\">line0</a>";
@@ -5192,7 +5204,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryHttpStatus) or die (mysql_error());
+$result=mysqli_query($connection,$queryHttpStatus,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -5227,7 +5239,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryLoginsHttpStatus) or die (mysql_error());
+$result=mysqli_query($connection,$queryLoginsHttpStatus,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line2','line0')>line0</a>";
@@ -5262,7 +5274,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryIpaddressHttpStatus) or die (mysql_error());
+$result=mysqli_query($connection,$queryIpaddressHttpStatus,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(34,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line2','line0')>line0</a>";
@@ -5294,10 +5306,10 @@ echo "
     ".$_lang['stSITE']."
     </th>";
 
-$result=mysql_query($queryOneLoginOneHttpStatus) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginOneHttpStatus,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 
@@ -5307,6 +5319,7 @@ echo "</tr>";
 $numrow++;
     }
 echo "</tbody></table>";
+mysqli_free_result($result);
 }
 
 /////////// ONE LOGIN ONE HTTP STATUS REPORT END
@@ -5328,10 +5341,10 @@ echo "
     ".$_lang['stSITE']."
     </th>";
 
-$result=mysql_query($queryOneIpaddressOneHttpStatus) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressOneHttpStatus,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 
@@ -5365,7 +5378,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryOneLoginIpTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginIpTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0','1','')>line0</a>";
@@ -5403,7 +5416,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryOneIpaddressLoginsTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressLoginsTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a>";
@@ -5441,7 +5454,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryCountIpaddressOnLogins) or die (mysql_error());
+$result=mysqli_query($connection,$queryCountIpaddressOnLogins,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a>";
@@ -5476,7 +5489,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryCountLoginsOnIpaddress) or die (mysql_error());
+$result=mysqli_query($connection,$queryCountLoginsOnIpaddress,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0','1','')>line0</a>";
@@ -5513,11 +5526,11 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByPeriodDay) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByPeriodDay,MYSQLI_USE_RESULT);
 
 $numrow=1;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 
 echo "<tr>";
@@ -5536,6 +5549,7 @@ echo "</tr>";
 $totalmb=$totalmb+$line[1];
 $numrow++;
 }
+mysqli_free_result($result);
 
 echo "<tr class=sortbottom>
 <td>&nbsp;</td>
@@ -5570,11 +5584,11 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByPeriodDayname) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByPeriodDayname,MYSQLI_USE_RESULT);
 
 $numrow=1;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 if($line[0]=='0')
 $linevalue[7]=$line[1];
 if($line[0]=='1')
@@ -5593,6 +5607,7 @@ $linevalue[6]=$line[1];
 $line[1]=$line[1] / 1000000;
 $totalmb=$totalmb+$line[1];
 }
+mysqli_free_result($result);
 echo "<tr>";
 echo "<td>1</td>";
 echo "<td>".$_lang['stMONDAY']."</td>";
@@ -5669,7 +5684,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryWhoVisitSiteOneHourLogin) or die (mysql_error());
+$result=mysqli_query($connection,$queryWhoVisitSiteOneHourLogin,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(43,'".$dayormonth."','line2','line0','0','".$currenthour."')>line0</a>";
@@ -5704,7 +5719,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysql_query($queryWhoVisitSiteOneHourIpaddress) or die (mysql_error());
+$result=mysqli_query($connection,$queryWhoVisitSiteOneHourIpaddress,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(44,'".$dayormonth."','line2','line0','1','".$currenthour."')>line0</a>";
@@ -5736,14 +5751,14 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryOneLoginOneHourTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginOneHourTraffic,MYSQLI_USE_RESULT);
 
-/*
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -5775,14 +5790,14 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryOneIpaddressOneHourTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressOneHourTraffic,MYSQLI_USE_RESULT);
 
-/*
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -5814,7 +5829,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryMimeTypesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryMimeTypesTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(58,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
@@ -5844,7 +5859,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryOneLoginMimeTypesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginMimeTypesTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(59,'".$dayormonth."','".$currentloginid."','line0',0,'".$currentlogin."')\">line0</a>";
@@ -5876,7 +5891,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryOneIpaddressMimeTypesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressMimeTypesTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(60,'".$dayormonth."','".$currentipaddressid."','line0',0,'".$currentipaddress."')\">line0</a>";
@@ -5907,7 +5922,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryDomainZonesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryDomainZonesTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -5931,11 +5946,11 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysql_query($queryTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -5959,6 +5974,8 @@ while($HourCounter<24)
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
+
+mysqli_free_result($result);
 
 if($graphtype['trafficbyhours']==1)
 {
@@ -6046,11 +6063,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryTopLoginsTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryTopLoginsTraffic,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -6066,6 +6083,7 @@ break;
 $numrow++;
 }
 
+mysqli_free_result($result);
 
 //top logins end
 
@@ -6114,11 +6132,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryTopIpTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryTopIpTraffic,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -6134,9 +6152,8 @@ break;
 $numrow++;
 }
 
-
+mysqli_free_result($result);
 //top ip end
-
 
 /// pchart top ip
 
@@ -6186,11 +6203,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryTopSitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryTopSitesTraffic,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -6209,9 +6226,9 @@ break;
 $numrow++;
 }
 
+mysqli_free_result($result);
 
 //top IP end
-
 
 /// pchart top sites
 
@@ -6262,11 +6279,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryPopularSites) or die (mysql_error());
+$result=mysqli_query($connection,$queryPopularSites,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -6281,7 +6298,7 @@ break;
 
 $numrow++;
 }
-
+mysqli_free_result($result);
 
 //top popular end
 
@@ -6422,7 +6439,7 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByHoursLogins) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByHoursLogins,MYSQLI_USE_RESULT);
 
 
 $HourCounter=0;
@@ -6446,11 +6463,11 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysql_fetch_array($result,MYSQL_NUM)){
+while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
-
+mysqli_free_result($result);
 $k=0;
 
 while($k<$j)
@@ -6597,7 +6614,7 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByHoursIpaddress) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByHoursIpaddress,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
@@ -6619,11 +6636,12 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysql_fetch_array($result,MYSQL_NUM)){
+while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
 
+mysqli_free_result($result);
 $k=0;
 
 while($k<$j)
@@ -6698,10 +6716,10 @@ echo "
     </th>
 </tr>
 ";
-$result=mysql_query($queryCategorySitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryCategorySitesTraffic,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 
@@ -6717,6 +6735,8 @@ echo "<td>".$line[2]."</td>";
 echo "</tr>";
 $numrow++;
 }
+
+mysqli_free_result($result);
 echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -6821,7 +6841,7 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByHoursLoginsOneSite) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByHoursLoginsOneSite,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
@@ -6843,11 +6863,11 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysql_fetch_array($result,MYSQL_NUM)){
+while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
-
+mysqli_free_result($result);
 $k=0;
 
 while($k<$j)
@@ -6994,7 +7014,7 @@ echo "
 </tr>
 ";
 
-$result=mysql_query($queryTrafficByHoursIpaddressOneSite) or die (mysql_error());
+$result=mysqli_query($connection,$queryTrafficByHoursIpaddressOneSite,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
@@ -7016,11 +7036,11 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysql_fetch_array($result,MYSQL_NUM)){
+while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
-
+mysqli_free_result($result);
 $k=0;
 
 while($k<$j)
@@ -7099,16 +7119,16 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
 
-$result=mysql_query($queryOneGroupPopularSites) or die (mysql_error());
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
+
+$result=mysqli_query($connection,$queryOneGroupPopularSites,MYSQLI_USE_RESULT);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -7148,16 +7168,16 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
 
-$result=mysql_query($queryOneLoginPopularSites) or die (mysql_error());
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
+
+$result=mysqli_query($connection,$queryOneLoginPopularSites,MYSQLI_USE_RESULT);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -7195,16 +7215,16 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-/*
-$tmpLine=explode(':',$line[0]);
 
-if($tmpLine[1]==443)
-echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-else
-echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-*/
+///$tmpLine=explode(':',$line[0]);
 
-$result=mysql_query($queryOneIpaddressPopularSites) or die (mysql_error());
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
+
+$result=mysqli_query($connection,$queryOneIpaddressPopularSites,MYSQLI_USE_RESULT);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -7245,7 +7265,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
-$result=mysql_query($queryOneMime) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneMime,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
@@ -7281,7 +7301,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryOneMimeOneLogin) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneMimeOneLogin,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -7314,7 +7334,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysql_query($queryOneMimeOneIpaddress) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneMimeOneIpaddress,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -7339,11 +7359,11 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysql_query($queryOneLoginTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -7367,6 +7387,8 @@ while($HourCounter<24)
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
+
+mysqli_free_result($result);
 
 if($graphtype['trafficbyhours']==1)
 {
@@ -7452,11 +7474,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryOneLoginTopSitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginTopSitesTraffic,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -7474,7 +7496,7 @@ break;
 
 $numrow++;
 }
-
+mysqli_free_result($result);
 
 //top sites end
 
@@ -7527,11 +7549,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryOneLoginPopularSites) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneLoginPopularSites,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -7546,7 +7568,7 @@ break;
 
 $numrow++;
 }
-
+mysqli_free_result($result);
 
 //top popular end
 
@@ -7606,11 +7628,11 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysql_query($queryOneIpaddressTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -7634,7 +7656,7 @@ while($HourCounter<24)
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
-
+mysqli_free_result($result);
 if($graphtype['trafficbyhours']==1)
 {
 // Dataset definition 
@@ -7723,11 +7745,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryOneIpaddressTopSitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressTopSitesTraffic,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -7745,7 +7767,7 @@ break;
 
 $numrow++;
 }
-
+mysqli_free_result($result);
 
 //top sites end
 
@@ -7799,11 +7821,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryOneIpaddressPopularSites) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneIpaddressPopularSites,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -7818,7 +7840,7 @@ break;
 
 $numrow++;
 }
-
+mysqli_free_result($result);
 
 //top popular end
 
@@ -7874,11 +7896,11 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysql_query($queryOneGroupTrafficByHours) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneGroupTrafficByHours,MYSQLI_USE_RESULT);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 while($HourCounter<24)
 {
@@ -7902,7 +7924,7 @@ while($HourCounter<24)
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
-
+mysqli_free_result($result);
 if($graphtype['trafficbyhours']==1)
 {
 // Dataset definition 
@@ -7987,11 +8009,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryOneGroupTopSitesTraffic) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneGroupTopSitesTraffic,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -8009,7 +8031,7 @@ break;
 
 $numrow++;
 }
-
+mysqli_free_result($result);
 
 //top sites end
 
@@ -8059,11 +8081,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysql_query($queryOneGroupPopularSites) or die (mysql_error());
+$result=mysqli_query($connection,$queryOneGroupPopularSites,MYSQLI_USE_RESULT);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -8078,7 +8100,7 @@ break;
 
 $numrow++;
 }
-
+mysqli_free_result($result);
 
 //top popular end
 
@@ -8130,7 +8152,7 @@ $numrow=1;
 $totalmb=0;
 
 //PARSE SQL
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / 1000000;
@@ -8198,7 +8220,7 @@ echo $colf[$i];
 echo "	</tr>";
 
 echo "</table>";
-
+mysqli_free_result($result);
 ///universal table end
 }
 

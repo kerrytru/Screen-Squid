@@ -5,7 +5,7 @@
 
 <?php
 
-#build 20170111
+#build 20170501
 
 include("../config.php");
 
@@ -85,7 +85,7 @@ $querydate=$_GET['date'];
 else
 $querydate=date("d-m-Y");
 
-list($day,$month,$year) = split('[/.-]', $querydate);
+list($day,$month,$year) = explode('[/.-]', $querydate);
 
 if(isset($_GET['dom']))
 $dayormonth=$_GET['dom'];
@@ -144,10 +144,7 @@ $queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,
 
 //querys for reports end
 
-mysql_connect("$address", "$user", "$pass") or die(mysql_error());
-mysql_select_db($db);
-
-
+$connection=mysqli_connect("$address","$user","$pass","$db");
 
 ///CALENDAR
 
@@ -190,14 +187,14 @@ echo "<h2>".$_lang['stACTIVEIPADDRESS']."</h2>";
 
 #если тренды не открывали более 5 минут, таблица очищается
 $sqltext="select max(date) from scsq_sqper_trend10";
-$result=mysql_query($sqltext) or die (mysql_error());
-$linedate = mysql_fetch_array($result,MYSQL_NUM);
+$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
+$linedate = mysqli_fetch_array($result,MYSQLI_NUM);
 $resdate=$nowtimestamp - $linedate[0];
-
+mysqli_free_result($result);
 if($resdate>=60)
 {
 $sqltext="truncate scsq_sqper_trend10";
-$result=mysql_query($sqltext) or die (mysql_error());
+$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
 }
 
 
@@ -208,11 +205,12 @@ if($id==1)
 {
  
 $sqltext="truncate scsq_sqper_activerequests;";
-$result=mysql_query($sqltext) or die (mysql_error());
-
+$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
+mysqli_free_result($result);
 
 $sqltext="ALTER TABLE scsq_sqper_activerequests AUTO_INCREMENT = 1 ;";
-$result=mysql_query($sqltext) or die (mysql_error());
+$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
+mysqli_free_result($result);
 
 $cmd = "GET cache_object://".$squidhost."/active_requests HTTP/1.0\r\n";
 //$cmd = "GET cache_object://".$squidhost."/active_requests";
@@ -226,12 +224,14 @@ $cmd.="\r\n";
  $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
 
 if($fp) {
+
  fwrite($fp, $cmd); 
 $count=0;
 #если будет ошибка при получении данных, установить в 1.
 $errCheck=0;
 
 $ptmp="";
+
 
  while(!feof($fp)) 
   { 
@@ -243,14 +243,14 @@ $ptmp.=$tmp;
 if(preg_match("/HTTP/1.0 200 OK/",$ptmp)){
 echo "Error: No connection to Squid";
 $errCheck=1;
-break;
 }
-
 preg_match_all("/username(.+)/",$ptmp,$match);
 preg_match_all("/(peer|remote):(.+)/",$ptmp,$matchpeer);
 preg_match_all("/uri(.+)/",$ptmp,$matchuri);
 preg_match_all("/out\.size(.+)/",$ptmp,$matchsize);
 preg_match_all("/\((.+)seconds/",$ptmp,$matchsec);
+
+
 
 for ($i=0; $i< count($match[1]); $i++) {
 if($matchsec[1][$i]==0)
@@ -263,18 +263,11 @@ $size=$matchsize[1][$i];
 $seconds=$matchsec[1][$i];
 	$sqltext="INSERT INTO scsq_sqper_activerequests (date,ipaddress,username,site,sizeinbytes,seconds) VALUES";
 	$sqltext=$sqltext."($nowtimestamp,'$ipaddress','$username','$site','$size','$seconds')";
-	$result=mysql_query($sqltext) or die (mysql_error());
+	$result=mysqli_query($connection,$sqltext);
 	$sqltext="";
+	
 }
 
-/*
-while(preg_match("/username(.*?)/",$ptmp,$match))
-{
-echo $match[1];
-echo "<br />";
-
-}
-*/
 
   fclose($fp); 
 
@@ -302,15 +295,15 @@ $showInspectTable=0;
 
 
 echo "<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=1>".$_lang['stSTOP']."</a>";
-$result=mysql_query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests") or die (mysql_error());
-$lastUpdateDate = mysql_fetch_array($result,MYSQL_NUM);
-
-$result=mysql_query($queryActiveUsers) or die (mysql_error());
+$result=mysqli_query($connection,"select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests",MYSQLI_USE_RESULT);
+$lastUpdateDate = mysqli_fetch_array($result,MYSQLI_NUM);
+mysqli_free_result($result);
+$result=mysqli_query($connection,$queryActiveUsers);
 $numrow=1;
 $totalspeed=0;
 $insptotalspeed=0; //total speed for inspected table
 
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 if($line[0]=='')
@@ -319,6 +312,7 @@ $line[0]="::1";
 @$rows[$numrow]=implode(";;",$line);
 $numrow++;
 }
+mysqli_free_result($result);
 
 echo "<p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />";
 
@@ -429,7 +423,7 @@ echo "</table>";
 
 #trend totalspeed
    $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$totalspeed,1)";
-mysql_query($sqltext) or die (mysql_error());
+mysqli_query($connection,$sqltext);
 
 
 foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
@@ -440,16 +434,17 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
 
 
    $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
-$result=mysql_query($sqltext) or die (mysql_error());
+$result=mysqli_query($connection,$sqltext);
 
    $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=1 order by date desc limit 30) as tmp order by date asc";
-$result=mysql_query($sqltext) or die (mysql_error());
+$result=mysqli_query($connection,$sqltext, MYSQLI_USE_RESULT);
 
 $countValues=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 $arrValues[$countValues]=$line[0];
 $countValues++;
 }
+mysqli_free_result($result);
 //pChart Graph 
  // Dataset definition 
  $DataSet = new pData;
@@ -742,7 +737,7 @@ echo "</table>";
 #trend cpuusage
 $cpuusage=$cpuusage*100;
    $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$cpuusage,2)";
-mysql_query($sqltext) or die (mysql_error());
+mysqli_query($connection,$sqltext);
 
 
 foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
@@ -753,16 +748,18 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
 
 
    $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
-$result=mysql_query($sqltext) or die (mysql_error());
+$result=mysqli_query($connection,$sqltext);
 
    $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=2 order by date desc limit 30) as tmp order by date asc";
-$result=mysql_query($sqltext) or die (mysql_error());
+$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
 
 $countValues=0;
-while ($line = mysql_fetch_array($result,MYSQL_NUM)) {
+while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 $arrValues[$countValues]=$line[0]/100;
 $countValues++;
 }
+mysqli_free_result($result);
+
 //pChart Graph 
  // Dataset definition 
  $DataSet = new pData;
