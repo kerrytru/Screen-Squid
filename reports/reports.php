@@ -208,8 +208,8 @@ if(isset($_GET['date']))
   $querydate=$_GET['date'];
 else
   $querydate=date("d-m-Y");
-
-list($day,$month,$year) = explode('[/.-]', $querydate);
+echo $querydate;
+list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
 
 if(isset($_GET['dom']))
   $dayormonth=$_GET['dom'];
