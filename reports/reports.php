@@ -1,5 +1,5 @@
 <?php
-#build 20170501
+#build 20170502
  
 $header='<html>
 <head>
@@ -208,7 +208,7 @@ if(isset($_GET['date']))
   $querydate=$_GET['date'];
 else
   $querydate=date("d-m-Y");
-echo $querydate;
+
 list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
 
 if(isset($_GET['dom']))
