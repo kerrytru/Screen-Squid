@@ -5,7 +5,7 @@
 
 <?php
 
-#build 20170501
+#build 20180530
 
 include("../config.php");
 
@@ -134,13 +134,33 @@ if($goodIpaddress!="")
 }
 
 
-$queryActiveUsers="select substring_index(ipaddress,':',1) as ipaddr,
+/*
+$queryActiveUsers1="select substring_index(ipaddress,':',1) as ipaddr,
 			sum((sizeinbytes/1024)/seconds) as s,
-			username 
+		username 
 		   from scsq_sqper_activerequests 
 		   where substring_index(ipaddress,':',1) not IN ('".$friendsIpaddress."')
 		     AND trim(username) not IN ('".$friendsLogin."')
 		   group by ipaddr,username;";
+*/
+//		   LEFT JOIN (SELECT 
+//		  	      name,
+//			      tableid 
+//			   FROM scsq_alias 
+//			   WHERE typeid=1) 
+//			   AS aliastbl 
+//		   ON nofriends.id=aliastbl.tableid 
+//
+
+$queryActiveUsers="select table1.ipaddr,sum(table1.sums/1024/table1.seconds) as s, table1.username, table1.id,table1.aliasname from 
+(select DISTINCT substring_index(ipaddress,':',1) as ipaddr,sizeinbytes as sums, seconds, username, ipaddresstbl.id,aliastbl.name as aliasname from scsq_sqper_activerequests
+LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,substring_index(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON substring_index(ipaddress,':',1)=ipaddresstbl.name 
+LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid 
+) as table1
+where table1.ipaddr not IN ('".$friendsIpaddress."') AND trim(table1.username) not IN ('".$friendsLogin."') group by table1.ipaddr,table1.username; 
+	
+";
+//echo $queryActiveUsers;
 
 //querys for reports end
 
@@ -337,6 +357,9 @@ echo "
     <th>
     ".$_lang['stINSPECT']."
     </th>
+    <th>
+    ".$_lang['stALIAS']."
+    </th>
 </tr>
 ";
 
@@ -353,6 +376,7 @@ echo "<td>".$line[2]."</td>"; //username
 $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&idel=".$line[0].">".$_lang['stDELETE']."</a></td>";
+echo "<td>".$line[4]."</td>"; //username
 echo "</tr>";
 $insptotalspeed+=$line[1];
 }
@@ -362,6 +386,7 @@ echo "<tr>
 <td>&nbsp;</td>
 <td>".$_lang['stTOTAL']."</td>
 <td>".$insptotalspeed."</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
 ";
@@ -390,6 +415,9 @@ echo "
     <th>
     ".$_lang['stINSPECT']."
     </th>
+    <th>
+    ".$_lang['stALIAS']."
+    </th>
 </tr>
 ";
 
@@ -403,9 +431,7 @@ echo "<td>".$line[2]."</td>"; //username
 $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&iadd=".$line[0].">".$_lang['stADD']."</a></td>";
-
-
-
+echo "<td>".$line[4]."</td>"; //username
 echo "</tr>";
 $totalspeed+=$line[1];
     }
@@ -415,10 +441,13 @@ echo "<tr>
 <td>".$_lang['stTOTAL']."</td>
 <td>".$totalspeed."</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 ";
 
 echo "</table>";
+
+
 
 
 #trend totalspeed
