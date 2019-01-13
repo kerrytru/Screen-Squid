@@ -176,5 +176,13 @@ $_lang['stSTOP']="Стоп";
 
 $_lang['stINSPECT']="Наблюдение";
 
+$_lang['stUSERS']="Пользователи";
+$_lang['stACTIVEAUTH']="Активировать кабинет пользователя";
+$_lang['stUSERLOGIN']="Логин";
+$_lang['stUSERPASSWORD']="Пароль";
 
+$_lang['stENTER']="Вход";
+
+$_lang['stAUTHFAIL']="Вы неправильно ввели логин или пароль";
+$_lang['stCHANGEPASSWORD']="Изменить пароль?";
 ?>

@@ -10,7 +10,7 @@ ul {list-style-type:none;padding-left:1em}
 body {margin:0.5em;padding:0.5em}
 </style>
 
-<?php include("config.php");
+<?php include("../config.php");
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -18,7 +18,7 @@ else
   $srv=0
  ?>
 
-<link rel="stylesheet" type="text/css" href="javascript/example.css"/>
+<link rel="stylesheet" type="text/css" href="../javascript/example.css"/>
 <script language=JavaScript>
 function TwoByOne(frame1, frame2)
 {
@@ -55,7 +55,7 @@ function toggleview (id1,id2) {
 		var obj1 = document.getElementById(id1);
 		var obj2 = document.getElementById(id2);
 		(obj1.className=="itemshown") ? obj1.className="itemhidden" : obj1.className="itemshown"; 
-		(obj1.className=="itemshown") ? obj2.innerHTML="<img border='0' src='img/gray-open.png' alt='[&ndash;]'>" : obj2.innerHTML="<img border='0' src='img/gray-closed.png' alt='[+]'>"; 
+		(obj1.className=="itemshown") ? obj2.innerHTML="<img border='0' src='../img/gray-open.png' alt='[&ndash;]'>" : obj2.innerHTML="<img border='0' src='../img/gray-closed.png' alt='[+]'>"; 
 	}
 
 function GoOnlineReport(srv,id)
@@ -139,7 +139,6 @@ echo "
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=5\" target=right>".$_lang['stLOGTABLE']."</a></div>
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=2\" target=right>".$_lang['stALIASES']."</a></div>
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=3\" target=right>".$_lang['stGROUPS']."</a></div>
-
 </div> <!--srvname-->
  
 ";

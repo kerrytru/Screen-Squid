@@ -17,7 +17,10 @@ CREATE TABLE IF NOT EXISTS `scsq_alias` (
   `name` varchar(90) NOT NULL,
   `typeid` int(4) NOT NULL,
   `tableid` varchar(50) NOT NULL,
-  `password` varchar(100) DEFAULT NULL,
+  `login` varchar(100) DEFAULT NULL,
+  `password` varchar(32) DEFAULT NULL,
+  `hash` varchar(32) DEFAULT NULL,
+  `active` int(10) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -59,6 +62,10 @@ CREATE TABLE IF NOT EXISTS `scsq_groups` (
   `name` varchar(90) NOT NULL,
   `typeid` int(2) NOT NULL,
   `comment` varchar(255) DEFAULT NULL,
+  `login` varchar(100) DEFAULT NULL,
+  `password` varchar(32) DEFAULT NULL,
+  `hash` varchar(32) DEFAULT NULL,
+  `active` int(10) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

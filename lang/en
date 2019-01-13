@@ -162,7 +162,6 @@ $_lang['stCATEGORY']="Category";
 $_lang['stTRAFFICBYHOURSLOGINSONESITE']="Traffic by hours (logins) site";
 $_lang['stTRAFFICBYHOURSIPADDRESSONESITE']="Traffic by hours (IP address) site";
 
-
 $_lang['stACTIVEIPADDRESS']="Active IP address";
 $_lang['stONLINE']="Online";
 $_lang['stREFRESHED']="Refreshed in";
@@ -174,5 +173,15 @@ $_lang['stSTOP']="Stop";
 
 $_lang['stINSPECT']="Inspect";
 
+$_lang['stUSERS']="Users";
 
+$_lang['stACTIVEAUTH']="Activate user cabinet";
+$_lang['stUSERLOGIN']="User login";
+$_lang['stUSERPASSWORD']="User password";
+
+
+$_lang['stENTER']="Login";
+
+$_lang['stAUTHFAIL']="Login failed";
+$_lang['stCHANGEPASSWORD']="Change password?";
 ?>

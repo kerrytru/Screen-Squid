@@ -200,8 +200,8 @@ if($_GET['id']==1) {
 
 echo "</table>";
 
-    }  //end GET[id]=1
-    else
+}  //end GET[id]=1
+//    else
 
       if($_GET['id']==2) {  //aliases
 
@@ -229,7 +229,27 @@ echo "</table>";
         if(isset($_POST['tableid'])) // id логина или ipaddress
           $tableid=$_POST['tableid'];
         else
-          $tableid=$_POST['tableid'];
+          $tableid=0;
+
+        if(isset($_POST['userlogin'])) // логин для авторизации в кабинете
+          $userlogin=$_POST['userlogin'];
+        else
+          $userlogin="";
+
+        if(isset($_POST['userpassword'])) // пароль для авторизации в кабинете
+          $userpassword=md5(md5(trim($_POST['userpassword'])));
+        else
+          $userpassword="";
+
+        if(isset($_POST['activeauth'])) // включить авторизацию
+          $activeauth=1;
+        else
+          $activeauth=0;
+
+        if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
+          $changepassword=1;
+        else
+          $changepassword=0;
 
 ///SQL querys
 
@@ -276,8 +296,13 @@ echo "</table>";
 	  GROUP BY altableid
 	  ORDER BY alname asc";
 
-        $queryOneAlias="select name,typeid,tableid,id from scsq_alias where id='".$aliasid."';";
-        $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."' where id='".$aliasid."'";
+        $queryOneAlias="select name,typeid,tableid,id,login,password,active from scsq_alias where id='".$aliasid."';";
+if($changepassword==1)        
+$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',login='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$aliasid."'";
+else
+$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',login='".$userlogin."',active='".$activeauth."' where id='".$aliasid."'";
+
+
         $queryDeleteOneAlias="delete from scsq_alias where id='".$aliasid."'";
         $queryDeleteOneAliasFromGroup="delete from scsq_aliasingroups where aliasid='".$aliasid."'";
 
@@ -346,7 +371,10 @@ echo "</table>";
           echo '
             <form action="right.php?srv='.$srv.'&id=2&actid=2" method="post">
            '.$_lang['stALIASNAME'].': <input type="text" name="name"><br />
-           '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br />
+           '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
+           '.$_lang['stACTIVEAUTH'].': <input type="checkbox" name="activeauth"><br /> 
+	   '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin"><br /> 
+	   '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
            '.$_lang['stVALUE'].':<br /> 
            ';
 
@@ -411,9 +439,18 @@ echo "</table>";
           else
             $typeid=1;
 
+	  if(!isset($_POST['activeauth']))
+            $activeauth=0;
+          else
+            $activeauth=1;
+
+
+
           $tableid=$_POST['tableid'];
 
-          $sql="INSERT INTO scsq_alias (name, typeid,tableid) VALUES ('$name', '$typeid','$tableid')";
+	
+
+          $sql="INSERT INTO scsq_alias (name, typeid,tableid,login,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
 
           if (!mysqli_query($connection,$sql)) {
             die('Error: ' . mysqli_error());
@@ -434,9 +471,21 @@ echo "</table>";
 
           $tableid=$line[2];
           $aliasid=$line[3];
+
+          if($line[6]==1)
+            $activeIsChecked="checked";
+          else
+            $activeIsChecked="";
+		
+
+
           echo '
             <form action="right.php?srv='.$srv.'&id=2&actid=4&aliasid='.$aliasid.'" method="post">
-            '.$_lang['stALIASNAME'].': <input type="text" name="name" value="'.$line[0].'"><br />
+            '.$_lang['stALIASNAME'].': <input type="text" name="name" value="'.$line[0].'"><br /><br />
+            '.$_lang['stACTIVEAUTH'].': <input type="checkbox" '.$activeIsChecked.' name="activeauth"><br /> 
+	    '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin" value="'.$line[0].'"><br /> 
+	    '.$_lang['stCHANGEPASSWORD'].': <input type="checkbox" name="changepassword"><br /> 
+	    '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
             '.$_lang['stVALUE'].':<br /> 
           ';
 
@@ -514,8 +563,8 @@ echo "</table>";
           if (!mysqli_query($connection,$queryDeleteOneAlias)) {
             die('Error: ' . mysqli_error());
           }
-          if (!mysqli_query($onnection,$queryDeleteOneAliasFromGroup)) {
-            die('Error: ' . mysqli_error());
+          if (!mysqli_query($connection,$queryDeleteOneAliasFromGroup)) {
+            die('Error1: ' . mysqli_error());
           }
           
 	  echo "".$_lang['stALIASDELETED']."<br /><br />";
@@ -524,9 +573,9 @@ echo "</table>";
         } //удаление
       } ///end if($_GET['id']==2
 
-else
+//else
 
-         if($_GET['id']==3) {
+         if($_GET['id']==3) { //группы
 
             if(isset($_GET['actid'])) //action ID.
               $actid=$_GET['actid'];
@@ -890,7 +939,7 @@ else
 
           } ///end GET[id]=3
 
-else
+//else
 
             if($_GET['id']==4) { ///быстрый поиск
            
@@ -1004,8 +1053,10 @@ else
 /////////////// IPADDRESS END
 
             } ///end GET[id]=4
- 	    else
-	    if($_GET['id']==5) {
+ ///	    else
+	
+
+   if($_GET['id']==5) {
       echo "
       <h3>".$_lang['stLOGTABLE'].":</h3>
       <table border=1>
@@ -1040,11 +1091,18 @@ else
 
     }  //end GET[id]=5
 
-            else
+///            else
 
-            echo $_lang['stALLISOK'];
+
+    
+
+            
 
  } /// end GET[id]=1 
+
+if(($_GET['id']!=1) && ($_GET['id']!=2) && ($_GET['id']!=3) && ($_GET['id']!=4) && ($_GET['id']!=5))
+	echo $_lang['stALLISOK'];
+
 
 $end=microtime(true);
 
