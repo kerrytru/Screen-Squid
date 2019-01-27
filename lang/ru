@@ -185,4 +185,7 @@ $_lang['stENTER']="Вход";
 
 $_lang['stAUTHFAIL']="Вы неправильно ввели логин или пароль";
 $_lang['stCHANGEPASSWORD']="Изменить пароль?";
+$_lang['stLOGINTOCABINET'] ="Войти в кабинет";
+$_lang['stLOGOUT']="Выйти";
+
 ?>

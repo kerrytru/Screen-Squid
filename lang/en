@@ -184,4 +184,6 @@ $_lang['stENTER']="Login";
 
 $_lang['stAUTHFAIL']="Login failed";
 $_lang['stCHANGEPASSWORD']="Change password?";
+$_lang['stLOGINTOCABINET'] ="Login to cabinet";
+$_lang['stLOGOUT']="Logout";
 ?>

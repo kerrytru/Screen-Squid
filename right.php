@@ -94,6 +94,26 @@ if($enableNofriends==1) {
       }
 
 
+       if(isset($_POST['userlogin'])) // логин для авторизации в кабинете
+          $userlogin=$_POST['userlogin'];
+        else
+          $userlogin="";
+
+        if(isset($_POST['userpassword'])) // пароль для авторизации в кабинете
+          $userpassword=md5(md5(trim($_POST['userpassword'])));
+        else
+          $userpassword="";
+
+        if(isset($_POST['activeauth'])) // включить авторизацию
+          $activeauth=1;
+        else
+          $activeauth=0;
+
+        if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
+          $changepassword=1;
+        else
+          $changepassword=0;
+
 if($_GET['id']==1) {
   $queryCountRowsTraffic="select count(*) from scsq_traffic";
   $queryCountRowsLogin="select count(*) from scsq_logins";
@@ -231,25 +251,7 @@ echo "</table>";
         else
           $tableid=0;
 
-        if(isset($_POST['userlogin'])) // логин для авторизации в кабинете
-          $userlogin=$_POST['userlogin'];
-        else
-          $userlogin="";
-
-        if(isset($_POST['userpassword'])) // пароль для авторизации в кабинете
-          $userpassword=md5(md5(trim($_POST['userpassword'])));
-        else
-          $userpassword="";
-
-        if(isset($_POST['activeauth'])) // включить авторизацию
-          $activeauth=1;
-        else
-          $activeauth=0;
-
-        if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
-          $changepassword=1;
-        else
-          $changepassword=0;
+ 
 
 ///SQL querys
 
@@ -483,7 +485,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             <form action="right.php?srv='.$srv.'&id=2&actid=4&aliasid='.$aliasid.'" method="post">
             '.$_lang['stALIASNAME'].': <input type="text" name="name" value="'.$line[0].'"><br /><br />
             '.$_lang['stACTIVEAUTH'].': <input type="checkbox" '.$activeIsChecked.' name="activeauth"><br /> 
-	    '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin" value="'.$line[0].'"><br /> 
+	    '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin" value="'.$line[4].'"><br /> 
 	    '.$_lang['stCHANGEPASSWORD'].': <input type="checkbox" name="changepassword"><br /> 
 	    '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
             '.$_lang['stVALUE'].':<br /> 
@@ -619,7 +621,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 			     GROUP BY scsq_aliasingroups.groupid
 			     ORDER BY name asc;";
             $queryGroupMembers="select aliasid from scsq_aliasingroups where groupid='".$groupid."'";
-            $queryOneGroup="select name,typeid,id,comment from scsq_groups where id='".$groupid."';";
+            $queryOneGroup="select name,typeid,id,comment,userlogin,active from scsq_groups where id='".$groupid."';";
             $queryOneGroupList="SELECT
 				   scsq_groups.name, 
 				   scsq_alias.name
@@ -628,8 +630,12 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 				RIGHT JOIN scsq_groups ON scsq_groups.id=scsq_aliasingroups.groupid
 				WHERE groupid='".$groupid."'
 				ORDER BY scsq_alias.name asc;";
+	if($changepassword==1) 
+            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='".$typeid."',comment='".$comment."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$groupid."'";
+	else
+            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='".$typeid."',comment='".$comment."',userlogin='".$userlogin."',active='".$activeauth."' where id='".$groupid."'";
 
-            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='".$typeid."',comment='".$comment."' where id='".$groupid."'";
+
             $queryDeleteOneGroup="delete from scsq_groups where id='".$groupid."'";
 
             if(!isset($_GET['actid'])) {
@@ -676,7 +682,10 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                 <form action="right.php?srv='.$srv.'&id=3&actid=2" method="post">
                 '.$_lang['stGROUPNAME'].': <input type="text" name="name"><br />
                 '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br />
-                '.$_lang['stCOMMENT'].': <input type="text" name="comment"><br />
+                '.$_lang['stCOMMENT'].': <input type="text" name="comment"><br /> <br />
+                '.$_lang['stACTIVEAUTH'].': <input type="checkbox" name="activeauth"><br /> 
+	        '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin"><br /> 
+	    	'.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
                 '.$_lang['stVALUE'].':<br />';
 
                 $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);
@@ -743,7 +752,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                 $comment=$_POST['comment'];
 
 
-              $sql="INSERT INTO scsq_groups (name, typeid,comment) VALUES ('$name', '$typeid','$comment')";
+              $sql="INSERT INTO scsq_groups (name, typeid,comment,login, password,active) VALUES ('$name', '$typeid','$comment','$userlogin','$userpassword','$activeauth')";
 
               if (!mysqli_query($connection,$sql)) {
                 die('Error: ' . mysqli_error());
@@ -784,11 +793,20 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
               else
                 $isChecked="";
 
+		 if($line[5]==1)
+		    $activeIsChecked="checked";
+		  else
+		    $activeIsChecked="";
+
               echo '
                 <form action="right.php?srv='.$srv.'&id=3&actid=4&groupid='.$groupid.'" method="post">
                '.$_lang['stGROUPNAME'].': <input type="text" name="name" value="'.$line[0].'"><br />
                '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid" '.$isChecked.' ><br />
                '.$_lang['stCOMMENT'].': <input type="text" name="comment" value="'.$line[3].'"><br />
+               '.$_lang['stACTIVEAUTH'].': <input type="checkbox" '.$activeIsChecked.' name="activeauth"><br /> 
+	       '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin" value="'.$line[4].'"><br /> 
+	       '.$_lang['stCHANGEPASSWORD'].': <input type="checkbox" name="changepassword"><br /> 
+	       '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
                '.$_lang['stVALUE'].':<br />';
 
                $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);

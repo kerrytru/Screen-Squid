@@ -81,7 +81,9 @@ if (isset($_COOKIE['logged']))
 if (isset($_COOKIE['id']) and isset($_COOKIE['hash']))
 {
 
-
+if((($_GET['id']>=25) and ($_GET['id']<=29)) or ($_GET['id']==55) or ($_GET['id']==63))
+    $query = "SELECT * FROM scsq_groups WHERE id = '".intval($_COOKIE['id'])."' LIMIT 1";
+else
     $query = "SELECT * FROM scsq_alias WHERE id = '".intval($_COOKIE['id'])."' LIMIT 1";
 
 $result=mysqli_query($connection,$query, MYSQLI_USE_RESULT);
@@ -182,8 +184,9 @@ else
   $currentmime="";
 }
 
-if(isset($_GET['login']))
-  $currentloginid=$_GET['login'];
+//fix for cabinet!
+if(isset($_COOKIE['tableid']))
+  $currentloginid=$_COOKIE['tableid'];
 else
   $currentloginid="";
 
@@ -193,8 +196,9 @@ if(isset($_GET['ipname']))
 else
   $currentipaddress="";
 
-if(isset($_GET['ip']))
-  $currentipaddressid=$_GET['ip'];
+//fix for cabinet!
+if($_COOKIE['tableid'])
+  $currentipaddressid=$_COOKIE['tableid'];
 else
   $currentipaddressid="";
 
@@ -220,8 +224,8 @@ if(isset($_GET['group']))
 else
   $currentgroupid="";
 
-if(isset($_GET['typeid']))
-  $typeid=$_GET['typeid'];
+if(isset($_COOKIE['typeid']))
+  $typeid=$_COOKIE['typeid'];
 else
   $typeid="";
 
@@ -2468,6 +2472,10 @@ $queryOneGroupTraffic="
 
   ORDER BY scsq_ipaddress.name asc;";
 
+
+
+
+
 if(($typeid==0)&&($useLoginalias==0))
 $useAliasColumn="";
 if(($typeid==0)&&($useLoginalias==1))
@@ -3108,6 +3116,7 @@ if(!isset($_GET['pdf'])){
 
 ?>
 
+<p align=right><a href="Javascript:deleteCookie('logged')" ><?php echo $_lang['stLOGOUT']; ?></a></p>
 
 <script src="../../javascript/calendar_ru.js" type="text/javascript"></script>
 
@@ -8240,18 +8249,33 @@ if(isset($_POST['submit']))
 {
 echo '<script src="../../javascript/navigator.js" type="text/javascript"></script>';
 
-	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE login='".mysql_real_escape_string($_POST['login'])."' LIMIT 1";
+	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE userlogin='".mysql_real_escape_string($_POST['userlogin'])."' LIMIT 1";
 	$result=mysqli_query($connection,$query, MYSQLI_USE_RESULT);
+
 	$row=mysqli_fetch_assoc($result);
 
+
 	
+	if(!isset($row['id']))
+		{		
+			mysqli_free_result($result);
+			$query = "SELECT id, password,active,typeid FROM scsq_groups WHERE userlogin='".mysql_real_escape_string($_POST['userlogin'])."' LIMIT 1";
+			$result=mysqli_query($connection,$query, MYSQLI_USE_RESULT);
+			$row=mysqli_fetch_assoc($result);
+			$groupquery=1; //признак что сработал групповой запрос
+			
+		}
+
 		if($row['password'] == md5(md5($_POST['password'])) && $row['active'] == 1)
 
 		    {
-       
+       			
 		        $hash = md5(generateCode(10));
 			mysqli_free_result($result);
-			$query = "UPDATE scsq_alias SET hash='".$hash."' WHERE id=".$row['id'].";";
+			if($groupquery==1)
+				$query = "UPDATE scsq_groups SET hash='".$hash."' WHERE id=".$row['id'].";";
+			else
+				$query = "UPDATE scsq_alias SET hash='".$hash."' WHERE id=".$row['id'].";";
 
 			$result=mysqli_query($connection,$query);
      
@@ -8263,19 +8287,35 @@ echo '<script src="../../javascript/navigator.js" type="text/javascript"></scrip
 			setcookie("hash", $hash, 0);
 
 			setcookie("logged", 1, 0);
-		//	if($row['typeid']==0)			
-	//		echo "<script>UpdateLeftMenu(1);</script>";
-//			if($row['typeid']==1)			
-//			echo "<script>UpdateLeftMenu(2);</script>";
-echo "reports.php?srv=0&id=11&date=".$querydate."&dom=day&ip=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group=";
 
+			
+			
+			setcookie("typeid", $row['typeid'], 0);
+			
+
+			mysqli_free_result($result);
+
+			if($groupquery==1)
+			{
+			setcookie("tableid", $row['id'], 0);
+
+
+			header("Location: reports.php?srv=0&id=25&date=".$querydate."&dom=day&login=&groupname=&typeid=".$row['typeid']."&group=".$row['id'].""); exit();
+			}
+			
+			else		
+			{
 			if($row['typeid']==0){
-	header("Location: reports.php?srv=0&id=8&date=".$querydate."&dom=day&login=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
-}			
-if($row['typeid']==1)
-{
-	header("Location: reports.php?srv=0&id=11&date=".$querydate."&dom=day&ip=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
-}
+				setcookie("tableid", $row['tableid'], 0);
+				header("Location: reports.php?srv=0&id=8&date=".$querydate."&dom=day&login=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
+			}			
+			if($row['typeid']==1)
+			{
+				setcookie("tableid", $row['tableid'], 0);
+				header("Location: reports.php?srv=0&id=11&date=".$querydate."&dom=day&ip=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
+			}
+			}
+
 		    }
 
 		else
@@ -8283,6 +8323,7 @@ if($row['typeid']==1)
 		    {
 			//wrong password
 		        print $_lang['stAUTHFAIL'];
+			echo "<br /><br />";
 
 		    }
 
@@ -8292,10 +8333,15 @@ if($_COOKIE['logged']== 0)
 
 {
 
+print $_lang['stLOGINTOCABINET'];
+
+
+echo "<br /><br />";
+
 echo '
 	<form method="POST">
 
-		'.$_lang['stUSERLOGIN'].' <input name="login" type="text"><br>
+		'.$_lang['stUSERLOGIN'].' <input name="userlogin" type="text"><br>
 		'.$_lang['stUSERPASSWORD'].' <input name="password" type="password"><br>
 		<input name="submit" type="submit" value="'.$_lang['stENTER'].'">
 
@@ -8315,11 +8361,15 @@ echo '
 
 //}
 
+
+
 mysqli_free_result($result);
 
 //}
 
 }
+
+
 
 //check login end
 
