@@ -11,24 +11,31 @@ my $user = "mysql-user"; # username k DB
 my $pass = "pass"; # pasword k DB
 my $db = "test"; # name DB
 #==========================================================
+#Count lines for one insert. You can change it, if its needed.
 #Kolichestvo strok, vstavliaemoe za odin INSERT. Mozhno pokrutit bolshe/menshe dlia skorosti
 #Количество строк, вставляемое за один INSERT. Можно покрутить больше/меньше для скорости.
 my $count_lines_for_one_insert=100; #how much INSERT for one 'transaction'
 #==========================================================
+#Path to access.log. It could be full path, e.g. /var/log/squid/access.log
 #Put k access.log. Eto mozhet bit polnii put. Naprimer, /var/log/squid/access.log
 #Путь к файлу access.log(имя может другим). Это может быть и полный путь, например, /var/log/squid/access.log
 my $filetoparse="access.log";
 #==========================================================
+#Path to ssquid.log. Log fetch.pl. It could be full path, e.g /var/log/squid/ssquid.log
 #File kuda budet zapisivatsia resultat otrabotki skripta fetch.pl. Eto mozhet bit polnii put. Naprimer, /var/log/squid/ssquid.log
 my $filetolog="ssquid.log";
 #==========================================================
+#Enable delete old data.
 #Vkluchit udalenie starih dannih iz bazi
 #Включить удаление старых данных из базы
 my $enabledelete=0;
+
+#How older data must be deleted. In example, older than 100 days from max date.
 #Period, starshe kotorogo dannie budut udaliatsia. Ukazivaetsia v dniah.
 #Период, старше которого данные будут удаляться. Указывается в днях.
 my $deleteperiod=100; #days
 #==========================================================
+#min bytes of traffic in one record to be parsed. By default parsed whole log.
 #Kolichestvo bait, menshe kotorogo dannie ne budut zapisivatsa v bazu. Ukazivaetsia v baitah. Mozhet ispolzovatsa, chtobi ne zapisivat v bazu dannie o bannerah.
 #Количество байт, меньше которого данные не будут записываться в базу. Указывается в байтах. Может использоваться, чтобы не записывать в базу данные о баннерах.
 my $minbytestoparse=-1; #bytes, default -1
