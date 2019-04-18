@@ -298,11 +298,11 @@ echo "</table>";
 	  GROUP BY altableid
 	  ORDER BY alname asc";
 
-        $queryOneAlias="select name,typeid,tableid,id,login,password,active from scsq_alias where id='".$aliasid."';";
+        $queryOneAlias="select name,typeid,tableid,id,userlogin,password,active from scsq_alias where id='".$aliasid."';";
 if($changepassword==1)        
-$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',login='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$aliasid."'";
+$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$aliasid."'";
 else
-$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',login='".$userlogin."',active='".$activeauth."' where id='".$aliasid."'";
+$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',userlogin='".$userlogin."',active='".$activeauth."' where id='".$aliasid."'";
 
 
         $queryDeleteOneAlias="delete from scsq_alias where id='".$aliasid."'";
@@ -452,7 +452,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
 	
 
-          $sql="INSERT INTO scsq_alias (name, typeid,tableid,login,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
+          $sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
 
           if (!mysqli_query($connection,$sql)) {
             die('Error: ' . mysqli_error());
