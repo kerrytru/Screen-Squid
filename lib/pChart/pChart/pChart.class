@@ -1528,7 +1528,9 @@
       {
        if ( $SerieName == "" || $SerieName == $ColName )
         {
-         $XIn = ""; $Yin = ""; $Yt = ""; $U = "";
+//         $XIn = ""; $Yin = ""; $Yt = ""; $U = "";
+         $XIn = array(); $Yin = array(); $Yt = array(); $U = array();
+
          $XIn[0] = 0; $YIn[0] = 0;
 
          $ID = 0;
@@ -2404,7 +2406,7 @@
      $SplicePercent       = 100 / $PieSum;
 
      /* Calculate all polygons */
-     $Angle    = 0; $TopPlots = "";
+     $Angle    = 0; //$TopPlots = array(); //$TopPlots = "";
      foreach($iValues as $Key => $Value)
       {
        $TopPlots[$Key][] = $XPos;
@@ -2522,7 +2524,7 @@
      $SplicePercent = 100 / $PieSum;
 
      /* Calculate all polygons */
-     $Angle = 0; $TopPlots = "";
+     $Angle = 0; $TopPlots = array();// $TopPlots = "";
      foreach($iValues as $Key => $Value)
       {
        $XOffset = cos(($Angle+($Value/2*$SpliceRatio)) * 3.1418 / 180 ) * $SpliceDistance;
