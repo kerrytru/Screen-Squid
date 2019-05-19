@@ -23,7 +23,7 @@ $cfgcachemgr_passwd[0]="";
 #$cfgcachemgr_passwd[1]="";
 
 
-#language ru = russian, en = english
+#language ru = russian, en = english, ua = ukrainian
 $language="en";
 
 include_once("lang/$language");
