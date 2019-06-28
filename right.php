@@ -1160,6 +1160,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
    ";
 	$file=file($configfile); 
 	
+	$num = 1; //
+	
 	echo '<form name=configphp_form action="right.php?srv='.$srv.'&id=6&actid=3" method="post">';
 	
 	for($i=0;$i<sizeof($file);$i++){
@@ -1179,12 +1181,13 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
 		echo '
 			<tr>
-				<td>1</td>
+				<td>'.$num.'</td>
 				<td>'.trim($expParamname[0]).'</td>
 				<td><input type="text" name="'.trim($expParamname[0]).'" value="'.trim($expParamvalue[0]).'"></td>
 				<td></td>
 			</tr>
 		';
+		$num++;
 		}
 	
 	} //end for
