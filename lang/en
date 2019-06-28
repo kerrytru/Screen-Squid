@@ -186,4 +186,10 @@ $_lang['stAUTHFAIL']="Login failed";
 $_lang['stCHANGEPASSWORD']="Change password?";
 $_lang['stLOGINTOCABINET'] ="Login to cabinet";
 $_lang['stLOGOUT']="Logout";
+
+//1.14
+$_lang['stPARAMNAME'] ="Parameter";
+$_lang['stPARAMVALUE']="Value";
+$_lang['stCONFIG']="Configuration";
+
 ?>

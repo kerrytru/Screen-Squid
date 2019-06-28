@@ -188,4 +188,9 @@ $_lang['stCHANGEPASSWORD']="Змінити пароль?";
 $_lang['stLOGINTOCABINET'] ="Ввійти в кабінет";
 $_lang['stLOGOUT']="Вийти";
 
+//1.14
+$_lang['stPARAMNAME'] ="Parameter";
+$_lang['stPARAMVALUE']="Value";
+$_lang['stCONFIG']="Configuration";
+
 ?>

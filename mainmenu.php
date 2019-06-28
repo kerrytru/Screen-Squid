@@ -139,7 +139,7 @@ echo "
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=5\" target=right>".$_lang['stLOGTABLE']."</a></div>
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=2\" target=right>".$_lang['stALIASES']."</a></div>
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=3\" target=right>".$_lang['stGROUPS']."</a></div>
-
+<div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=6\" target=right>".$_lang['stCONFIG']."</a></div>
 </div> <!--srvname-->
  
 ";

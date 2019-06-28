@@ -63,10 +63,10 @@ include("config.php");
 
 
 
-$address=$address[$srv];
-$user=$user[$srv];
-$pass=$pass[$srv];
-$db=$db[$srv];
+$addr=$address[$srv];
+$usr=$user[$srv];
+$psw=$pass[$srv];
+$dbase=$db[$srv];
 
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
@@ -74,7 +74,7 @@ echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
 $start=microtime(true);
 
 ///$connectionStatus=mysqli_connect($address,$user,$pass,$db) or die(mysqli_connect_error());
-$connection=mysqli_connect("$address","$user","$pass","$db");
+$connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 
 ///mysqli_select_db($db);
 
@@ -1109,6 +1109,99 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
     }  //end GET[id]=5
 
+ if($_GET['id']==6) {
+   	
+	//определим файл который будем изменять. Это сделано для того, чтобы работая в админском интерфейсе, можно было конфигурить версию для директора:)
+	$configfile = "config.php";
+
+	if($_GET['actid'] == 3) ///сохранить настройки
+	{
+		$file=file($configfile); 
+
+		foreach($_POST as $key => $val) {
+		
+		$stkey = str_replace("<","[",$key);
+		$stkey = str_replace(">","]",$stkey);
+		
+		
+		for($i=0;$i<sizeof($file);$i++)
+		  {
+			$st = $file[$i];
+			#исключаем лишние строки. Чтоб не изменять лишнее.
+			if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i")
+			
+				if(strpos($file[$i],$stkey)){
+					$st = '$'.$stkey.'="'.$val.'";'.PHP_EOL;
+					$file[$i] = $st; 
+				}
+		  }
+	
+		}
+	
+		$fp=fopen($configfile,"w"); 
+		fputs($fp,implode("",$file)); 
+		fclose($fp);
+		
+
+	} //if($_GET['actid'] == 3) 
+	
+
+  
+
+    echo "
+      <h3>".$_lang['stCONFIG']." Screen Squid:</h3>
+      <table border=1>
+      <tr>
+         <th>#</th>
+         <th>".$_lang['stPARAMNAME']."</th>
+         <th>".$_lang['stPARAMVALUE']."</th>
+         <th>".$_lang['stCOMMENT']."</th>
+      </tr>
+   ";
+	$file=file($configfile); 
+	
+	echo '<form name=configphp_form action="right.php?srv='.$srv.'&id=6&actid=3" method="post">';
+	
+	for($i=0;$i<sizeof($file);$i++){
+	
+	$st = $file[$i];
+		#исключаем лишние строки. Также можно будет регулировать количество отображаемых параметров
+		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && $st[1]<>"v")	{
+
+	  	$expString = explode("$",$file[$i]);
+		$expParamname = explode("=",$expString[1]);
+		$expParamname = str_replace("[","<",$expParamname);
+		$expParamname = str_replace("]",">",$expParamname);
+		$expParamvalue = explode(";",$expParamname[1]);		
+		#стираем лишние символы для пользователя		
+		$expParamvalue = str_replace("\"","",$expParamvalue);
+		
+
+		echo '
+			<tr>
+				<td>1</td>
+				<td>'.trim($expParamname[0]).'</td>
+				<td><input type="text" name="'.trim($expParamname[0]).'" value="'.trim($expParamvalue[0]).'"></td>
+				<td></td>
+			</tr>
+		';
+		}
+	
+	} //end for
+
+	
+	echo "</table>";
+	echo "<br />";
+	echo '<input type="submit" value="'.$_lang['stSAVE'].'"><br />';
+   	echo " </form>";
+
+
+                  
+                  
+
+    }  //end GET[id]=6
+
+
 ///            else
 
 
@@ -1118,7 +1211,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
  } /// end GET[id]=1 
 
-if(($_GET['id']!=1) && ($_GET['id']!=2) && ($_GET['id']!=3) && ($_GET['id']!=4) && ($_GET['id']!=5))
+if(($_GET['id']!=1) && ($_GET['id']!=2) && ($_GET['id']!=3) && ($_GET['id']!=4) && ($_GET['id']!=5) && ($_GET['id']!=6))
 	echo $_lang['stALLISOK'];
 
 
