@@ -193,4 +193,7 @@ $_lang['stPARAMNAME'] ="Parameter";
 $_lang['stPARAMVALUE']="Value";
 $_lang['stCONFIG']="Configuration";
 
+//1.15
+$_lang['stSPECIFIED'] = "SPECIFIED";
+
 ?>

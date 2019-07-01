@@ -193,4 +193,7 @@ $_lang['stPARAMNAME'] ="Параметр";
 $_lang['stPARAMVALUE']="Значение";
 $_lang['stCONFIG']="Конфигурация";
 
+//1.15
+$_lang['stSPECIFIED'] = "ПРОИЗВОЛЬНО";
+
 ?>

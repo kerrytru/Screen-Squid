@@ -9,7 +9,42 @@ $header='<html>
 <body>
 ';
 
+
+
+
 include("../config.php");
+
+if(isset($_GET['srv']))
+  $srv=$_GET['srv'];
+else
+  $srv=0;
+
+if(isset($_GET['date']))
+  $querydate=$_GET['date'];
+else
+  $querydate=date("d-m-Y");
+
+if(isset($_GET['date2']))
+  $querydate2=$_GET['date2'];
+else
+  $querydate2="";
+
+list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
+
+if(isset($_GET['dom']))
+  $dayormonth=$_GET['dom'];
+else
+  $dayormonth="day";
+
+
+
+$address=$address[$srv];
+$user=$user[$srv];
+$pass=$pass[$srv];
+$db=$db[$srv];
+
+$connection=mysqli_connect("$address","$user","$pass","$db");
+
 
  // Standard pChart inclusions
  include("../lib/pChart/pChart/pData.class");
@@ -30,10 +65,7 @@ $makepdf=1;
 
 $start=microtime(true);
 
-if(isset($_GET['srv']))
-  $srv=$_GET['srv'];
-else
-  $srv=0;
+
 
 // Javascripts
 
@@ -52,7 +84,7 @@ function LeftRightDateSwitch(idReport, dom,lr)
   var rightdate=new Date(arraydate[2],arraydate[1]-1,arraydate[0]);
   var ldate;
   var rdate;
-  if(dom=='day') {
+  if((dom=='day')  || (dom=='btw'))  {
     leftdate.setDate(leftdate.getDate()-1);
     rightdate.setDate(rightdate.getDate()+1);
   }
@@ -103,6 +135,7 @@ function FastDateSwitch(idReport, dom)
   else
     parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
 +'&date='+window.document.fastdateswitch_form.date_field.value
++'&date2='+window.document.fastdateswitch_form.date2_field.value
 +'&dom='+dom
 +'&login='+window.document.fastdateswitch_form.login_field_hidden.value
 +'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
@@ -118,17 +151,17 @@ function FastDateSwitch(idReport, dom)
 +'&loiname='+window.document.fastdateswitch_form.loiname_field_hidden.value;
 }
 
-/*
-JS function to open reports page with some additional parameters.
-idReport - id of report
-dom - day or month report
-id - id login or id ipaddress or id group
-idname - visible name login(Yoda) or name ipaddress(172.16.120.33) or name group(StarWars club)
-idsign - login (0) or ipaddress (1) or group login (3) or group ipaddress (4) or httpstatus id >4
-par1 - sitename if report need it or httpstatus name
+
+//JS function to open reports page with some additional parameters.
+//idReport - id of report
+//dom - day or month report
+//id - id login or id ipaddress or id group
+//idname - visible name login(Yoda) or name ipaddress(172.16.120.33) or name group(StarWars club)
+//idsign - login (0) or ipaddress (1) or group login (3) or group ipaddress (4) or httpstatus id >4
+//par1 - sitename if report need it or httpstatus name
 
 
-*/
+
 function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 {
 
@@ -194,27 +227,12 @@ function UpdateLeftMenu(id)
 
 <?php
 }
+
 // Javascripts END
 
-$address=$address[$srv];
-$user=$user[$srv];
-$pass=$pass[$srv];
-$db=$db[$srv];
-
-$connection=mysqli_connect("$address","$user","$pass","$db");
 
 
-if(isset($_GET['date']))
-  $querydate=$_GET['date'];
-else
-  $querydate=date("d-m-Y");
 
-list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
-
-if(isset($_GET['dom']))
-  $dayormonth=$_GET['dom'];
-else
-  $dayormonth="day";
 
 ///костыль для отчетов по периодам
 /// 21 - по месяцам, 39 - по дням, 40 - по имени дня
@@ -228,13 +246,24 @@ if($dayormonth=="day") {
   $dateend=strtotime($querydate) + 86400;
   $weekdaynumber=date("w",$datestart);
 }
-else {
+if($dayormonth=="month")  {
   $querydom="%m-%Y";
   $querydate=$month."-".$year;
   $numdaysinmonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
   $datestart=mktime(0,0,0,$month,1,$year);
   $dateend=$datestart + 86400*$numdaysinmonth;
 }
+
+if($dayormonth=="btw")  {
+  $querydom="%d-%m-%Y";
+  $datestart=strtotime($querydate);
+  $dateend=strtotime($querydate2) + 86400;
+  $dayormonth="day";
+//  $weekdaynumber=date("w",$datestart);
+}
+
+
+
 
 if($weekdaynumber==1)
 $dayname="(".$_lang['stMONDAY'].")";
@@ -392,7 +421,7 @@ $echoLoginAliasColumn="";
 if($useLoginalias==1)
 $echoLoginAliasColumn=",aliastbl.name";
 
-  $queryLoginsTraffic="
+   $queryLoginsTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
@@ -1050,6 +1079,20 @@ $queryTrafficByPeriodDay="
 	ORDER BY FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d') asc;
 ;";
 
+$queryTrafficByPeriodDay="
+  	SELECT
+	  FROM_UNIXTIME(scsq_traffic.date,'%d.%m.%Y') AS d1,
+	  SUM(scsq_traffic.sizeinbytes), 
+	  ipaddress,
+	  login
+	FROM scsq_traffic
+
+	 
+	GROUP BY crc32(FROM_UNIXTIME(scsq_traffic.date,'%Y-%m-%d'))
+	ORDER BY FROM_UNIXTIME(scsq_traffic.date,'%Y-%m-%d') asc;
+;";
+
+//echo $queryTrafficByPeriodDay;
 
 $queryTrafficByPeriodDayname="
   	SELECT
@@ -1623,21 +1666,25 @@ $queryCategorySitesTraffic="
 //**********************************************
 //===============================================
 
+
+
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
 	   SUM(sizeinbytes) AS s,
 	   scsq_categorylist.category 
-	 FROM scsq_quicktraffic 
+	 FROM scsq_quicktraffic
 	 LEFT OUTER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
-	   AND par=1
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
+	AND par=1
 	 GROUP BY CRC32(scsq_quicktraffic.site) 
 	 ORDER BY site asc
 ;";
+
+//echo $queryOneLoginTraffic;
 
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
@@ -1814,6 +1861,7 @@ $queryWhoVisitPopularSiteLogin="
   ".$msgNoZeroTraffic."
 
   ORDER BY nofriends.name;";
+
 
 $queryVisitingWebsiteByTimeLogin="
   SELECT 
@@ -2922,6 +2970,7 @@ $queryOneGroupTopSitesTraffic="
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
+//echo $queryOneGroupTopSitesTraffic;
 
 if($typeid==0)
 $queryOneGroupTrafficByHours="
@@ -3246,6 +3295,9 @@ if(!isset($_GET['pdf'])){
 <input type="text" name=date_field onfocus="this.select();lcs(this)"
     onclick="event.cancelBubble=true;this.select();lcs(this)">
 <a href="Javascript:FastDateSwitch(<?php echo $_GET['id'] ?>,'day')"><?php echo $_lang['stDAY']?></a>&nbsp;<a href="Javascript:FastDateSwitch(<?php echo $_GET['id']; ?>,'month')"><?php echo $_lang['stMONTH']?></a>
+<br /><br />
+<input type="text" name=date2_field onfocus="this.select();lcs(this)"
+    onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;<a href="Javascript:FastDateSwitch(<?php echo $_GET['id']; ?>,'btw')"><?php echo $_lang['stSPECIFIED']; ?></a>
 <input type="hidden" name=date_field_hidden value="<?php echo $_GET['date']; ?>">
 <input type="hidden" name=dom_field_hidden value="<?php echo $dayormonth; ?>">
 <input type="hidden" name=loginname_field_hidden value="<?php echo $currentlogin; ?>">
@@ -3272,6 +3324,12 @@ if(!isset($_GET['pdf'])){
 <?php
 }
 ///CALENDAR END
+
+#костыль для перехода с произвольных отчетов
+if($_GET['dom']=="btw"){
+$dayname="";
+$querydate = $querydate." - ".$querydate2; 
+}
 
 ///REPORTS HEADERS
 
@@ -3473,7 +3531,7 @@ echo "<tr>";
 echo "<td valign=middle>".$repheader."</td>";
 
 if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
-echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php??srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date']."&dom=".$_GET['dom']."&login=".$_GET['login']."&loginname=".$_GET['loginname']."&ip=".$_GET['ip']."&ipname".$_GET['ipname']."=&site=".$_GET['site']."&group=".$_GET['group']."&groupname=".$_GET['groupname']."&typeid=".$_GET['typeid']."&httpstatus=".$_GET['httpstatus']."&httpname=".$_GET['httpname']."&loiid=".$_GET['loiid']."&loiname=".$_GET['loiname']."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php??srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date']."&date2=".$_GET['date2']."&dom=".$_GET['dom']."&login=".$_GET['login']."&loginname=".$_GET['loginname']."&ip=".$_GET['ip']."&ipname".$_GET['ipname']."=&site=".$_GET['site']."&group=".$_GET['group']."&groupname=".$_GET['groupname']."&typeid=".$_GET['typeid']."&httpstatus=".$_GET['httpstatus']."&httpname=".$_GET['httpname']."&loiid=".$_GET['loiid']."&loiname=".$_GET['loiname']."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
 echo "</tr>";
 echo "</table>";
 }
@@ -3496,9 +3554,15 @@ $colftext[4]="&nbsp;";
 
 $colh[0]=3+$useLoginalias;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
+//$colh[2]="<th>".$colhtext[2]."</th>";
+//$colh[3]="<th>".$colhtext[3]."</th>";
+//$colh[4]="<th>".$colhtext[4]."</th>";
+
+$colh[2]="<th>".$colhtext[2]."<a href=?></a></th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
+
+
 $result=mysqli_query($connection,$queryLoginsTraffic,MYSQLI_USE_RESULT);
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
@@ -8340,6 +8404,7 @@ $runtime=$end - $start;
 echo "<br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)." ".$_lang['stSECONDS']."</font><br />";
 
 echo $_lang['stCREATORS'];
+
 
 ///mysql_disconnect();
 
