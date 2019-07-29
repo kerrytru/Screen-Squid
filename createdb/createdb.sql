@@ -211,6 +211,26 @@ CREATE TABLE IF NOT EXISTS `scsq_traffic` (
   KEY `date` (`date`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+--
+-- Table structure for table `scsq_mod_quotas`
+--
+
+CREATE TABLE IF NOT EXISTS `scsq_mod_quotas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `aliasid` int(11) DEFAULT NULL,
+  `quota` int(11) DEFAULT NULL,
+  `status` int(4) DEFAULT '0',
+  `active` int(10) DEFAULT '0',
+  `quotaday` int(11) DEFAULT NULL,
+  `quotamonth` int(11) DEFAULT NULL,
+  `sumday` int(11) DEFAULT NULL,
+  `summonth` int(11) DEFAULT NULL,
+  `datemodified` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
