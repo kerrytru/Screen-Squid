@@ -195,5 +195,12 @@ $_lang['stCONFIG']="Конфигурация";
 
 //1.15
 $_lang['stSPECIFIED'] = "ПРОИЗВОЛЬНО";
+$_lang['stMODULEMANAGER'] = "Менеджер модулей";
+$_lang['stDESCRIPTION'] = "Описание";
+$_lang['stNAME'] = "Наименование";
+$_lang['stINSTALL'] = "Установить";
+$_lang['stUNINSTALL'] = "Удалить";
+
+
 
 ?>

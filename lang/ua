@@ -195,5 +195,10 @@ $_lang['stCONFIG']="Configuration";
 
 //1.15
 $_lang['stSPECIFIED'] = "SPECIFIED";
+$_lang['stMODULEMANAGER'] = "Manager Modules";
+$_lang['stDESCRIPTION'] = "Description";
+$_lang['stNAME'] = "Name";
+$_lang['stINSTALL'] = "Install";
+$_lang['stUNINSTALL'] = "Uninstall";
 
 ?>

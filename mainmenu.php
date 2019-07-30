@@ -140,7 +140,42 @@ echo "
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=2\" target=right>".$_lang['stALIASES']."</a></div>
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=3\" target=right>".$_lang['stGROUPS']."</a></div>
 <div class='linkwithicon'><a href=\"right.php?srv=".$srv."&id=6\" target=right>".$_lang['stCONFIG']."</a></div>
+
+
+<!--moduletemplate-->
+
+<div class='linkwithicon1'><a href=\"javascript:toggleview('modules".$srv."','togglemodules".$srv."')\" id='togglemodules".$srv."'><img border='0' src='img/gray-closed.png' alt='[+]'></a>
+<div class='aftericon'><a href=\"javascript:toggleview('modules".$srv."','togglemodules".$srv."')\" id='togglemodules".$srv."'><font color=#000000>Модули</font></a></div></div>
+
+<div class='itemhidden' id='modules".$srv."'>
+
+<div class='linkindented1'><a href=\"right.php?srv=".$srv."&id=7\" target=right>".$_lang['stMODULEMANAGER']."</a></div>
+";
+
+$addr=$address[$srv];
+$usr=$user[$srv];
+$psw=$pass[$srv];
+$dbase=$db[$srv];
+
+$connection=mysqli_connect("$addr","$usr","$psw","$dbase");
+
+$queryModules="select name from scsq_modules order by name asc;";
+
+$result=mysqli_query($connection,$queryModules,MYSQLI_USE_RESULT);
+
+while($line = mysqli_fetch_row($result)) {
+
+echo "<div class='linkindented1'><a href=\"modules/".$line[0]."/index.php\" target=right>".$line[0]."</a></div>";
+}
+mysqli_free_result($result);
+echo "
+
+</div>
+
+
 </div> <!--srvname-->
+
+
  
 ";
 $srv++;

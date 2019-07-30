@@ -68,6 +68,12 @@ $usr=$user[$srv];
 $psw=$pass[$srv];
 $dbase=$db[$srv];
 
+$variableSet = array();
+$variableSet['addr']=$addr;
+$variableSet['usr']=$usr;
+$variableSet['psw']=$psw;
+$variableSet['dbase']=$dbase;
+
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
 
@@ -752,7 +758,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                 $comment=$_POST['comment'];
 
 
-              $sql="INSERT INTO scsq_groups (name, typeid,comment,login, password,active) VALUES ('$name', '$typeid','$comment','$userlogin','$userpassword','$activeauth')";
+              $sql="INSERT INTO scsq_groups (name, typeid,comment,userlogin, password,active) VALUES ('$name', '$typeid','$comment','$userlogin','$userpassword','$activeauth')";
 
               if (!mysqli_query($connection,$sql)) {
                 die('Error: ' . mysqli_error());
@@ -1203,6 +1209,79 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                   
 
     }  //end GET[id]=6
+
+
+ if($_GET['id']==7) {
+   	
+	$configfile = "config.php";
+	
+	
+	
+
+$path    = 'modules/';
+$files = array_diff(scandir($path), array('.', '..'));
+
+
+
+    echo "
+      <h3>".$_lang['stMODULEMANAGER']." Screen Squid:</h3>
+      <table border=1>
+      <tr>
+         <th>#</th>
+         <th>".$_lang['stNAME']."</th>
+	 <th>".$_lang['stDESCRIPTION']."</th>
+         <th>".$_lang['stINSTALL']."</th>
+         <th>".$_lang['stUNINSTALL']."</th>
+      </tr>
+	";
+$num=1;
+foreach($files as $file)
+{
+	include("modules/".$file."/module.php");
+	$module = new $file($variableSet);
+
+echo "
+      <tr>
+
+         <td>".$num."</td>
+
+         <td><a href=\"modules/".$file."/index.php\">".$file."</a></td>
+         <td>".$module->GetDesc()."</td>
+         <td><a href=\"right.php?srv=".$srv."&id=7&actid=10&mod=".$file."\">".$_lang['stINSTALL']."</a></td>
+         <td><a href=\"right.php?srv=".$srv."&id=7&actid=11&mod=".$file."\">".$_lang['stUNINSTALL']."</a></td>
+
+      </tr>
+	";
+$num++;
+}
+echo "	</table>
+   ";
+
+
+	if($_GET['actid'] == 10) ///установить
+	{
+	
+	$test = new $_GET['mod']($variableSet);
+	echo $test->Install();
+		
+
+	} //if($_GET['actid'] == 10) 
+ 	
+	if($_GET['actid'] == 11) ///удалить
+	{
+	
+	$test = new $_GET['mod']($variableSet);	
+	$test->Uninstall();
+		
+
+	} //if($_GET['actid'] == 11) 
+
+
+                  
+                  
+
+    }  //end GET[id]=7
+
 
 
 ///            else

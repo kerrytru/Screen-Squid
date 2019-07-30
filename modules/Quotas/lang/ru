@@ -1,0 +1,22 @@
+<?php
+
+//1.00
+$_lang['stQUOTASMODULE'] = "Модуль Квоты";
+
+$_lang['stQUOTASCURRENT']="Тек. днев. квота (Мб)";
+$_lang['stQUOTASDAY']="Дневная квота (Мб)";
+$_lang['stQUOTASMONTH']="Месячная квота (Мб)";
+
+$_lang['stQUOTASADDQUOTA']="Добавить квоту";
+$_lang['stQUOTASFORMADDQUOTA']="Форма для добавления квоты";
+$_lang['stQUOTASADDED']="1 квота добавлена";
+$_lang['stQUOTASUPDATED']="1 квота обновлена";
+$_lang['stQUOTASDELETED']="1 квота удалена";
+$_lang['stQUOTASSTATUS']="Статус";
+$_lang['stQUOTASACTIVE']="Актив?";
+$_lang['stQUOTASTRAFFICDAY']="Дневной траффик (Мб)";
+$_lang['stQUOTASTRAFFICMONTH']="Месячный траффик (Мб)";
+
+
+
+?>
