@@ -164,6 +164,45 @@ $connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 	  GROUP BY altableid
 	  ORDER BY alname asc";
 
+        $queryAllAliasesHaveNotQuota="
+	  SELECT 
+	     alname,
+	     altypeid,
+	     altableid,
+	     alid,
+	     tablename,
+	     group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
+	     group_concat(scsq_groups.id order by scsq_groups.name asc)
+	  FROM ((SELECT 
+		scsq_alias.name as alname,
+		scsq_alias.typeid as altypeid,
+		scsq_alias.tableid as altableid,
+		scsq_alias.id as alid,
+		scsq_logins.name as tablename
+	       FROM scsq_alias 
+	       LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
+	       WHERE scsq_alias.typeid=0
+		
+		) 
+
+	       UNION 
+			
+	        (SELECT 
+		   scsq_alias.name as alname,
+		   scsq_alias.typeid as altypeid,
+		   scsq_alias.tableid as altableid,
+		   scsq_alias.id as alid,
+		   scsq_ipaddress.name as tablename 
+		 FROM scsq_alias 
+		 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+		 WHERE scsq_alias.typeid=1)) as tmp
+	  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
+	  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
+	  WHERE alid NOT IN (select aliasid from scsq_mod_quotas)
+
+	  GROUP BY altableid
+	  ORDER BY alname asc";
+
             $queryAllQuotas="SELECT 
 				sm.id,
 				sm.aliasid,
@@ -178,6 +217,7 @@ $connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 			     FROM scsq_mod_quotas sm, scsq_alias sa
 			     WHERE sm.aliasid = sa.id
 			     ORDER BY aliasid asc;";
+
 
    
             $queryOneQuota="select aliasid,quota,quotaday,quotamonth,sm.active,sa.name,sm.id,sumday,summonth from scsq_mod_quotas sm, scsq_alias sa where sm.id='".$quotaid."' 
@@ -262,16 +302,18 @@ $datestart=strtotime($querydate);
             }
 
           if($actid==1) {
-              echo $_lang['stFORMADDQUOTA'];
+            echo $_lang['stFORMADDQUOTA'];
               echo '
                 <form action="index.php?srv='.$srv.'&actid=2" method="post">
                 Дневная квота: <input type="text" name="quotaday" ><br />
                 Месячная квота: <input type="text" name="quotamonth"><br />
 		Активен: <input type="checkbox" name="active"><br /> 
+		'.$_lang['stQUOTASEXCLUDE'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
                 '.$_lang['stVALUE'].':<br />';
+  
 
                 $result=mysqli_query($connection,$queryAllAliases,MYSQLI_USE_RESULT) or die ('Error: Cant select aliases from scsq_alias table');
-                $numrow=1;
+         $numrow=1;
 
               echo "<table id='loginsTable' class=sortable style='display:table;'>";
               echo "<tr>
@@ -291,6 +333,30 @@ $datestart=strtotime($querydate);
               }
 	      mysqli_free_result($result);
               echo "</table>";
+
+	$result=mysqli_query($connection,$queryAllAliasesHaveNotQuota,MYSQLI_USE_RESULT) or die ('Error: Cant select aliases from scsq_alias table');       
+         $numrow=1;
+
+              echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+              echo "<tr>
+		    <th class=unsortable>#</th>
+		    <th>".$_lang['stALIAS']."</th>
+		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
+		    </tr>";
+
+              while($line = mysqli_fetch_row($result)) {
+                echo "
+                  <tr>
+                    <td >".$numrow."</td>
+                    <td >".$line[0]."</td>
+                    <td><input type='radio' name='aliasid' value='".$line[3]."';</td>
+                  </tr>";
+                $numrow++;
+              }
+	      mysqli_free_result($result);
+              echo "</table>";
+
+
 
                echo '
                 <input type="submit" value="'.$_lang['stADD'].'"><br />
@@ -341,6 +407,8 @@ $datestart=strtotime($querydate);
 	       <input type="hidden" name=sumday value="'.$line[7].'">
 	       <input type="hidden" name=summonth value="'.$line[8].'">
                Активен: <input type="checkbox" '.$isChecked.' name="active"><br /> 
+	
+		'.$_lang['stQUOTASEXCLUDE'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
                '.$_lang['stVALUE'].':<br />';
 
 		$checkedAliasid = $line[0];
@@ -365,6 +433,28 @@ if($line[3]==$checkedAliasid)
 else
 	echo         "<td><input type='radio' name='aliasid' value='".$line[3]."';</td>";
         echo         "</tr>";
+                $numrow++;
+              }
+	      mysqli_free_result($result);
+              echo "</table>";
+
+		$result=mysqli_query($connection,$queryAllAliasesHaveNotQuota,MYSQLI_USE_RESULT) or die ('Error: Cant select aliases from scsq_alias table');       
+         $numrow=1;
+
+              echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+              echo "<tr>
+		    <th class=unsortable>#</th>
+		    <th>".$_lang['stALIAS']."</th>
+		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
+		    </tr>";
+
+              while($line = mysqli_fetch_row($result)) {
+                echo "
+                  <tr>
+                    <td >".$numrow."</td>
+                    <td >".$line[0]."</td>
+                    <td><input type='radio' name='aliasid' value='".$line[3]."';</td>
+                  </tr>";
                 $numrow++;
               }
 	      mysqli_free_result($result);

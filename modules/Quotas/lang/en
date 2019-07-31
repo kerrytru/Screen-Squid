@@ -17,6 +17,6 @@ $_lang['stQUOTASACTIVE']="Active?";
 $_lang['stQUOTASTRAFFICDAY']="Daily traffic (MB)";
 $_lang['stQUOTASTRAFFICMONTH']="Monthly traffic (MB)";
 
-
+$_lang['stQUOTASEXCLUDE']="Exclude used aliases";
 
 ?>
