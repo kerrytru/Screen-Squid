@@ -19,4 +19,7 @@ $_lang['stQUOTASTRAFFICMONTH']="Месячный траффик (Мб)";
 
 $_lang['stQUOTASEXCLUDE']="Исключить используемые алиасы";
 
+$_lang['stREFRESH']="Обновить";
+
+
 ?>

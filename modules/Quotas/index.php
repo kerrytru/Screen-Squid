@@ -262,7 +262,7 @@ $datestart=strtotime($querydate);
 
               $result=mysqli_query($connection,$queryAllQuotas,MYSQLI_USE_RESULT);
               $numrow=1;
-              echo "<a href=index.php?srv=".$srv."&actid=1>".$_lang['stADDQUOTA']."</a>";
+	      echo "<a href=index.php?srv=".$srv.">".$_lang['stREFRESH']."</a>";
               echo "<br /><br />";
               echo "<table id=report_table_id_group border=1 class=sortable>
               <tr>
