@@ -472,7 +472,9 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 	  $result=mysqli_query($connection,$queryOneAlias,MYSQLI_USE_RESULT);
           $line=mysqli_fetch_row($result);
 	  mysqli_free_result($result);
-          if($line[1]==1)
+          
+	  $typeid=$line[1]; #сохраняем тип алиаса.
+	  if($line[1]==1)
             $isChecked="checked";
           else
             $isChecked="";
@@ -548,9 +550,11 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
           }
 	  mysqli_free_result($result);
           echo "</table>";
-
-          echo '
-            <input type="submit" value="'.$_lang['stSAVE'].'"><br />
+	  if($typeid == 1)
+	  echo '<input type="hidden" name=typeid value="'.$typeid.'">';
+          
+	  echo '
+	    <input type="submit" value="'.$_lang['stSAVE'].'"><br />
             </form>
             <form action="right.php?srv='.$srv.'&id=2&actid=5&aliasid='.$aliasid.'" method="post">
             <input type="submit" value="'.$_lang['stDELETE'].'"><br />
