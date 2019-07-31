@@ -334,7 +334,7 @@ $datestart=strtotime($querydate);
 	      $quotaid = $line[6];
               echo '
                 <form action="index.php?srv='.$srv.'&actid=4&quotaid='.$quotaid.'" method="post">
-	       Алиас: '.$line[3].'<br /><br />
+	       Алиас: '.$line[5].'<br /><br />
                Текущая дневная квота: <input type="text" name="quota" value="'.$line[1].'"><br />
                Дневная квота: <input type="text" name="quotaday" value="'.$line[2].'"><br />
                Месячная квота: <input type="text" name="quotamonth" value="'.$line[3].'"><br />
