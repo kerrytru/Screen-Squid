@@ -116,23 +116,27 @@ $MonthSumSizeTraffic = int(($MonthSumSizeTraffic + 0)/1000/1000);
 
 #print int($MonthSumSizeTraffic/1000/1000);
 #print "\n";
-
+$status=0;
 if($active eq 0){
 $status=0;
 }
 else
 {
-if($DaySumSizeTraffic > int($quota)){
+if(($DaySumSizeTraffic > int($quota)) and int($quota >= 0 )){
 $status=1; #текущий траффик вышел за пределы квоты
 
 }
 
-if($MonthSumSizeTraffic > int($quotamonth)){
+if(($MonthSumSizeTraffic > int($quotamonth))and(int($quotamonth) >=0)){
 
 $status=2; #текущий месячный траффик вышел за пределы месячной квоты
 }
 
 if(($DaySumSizeTraffic < int($quota))and($MonthSumSizeTraffic < int($quotamonth))){
+$status=0; #нет превышения квоты
+}
+
+if((0 < $quota)and(0 < $quotamonth)){
 $status=0; #нет превышения квоты
 }
 

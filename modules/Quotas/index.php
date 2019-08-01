@@ -230,12 +230,12 @@ $status=0;
 }
 else
 {
-if($sumday > ($quota)){
+if(($sumday > $quota)&&($quota >0 )){
 $status=1; #текущий траффик вышел за пределы квоты
 
 }
 
-if($summonth > ($quotamonth)){
+if(($summonth > $quotamonth) &&($quotamonth >0 )){
 
 $status=2; #текущий месячный траффик вышел за пределы месячной квоты
 }
@@ -244,11 +244,14 @@ if(($sumday < ($quota))&&($summonth < ($quotamonth))){
 $status=0; #нет превышения квоты
 }
 
+if((0 < ($quota))and(0 < ($quotamonth))){
+$status=0; #нет превышения квоты
+}
 
 }
 
 $querydate=date("d-m-Y");
-$querydate=date("24-11-2018");# for debug
+#$querydate=date("24-11-2018");# for debug
 $datestart=strtotime($querydate);
 
 
