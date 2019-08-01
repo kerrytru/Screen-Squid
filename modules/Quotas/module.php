@@ -70,6 +70,47 @@ $queryOneAliasTraffic="
     
 }
 
+ function GetAliasValue($aliasid) #по алиасу возвращаем элемент из таблицы логинов/ip адресов
+  {
+
+$connection = $this->GetConnectionDB();
+
+$queryAlias = "
+ 	SELECT 
+	   tableid,
+	   typeid
+ 		   FROM scsq_alias 
+		   WHERE id=".$aliasid."
+	;";
+
+	$result=mysqli_query($connection,$queryAlias,MYSQLI_USE_RESULT) or die (mysqli_error());
+
+	$row=mysqli_fetch_array($result,MYSQLI_NUM);
+		mysqli_free_result($result);
+
+if($row[1] == 0)
+$tablename = "logins";
+else
+$tablename = "ipaddress";
+
+
+$queryOneAliasValue="
+ 	SELECT 
+	   name
+ 		   FROM scsq_".$tablename." 
+		   WHERE id =".$row[0]." 
+	 ;";
+
+	$result=mysqli_query($connection,$queryOneAliasValue,MYSQLI_USE_RESULT) or die ('Error: Cant get login/ipaddress for tableid');
+	$row=mysqli_fetch_array($result,MYSQLI_NUM);
+	mysqli_free_result($result);
+
+    return $row[0];
+
+    
+}
+
+
   function GetAliasMonthTraffic($aliasid,$goodSitesList) #по алиасу возвращаем его дневной траффик
   {
 

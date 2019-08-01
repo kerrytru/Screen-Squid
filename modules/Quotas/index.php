@@ -213,7 +213,8 @@ $connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 				quotamonth,
 				quota,
 				status,
-				sm.active
+				sm.active,
+				sa.id
 			     FROM scsq_mod_quotas sm, scsq_alias sa
 			     WHERE sm.aliasid = sa.id
 			     ORDER BY aliasid asc;";
@@ -272,6 +273,7 @@ $datestart=strtotime($querydate);
                 <th class=unsortable><b>#</b></th>
 		<th><b>".$_lang['stQUOTASSTATUS']."</b></th>
                 <th><b>".$_lang['stALIAS']."</b></th>
+		<th><b>".$_lang['stVALUE']."</b></th>
  		<th class=unsortable><b>".$_lang['stQUOTASCURRENT']."</b></th>
                 <th class=unsortable><b>".$_lang['stQUOTASDAY']."</b></th>
                 <th class=unsortable><b>".$_lang['stQUOTASTRAFFICDAY']."</b></th>
@@ -288,6 +290,7 @@ $datestart=strtotime($querydate);
                     <td>".$numrow."</td>
                     <td align=center>".$line[8]."</td>                 
                     <td align=center><a href=index.php?srv=".$srv."&actid=3&quotaid=".$line[0].">".$line[2]."&nbsp;</a></td>
+		    <td>".$quotaex->GetAliasValue($line[10])."</td>
                     <td align=center>".$line[7]."&nbsp;</td>
                     <td align=center>".$line[5]."&nbsp;</td>
 		    <td align=center>".$line[3]."</td>
