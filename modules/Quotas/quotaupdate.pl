@@ -17,6 +17,10 @@ my $db = "test"; # name DB
 $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
 
 
+#очистим таблицу квот от алиасов, которые были удалены, а в таблице квот остались
+$sql_refreshquota="delete from scsq_mod_quotas where aliasid not in (select id from scsq_alias);";
+$sth = $dbh->prepare($sql_refreshquota);
+$sth->execute; #
 
 
 
