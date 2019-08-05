@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#build 20170105
+#build 20190805
 
 use DBI; # DBI  Perl!!!
 
@@ -137,7 +137,15 @@ print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/s
 #split string into items.
   
   @item = split " ", $line; 
-  #check date before add to sqltext
+
+# if parsed date is in future, pass it
+  if($item[0]>localtime){
+      next
+    }
+  
+
+#check date before add to sqltext
+  
   if($item[0]>$lastdate) {
     if($item[4]>$minbytestoparse) {
       #count how much lines added
