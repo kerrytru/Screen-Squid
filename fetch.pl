@@ -139,7 +139,7 @@ print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/s
   @item = split " ", $line; 
 
 # if parsed date is in future, pass it
-  if($item[0]>localtime){
+  if($item[0]>time){
       next
     }
   
