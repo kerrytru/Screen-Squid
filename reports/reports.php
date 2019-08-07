@@ -14,6 +14,7 @@ $header='<html>
 
 include("../config.php");
 
+
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
@@ -413,6 +414,18 @@ if($showZeroTrafficInReports==1)
 else
   $msgNoZeroTraffic=" where tmp.s!=0 ";
 
+//проверим, есть ли модуль категорий. Если есть показываем столбец с категориями
+
+$queryExistModuleCategory = "select count(1) from scsq_modules where name = 'CATEGORYLIST';";
+$result=mysqli_query($connection,$queryExistModuleCategory,MYSQLI_USE_RESULT);
+$line = mysqli_fetch_array($result,MYSQLI_NUM);
+mysqli_free_result($result);
+
+if($line[0] == 0)
+$category="''";
+else
+$category="category";
+
 
 //querys for reports
 
@@ -496,6 +509,8 @@ $queryLoginsTraffic1="
 
   GROUP BY nofriends.name;";
 
+//echo $queryLoginsTraffic;
+
 $queryLoginsTraffic1=str_replace("goodSitesList",$goodSitesList,$queryLoginsTraffic1);
 $queryLoginsTraffic1=str_replace("goodLoginsList",$goodLoginsList,$queryLoginsTraffic1);
 $queryLoginsTraffic1=str_replace("datestart",$datestart,$queryLoginsTraffic1);
@@ -554,14 +569,17 @@ $queryIpaddressTraffic="
 $querySitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
-	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2)
+	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2),
+	 '',
+	 tmp2.cat
   
   FROM ((SELECT 
 		 sum(sizeinbytes) as s,
 		 date,
 		 login,
 		 ipaddress,
-		 site
+		 site,
+		 ".$category." as cat
 	       FROM scsq_quicktraffic
 	       LEFT  JOIN (SELECT 
 			     id 
@@ -1672,9 +1690,9 @@ $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
 	   SUM(sizeinbytes) AS s,
-	   scsq_categorylist.category 
+	   $category 
 	 FROM scsq_quicktraffic
-	 LEFT OUTER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
+	 
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
@@ -1910,9 +1928,8 @@ $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
 	   sum(sizeinbytes) AS s,
-	   scsq_categorylist.category 
+	   $category 
 	 FROM scsq_quicktraffic 
-	 LEFT OUTER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
@@ -3639,7 +3656,12 @@ $colftext[4]="&nbsp;";
 $colftext[5]="&nbsp;";
 $colftext[6]="&nbsp;";
 
+//если есть модуль категорий то добавим столбец
+if($category=="category")
 $colh[0]=6;
+else
+$colh[0]=5;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
@@ -3663,6 +3685,10 @@ $colr[3]="line1";
 $colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 $colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 $colr[6]="line4"; ///category
+
+
+
+
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -3999,11 +4025,12 @@ if($id==8)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
-
+$colftext[4]="&nbsp;";
 
 ///$tmpLine=explode(':',$line[0]);
 
@@ -4013,20 +4040,27 @@ $colftext[3]="totalmb";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysqli_query($connection,$queryOneLoginTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
@@ -4146,10 +4180,12 @@ if($id==11)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
 
 
 ///$tmpLine=explode(':',$line[0]);
@@ -4159,21 +4195,27 @@ $colftext[3]="totalmb";
 ///else
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
-
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=mysqli_query($connection,$queryOneIpaddressTraffic,MYSQLI_USE_RESULT);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0)
 echo "<script>UpdateLeftMenu(2);</script>";
 }
@@ -8220,6 +8262,8 @@ while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / 1000000;
+
+
 
 $totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);
