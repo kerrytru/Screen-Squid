@@ -80,7 +80,7 @@ $sth = $dbh->prepare($queryOneAliasTraffic);
 $sth->execute; #
 
 $DaySumSizeTraffic = $sth->fetchrow_array;
-$DaySumSizeTraffic = int(($DaySumSizeTraffic + 0)/1000/1000); 
+$DaySumSizeTraffic = int(($DaySumSizeTraffic + 0)/1024/1024); 
 #print int($DaySumSizeTraffic/1000/1000);
 #print "\n";
 
@@ -116,7 +116,7 @@ $sth = $dbh->prepare($queryOneAliasTraffic);
 $sth->execute; #
 
 $MonthSumSizeTraffic = $sth->fetchrow_array;
-$MonthSumSizeTraffic = int(($MonthSumSizeTraffic + 0)/1000/1000);
+$MonthSumSizeTraffic = int(($MonthSumSizeTraffic + 0)/1024/1024);
 
 #print int($MonthSumSizeTraffic/1000/1000);
 #print "\n";

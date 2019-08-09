@@ -110,6 +110,34 @@ $queryOneAliasValue="
     
 }
 
+function GetQuotaStatusByAlias($aliasid) #по алиасу возвращаем статус 0 - норма, >0 превышение квоты
+  {
+
+$connection = $this->GetConnectionDB();
+
+$aliasid = $aliasid + 0; #защита от пустых значений
+
+$queryAlias = "
+ 	SELECT 
+	   status
+ 		   FROM scsq_mod_quotas 
+		   WHERE aliasid=".$aliasid."
+	;";
+
+	$result=mysqli_query($connection,$queryAlias,MYSQLI_USE_RESULT) or die (mysqli_error());
+	$numrows = mysqli_num_rows($result);
+	$row=mysqli_fetch_array($result,MYSQLI_NUM);
+	
+
+	mysqli_free_result($result);
+
+
+    return $row[0];
+
+    
+}
+
+
 
   function GetAliasMonthTraffic($aliasid,$goodSitesList) #по алиасу возвращаем его дневной траффик
   {

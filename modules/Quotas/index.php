@@ -19,6 +19,8 @@ body {margin:0.5em;padding:0.5em}
 
 </style>
 <link rel="stylesheet" type="text/css" href="../../javascript/example.css"/>
+<link rel="stylesheet" type="text/css" href="css/example.css"/>
+
 </head>
 <body>
 <br />
@@ -269,7 +271,8 @@ $datestart=strtotime($querydate);
 	      echo "<a href=index.php?srv=".$srv.">".$_lang['stREFRESH']."</a>";
               echo "<br /><br />";
               echo "<table id=report_table_id_group border=1 class=sortable>
-              <tr>
+      
+             <tr>
                 <th class=unsortable><b>#</b></th>
 		<th><b>".$_lang['stQUOTASSTATUS']."</b></th>
                 <th><b>".$_lang['stALIAS']."</b></th>
@@ -284,9 +287,18 @@ $datestart=strtotime($querydate);
               </tr>";
 
               while($line = mysqli_fetch_row($result)) {
+		
+		#раскрасим строки в зависимости от статуса по квотам
+		if($line[8] == 0)
+			$alarmclass=""; #нет превышения
+		if($line[8] == 1)
+			$alarmclass="class=quotaAlm1"; #дневная превышена
+		if($line[8] == 2)
+			$alarmclass="class=quotaAlm2"; #месячная превышена
 
-                echo "
-                  <tr>
+                
+               echo "<tr ".$alarmclass.">
+	       
                     <td>".$numrow."</td>
                     <td align=center>".$line[8]."</td>                 
                     <td align=center><a href=index.php?srv=".$srv."&actid=3&quotaid=".$line[0].">".$line[2]."&nbsp;</a></td>
