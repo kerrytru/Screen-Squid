@@ -44,6 +44,12 @@ $user=$user[$srv];
 $pass=$pass[$srv];
 $db=$db[$srv];
 
+$variableSet = array();
+$variableSet['addr']=$address;
+$variableSet['usr']=$user;
+$variableSet['psw']=$pass;
+$variableSet['dbase']=$db;
+
 $connection=mysqli_connect("$address","$user","$pass","$db");
 
 
@@ -165,6 +171,22 @@ function FastDateSwitch(idReport, dom)
 
 function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 {
+	if(idsign==-2)
+	{
+		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+
+		'&date='+par1
+		+'&dom='+dom
+		+'&login='+id
+		+'&loginname='+idname;
+	}
+	if(idsign==-1)
+	{
+		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
+		+'&date='+par1
+		+'&dom='+dom
+		+'&ip='+id
+		+'&ipname='+idname;
+	}
 
 	if(idsign==0)
 	{
@@ -432,7 +454,7 @@ $category="category";
 if($useLoginalias==0)
 $echoLoginAliasColumn="";
 if($useLoginalias==1)
-$echoLoginAliasColumn=",aliastbl.name";
+$echoLoginAliasColumn=",aliastbl.name ,aliastbl.id";
 
    $queryLoginsTraffic="
   SELECT 
@@ -440,6 +462,7 @@ $echoLoginAliasColumn=",aliastbl.name";
     tmp.s,
     nofriends.id
     ".$echoLoginAliasColumn."
+    
   FROM (SELECT 
           login,
           SUM(sizeinbytes) as 's' 
@@ -461,7 +484,8 @@ $echoLoginAliasColumn=",aliastbl.name";
 	ON tmp.login=nofriends.id  
  	LEFT JOIN (SELECT 
 		      name,
-		      tableid		      
+		      tableid,
+		      id		      
 		   FROM scsq_alias 
 		   WHERE typeid=0) 
 		   AS aliastbl 
@@ -526,7 +550,7 @@ $queryLoginsTraffic1=str_replace("msgNoZeroTraffic",$msgNoZeroTraffic,$queryLogi
 if($useIpaddressalias==0)
 $echoIpaddressAliasColumn="";
 if($useIpaddressalias==1)
-$echoIpaddressAliasColumn=",aliastbl.name";
+$echoIpaddressAliasColumn=",aliastbl.name ,aliastbl.id";
 
 $queryIpaddressTraffic="
   SELECT 
@@ -534,6 +558,7 @@ $queryIpaddressTraffic="
     tmp.s,
     nofriends.id 
     ".$echoIpaddressAliasColumn."
+    
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s 
@@ -553,7 +578,8 @@ $queryIpaddressTraffic="
 	ON tmp.ipaddress=nofriends.id  
 	LEFT JOIN (SELECT 
 		      name,
-		      tableid 
+		      tableid,
+		      id 
 		   FROM scsq_alias 
 		   WHERE typeid=1) 
 		   AS aliastbl 
@@ -608,8 +634,50 @@ $querySitesTraffic="
 
   ORDER BY site asc
 ;";
-////, scsq_categorylist.category
-//	  LEFT OUTER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
+
+$querySites="
+  SELECT tmp2.site,
+	 '',
+	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2),
+	 '',
+	 tmp2.cat
+  
+  FROM ((SELECT 
+		 
+		 date,
+		 login,
+		 ipaddress,
+		 site,
+		 ".$category." as cat
+	       FROM scsq_quicktraffic
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_logins 
+			   WHERE id  IN (".$goodLoginsList.")) 
+			   AS tmplogin 
+	       ON tmplogin.id=scsq_quicktraffic.login
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_ipaddress 
+			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
+	       ON tmpipaddress.id=scsq_quicktraffic.ipaddress       	
+
+	       WHERE (1=1) 
+ 		 AND par=1
+		 AND tmplogin.id IS NULL 
+	   	 AND tmpipaddress.id IS NULL
+	 	 AND site NOT IN (".$goodSitesList.")
+	       group by site
+	       ORDER BY null
+	      ) as tmp2
+ 	  
+	 )
+ 
+
+  ORDER BY site asc
+;";
+
+
 
 //echo $querySitesTraffic;
 
@@ -1270,7 +1338,7 @@ $queryCountLoginsOnIpaddress="
 ////КОСТЫЛЬ
 ///$echoLoginAliasColumn=",aliastbl.name";
 if($useLoginalias==0)
-$echoLoginAliasColumn="";
+$echoLoginAliasColumn=",''";
 if($useLoginalias==1)
 $echoLoginAliasColumn=",aliastbl.name";
 
@@ -1314,7 +1382,7 @@ $queryWhoVisitSiteOneHourLogin="
   GROUP BY nofriends.name;";
 
 if($useIpaddressalias==0)
-$echoIpaddressAliasColumn="";
+$echoIpaddressAliasColumn=",''";
 if($useIpaddressalias==1)
 $echoIpaddressAliasColumn=",aliastbl.name";
 
@@ -1514,6 +1582,7 @@ ORDER BY nofriends.name
 ;
 ";
 
+
 $queryTrafficByHoursIpaddress="
 SELECT  ipaddress,
 nofriends.name,
@@ -1670,6 +1739,61 @@ $queryCategorySitesTraffic="
 
 
 
+if($currentloginid==1)
+$queryWhoVisitSiteFreq="
+  SELECT 
+    tmp.date
+    ,''	    
+    ,tmp.s 
+   
+  FROM (SELECT 
+	  FROM_UNIXTIME(date,'%m-%Y') date,
+	  count(1) as s
+	  
+	   
+	FROM scsq_traffic
+
+	WHERE SUBSTRING_INDEX(site,'/',1)='".$currentsite."' 
+	AND trim(scsq_traffic.mime) = 'text/html'
+	
+	
+	group by FROM_UNIXTIME(date,'%m-%Y')) 
+	AS tmp 
+
+
+  ".$msgNoZeroTraffic."
+
+  ORDER BY tmp.date;";
+
+
+if($currentloginid==2)
+$queryWhoVisitSiteFreq="
+  SELECT 
+    tmp.date
+    ,''
+    ,tmp.s
+     
+  FROM (SELECT 
+	  FROM_UNIXTIME(date,'%m-%Y') date,
+	  count(1) as s
+	  
+	   
+	FROM scsq_traffic
+
+	WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
+	AND trim(scsq_traffic.mime) = 'text/html'
+	
+	
+	group by FROM_UNIXTIME(date,'%m-%Y')) 
+	AS tmp 
+
+
+  ".$msgNoZeroTraffic."
+
+  ORDER BY tmp.date;";
+
+//echo $queryWhoVisitSiteFreq;
+
 //===============================================
 //**********************************************
 //**********************************************
@@ -1742,13 +1866,12 @@ $queryOneLoginTrafficByHours="
 
 #костыль для правильного разбора сайтов
 if($currentloginid==1)
-if($useLoginalias==0)
 $queryWhoVisitPopularSiteLogin="
   SELECT 
     nofriends.name, 
-    tmp.s,
-    'костыль',
-    nofriends.id 
+    tmp.s
+    ".$echoLoginAliasColumn."
+    ,nofriends.id 
   FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) AS s 
@@ -1768,43 +1891,6 @@ $queryWhoVisitPopularSiteLogin="
 		    WHERE id NOT IN (".$goodLoginsList.")) 
 		    AS nofriends 
 	ON tmp.login=nofriends.id  
-
-  ".$msgNoZeroTraffic."
-
-  ORDER BY nofriends.name;";
-else
-$queryWhoVisitPopularSiteLogin="
-  SELECT 
-    nofriends.name, 
-    tmp.s,
-    tmp2.name,
-    nofriends.id
-  FROM (SELECT 
-	  login,
-	  SUM(sizeinbytes) AS s 
-	FROM scsq_traffic
-
-	WHERE SUBSTRING_INDEX(site,'/',1)='".$currentsite."' 
-	  AND date>".$datestart." 
-	  AND date<".$dateend."
-	
-	GROUP BY CRC32(login)) 
-	AS tmp 
-
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_logins 
-		    WHERE id NOT IN (".$goodLoginsList.")) 
-		    AS nofriends 
-	ON tmp.login=nofriends.id  
-	LEFT JOIN (SELECT 
-		      name,
-		      tableid 
-		   FROM scsq_alias 
-		   WHERE typeid=0) 
-		   tmp2 
-	ON tmp2.tableid=nofriends.id
 
   ".$msgNoZeroTraffic."
 
@@ -1812,13 +1898,12 @@ $queryWhoVisitPopularSiteLogin="
 
 
 if($currentloginid==2)
-if($useLoginalias==0)
 $queryWhoVisitPopularSiteLogin="
   SELECT 
     nofriends.name, 
-    tmp.s,
-    'костыль',
-    nofriends.id
+    tmp.s
+    ".$echoLoginAliasColumn."
+    ,nofriends.id
   FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) AS s 
@@ -1842,23 +1927,29 @@ $queryWhoVisitPopularSiteLogin="
   ".$msgNoZeroTraffic."
 
   ORDER BY nofriends.name;";
-else
-$queryWhoVisitPopularSiteLogin="
+
+
+if($currentloginid==1)
+$queryWhoVisitSiteLoginFreq="
   SELECT 
-    nofriends.name, 
-    tmp.s,
-    tmp2.name,
-    nofriends.id
+    tmp.date,
+    '',
+    nofriends.name 
+    ".$echoLoginAliasColumn."
+    ,nofriends.id
+   ,tmp.s 
   FROM (SELECT 
-	  login,
-	  SUM(sizeinbytes) AS s 
+	  FROM_UNIXTIME(date,'%d-%m-%Y') date,
+	  count(1) as s,
+	  login
+	   
 	FROM scsq_traffic
 
-	WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
-	  AND date>".$datestart." 
-	  AND date<".$dateend."
+	WHERE SUBSTRING_INDEX(site,'/',1)='".$currentsite."' 
+	AND trim(scsq_traffic.mime) = 'text/html'
 	
-	GROUP BY CRC32(login)) 
+	
+	group by FROM_UNIXTIME(date,'%d-%m-%Y'), login) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
@@ -1873,12 +1964,58 @@ $queryWhoVisitPopularSiteLogin="
 		      tableid 
 		   FROM scsq_alias 
 		   WHERE typeid=0) 
-		   tmp2 
-	ON tmp2.tableid=nofriends.id
-
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
   ".$msgNoZeroTraffic."
 
   ORDER BY nofriends.name;";
+
+
+
+
+if($currentloginid==2)
+$queryWhoVisitSiteLoginFreq="
+  SELECT 
+    tmp.date,
+    '',
+    nofriends.name 
+    ".$echoLoginAliasColumn."
+    ,nofriends.id
+   ,tmp.s  
+  FROM (SELECT 
+	  FROM_UNIXTIME(date,'%d-%m-%Y') date,
+	  count(1) as s,
+	  login
+	   
+	FROM scsq_traffic
+
+	WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
+	AND trim(scsq_traffic.mime) = 'text/html'
+	
+	
+	group by FROM_UNIXTIME(date,'%d-%m-%Y'), login) 
+	AS tmp 
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_logins 
+		    WHERE id NOT IN (".$goodLoginsList.")) 
+		    AS nofriends 
+	ON tmp.login=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+  ".$msgNoZeroTraffic."
+
+  ORDER BY nofriends.name;";
+
+
+//echo $queryWhoVisitSiteLoginFreq;
 
 
 $queryVisitingWebsiteByTimeLogin="
@@ -1976,12 +2113,11 @@ $queryOneIpaddressTrafficByHours="
 
 #костыль для правильного разбора сайтов
 if($currentipaddressid==1)
-if($useIpaddressalias==0)
 $queryWhoVisitPopularSiteIpaddress="
   SELECT 
     nofriends.name, 
     tmp.s,
-    'костыль',
+   ".$echoIpaddressAliasColumn."
     nofriends.id 
   from (SELECT 
 	  ipaddress,
@@ -2004,23 +2140,64 @@ $queryWhoVisitPopularSiteIpaddress="
   ".$msgNoZeroTraffic."
 
   order by nofriends.name;";
-else
+
+
+
+
+
+#костыль для правильного разбора сайтов
+if($currentipaddressid==2)
 $queryWhoVisitPopularSiteIpaddress="
   SELECT 
     nofriends.name, 
     tmp.s,
-    tmp2.name,
-    nofriends.id 
+    ".$echoIpaddressAliasColumn."
+    ,nofriends.id 
   from (SELECT 
 	  ipaddress,
 	  sum(sizeinbytes) as s 
 	from scsq_traffic 
-	where substring_index(site,'/',1)='".$currentsite."' 
+	where SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
 	  and date>".$datestart." 
 	  and date<".$dateend." 
 	
 	group by crc32(ipaddress)) 
 	as tmp
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_ipaddress 
+		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
+	ON tmp.ipaddress=nofriends.id  
+
+  ".$msgNoZeroTraffic."
+
+  order by nofriends.name;";
+
+
+
+if($currentipaddressid==1)
+$queryWhoVisitSiteIpaddressFreq="
+  SELECT 
+    tmp.date,
+    '',
+    nofriends.name 
+    ".$echoIpaddressAliasColumn."
+    ,nofriends.id 
+   ,tmp.s 
+  FROM (SELECT 
+	  FROM_UNIXTIME(date,'%d-%m-%Y') date,
+	  count(1) as s,
+	  ipaddress
+	   
+	FROM scsq_traffic
+
+	WHERE SUBSTRING_INDEX(site,'/',1)='".$currentsite."' 
+	AND trim(scsq_traffic.mime) = 'text/html'
+	
+	group by FROM_UNIXTIME(date,'%d-%m-%Y'), ipaddress) 
+	AS tmp 
 
 	RIGHT JOIN (SELECT 
 		      id,
@@ -2033,12 +2210,54 @@ $queryWhoVisitPopularSiteIpaddress="
 		      tableid 
 		   FROM scsq_alias 
 		   WHERE typeid=1) 
-		   tmp2 
-	ON tmp2.tableid=nofriends.id
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
   ".$msgNoZeroTraffic."
 
-  order by nofriends.name;";
+  ORDER BY nofriends.name;";
 
+
+if($currentipaddressid==2)
+$queryWhoVisitSiteIpaddressFreq="
+  SELECT 
+    tmp.date,
+    '',
+    nofriends.name 
+    ".$echoIpaddressAliasColumn."
+    ,nofriends.id
+    ,tmp.s 
+  FROM (SELECT 
+	  FROM_UNIXTIME(date,'%d-%m-%Y') date,
+	  count(1) as s,
+	  ipaddress
+	   
+	FROM scsq_traffic
+
+	WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
+	AND trim(scsq_traffic.mime) = 'text/html'
+	
+	
+	group by FROM_UNIXTIME(date,'%d-%m-%Y'), ipaddress) 
+	AS tmp 
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_ipaddress 
+		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
+	ON tmp.ipaddress=nofriends.id   
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+  ".$msgNoZeroTraffic."
+
+  ORDER BY nofriends.name;";
+
+echo $queryWhoVisitSiteIpaddressFreq;
 
 #костылище для частных отчетов
 
@@ -2069,73 +2288,6 @@ $queryOneIpaddressOneHourTraffic="
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
  	 GROUP BY CRC32(site) 
 	 ORDER BY st asc ";
-
-
-
-#костыль для правильного разбора сайтов
-if($currentipaddressid==2)
-if($useIpaddressalias==0)
-$queryWhoVisitPopularSiteIpaddress="
-  SELECT 
-    nofriends.name, 
-    tmp.s,
-    'костыль',
-    nofriends.id 
-  from (SELECT 
-	  ipaddress,
-	  sum(sizeinbytes) as s 
-	from scsq_traffic 
-	where SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
-	  and date>".$datestart." 
-	  and date<".$dateend." 
-	
-	group by crc32(ipaddress)) 
-	as tmp
-
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_ipaddress 
-		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
-	ON tmp.ipaddress=nofriends.id  
-
-  ".$msgNoZeroTraffic."
-
-  order by nofriends.name;";
-else
-$queryWhoVisitPopularSiteIpaddress="
-  SELECT 
-    nofriends.name, 
-    tmp.s,
-    tmp2.name,
-    nofriends.id
-  from (SELECT 
-	  ipaddress,
-	  sum(sizeinbytes) as s 
-	from scsq_traffic 
-	where SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
-	  and date>".$datestart." 
-	  and date<".$dateend." 
-	
-	group by crc32(ipaddress)) 
-	as tmp
-
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_ipaddress 
-		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
-	ON tmp.ipaddress=nofriends.id  
-	LEFT JOIN (SELECT 
-		      name,
-		      tableid 
-		   FROM scsq_alias 
-		   WHERE typeid=1) 
-		   tmp2 
-	ON tmp2.tableid=nofriends.id
-  ".$msgNoZeroTraffic."
-
-  order by nofriends.name;";
 
 
 $queryVisitingWebsiteByTimeIpaddress="
@@ -3541,13 +3693,25 @@ $repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentipaddress."</b> ".$_lang
 if($id==63)
 $repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
+if($id==64)
+$repheader= "<h2>".$_lang['stSITES']."</h2>";
+
+if($id==65)
+$repheader= "<h2>".$_lang['stWHOVISITSITELOGIN']." <b>".$currentsite."</b> </h2>";
+
+if($id==66)
+$repheader= "<h2>".$_lang['stWHOVISITSITEIPADDRESS']." <b>".$currentsite."</b> </h2>";
+
+if($id==67)
+$repheader= "<h2>".$_lang['stDYNAMICOFVISITS']." <b>".$currentsite."</b></h2>";
+
 
 if(!isset($_GET['pdf'])){
 echo "<table>";
 echo "<tr>";
 echo "<td valign=middle>".$repheader."</td>";
 
-if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
+if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48)or($id>=65 and $id<=67))
 echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php??srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date']."&date2=".$_GET['date2']."&dom=".$_GET['dom']."&login=".$_GET['login']."&loginname=".$_GET['loginname']."&ip=".$_GET['ip']."&ipname".$_GET['ipname']."=&site=".$_GET['site']."&group=".$_GET['group']."&groupname=".$_GET['groupname']."&typeid=".$_GET['typeid']."&httpstatus=".$_GET['httpstatus']."&httpname=".$_GET['httpname']."&loiid=".$_GET['loiid']."&loiname=".$_GET['loiname']."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
 echo "</tr>";
 echo "</table>";
@@ -8251,6 +8415,184 @@ echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='
 /////////////// ONE GROUP DASHBOARD REPORT END
 
 
+/////////////// SITES REPORT
+
+if($id==64)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stSITE'];
+$colhtext[3]=$_lang['stWHO'];
+$colhtext[4]="Динамика посещений";
+$colhtext[5]=$_lang['stCATEGORY'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
+$colftext[4]="&nbsp;";
+$colftext[5]="&nbsp;";
+
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=5;
+else
+$colh[0]=4;
+
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
+
+$result=mysqli_query($connection,$querySites,MYSQLI_USE_RESULT);
+
+
+///if($tmpLine[1]==443)
+///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
+///else
+///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
+
+
+$colr[0]=1; 
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="<a href=javascript:GoPartlyReports(65,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(66,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
+$colr[4]="<a href=javascript:GoPartlyReports(67,'".$dayormonth."','line2','','0','line0')>$_lang['stDYNAMICOFVISITS']</a>";
+$colr[5]="line4"; ///category
+
+
+
+
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
+$colf[5]="<td>".$colftext[5]."</td>";
+$colf[6]="<td>".$colftext[6]."</td>";
+
+}
+
+/////////////// SITES REPORT END
+
+/////////////// FREQ LOGIN VISIT POPULAR SITE REPORT
+
+if($id==65)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stDATE'];
+$colhtext[3]=$_lang['stREQUESTS'];
+$colhtext[4]=$_lang['stLOGIN'];
+$colhtext[5]=$_lang['stALIAS'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
+$colftext[4]="&nbsp;";
+$colftext[5]="&nbsp;";
+
+$colh[0]=4+$useLoginalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
+
+
+$result=mysqli_query($connection,$queryWhoVisitSiteLoginFreq,MYSQLI_USE_RESULT);
+
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line5";
+$colr[4]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line2','-2','line0')>line2</a>";
+$colr[5]="line3";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
+}
+
+/////////////// FREQ VISIT POPULAR SITE LOGIN REPORT END
+
+/////////////// FREQ IPADDRESS VISIT POPULAR SITE REPORT
+
+if($id==66)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stDATE'];
+$colhtext[3]=$_lang['stREQUESTS'];
+$colhtext[4]=$_lang['stIPADDRESS'];
+$colhtext[5]=$_lang['stALIAS'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
+$colftext[4]="&nbsp;";
+$colftext[5]="&nbsp;";
+
+$colh[0]=4+$useIpaddressalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
+
+
+$result=mysqli_query($connection,$queryWhoVisitSiteIpaddressFreq,MYSQLI_USE_RESULT);
+
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line5";
+$colr[4]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line4','line2','-1','line0')>line2</a>";
+$colr[5]="line3";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
+}
+
+
+/////////////// FREQ VISIT POPULAR SITE IPADDRESS REPORT END
+
+
+/////////////// FREQ VISIT POPULAR SITE REPORT
+
+if($id==67)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stDATE'];
+$colhtext[3]=$_lang['stREQUESTS'];
+
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
+
+$colh[0]=3;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+
+$result=mysqli_query($connection,$queryWhoVisitSiteFreq,MYSQLI_USE_RESULT);
+
+$colr[1]="numrow";
+$colr[2]="line0";
+$colr[3]="line2";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+}
+
+/////////////// FREQ VISIT POPULAR SITE REPORT END
+
+
 
 /////universal table
 
@@ -8273,6 +8615,7 @@ $numrow++;
 if($makepdf==0)
 {
 
+
 ///TABLE HEADER
 echo "<table id=report_table_id class=sortable>
 	<tr>";
@@ -8293,6 +8636,10 @@ $totalmb=round($totalmb,$roundTrafficDigit);
 }
 echo "<tr>";
 
+
+
+
+
 for($j=1;$j<=$colh[0];$j++){
 $resultcolr=$colr[$j];
 $resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
@@ -8303,7 +8650,9 @@ $resultcolr=preg_replace("/line4/i", $line[4], $resultcolr);
 $resultcolr=preg_replace("/line5/i", $line[5], $resultcolr);
 $resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
 
+
 echo 	"<td>".$resultcolr."</td>";
+
 
 }
 

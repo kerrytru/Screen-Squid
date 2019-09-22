@@ -199,4 +199,7 @@ $_lang['stDESCRIPTION'] = "Description";
 $_lang['stNAME'] = "Name";
 $_lang['stINSTALL'] = "Install";
 $_lang['stUNINSTALL'] = "Uninstall";
+
+$_lang['stDYNAMICOFVISITS'] = "Dynamic of visits";
+$_lang['stSITESVISITORS'] = "Sites visitors";
 ?>

@@ -201,6 +201,8 @@ $_lang['stNAME'] = "Наименование";
 $_lang['stINSTALL'] = "Установить";
 $_lang['stUNINSTALL'] = "Удалить";
 
+$_lang['stSITESVISITORS'] = "Посещения сайтов";
+$_lang['stDYNAMICOFVISITS'] = "Динамика посещений";
 
 
 ?>

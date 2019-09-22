@@ -126,6 +126,8 @@ echo "
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",50)\">".$_lang['stTRAFFICBYHOURSLOGINS']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",51)\">".$_lang['stTRAFFICBYHOURSIPADDRESS']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",52)\">".$_lang['stTRAFFICBYCATEGORIES']."</a></div>
+<div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",64)\">".$_lang['stSITESVISITORS']."</a></div>
+
 </div>
 <!--reports-->
 
