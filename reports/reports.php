@@ -8456,7 +8456,7 @@ $colr[0]=1;
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="<a href=javascript:GoPartlyReports(65,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(66,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-$colr[4]="<a href=javascript:GoPartlyReports(67,'".$dayormonth."','line2','','0','line0')>$_lang['stDYNAMICOFVISITS']</a>";
+$colr[4]="<a href=javascript:GoPartlyReports(67,'".$dayormonth."','line2','','0','line0')>".$_lang['stDYNAMICOFVISITS']."</a>";
 $colr[5]="line4"; ///category
 
 
