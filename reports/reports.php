@@ -1949,7 +1949,7 @@ $queryWhoVisitSiteLoginFreq="
 	AND trim(scsq_traffic.mime) = 'text/html'
 	
 	
-	group by FROM_UNIXTIME(date,'%d-%m-%Y'), login) 
+	group by crc32(FROM_UNIXTIME(date,'%d-%m-%Y')), crc32(login)) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
@@ -1993,7 +1993,7 @@ $queryWhoVisitSiteLoginFreq="
 	AND trim(scsq_traffic.mime) = 'text/html'
 	
 	
-	group by FROM_UNIXTIME(date,'%d-%m-%Y'), login) 
+	group by crc32(FROM_UNIXTIME(date,'%d-%m-%Y')), crc32(login)) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
@@ -2196,7 +2196,7 @@ $queryWhoVisitSiteIpaddressFreq="
 	WHERE SUBSTRING_INDEX(site,'/',1)='".$currentsite."' 
 	AND trim(scsq_traffic.mime) = 'text/html'
 	
-	group by FROM_UNIXTIME(date,'%d-%m-%Y'), ipaddress) 
+	group by crc32(FROM_UNIXTIME(date,'%d-%m-%Y')), crc32(ipaddress)) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
@@ -2237,7 +2237,7 @@ $queryWhoVisitSiteIpaddressFreq="
 	AND trim(scsq_traffic.mime) = 'text/html'
 	
 	
-	group by FROM_UNIXTIME(date,'%d-%m-%Y'), ipaddress) 
+	group by crc32(FROM_UNIXTIME(date,'%d-%m-%Y')), crc32(ipaddress)) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
