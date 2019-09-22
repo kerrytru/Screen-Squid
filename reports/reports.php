@@ -2257,7 +2257,7 @@ $queryWhoVisitSiteIpaddressFreq="
 
   ORDER BY nofriends.name;";
 
-echo $queryWhoVisitSiteIpaddressFreq;
+//echo $queryWhoVisitSiteIpaddressFreq;
 
 #костылище для частных отчетов
 
