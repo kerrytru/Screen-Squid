@@ -1,0 +1,55 @@
+================================================================================
+This is a README file for the Screen Squid  program, version 1.6 or higher
+
+    Copyright (C) 2014-2017 KerryT <kerryt@break-people.ru>
+
+    SortTable code Copyright (C) 2007 Stuart Langridge
+    http://www.kryogenix.org/code/browser/sorttable/
+
+    Swazz Javascript Calendar code Copyright (C) 2006 v 1.0 3rd November 2006
+    By Oliver Bryant http://calendar.swazz.org
+    Update (12/11/2011):
+    Gene Bechtold http://www.bechtold.biz
+
+    Copyright (C) 2002-2015 Nicola Asuni - Tecnick.com LTD
+
+    TCPDF is free software: you can redistribute it and/or modify it
+    under the terms of the GNU Lesser General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    TCPDF is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU Lesser General Public License for more details.
+
+    This files is part of Screen Squid.
+
+    This web-based scripts is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+================================================================================
+
+Screen Squid is statistic analyzer for SQUID log files. Its main 
+advantages over SARG are much better speed, more reports support,
+crossplatform work. It's written in PHP and Perl.
+
+Screen Squid objectives:
+- Control of users traffic usage;
+- Help IT security officers to control internet access security policies and
+  investigate IT security incidents;
+- Be crossplatform.
+
+Screen Squid currently support following log formats:
+    -	Squid 2.x,3.x native log format.
+
