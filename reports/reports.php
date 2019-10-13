@@ -2257,7 +2257,7 @@ $queryWhoVisitSiteIpaddressFreq="
 
   ORDER BY nofriends.name;";
 
-//echo $queryWhoVisitSiteIpaddressFreq;
+echo $queryWhoVisitSiteIpaddressFreq;
 
 #костылище для частных отчетов
 
@@ -3752,8 +3752,8 @@ $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line
 $colr[3]="line1";
 $colr[4]="line3";
 
-$row = mysqli_fetch_array($resultmax,MYSQLI_NUM);
-$collength[4]=$row[0];
+#$row = mysqli_fetch_array($resultmax,MYSQLI_NUM);
+#$collength[4]=$row[0];
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
