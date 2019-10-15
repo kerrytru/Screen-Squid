@@ -187,11 +187,11 @@ if($_GET['id']==1) {
       </tr>
       <tr>
          <td>".$_lang['stMINDATE']."</td>
-         <td>".(date('d-m-Y h:m:s',$MinMaxDateTraffic[0]))."</td>
+         <td>".(date('d-m-Y H:m:s',$MinMaxDateTraffic[0]))."</td>
       </tr>
       <tr>
          <td>".$_lang['stMAXDATE']."</td>
-         <td>".(date('d-m-Y h:m:s',$MinMaxDateTraffic[1]))."</td>
+         <td>".(date('d-m-Y H:m:s',$MinMaxDateTraffic[1]))."</td>
       </tr>
       <tr>
          <td>".$_lang['stTRAFFICSUM']."</td>
