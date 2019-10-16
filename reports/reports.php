@@ -1615,7 +1615,7 @@ FROM scsq_quicktraffic
 	  AND tmpipaddress.id is  NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-GROUP BY login,FROM_UNIXTIME(date,'%H')
+GROUP BY ipaddress,FROM_UNIXTIME(date,'%H')
 ORDER BY nofriends.name
 ;
 ";
