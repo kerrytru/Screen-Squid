@@ -1928,7 +1928,6 @@ $queryWhoVisitPopularSiteLogin="
 
   ORDER BY nofriends.name;";
 
-
 if($currentloginid==1)
 $queryWhoVisitSiteLoginFreq="
   SELECT 
@@ -2116,7 +2115,7 @@ if($currentipaddressid==1)
 $queryWhoVisitPopularSiteIpaddress="
   SELECT 
     nofriends.name, 
-    tmp.s,
+    tmp.s
    ".$echoIpaddressAliasColumn."
     nofriends.id 
   from (SELECT 
@@ -2150,7 +2149,7 @@ if($currentipaddressid==2)
 $queryWhoVisitPopularSiteIpaddress="
   SELECT 
     nofriends.name, 
-    tmp.s,
+    tmp.s
     ".$echoIpaddressAliasColumn."
     ,nofriends.id 
   from (SELECT 
@@ -2175,6 +2174,8 @@ $queryWhoVisitPopularSiteIpaddress="
 
   order by nofriends.name;";
 
+
+//echo $queryWhoVisitPopularSiteIpaddress;
 
 
 if($currentipaddressid==1)
@@ -2257,7 +2258,7 @@ $queryWhoVisitSiteIpaddressFreq="
 
   ORDER BY nofriends.name;";
 
-echo $queryWhoVisitSiteIpaddressFreq;
+//echo $queryWhoVisitSiteIpaddressFreq;
 
 #костылище для частных отчетов
 
