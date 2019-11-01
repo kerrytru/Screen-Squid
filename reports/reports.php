@@ -2117,7 +2117,7 @@ $queryWhoVisitPopularSiteIpaddress="
     nofriends.name, 
     tmp.s
    ".$echoIpaddressAliasColumn."
-    nofriends.id 
+    ,nofriends.id 
   from (SELECT 
 	  ipaddress,
 	  sum(sizeinbytes) as s 
