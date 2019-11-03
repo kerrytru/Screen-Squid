@@ -1,14 +1,27 @@
 #!/usr/bin/perl
 
-#build 20190807
+#build 20191024
 
 use DBI; # DBI  Perl!!!
 #=======================CONFIGURATION BEGIN============================
+my $dbtype = "1"; #type of db - 0 - MySQL, 1 - PostGRESQL
+
+#mysql default config
+if($dbtype==0){
 my $host = "localhost"; # host s DB
 my $port = "3306"; # port DB
 my $user = "mysql-user"; # username k DB
 my $pass = "pass"; # pasword k DB
-my $db = "test"; # name DB
+my $db = "test4"; # name DB
+}
+#postgresql default config
+if($dbtype==1){
+$host = "localhost"; # host s DB
+$port = "5432"; # port DB
+$user = "postgres"; # username k DB
+$pass = "pass"; # pasword k DB
+$db = "test4"; # name DB
+}
 #==========================================================
 my $count_lines_for_one_insert=10000; 
 
@@ -75,8 +88,13 @@ $filetoparse[54]="BL/webtv/domains";
 
 
 #make conection to DB
+if($dbtype==0){ #mysql
 $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+}
 
+if($dbtype==1){ #postgre
+$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+}
 
 
 #очистим таблицу категорий чтобы обновить список
@@ -85,7 +103,14 @@ $sth = $dbh->prepare($sql_refreshcats);
 $sth->execute; #
 
 #установим счетчик в 1. защитимся от переполнения
+if($dbtype==0){
 $sql="ALTER TABLE scsq_mod_categorylist AUTO_INCREMENT = 1;";
+}
+
+if($dbtype==1){
+$sql="ALTER SEQUENCE scsq_mod_categorylist_id_seq RESTART WITH 1;";
+}
+
 $sth = $dbh->prepare($sql);
 $sth->execute; #
 

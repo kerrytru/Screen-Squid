@@ -1,11 +1,15 @@
 <?php
-
+#20191023
 
 class Quotas
 {
 
 function __construct($variables){ // 
     $this->vars = $variables;
+    	
+  
+	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+	
 }
 
   function GetDesc()
@@ -13,17 +17,12 @@ function __construct($variables){ //
       return 'Менеджер квот пользователей'; # TODO добавить в lang
   }
 
-  function GetConnectionDB()
-  {
-
-	$connection=mysqli_connect($this->vars['addr'],$this->vars['usr'],$this->vars['psw'],$this->vars['dbase']);
-	return $connection;
-  }
+ 
 
   function GetAliasDayTraffic($aliasid,$goodSitesList) #по алиасу возвращаем его дневной траффик
   {
 
-$connection = $this->GetConnectionDB();
+
 
 $queryAlias = "
  	SELECT 
@@ -33,10 +32,10 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$result=mysqli_query($connection,$queryAlias,MYSQLI_USE_RESULT) or die (mysqli_error());
+	$result=$this->ssq->query($queryAlias) or die ("Can`t get alias traffic");
 
-	$row=mysqli_fetch_array($result,MYSQLI_NUM);
-		mysqli_free_result($result);
+	$row=$this->ssq->fetch_array($result);
+		$this->ssq->free_result($result);
 
 if($row[1] == 0)
 $columnname = "login";
@@ -57,13 +56,13 @@ $queryOneAliasTraffic="
 		     AND date<".$dateend."
 	             AND site NOT IN (".$goodSitesList.")
 		     AND ".$columnname." = ".$row[0]." 
-		   GROUP BY crc32(".$columnname.")
+		   GROUP BY ".$columnname."
 	;";
 
-	$result=mysqli_query($connection,$queryOneAliasTraffic,MYSQLI_USE_RESULT) or die (mysqli_error());
+	$result=$this->ssq->query($queryOneAliasTraffic) or die ("Can`t get one alias traffic");
 
-	$SumSizeTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
-		mysqli_free_result($result);
+	$SumSizeTraffic=$this->ssq->fetch_array($result);
+		$this->ssq->free_result($result);
 
     return $SumSizeTraffic[0]/1000/1000;
 
@@ -73,7 +72,6 @@ $queryOneAliasTraffic="
  function GetAliasValue($aliasid) #по алиасу возвращаем элемент из таблицы логинов/ip адресов
   {
 
-$connection = $this->GetConnectionDB();
 
 $queryAlias = "
  	SELECT 
@@ -83,10 +81,10 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$result=mysqli_query($connection,$queryAlias,MYSQLI_USE_RESULT) or die (mysqli_error());
+	$result=$this->ssq->query($queryAlias) or die ("Can`t get alias");
 
-	$row=mysqli_fetch_array($result,MYSQLI_NUM);
-		mysqli_free_result($result);
+	$row=$this->ssq->fetch_array($result);
+		$this->ssq->free_result($result);
 
 if($row[1] == 0)
 $tablename = "logins";
@@ -101,9 +99,9 @@ $queryOneAliasValue="
 		   WHERE id =".$row[0]." 
 	 ;";
 
-	$result=mysqli_query($connection,$queryOneAliasValue,MYSQLI_USE_RESULT) or die ('Error: Cant get login/ipaddress for tableid');
-	$row=mysqli_fetch_array($result,MYSQLI_NUM);
-	mysqli_free_result($result);
+	$result=$this->ssq->query($queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
+	$row=$this->ssq->fetch_array($result);
+	$this->ssq->free_result($result);
 
     return $row[0];
 
@@ -112,8 +110,6 @@ $queryOneAliasValue="
 
 function GetQuotaStatusByAlias($aliasid) #по алиасу возвращаем статус 0 - норма, >0 превышение квоты
   {
-
-$connection = $this->GetConnectionDB();
 
 $aliasid = $aliasid + 0; #защита от пустых значений
 
@@ -124,12 +120,12 @@ $queryAlias = "
 		   WHERE aliasid=".$aliasid."
 	;";
 
-	$result=mysqli_query($connection,$queryAlias,MYSQLI_USE_RESULT) or die (mysqli_error());
-	$numrows = mysqli_num_rows($result);
-	$row=mysqli_fetch_array($result,MYSQLI_NUM);
+	$result=$this->ssq->query($queryAlias) or die ("Can`t get quota status by alias");
+	
+	$row=$this->ssq->fetch_array($result);
 	
 
-	mysqli_free_result($result);
+	$this->ssq->free_result($result);
 
 
     return $row[0];
@@ -142,7 +138,6 @@ $queryAlias = "
   function GetAliasMonthTraffic($aliasid,$goodSitesList) #по алиасу возвращаем его дневной траффик
   {
 
-$connection = $this->GetConnectionDB();
 
 $queryAlias = "
  	SELECT 
@@ -152,10 +147,10 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$result=mysqli_query($connection,$queryAlias,MYSQLI_USE_RESULT) or die (mysqli_error());
+	$result=$this->ssq->query($queryAlias) or die ("Can`t query alias table");
 
-	$row=mysqli_fetch_array($result,MYSQLI_NUM);
-		mysqli_free_result($result);
+	$row=$this->ssq->fetch_array($result,MYSQLI_NUM);
+		$this->ssq->free_result($result);
 
 if($row[1] == 0)
 $columnname = "login";
@@ -179,13 +174,13 @@ $queryOneAliasTraffic="
 		     AND date<".$dateend."
 	             AND site NOT IN (".$goodSitesList.")
 		     AND ".$columnname." = ".$row[0]." 
-		   GROUP BY crc32(".$columnname.")
+		   GROUP BY ".$columnname."
 	;";
 
-	$result=mysqli_query($connection,$queryOneAliasTraffic,MYSQLI_USE_RESULT) or die (mysqli_error());
+	$result=$this->ssq->query($queryOneAliasTraffic) or die ("Can`t get one alias traffic");
 
-	$SumSizeTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
-		mysqli_free_result($result);
+	$SumSizeTraffic=$this->ssq->fetch_array($result);
+		$this->ssq->free_result($result);
 
     return $SumSizeTraffic[0]/1000/1000;
 
@@ -196,36 +191,57 @@ $queryOneAliasTraffic="
   {
 
 
-$connection = $this->GetConnectionDB();
+
 # Table structure for table `scsq_mod_quotas`
 
+		if($this->vars['dbtype']==0) #mysql version
 		$CreateTable = "
-		CREATE TABLE IF NOT EXISTS `scsq_mod_quotas` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `aliasid` int(11) NOT NULL,
-			  `quota` int(11) DEFAULT '0',
-			  `status` int(4) DEFAULT '0',
-			  `active` int(10) DEFAULT '0',
-			  `quotaday` int(11) DEFAULT '0',
-			  `quotamonth` int(11) DEFAULT '0',
-			  `sumday` int(11) DEFAULT '0',
-			  `summonth` int(11) DEFAULT '0',
-			  `datemodified` int(11) DEFAULT NULL,
-			  PRIMARY KEY (`id`)
+		CREATE TABLE IF NOT EXISTS scsq_mod_quotas (
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  aliasid int(11) NOT NULL,
+			  quota int(11) DEFAULT '0',
+			  status int(4) DEFAULT '0',
+			  active int(10) DEFAULT '0',
+			  quotaday int(11) DEFAULT '0',
+			  quotamonth int(11) DEFAULT '0',
+			  sumday int(11) DEFAULT '0',
+			  summonth int(11) DEFAULT '0',
+			  datemodified int(11) DEFAULT NULL,
+			  PRIMARY KEY (id)
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 		";
+		
+		if($this->vars['dbtype']==1) #postgre version
+		$CreateTable = "
+		CREATE TABLE IF NOT EXISTS scsq_mod_quotas (
+			  id serial NOT NULL,
+			  aliasid integer NOT NULL,
+			  quota integer DEFAULT 0,
+			  status integer DEFAULT 0,
+			  active integer DEFAULT 0,
+			  quotaday integer DEFAULT 0,
+			  quotamonth integer DEFAULT 0,
+			  sumday integer DEFAULT 0,
+			  summonth integer DEFAULT 0,
+			  datemodified integer DEFAULT NULL,
+			  CONSTRAINT scsq_mod_quotas_pkey PRIMARY KEY (id)
+			);
+		ALTER TABLE scsq_mod_quotas
+			OWNER TO postgres;
+		";
+
 
 		$UpdateModules = "
-		INSERT INTO `scsq_modules` (name,link) VALUES ('Quotas','modules/Quotas/index.php');";
+		INSERT INTO scsq_modules (name,link) VALUES ('Quotas','modules/Quotas/index.php');";
 
 
-		$result=mysqli_query($connection,$CreateTable,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($CreateTable) or die ("Can`t install module!");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 		
-		$result=mysqli_query($connection,$UpdateModules,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 		
 
 
@@ -236,21 +252,20 @@ $connection = $this->GetConnectionDB();
  function Uninstall() #добавить LANG
   {
 
-		$connection = $this->GetConnectionDB();
 		$query = "
-		DROP TABLE IF EXISTS `scsq_mod_quotas`;
+		DROP TABLE IF EXISTS scsq_mod_quotas;
 		";
 
 		$UpdateModules = "
-		DELETE FROM `scsq_modules` where name = 'QUOTAS';";
+		DELETE FROM scsq_modules where name = 'Quotas';";
 
-		$result=mysqli_query($connection,$query,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($query) or die ("Can`t uninstall module!");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 
-		$result=mysqli_query($connection,$UpdateModules,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 
 		echo "Удалено<br /><br />";
 		echo "<a href=right.php?srv=".$srv."&id=7 target=right>".$_lang['stBACK']."</a>";

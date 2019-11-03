@@ -1,20 +1,34 @@
 #!/usr/bin/perl
 
-#build 20190805
+#build 20191023
 
 use DBI; # DBI  Perl!!!
 
 #=======================CONFIGURATION BEGIN============================
+
+my $dbtype = "1"; #type of db - 0 - MySQL, 1 - PostGRESQL
+
+#mysql default config
+if($dbtype==0){
 my $host = "localhost"; # host s DB
 my $port = "3306"; # port DB
 my $user = "mysql-user"; # username k DB
 my $pass = "pass"; # pasword k DB
 my $db = "test"; # name DB
+}
+#postgresql default config
+if($dbtype==1){
+$host = "localhost"; # host s DB
+$port = "5432"; # port DB
+$user = "postgres"; # username k DB
+$pass = "pass"; # pasword k DB
+$db = "test"; # name DB
+}
 #==========================================================
 #Count lines for one insert. You can change it, if its needed.
 #Kolichestvo strok, vstavliaemoe za odin INSERT. Mozhno pokrutit bolshe/menshe dlia skorosti
 #Количество строк, вставляемое за один INSERT. Можно покрутить больше/меньше для скорости.
-my $count_lines_for_one_insert=100; #how much INSERT for one 'transaction'
+my $count_lines_for_one_insert=1000; #how much INSERT for one 'transaction'
 #==========================================================
 #Path to access.log. It could be full path, e.g. /var/log/squid/access.log
 #Put k access.log. Eto mozhet bit polnii put. Naprimer, /var/log/squid/access.log
@@ -23,7 +37,7 @@ my $filetoparse="access.log";
 #==========================================================
 #Path to ssquid.log. Log fetch.pl. It could be full path, e.g /var/log/squid/ssquid.log
 #File kuda budet zapisivatsia resultat otrabotki skripta fetch.pl. Eto mozhet bit polnii put. Naprimer, /var/log/squid/ssquid.log
-my $filetolog="ssquid.log";
+my $filetolog="ssquid1.log";
 #==========================================================
 #Enable delete old data.
 #Vkluchit udalenie starih dannih iz bazi
@@ -63,7 +77,13 @@ print OUT $now;
 $line_count = `wc -l < $filetoparse`;
 
 #make conection to DB
+if($dbtype==0){ #mysql
 $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+}
+
+if($dbtype==1){ #postgre
+$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+}
 
 #delete data stored more than $deleteperiod days
 if($enabledelete==1){
@@ -87,7 +107,15 @@ $lastdate=$row[0];
 
 
 #get last date in table with data. It used to prevent importing data from log which could be in table yet.
+
+if($dbtype==0){
 $sql_getlastdate="select unix_timestamp(from_unixtime(max(date),'%Y-%m-%d')) from scsq_quicktraffic";
+}
+
+if($dbtype==1){
+$sql_getlastdate="select EXTRACT(epoch from timestamptz (to_char(TO_TIMESTAMP(max(date)),'YYYY-MM-DD'))) from scsq_quicktraffic";
+}
+
 $sth = $dbh->prepare($sql_getlastdate);
 $sth->execute; #
 @row=$sth->fetchrow_array;
@@ -202,12 +230,25 @@ $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
 #copy data from temptable to main table
+
+if($dbtype==0){
 $sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime from scsq_temptraffic
 LEFT JOIN (select id,name from scsq_ipaddress
 RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
 LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
 LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
 ;";
+}
+
+if($dbtype==1){
+$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime from scsq_temptraffic
+LEFT JOIN (select id,name from scsq_ipaddress
+RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
+LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
+LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+;";
+}
+
 $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
@@ -242,7 +283,11 @@ break;
 print "\n";
 
 #update scsq_quicktraffic
+
 $sqltext="";
+
+if($dbtype==0){
+
 $sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par)
 SELECT 
 date,
@@ -268,6 +313,44 @@ where date>".$lastday."
 GROUP BY CRC32(tmp2.st),FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus
 ORDER BY null;
 ";
+}
+
+
+
+if($dbtype==1){
+
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par)
+SELECT 
+date,
+tmp2.login,
+tmp2.ipaddress,
+sum(tmp2.sizeinbytes),
+tmp2.st,
+tmp2.httpstatus,
+1
+
+FROM (SELECT 
+case
+
+	when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]')  
+		then split_part(site,'/',1) 
+		else reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) 
+		
+	end as st, 
+sizeinbytes,
+date,
+login,
+ipaddress,
+httpstatus
+FROM scsq_traffic
+where date>".$lastday."
+
+) as tmp2
+
+GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,httpstatus,tmp2.date
+";
+}
+
 print $sqltext;
 $sth = $dbh->prepare($sqltext);
 $sth->execute;
@@ -275,6 +358,8 @@ $sth->execute;
 
 #update2 scsq_quicktraffic
 $sqltext="";
+
+if($dbtype==0) {
 $sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par)
 SELECT 
 tmp2.date,
@@ -297,6 +382,39 @@ GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st)
 
 ORDER BY null;
 ";
+}
+
+if($dbtype==1){
+
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par)
+SELECT 
+tmp2.date,
+'0',
+'0',
+tmp2.sums,
+tmp2.st,
+2
+
+FROM (SELECT 
+case
+
+	when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]')  
+		then split_part(site,'/',1) 
+		else reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) 
+		
+	end as st, 
+
+sum(sizeinbytes) as sums,
+date
+FROM scsq_traffic
+where date>".$lastday."
+GROUP BY to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),st,date
+
+) as tmp2
+
+";
+}
+
 print $sqltext;
 $sth = $dbh->prepare($sqltext);
 $sth->execute;

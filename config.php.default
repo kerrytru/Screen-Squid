@@ -10,7 +10,7 @@ $address[0] ="localhost"; //mysql db
 $cfgsquidhost[0]="localhost";
 $cfgsquidport[0] = 3128;
 $cfgcachemgr_passwd[0]="";
-
+$srvdbtype[0]="0";	# type of db 0 - MySQL, 1 - PostgreSQL
 
 #server #1
 #$srvname[1]="Proxy1"; #nickname of server
@@ -21,7 +21,7 @@ $cfgcachemgr_passwd[0]="";
 #$cfgsquidhost[1]="localhost";
 #$cfgsquidport[1] = 3128;
 #$cfgcachemgr_passwd[1]="";
-
+#$srvdbtype[1]="0"; # type of db 0 - MySQL, 1 - PostgreSQL
 
 #language ru = russian, en = english, ua = ukrainian
 $language="en";

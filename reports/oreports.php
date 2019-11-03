@@ -5,9 +5,47 @@
 
 <?php
 
-#build 20180530
+#build 20191026
+
+if(isset($_GET['srv']))
+  $srv=$_GET['srv'];
+else
+  $srv=0;
 
 include("../config.php");
+
+$addr=$address[$srv];
+$usr=$user[$srv];
+$psw=$pass[$srv];
+$dbase=$db[$srv];
+$dbtype=$srvdbtype[$srv];
+
+$variableSet = array();
+$variableSet['addr']=$addr;
+$variableSet['usr']=$usr;
+$variableSet['psw']=$psw;
+$variableSet['dbase']=$dbase;
+
+
+
+$squidhost=$cfgsquidhost[$srv];
+$squidport=$cfgsquidport[$srv];
+$cachemgr_passwd=$cfgcachemgr_passwd[$srv];
+
+$address=$address[$srv];
+$user=$user[$srv];
+$pass=$pass[$srv];
+$db=$db[$srv];
+
+#в зависимости от типа БД, подключаем разные модули
+if($dbtype==0)
+include("../lib/dbDriver/mysqlmodule.php");
+
+if($dbtype==1)
+include("../lib/dbDriver/pgmodule.php");
+
+$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+
 
  // Standard pChart inclusions
  include("../lib/pChart/pChart/pData.class");
@@ -108,19 +146,7 @@ $datestart=mktime(0,0,0,$month,1,$year);
 $dateend=$datestart + 86400*$numdaysinmonth;
 }
 
-if(isset($_GET['srv']))
-  $srv=$_GET['srv'];
-else
-  $srv=0;
 
-$squidhost=$cfgsquidhost[$srv];
-$squidport=$cfgsquidport[$srv];
-$cachemgr_passwd=$cfgcachemgr_passwd[$srv];
-
-$address=$address[$srv];
-$user=$user[$srv];
-$pass=$pass[$srv];
-$db=$db[$srv];
 
 $friendsLogin="0";
 $friendsIpaddress="0";
@@ -151,7 +177,7 @@ $queryActiveUsers1="select substring_index(ipaddress,':',1) as ipaddr,
 //			   AS aliastbl 
 //		   ON nofriends.id=aliastbl.tableid 
 //
-
+if($dbtype==0) #mysql version
 $queryActiveUsers="select table1.ipaddr,sum(table1.sums/1024/table1.seconds) as s, table1.username, table1.id,table1.aliasname from 
 (select DISTINCT substring_index(ipaddress,':',1) as ipaddr,sizeinbytes as sums, seconds, username, ipaddresstbl.id,aliastbl.name as aliasname from scsq_sqper_activerequests
 LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,substring_index(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON substring_index(ipaddress,':',1)=ipaddresstbl.name 
@@ -160,11 +186,22 @@ LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_ali
 where table1.ipaddr not IN ('".$friendsIpaddress."') AND trim(table1.username) not IN ('".$friendsLogin."') group by table1.ipaddr,table1.username; 
 	
 ";
+
+if($dbtype==1)
+$queryActiveUsers="
+ select table1.ipaddr,sum(table1.sums/1024/table1.seconds) as s, table1.username, table1.id,table1.aliasname 
+ from 
+ (select DISTINCT split_part(ipaddress,':',1) as ipaddr,sizeinbytes as sums, seconds, username, ipaddresstbl.id,aliastbl.name as aliasname from scsq_sqper_activerequests 
+ LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,split_part(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON split_part(ipaddress,':',1)=ipaddresstbl.name 
+ LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid ) as table1 
+ where table1.ipaddr not IN ('".$friendsIpaddress."') AND trim(table1.username) not IN ('".$friendsLogin."') group by table1.ipaddr,table1.username,table1.id,table1.aliasname ; 
+
+";
+
 //echo $queryActiveUsers;
 
 //querys for reports end
 
-$connection=mysqli_connect("$address","$user","$pass","$db");
 
 ///CALENDAR
 
@@ -207,14 +244,15 @@ echo "<h2>".$_lang['stACTIVEIPADDRESS']."</h2>";
 
 #если тренды не открывали более 5 минут, таблица очищается
 $sqltext="select max(date) from scsq_sqper_trend10";
-$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
-$linedate = mysqli_fetch_array($result,MYSQLI_NUM);
+$result=$ssq->query($sqltext);
+$linedate = $ssq->fetch_array($result);
 $resdate=$nowtimestamp - $linedate[0];
-mysqli_free_result($result);
+$ssq->free_result($result);
 if($resdate>=60)
 {
 $sqltext="truncate scsq_sqper_trend10";
-$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
+$result=$ssq->query($sqltext);
+$ssq->free_result($result);
 }
 
 
@@ -225,12 +263,18 @@ if($id==1)
 {
  
 $sqltext="truncate scsq_sqper_activerequests;";
-$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
-mysqli_free_result($result);
+$result=$ssq->query($sqltext);
+$ssq->free_result($result);
 
+if($dbtype==0)
 $sqltext="ALTER TABLE scsq_sqper_activerequests AUTO_INCREMENT = 1 ;";
-$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
-mysqli_free_result($result);
+
+if($dbtype==1)
+$sqltext="ALTER SEQUENCE scsq_mod_categorylist_id_seq RESTART WITH 1;";
+
+
+$result=$ssq->query($sqltext);
+$ssq->free_result($result);
 
 $cmd = "GET cache_object://".$squidhost."/active_requests HTTP/1.0\r\n";
 //$cmd = "GET cache_object://".$squidhost."/active_requests";
@@ -280,10 +324,13 @@ $username=$match[1][$i];
 $site=$matchuri[1][$i];
 $site=preg_replace("/\'/i", "&quot;", $site);
 $size=$matchsize[1][$i];
-$seconds=$matchsec[1][$i];
+$seconds=round($matchsec[1][$i],0);
+
 	$sqltext="INSERT INTO scsq_sqper_activerequests (date,ipaddress,username,site,sizeinbytes,seconds) VALUES";
 	$sqltext=$sqltext."($nowtimestamp,'$ipaddress','$username','$site','$size','$seconds')";
-	$result=mysqli_query($connection,$sqltext);
+	$result=$ssq->query($sqltext);
+
+
 	$sqltext="";
 	
 }
@@ -315,15 +362,23 @@ $showInspectTable=0;
 
 
 echo "<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=1>".$_lang['stSTOP']."</a>";
-$result=mysqli_query($connection,"select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests",MYSQLI_USE_RESULT);
-$lastUpdateDate = mysqli_fetch_array($result,MYSQLI_NUM);
-mysqli_free_result($result);
-$result=mysqli_query($connection,$queryActiveUsers);
+
+if($dbtype==0)#mysql version
+$result=$ssq->query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests");
+
+if($dbtype==1)#postgre version
+$result=$ssq->query("select to_char(to_timestamp(date),'DD.MM.YYYY HH24:MI:SS') as d from scsq_sqper_activerequests");
+
+
+$lastUpdateDate = $ssq->fetch_array($result);
+$ssq->free_result($result);
+
+$result=$ssq->query($queryActiveUsers);
 $numrow=1;
 $totalspeed=0;
 $insptotalspeed=0; //total speed for inspected table
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 if($line[0]=='')
@@ -332,7 +387,7 @@ $line[0]="::1";
 @$rows[$numrow]=implode(";;",$line);
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 echo "<p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />";
 
@@ -452,7 +507,7 @@ echo "</table>";
 
 #trend totalspeed
    $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$totalspeed,1)";
-mysqli_query($connection,$sqltext);
+$ssq->query($sqltext);
 
 
 foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
@@ -463,17 +518,17 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
 
 
    $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
-$result=mysqli_query($connection,$sqltext);
+$result=$ssq->query($sqltext);
 
    $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=1 order by date desc limit 30) as tmp order by date asc";
-$result=mysqli_query($connection,$sqltext, MYSQLI_USE_RESULT);
+$result=$ssq->query($sqltext);
 
 $countValues=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 $arrValues[$countValues]=$line[0];
 $countValues++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 //pChart Graph 
  // Dataset definition 
  $DataSet = new pData;
@@ -766,7 +821,7 @@ echo "</table>";
 #trend cpuusage
 $cpuusage=$cpuusage*100;
    $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$cpuusage,2)";
-mysqli_query($connection,$sqltext);
+$sql->query($connection,$sqltext);
 
 
 foreach (glob("../lib/pChart/pictures/*.png") as $filename) {

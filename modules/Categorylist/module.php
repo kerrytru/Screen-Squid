@@ -1,23 +1,20 @@
 <?php
-
+#20191024
 
 class Categorylist
 {
 
 function __construct($variables){ // 
     $this->vars = $variables;
+    
+    
+	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
 }
 
   function GetDesc()
   {
       return 'Модуль категорий сайтов'; # TODO добавить в lang
-  }
-
-  function GetConnectionDB()
-  {
-
-	$connection=mysqli_connect($this->vars['addr'],$this->vars['usr'],$this->vars['psw'],$this->vars['dbase']);
-	return $connection;
   }
 
 
@@ -26,40 +23,63 @@ function __construct($variables){ //
   {
 
 
-$connection = $this->GetConnectionDB();
-# Table structure for table `scsq_mod_quotas`
+# Table structure for table `scsq_mod_categorylist`
+
+		if($this->vars['dbtype']==0 ) {
 
 		$CreateTable = "
-			CREATE TABLE IF NOT EXISTS `scsq_mod_categorylist` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `category` varchar(100) NOT NULL,
-			  `site` varchar(300) NOT NULL,
-			  PRIMARY KEY (`id`),
-			  KEY `site` (`site`)
+			CREATE TABLE IF NOT EXISTS scsq_mod_categorylist (
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  category varchar(100) NOT NULL,
+			  site varchar(300) NOT NULL,
+			  PRIMARY KEY (id),
+			  KEY site (site)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 		";
 
 		$queryAddColumn = "
-		ALTER TABLE `scsq_quicktraffic` ADD `category` VARCHAR( 30 ) NULL DEFAULT NULL ;
+		ALTER TABLE scsq_quicktraffic ADD category VARCHAR( 30 ) NULL DEFAULT NULL ;
 		";
+		}
+
+		if($this->vars['dbtype']==1){
+
+
+
+		$CreateTable = "
+			CREATE TABLE IF NOT EXISTS scsq_mod_categorylist (
+			  id serial NOT NULL,
+			  category text NOT NULL,
+			  site text NOT NULL,
+			  CONSTRAINT scsq_mod_categorylist_pkey PRIMARY KEY (id)
+			 
+			) ;
+			ALTER TABLE scsq_mod_categorylist
+			OWNER TO postgres;
+		";
+
+		$queryAddColumn = "
+		ALTER TABLE scsq_quicktraffic ADD category text NULL DEFAULT NULL ;
+		";
+		}
 
 
 
 		$UpdateModules = "
-		INSERT INTO `scsq_modules` (name,link) VALUES ('Categorylist','modules/Categorylist/index.php');";
+		INSERT INTO scsq_modules (name,link) VALUES ('Categorylist','modules/Categorylist/index.php');";
 
 
-		$result=mysqli_query($connection,$CreateTable,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($CreateTable) or die ("Can`t create table for Categories");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 
-		$result=mysqli_query($connection,$queryAddColumn,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($queryAddColumn) or die ("Can`t add column Category");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 		
-		$result=mysqli_query($connection,$UpdateModules,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($UpdateModules) or die ("Can`t update modules table");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 		
 
 
@@ -70,30 +90,30 @@ $connection = $this->GetConnectionDB();
  function Uninstall() #добавить LANG
   {
 
-		$connection = $this->GetConnectionDB();
+		
 		$query = "
-		DROP TABLE IF EXISTS `scsq_mod_categorylist`;
+		DROP TABLE IF EXISTS scsq_mod_categorylist;
 		";
 
 		$queryDropColumn = "
-		ALTER TABLE `scsq_quicktraffic`  DROP `category`;
+		ALTER TABLE scsq_quicktraffic  DROP category;
 		";
 
 
 		$UpdateModules = "
-		DELETE FROM `scsq_modules` where name = 'Categorylist';";
+		DELETE FROM scsq_modules where name = 'Categorylist';";
 
-		$result=mysqli_query($connection,$query,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($query) or die ("Can`t drop table for Categories");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 
-		$result=mysqli_query($connection,$queryDropColumn,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($queryDropColumn) or die ("Can`t drop column Category");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 
-		$result=mysqli_query($connection,$UpdateModules,MYSQLI_USE_RESULT) or die (mysqli_error());
+		$result=$this->ssq->query($UpdateModules) or die ("Can`t update modules");
 
-		mysqli_free_result($result);
+		$this->ssq->free_result($result);
 
 		echo "Удалено<br /><br />";
 		echo "<a href=right.php?srv=".$srv."&id=7 target=right>".$_lang['stBACK']."</a>";

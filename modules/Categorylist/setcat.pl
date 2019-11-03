@@ -4,33 +4,70 @@
 
 use DBI; # DBI  Perl!!!
 #=======================CONFIGURATION BEGIN============================
+my $dbtype = "1"; #type of db - 0 - MySQL, 1 - PostGRESQL
+
+#mysql default config
+if($dbtype==0){
 my $host = "localhost"; # host s DB
 my $port = "3306"; # port DB
 my $user = "mysql-user"; # username k DB
 my $pass = "pass"; # pasword k DB
-my $db = "test"; # name DB
-#==========================================================
+my $db = "test4"; # name DB
+}
+#postgresql default config
+if($dbtype==1){
+$host = "localhost"; # host s DB
+$port = "5432"; # port DB
+$user = "postgres"; # username k DB
+$pass = "pass"; # pasword k DB
+$db = "test4"; # name DB
+}
 
+my $procs=256; #kol-vo processov
+#=======================CONFIGURATION END==============================
 
 #make conection to DB
+if($dbtype==0){ #mysql
 $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+}
+
+if($dbtype==1){ #postgre
+$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+}
 
 #обновляем категории
-$sql="select id,site,category from scsq_quicktraffic where category is NULL;";
+$sql="select distinct site from scsq_quicktraffic where category is NULL;";
 $sthr = $dbh->prepare($sql);
 $sthr->execute; #
+
+#посчитаем количество уникальных сайтов, которым попробуем присвоить категории
+$sql="select count(1) from (select distinct site from scsq_quicktraffic where category is NULL) t;";
+$sth = $dbh->prepare($sql);
+$sth->execute; #
+
+@countlines=$sth->fetchrow_array();
+
+$completed=0;
 
 while (@row = $sthr->fetchrow_array())
 
     {
-$id = $row[0];
-$site = $row[1];
+#$id = $row[0];
+
+
+print STDERR "Completed: ".$completedP."% Line:".$completed." Total: ".$countlines[0]." line \r";
+
+$completed=$completed+1;
+
+$completedP=int($completed/$countlines[0] *100);
+
+$site = $row[0];
 
 @itm= split ":", $site; #преобразуем, отрезав двоеточие
 
-$site = $itm[0];
+$itm[0];
 
-$sql_category="select category from scsq_mod_categorylist where site = '$site' limit 1";
+$sql_category="select category from scsq_mod_categorylist where site = '$itm[0]' limit 1";
 $sth = $dbh->prepare($sql_category);
 $sth->execute; #
 @rowcat = $sth->fetchrow_array();
@@ -39,7 +76,7 @@ $category = $rowcat[0];
 
 
 	if($sth->rows>0){
-	$sql_setcategory="update scsq_quicktraffic set category='$category' where id=$id;";
+	$sql_setcategory="update scsq_quicktraffic set category='$category' where site='$site';";
 	$sth = $dbh->prepare($sql_setcategory);
 	$sth->execute; #
 	}

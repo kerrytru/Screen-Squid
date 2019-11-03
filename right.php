@@ -67,24 +67,30 @@ $addr=$address[$srv];
 $usr=$user[$srv];
 $psw=$pass[$srv];
 $dbase=$db[$srv];
+$dbtype=$srvdbtype[$srv];
 
 $variableSet = array();
 $variableSet['addr']=$addr;
 $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
+$variableSet['dbtype']=$dbtype;
+
+#в зависимости от типа БД, подключаем разные модули
+if($dbtype==0)
+include("lib/dbDriver/mysqlmodule.php");
+
+if($dbtype==1)
+include("lib/dbDriver/pgmodule.php");
+
+$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
 
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
 
 $start=microtime(true);
 
-///$connectionStatus=mysqli_connect($address,$user,$pass,$db) or die(mysqli_connect_error());
-$connection=mysqli_connect("$addr","$usr","$psw","$dbase");
-
-///mysqli_select_db($db);
-
-///echo $connection;
 
 if($enableNofriends==1) {
   $friendsTmp=implode("','",explode(" ", $goodLogins));
@@ -125,39 +131,44 @@ if($_GET['id']==1) {
   $queryCountRowsLogin="select count(*) from scsq_logins";
   $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
   $queryMinMaxDateTraffic="select min(date),max(date) from scsq_quicktraffic";
-  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic group by crc32('1') order by null";
+  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic ";
   $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
   $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
   $queryCountObjectsTraffic3="select count(id) from scsq_traffic where sizeinbytes>5000 and sizeinbytes<=10000";
   $queryCountObjectsTraffic4="select count(id) from scsq_traffic where sizeinbytes>10000";
 
-  $result=mysqli_query($connection,$queryCountRowsTraffic, MYSQLI_USE_RESULT);
+#  $result=mysqli_query($connection,$queryCountRowsTraffic, MYSQLI_USE_RESULT);
 
-  $CountRowsTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
-  mysqli_free_result($result);
-  $result=mysqli_query($connection,$queryCountRowsLogin, MYSQLI_USE_RESULT);
-  $CountRowsLogin=mysqli_fetch_array($result,MYSQLI_NUM);
-  mysqli_free_result($result);
-  $result=mysqli_query($connection,$queryCountRowsIpaddress, MYSQLI_USE_RESULT);
-  $CountRowsIpaddress=mysqli_fetch_array($result,MYSQLI_NUM);
-  mysqli_free_result($result);
-  $result=mysqli_query($connection,$queryMinMaxDateTraffic, MYSQLI_USE_RESULT);
-  $MinMaxDateTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
-  mysqli_free_result($result);
-  $result=mysqli_query($connection,$querySumSizeTraffic, MYSQLI_USE_RESULT);
-  $SumSizeTraffic=mysqli_fetch_array($result,MYSQLI_NUM);
-  mysqli_free_result($result);
+$result = $ssq->query($queryCountRowsTraffic) ;
+$CountRowsTraffic=$ssq->fetch_array($result);
+$ssq->free_result($result);
+
+$result = $ssq->query($queryCountRowsLogin) ;
+$CountRowsLogin=$ssq->fetch_array($result);
+$ssq->free_result($result);
+
+$result = $ssq->query($queryCountRowsIpaddress) ;
+$CountRowsIpaddress=$ssq->fetch_array($result);
+$ssq->free_result($result);
+
+$result = $ssq->query($queryMinMaxDateTraffic) ;
+$MinMaxDateTraffic=$ssq->fetch_array($result);
+$ssq->free_result($result);
+
+$result = $ssq->query($querySumSizeTraffic) ;
+$SumSizeTraffic=$ssq->fetch_array($result);
+$ssq->free_result($result);
 
 	if($enableTrafficObjectsInStat==1)
 	{
-	  $result=mysqli_query($connection,$queryCountObjectsTraffic1);
-	  $CountObjects1=mysqli_fetch_array($result,MYSQLI_NUM);
-	  $result=mysqli_query($connection,$queryCountObjectsTraffic2);
-	  $CountObjects2=mysqli_fetch_array($result,MYSQLI_NUM);
-	  $result=mysqli_query($connection,$queryCountObjectsTraffic3);
-	  $CountObjects3=mysqli_fetch_array($result,MYSQLI_NUM);
-	  $result=mysqli_query($connection,$queryCountObjectsTraffic4);
-	  $CountObjects4=mysqli_fetch_array($result,MYSQLI_NUM);
+	  $result=$ssq->query($queryCountObjectsTraffic1);
+	  $CountObjects1=$ssq->fetch_array($result);
+	  $result=$ssq->query($queryCountObjectsTraffic2);
+	  $CountObjects2=$ssq->fetch_array($result);
+	  $result=$ssq->query($queryCountObjectsTraffic3);
+	  $CountObjects3=$ssq->fetch_array($result);
+	  $result=$ssq->query($queryCountObjectsTraffic4);
+	  $CountObjects4=$ssq->fetch_array($result);
 	}
 
   }
@@ -265,18 +276,26 @@ echo "</table>";
 
         $queryAllIpaddressToAdd="select id,name from scsq_ipaddress where name NOT IN (''".$goodIpaddressList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=1) order by name asc;";
 
+if($dbtype==0)
+$str = "group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
+	group_concat(scsq_groups.id order by scsq_groups.name asc)";
+
+if($dbtype==1)
+$str = "string_agg(scsq_groups.name, ',' order by scsq_groups.name asc) as gconcat,
+	string_agg(CAST(scsq_groups.id as text), ',' order by scsq_groups.name asc)";
+
+
 
         $queryAllLogins="select id,name from scsq_logins  where name NOT IN (''".$goodLoginsList.") order by name asc;";
         $queryAllIpaddress="select id,name from scsq_ipaddress where name NOT IN (''".$goodIpaddressList.") order by name asc;";
         $queryAllAliases="
-	  SELECT 
-	     alname,
-	     altypeid,
-	     altableid,
-	     alid,
-	     tablename,
-	     group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
-	     group_concat(scsq_groups.id order by scsq_groups.name asc)
+	   SELECT 
+	     tmp.alname,
+	     tmp.altypeid,
+	     tmp.altableid,
+	     tmp.alid,
+	     tmp.tablename,
+	     ".$str."
 	  FROM ((SELECT 
 		scsq_alias.name as alname,
 		scsq_alias.typeid as altypeid,
@@ -301,7 +320,7 @@ echo "</table>";
 	  
 	  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
 	  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
-	  GROUP BY altableid
+	  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
 	  ORDER BY alname asc";
 
         $queryOneAlias="select name,typeid,tableid,id,userlogin,password,active from scsq_alias where id='".$aliasid."';";
@@ -314,6 +333,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
         $queryDeleteOneAlias="delete from scsq_alias where id='".$aliasid."'";
         $queryDeleteOneAliasFromGroup="delete from scsq_aliasingroups where aliasid='".$aliasid."'";
 
+
+
 ///SQL querys end
 
 //mysqli_connect($address,$user,$pass);
@@ -322,7 +343,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 ///надо добавить обработку ошибки подключения к БД
 
         if(!isset($_GET['actid'])) {
-          $result=mysqli_query($connection,$queryAllAliases,MYSQLI_USE_RESULT);
+          $result=$ssq->query($queryAllAliases);
           $numrow=1;
 	 
           echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
@@ -338,7 +359,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
          	  </tr>
           ";
 
-         while($line = mysqli_fetch_row($result)) {
+         while($line = $ssq->fetch_array($result)) {
            if($line[1]=="1")
              $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
            else
@@ -365,7 +386,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
            ";
            $numrow++;
           }  //end while
-	mysqli_free_result($result);         
+	$ssq->free_result($result);         
 	echo "</table>";
          echo "<br />";
          echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
@@ -386,7 +407,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
            '.$_lang['stVALUE'].':<br /> 
            ';
 
-          $result=mysqli_query($connection,$queryAllLoginsToAdd,MYSQLI_USE_RESULT);
+          $result=$ssq->query($queryAllLoginsToAdd);
           $numrow=1;
 
           echo "<table id='loginsTable' class=sortable style='display:table;'>";
@@ -395,7 +416,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th>".$_lang['stLOGIN']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		</tr>";
-          while($line = mysqli_fetch_row($result)) {
+          while($line = $ssq->fetch_array($result)) {
             echo "
             <tr>
               <td >".$numrow."</td>
@@ -406,9 +427,9 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             $numrow++;
           }
           echo "</table>";
-	  mysqli_free_result($result);
+	  $ssq->free_result($result);
 
-          $result=mysqli_query($connection,$queryAllIpaddressToAdd,MYSQLI_USE_RESULT);
+          $result=$ssq->query($queryAllIpaddressToAdd);
           $numrow=1;
 
           echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
@@ -418,7 +439,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		</tr>";
 
-          while($line = mysqli_fetch_row($result)) {
+          while($line = $ssq->fetch_array($result)) {
             echo "
               <tr>
                 <td >".$numrow."</td>
@@ -429,7 +450,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             $numrow++;
           }
 
-	  mysqli_free_result($result);
+	  $ssq->free_result($result);
                 
 	  echo "</table>";
           echo '
@@ -460,8 +481,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
           $sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
 
-          if (!mysqli_query($connection,$sql)) {
-            die('Error: ' . mysqli_error());
+          if (!$ssq->query($sql)) {
+            die('Error: Can`t insert alias into table!');
           }
           echo "".$_lang['stALIASADDED']."<br /><br />";
           echo "<a href=right.php?srv=".$srv."&id=2 target=right>".$_lang['stBACK']."</a>";
@@ -469,9 +490,9 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
         if($actid==3) { ///Редактирование алиаса
 	  
-	  $result=mysqli_query($connection,$queryOneAlias,MYSQLI_USE_RESULT);
-          $line=mysqli_fetch_row($result);
-	  mysqli_free_result($result);
+	  $result=$ssq->query($queryOneAlias);
+          $line=$ssq->fetch_array($result);
+	  $ssq->free_result($result);
           
 	  $typeid=$line[1]; #сохраняем тип алиаса.
 	  if($line[1]==1)
@@ -499,7 +520,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             '.$_lang['stVALUE'].':<br /> 
           ';
 
-          $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);
+          $result=$ssq->query($queryAllLogins);
           $numrow=1;
 
           if($isChecked=="checked")
@@ -512,7 +533,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 	        </tr>";
 
-          while($line = mysqli_fetch_row($result)) {
+          while($line = $ssq->fetch_array($result)) {
             echo "<tr>";
             echo "<td >".$numrow."</td>";
             echo "<td >".$line[1]."</td>";
@@ -524,8 +545,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             $numrow++;
           }
           echo "</table>";
-          mysqli_free_result($result);
-          $result=mysqli_query($connection,$queryAllIpaddress,MYSQLI_USE_RESULT);
+          $ssq->free_result($result);
+          $result=$ssq->query($queryAllIpaddress);
           $numrow=1;
 
           if($isChecked=="checked")
@@ -537,7 +558,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th>".$_lang['stIPADDRESS']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 	        </tr>";
-          while($line = mysqli_fetch_row($result)) {
+          while($line = $ssq->fetch_array($result)) {
             echo "<tr>";
 	    echo "<td >".$numrow."</td>";
 	    echo "<td >".$line[1]."</td>";
@@ -548,7 +569,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 	    echo "</tr>";
             $numrow++;
           }
-	  mysqli_free_result($result);
+	  $ssq->free_result($result);
           echo "</table>";
 	  if($typeid == 1)
 	  echo '<input type="hidden" name=typeid value="'.$typeid.'">';
@@ -563,8 +584,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
         }
         if($actid==4) { //сохранение изменений UPDATE
  
-          if (!mysqli_query($connection,$queryUpdateOneAlias)) {
-            die('Error: ' . mysqli_error());
+          if (!$ssq->query($queryUpdateOneAlias)) {
+            die('Error: Can`t update 1 alias');
           }
           echo "".$_lang['stALIASUPDATED']."<br /><br />";
           echo "<a href=right.php?srv=".$srv."&id=2 target=right>".$_lang['stBACK']."</a>";
@@ -572,11 +593,11 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
         if($actid==5) { //удаление DELETE
         
-          if (!mysqli_query($connection,$queryDeleteOneAlias)) {
-            die('Error: ' . mysqli_error());
+          if (!$ssq->query($queryDeleteOneAlias)) {
+            die('Error: Can`t delete 1 alias');
           }
-          if (!mysqli_query($connection,$queryDeleteOneAliasFromGroup)) {
-            die('Error1: ' . mysqli_error());
+          if (!$ssq->query($queryDeleteOneAliasFromGroup)) {
+            die('Error1: Cant delete 1 alias from group');
           }
           
 	  echo "".$_lang['stALIASDELETED']."<br /><br />";
@@ -630,6 +651,18 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 			     RIGHT OUTER JOIN scsq_groups ON scsq_groups.id=scsq_aliasingroups.groupid
 			     GROUP BY scsq_aliasingroups.groupid
 			     ORDER BY name asc;";
+
+           $queryAllGroups="SELECT 
+				scsq_groups.name,
+				scsq_groups.typeid,
+				scsq_groups.id,
+				scsq_groups.comment,
+				count(scsq_aliasingroups.aliasid)
+			     FROM scsq_aliasingroups 
+			     RIGHT OUTER JOIN scsq_groups ON scsq_groups.id=scsq_aliasingroups.groupid
+			     GROUP BY scsq_aliasingroups.groupid, scsq_groups.name, scsq_groups.id, scsq_groups.typeid, scsq_groups.comment
+			     ORDER BY name asc;";
+
             $queryGroupMembers="select aliasid from scsq_aliasingroups where groupid='".$groupid."'";
             $queryOneGroup="select name,typeid,id,comment,userlogin,active from scsq_groups where id='".$groupid."';";
             $queryOneGroupList="SELECT
@@ -649,7 +682,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             $queryDeleteOneGroup="delete from scsq_groups where id='".$groupid."'";
 
             if(!isset($_GET['actid'])) {
-              $result=mysqli_query($connection,$queryAllGroups,MYSQLI_USE_RESULT);
+              $result=$ssq->query($queryAllGroups);
               $numrow=1;
               echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
               echo "<br /><br />";
@@ -663,7 +696,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
               </tr>";
 
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
                 if($line[1]=="1")
                   $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
                 else
@@ -683,7 +716,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
               echo "<br />";
               echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
               echo "<br />";
-		mysqli_free_result($result);
+		$ssq->free_result($result);
             }
 
             if($actid==1) {
@@ -698,7 +731,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 	    	'.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
                 '.$_lang['stVALUE'].':<br />';
 
-                $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);
+                $result=$ssq->query($queryAllLogins);
                 $numrow=1;
 
               echo "<table id='loginsTable' class=sortable style='display:table;'>";
@@ -708,7 +741,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -717,10 +750,10 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                   </tr>";
                 $numrow++;
               }
-	      mysqli_free_result($result);
+	      $ssq->free_result($result);
               echo "</table>";
 
-              $result=mysqli_query($connection,$queryAllIpaddress,MYSQLI_USE_RESULT);
+              $result=$ssq->query($queryAllIpaddress);
               $numrow=1;
 
               echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
@@ -729,7 +762,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th>".$_lang['stALIAS']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -738,7 +771,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                   </tr>";
                 $numrow++;
               }
-              mysqli_free_result($result);
+              $ssq->free_result($result);
 	      echo "</table>";
 
               echo '
@@ -764,14 +797,14 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
               $sql="INSERT INTO scsq_groups (name, typeid,comment,userlogin, password,active) VALUES ('$name', '$typeid','$comment','$userlogin','$userpassword','$activeauth')";
 
-              if (!mysqli_query($connection,$sql)) {
-                die('Error: ' . mysqli_error());
+              if (!$ssq->query($sql)) {
+                die('Error: Can`t insert new group');
               }
 
               $sql="select id from scsq_groups where name='".$name."';";
-              $result=mysqli_query($connection,$sql,MYSQLI_USE_RESULT);
-              $newid=mysqli_fetch_row($result);
-	      mysqli_free_result($result);
+              $result=$ssq->query($sql);
+              $newid=$ssq->fetch_array($result);
+	      $ssq->free_result($result);
               $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
 
               if($typeid==0) {
@@ -788,16 +821,16 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                 $sql=$sql.";";
               }
 
-              mysqli_query($connection,$sql);
+              $ssq->query($sql);
 
               echo "".$_lang['stGROUPADDED']."<br /><br />";
               echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a>";
             }
 
             if($actid==3) { ///Редактирование группы
-              $result=mysqli_query($connection,$queryOneGroup,MYSQLI_USE_RESULT);
-              $line=mysqli_fetch_row($result);
-	      mysqli_free_result($result);
+              $result=$ssq->query($queryOneGroup);
+              $line=$ssq->fetch_array($result);
+	      $ssq->free_result($result);
               if($line[1]==1)
                 $isChecked="checked";
               else
@@ -819,8 +852,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 	       '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
                '.$_lang['stVALUE'].':<br />';
 
-               $result=mysqli_query($connection,$queryAllLogins,MYSQLI_USE_RESULT);
-               $result1=mysqli_query($connection,$queryGroupMembers,MYSQLI_USE_RESULT);
+               $result=$ssq->query($queryAllLogins);
+               $result1=$ssq->query($queryGroupMembers);
 
                $numrow=1;
 
@@ -834,10 +867,10 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
                $groupmembers=array();
-               while($line = mysqli_fetch_row($result1))
+               while($line = $ssq->fetch_array($result1))
                  $groupmembers[]= $line[0];
-	       mysqli_free_result($result1);
-               while($line = mysqli_fetch_row($result)) {
+	       $ssq->free_result($result1);
+               while($line = $ssq->fetch_array($result)) {
                  echo "<tr>";
 		 echo "<td >".$numrow."</td>";
 		 echo "<td >".$line[1]."</td>";
@@ -849,10 +882,10 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                    ;
                  $numrow++;
                }
-	       mysqli_free_result($result);
+	       $ssq->free_result($result);
                echo "</table>";
-	       mysqli_free_result($result);
-               $result=mysqli_query($connection,$queryAllIpaddress,MYSQLI_USE_RESULT);
+	       $ssq->free_result($result);
+               $result=$ssq->query($queryAllIpaddress);
                $numrow=1;
 
                if($isChecked=="checked")
@@ -864,7 +897,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		    <th>".$_lang['stALIAS']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
-               while($line = mysqli_fetch_row($result)) {
+               while($line = $ssq->fetch_array($result)) {
 
                  echo "<tr>";
 		 echo "<td >".$numrow."</td>";
@@ -877,7 +910,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
                  $numrow++;
                }
-               mysqli_free_result($result);
+               $ssq->free_result($result);
 	       echo "</table>";
 
                echo '
@@ -891,13 +924,13 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
             if($actid==4) { //сохранение изменений UPDATE
 
-              if (!mysqli_query($connection,$queryUpdateOneGroup)) {
-                die('Error: ' . mysqli_error());
+              if (!$ssq->query($connection,$queryUpdateOneGroup)) {
+                die('Error: Cant update one group');
               }
 
               $sql="delete from scsq_aliasingroups where groupid='".$groupid."';";
 
-              mysqli_query($connection,$sql) or die();
+              $ssq->query($sql) or die();
 
               $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
 
@@ -917,7 +950,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                 $sql=$sql.";";
               }
 
-              mysqli_query($connection,$sql);
+              $ssq->query($connection,$sql);
 
               echo "".$_lang['stGROUPUPDATED']."<br /><br />";
               echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a>";
@@ -925,12 +958,12 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
             if($actid==5) {//удаление DELETE
 
-              if (!mysqli_query($connection,$queryDeleteOneGroup)) {
-                die('Error: ' . mysqli_error());
+              if (!$ssq->query($queryDeleteOneGroup)) {
+                die('Error: Cant delete one group');
               }
               $sql="delete from scsq_aliasingroups where groupid='".$groupid."';";
 
-              mysqli_query($connection,$sql) or die();
+              $ssq->query($sql) or die();
 
               echo "".$_lang['stGROUPDELETED']."<br /><br />";
               echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a><br />";
@@ -939,11 +972,11 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
             if($actid==6) { ///Просмотр группы
 
-              $result=mysqli_query($connection,$queryOneGroupList,MYSQLI_USE_RESULT);
+              $result=$ssq->query($queryOneGroupList);
 
 	      $numrow=1;
 
-               while($line = mysqli_fetch_row($result)) {
+               while($line = $ssq->fetch_array($result)) {
 		 if($numrow==1) {
 		   echo "".$_lang['stGROUPNAME']." : <b>".$line[0]."</b><br /><br />";
                    echo "<table id='OneGroupList' class=sortable >";
@@ -958,7 +991,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		 echo "</tr>";
                  $numrow++;
                }
-	       mysqli_free_result($result);
+	       $ssq->free_result($result);
                echo "</table>";
 	       echo "<br />";
                echo "<a href=right.php?srv=".$srv."&id=3>".$_lang['stBACKTOGROUPLIST']."</a>";
@@ -1033,17 +1066,17 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                       </th>
                     </tr>";
 
-                  $result=mysqli_query($connection,$queryForFindstr,MYSQLI_USE_RESULT) or die (mysqli_error());
+                  $result=$ssq->query($queryForFindstr) or die ('Error find str');
                   $numrow=1;
 
-                  while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+                  while ($line = $ssq->fetch_array($result)) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td><a href=javascript:PartlyReportsLogin(8,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
-		  mysqli_free_result($result);
+		  $ssq->free_result($result);
                   echo "</table>";
                 }
 
@@ -1063,17 +1096,17 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                       </th>
                     </tr>";
 
-                  $result=mysqli_query($connection,$queryForFindstr,MYSQLI_USE_RESULT) or die (mysqli_error());
+                  $result=$ssq->query($queryForFindstr) or die ('Cant find str');
                   $numrow=1;
 
-                  while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+                  while ($line = $ssq->fetch_array($result)) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td><a href=javascript:PartlyReportsIpaddress(11,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
-		  mysqli_free_result($result);
+		  $ssq->free_result($result);
                   echo "</table>";
 
                 }
@@ -1095,17 +1128,29 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
          <th>".$_lang['stLOGMESSAGE']."</th>
       </tr>
    ";
-  		$queryLogTable="SELECT
+  		
+  		if($dbtype==0)
+  		#mysql
+		  $queryLogTable="SELECT
 			FROM_UNIXTIME(datestart,'%Y-%m-%d %H:%i:%s') as d1,
 			FROM_UNIXTIME(dateend,'%Y-%m-%d %H:%i:%s'),
 			message
 		  FROM scsq_logtable order by d1 desc";
 
+		if($dbtype==1)
+		#postgre 
+		  $queryLogTable="SELECT
+			to_char(to_timestamp(datestart),'YYYY-MM-DD-HH-MM-SS') as d1,
+			to_char(to_timestamp(dateend),'YYYY-MM-DD-HH-MM-SS'),
+ 			message
+		  FROM scsq_logtable order by d1 desc";
 
-                  $result=mysqli_query($connection,$queryLogTable,MYSQLI_USE_RESULT) or die (mysqli_error());
+
+
+                  $result=$ssq->query($queryLogTable) or die ('Cant get log table');
                   $numrow=1;
 
-                  while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+                  while ($line = $ssq->fetch_array($result)) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td>".$line[0]."</td>";
@@ -1114,7 +1159,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                     echo "</tr>";
                     $numrow++;
                   }
-		  mysqli_free_result($result);
+		  $ssq->_free_result($result);
                   echo "</table>";
 
     }  //end GET[id]=5
@@ -1312,8 +1357,6 @@ echo $_lang['stCREATORS'];
 $newdate=strtotime(date("d-m-Y"))-86400;
 $newdate=date("d-m-Y",$newdate);
 
-  mysqli_free_result($result);
-  mysqli_close($link);
 
 ?>
 <form name=fastdateswitch_form>

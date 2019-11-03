@@ -1,5 +1,5 @@
 <?php
-#build 20190723
+#build 20191024
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -72,12 +72,21 @@ $addr=$address[$srv];
 $usr=$user[$srv];
 $psw=$pass[$srv];
 $dbase=$db[$srv];
+$dbtype=$srvdbtype[$srv];
 
 $variableSet = array();
 $variableSet['addr']=$addr;
 $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
+$variableSet['dbtype']=$dbtype;
+
+#в зависимости от типа БД, подключаем разные модули
+if($dbtype==0)
+include("../../lib/dbDriver/mysqlmodule.php");
+
+if($dbtype==1)
+include("../../lib/dbDriver/pgmodule.php");
 
 $start=microtime(true);
       
@@ -97,8 +106,7 @@ echo $_lang['stCREATORS'];
 $newdate=strtotime(date("d-m-Y"))-86400;
 $newdate=date("d-m-Y",$newdate);
 
-  mysqli_free_result($result);
-  mysqli_close($link);
+
 
 ?>
 <form name=fastdateswitch_form>

@@ -1,5 +1,5 @@
 <?php
-#build 20190723
+#build 20191023
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -74,25 +74,32 @@ $addr=$address[$srv];
 $usr=$user[$srv];
 $psw=$pass[$srv];
 $dbase=$db[$srv];
+$dbtype=$srvdbtype[$srv];
 
 $variableSet = array();
 $variableSet['addr']=$addr;
 $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
+$variableSet['dbtype']=$dbtype;
 
+#в зависимости от типа БД, подключаем разные модули
+if($dbtype==0)
+include("../../lib/dbDriver/mysqlmodule.php");
+
+if($dbtype==1)
+include("../../lib/dbDriver/pgmodule.php");
 
 $quotaex = new Quotas($variableSet);
 
+
+$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
 
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stQUOTASMODULE']."</h2><br />";
 
 $start=microtime(true);
-
-///$connectionStatus=mysqli_connect($address,$user,$pass,$db) or die(mysqli_connect_error());
-$connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 
 
    
@@ -109,14 +116,14 @@ $connection=mysqli_connect("$addr","$usr","$psw","$dbase");
                 $quotaid=0;
 
 	      $aliasid=$_POST['aliasid'];
-	      $quotaday=$_POST['quotaday'];
-	      $quotamonth=$_POST['quotamonth'];
+	      $quotaday=$_POST['quotaday']+0;
+	      $quotamonth=$_POST['quotamonth']+0;
 
 	      $sumday=$_POST['sumday'];
 	      $summonth=$_POST['summonth'];
 
               if(isset($_POST['quota'])) // 
-                $quota=$_POST['quota'];
+                $quota=$_POST['quota']+0;
               else
                 $quota=0;
 
@@ -129,16 +136,23 @@ $connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 
 ///SQL querys
 
+if($dbtype==0)
+$str = "group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
+	group_concat(scsq_groups.id order by scsq_groups.name asc)";
+
+if($dbtype==1)
+$str = "string_agg(scsq_groups.name, ',' order by scsq_groups.name asc) as gconcat,
+	string_agg(CAST(scsq_groups.id as text), ',' order by scsq_groups.name asc)";
+	
     
-        $queryAllAliases="
-	  SELECT 
-	     alname,
-	     altypeid,
-	     altableid,
-	     alid,
-	     tablename,
-	     group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
-	     group_concat(scsq_groups.id order by scsq_groups.name asc)
+               $queryAllAliases="
+	   SELECT 
+	     tmp.alname,
+	     tmp.altypeid,
+	     tmp.altableid,
+	     tmp.alid,
+	     tmp.tablename,
+	     ".$str."
 	  FROM ((SELECT 
 		scsq_alias.name as alname,
 		scsq_alias.typeid as altypeid,
@@ -163,29 +177,27 @@ $connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 	  
 	  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
 	  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
-	  GROUP BY altableid
+	  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
 	  ORDER BY alname asc";
-
+	  
+	  
         $queryAllAliasesHaveNotQuota="
-	  SELECT 
-	     alname,
-	     altypeid,
-	     altableid,
-	     alid,
-	     tablename,
-	     group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
-	     group_concat(scsq_groups.id order by scsq_groups.name asc)
+  	   SELECT 
+	     tmp.alname,
+	     tmp.altypeid,
+	     tmp.altableid,
+	     tmp.alid,
+	     tmp.tablename,
+	     ".$str."
 	  FROM ((SELECT 
 		scsq_alias.name as alname,
 		scsq_alias.typeid as altypeid,
 		scsq_alias.tableid as altableid,
 		scsq_alias.id as alid,
-		scsq_logins.name as tablename
+		scsq_logins.name as tablename 
 	       FROM scsq_alias 
 	       LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
-	       WHERE scsq_alias.typeid=0
-		
-		) 
+	       WHERE scsq_alias.typeid=0) 
 
 	       UNION 
 			
@@ -198,11 +210,12 @@ $connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 		 FROM scsq_alias 
 		 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
 		 WHERE scsq_alias.typeid=1)) as tmp
+	  
 	  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
 	  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
+	  
 	  WHERE alid NOT IN (select aliasid from scsq_mod_quotas)
-
-	  GROUP BY altableid
+	  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
 	  ORDER BY alname asc";
 
             $queryAllQuotas="SELECT 
@@ -233,6 +246,10 @@ $status=0;
 }
 else
 {
+#if((0 < ($quota))and(0 < ($quotamonth))){
+$status=0; #нет превышения квоты
+#}
+
 if(($sumday > $quota)&&($quota >0 )){
 $status=1; #текущий траффик вышел за пределы квоты
 
@@ -247,26 +264,23 @@ if(($sumday < ($quota))&&($summonth < ($quotamonth))){
 $status=0; #нет превышения квоты
 }
 
-if((0 < ($quota))and(0 < ($quotamonth))){
-$status=0; #нет превышения квоты
-}
 
 }
 
 $querydate=date("d-m-Y");
-#$querydate=date("24-11-2018");# for debug
+#$querydate=date("07-08-2019");# for debug
 $datestart=strtotime($querydate);
 
 
-   	    $queryUpdateOneQuota="update scsq_mod_quotas set aliasid='".$aliasid."',quota='".$quota."',quotaday='".$quotaday."',quotamonth='".$quotamonth."',active='".$active."',status='".$status."', datemodified=".$datestart." where id='".$quotaid."'";
+   	    $queryUpdateOneQuota="update scsq_mod_quotas set aliasid=".$aliasid.",quota=".$quota.",quotaday=".$quotaday.",quotamonth=".$quotamonth.",active=".$active.",status=".$status.", datemodified=".$datestart." where id=".$quotaid."";
 
 
 
-            $queryDeleteOneQuota="delete from scsq_mod_quotas where id='".$quotaid."'";
+            $queryDeleteOneQuota="delete from scsq_mod_quotas where id=".$quotaid."";
 
             if(!isset($_GET['actid'])) {
 
-              $result=mysqli_query($connection,$queryAllQuotas,MYSQLI_USE_RESULT);
+              $result=$ssq->query($queryAllQuotas);
               $numrow=1;
 	      echo "<a href=index.php?srv=".$srv.">".$_lang['stREFRESH']."</a>";
               echo "<br /><br />";
@@ -286,7 +300,7 @@ $datestart=strtotime($querydate);
 
               </tr>";
 
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
 		
 		#раскрасим строки в зависимости от статуса по квотам
 		if($line[8] == 0)
@@ -316,7 +330,7 @@ $datestart=strtotime($querydate);
               echo "<br />";
               echo "<a href=index.php?srv=".$srv."&actid=1>".$_lang['stQUOTASADDQUOTA']."</a>";
               echo "<br />";
-		mysqli_free_result($result);
+		$ssq->free_result($result);
             }
 
           if($actid==1) {
@@ -330,7 +344,7 @@ $datestart=strtotime($querydate);
                 '.$_lang['stVALUE'].':<br />';
   
 
-                $result=mysqli_query($connection,$queryAllAliases,MYSQLI_USE_RESULT) or die ('Error: Cant select aliases from scsq_alias table');
+                $result=$ssq->query($queryAllAliases) or die ('Error: Cant select aliases from scsq_alias table');
          $numrow=1;
 
               echo "<table id='loginsTable' class=sortable style='display:table;'>";
@@ -340,7 +354,7 @@ $datestart=strtotime($querydate);
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -349,10 +363,10 @@ $datestart=strtotime($querydate);
                   </tr>";
                 $numrow++;
               }
-	      mysqli_free_result($result);
+	      $ssq->free_result($result);
               echo "</table>";
 
-	$result=mysqli_query($connection,$queryAllAliasesHaveNotQuota,MYSQLI_USE_RESULT) or die ('Error: Cant select aliases from scsq_alias table');       
+	$result=$ssq->query($queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
          $numrow=1;
 
               echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
@@ -362,7 +376,7 @@ $datestart=strtotime($querydate);
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -371,7 +385,7 @@ $datestart=strtotime($querydate);
                   </tr>";
                 $numrow++;
               }
-	      mysqli_free_result($result);
+	      $ssq->free_result($result);
               echo "</table>";
 
 
@@ -394,9 +408,9 @@ $datestart=strtotime($querydate);
 
 
 
-              $sql="INSERT INTO scsq_mod_quotas (aliasid, quota, quotaday, quotamonth,active) VALUES ('$aliasid', '$quotaday','$quotaday','$quotamonth','$active')";
+              $sql="INSERT INTO scsq_mod_quotas (aliasid, quota, quotaday, quotamonth,active) VALUES ($aliasid, $quotaday,$quotaday,$quotamonth,$active)";
 
-              if (!mysqli_query($connection,$sql)) {
+              if (!$ssq->query($sql)) {
                 die('Error: Cant insert into scsq_mod_quotas table' );
               }
 
@@ -407,9 +421,9 @@ $datestart=strtotime($querydate);
             }
 
             if($actid==3) { ///Редактирование 
-              $result=mysqli_query($connection,$queryOneQuota,MYSQLI_USE_RESULT) or die ('Error: Cant select one quota from scsq_mod_quotas');
-              $line=mysqli_fetch_row($result);
-	      mysqli_free_result($result);
+              $result=$ssq->query($queryOneQuota) or die ('Error: Cant select one quota from scsq_mod_quotas');
+              $line=$ssq->fetch_array($result);
+	      $ssq->free_result($result);
               if($line[4]==1)
                 $isChecked="checked";
               else
@@ -431,7 +445,7 @@ $datestart=strtotime($querydate);
 
 		$checkedAliasid = $line[0];
 
-                $result=mysqli_query($connection,$queryAllAliases,MYSQLI_USE_RESULT) or die('Error: Cant select all aliases from scsq_alias');
+                $result=$ssq->query($queryAllAliases) or die('Error: Cant select all aliases from scsq_alias');
                 $numrow=1;
 
               echo "<table id='loginsTable' class=sortable style='display:table;'>";
@@ -441,7 +455,7 @@ $datestart=strtotime($querydate);
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -453,10 +467,10 @@ else
         echo         "</tr>";
                 $numrow++;
               }
-	      mysqli_free_result($result);
+	      $ssq->free_result($result);
               echo "</table>";
 
-		$result=mysqli_query($connection,$queryAllAliasesHaveNotQuota,MYSQLI_USE_RESULT) or die ('Error: Cant select aliases from scsq_alias table');       
+		$result=$ssq->query($queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
          $numrow=1;
 
               echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
@@ -466,7 +480,7 @@ else
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = mysqli_fetch_row($result)) {
+              while($line = $ssq->fetch_array($result)) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -475,7 +489,7 @@ else
                   </tr>";
                 $numrow++;
               }
-	      mysqli_free_result($result);
+	      $ssq->free_result($result);
               echo "</table>";
 
                echo '
@@ -489,8 +503,8 @@ else
 
             if($actid==4) { //сохранение изменений UPDATE
 
-              if (!mysqli_query($connection,$queryUpdateOneQuota)) {
-                die('Error: ' . mysqli_error());
+              if (!$ssq->query($queryUpdateOneQuota)) {
+                die('Error: Can`t update one quota');
               }
 
 
@@ -500,7 +514,7 @@ else
 
             if($actid==5) {//удаление DELETE
 
-              if (!mysqli_query($connection,$queryDeleteOneQuota)) {
+              if (!$ssq->query($queryDeleteOneQuota)) {
                 die('Error: Cant DELETE one quota from scsq_mod_quotas ');
               }
        
@@ -526,8 +540,7 @@ echo $_lang['stCREATORS'];
 $newdate=strtotime(date("d-m-Y"))-86400;
 $newdate=date("d-m-Y",$newdate);
 
-  mysqli_free_result($result);
-  mysqli_close($link);
+
 
 ?>
 <form name=fastdateswitch_form>

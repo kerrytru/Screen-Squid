@@ -13,7 +13,6 @@ if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
   $srv=0;
-
 ?>
 
 
@@ -26,6 +25,29 @@ else
 
 
 include("../../config.php");
+
+$addr=$address[$srv];
+$usr=$user[$srv];
+$psw=$pass[$srv];
+$dbase=$db[$srv];
+$dbtype=$srvdbtype[$srv];
+
+$variableSet = array();
+$variableSet['addr']=$addr;
+$variableSet['usr']=$usr;
+$variableSet['psw']=$psw;
+$variableSet['dbase']=$dbase;
+
+#в зависимости от типа БД, подключаем разные модули
+if($dbtype==0)
+include("../../lib/dbDriver/mysqlmodule.php");
+
+if($dbtype==1)
+include("../../lib/dbDriver/pgmodule.php");
+
+$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+
+
 
 
 function generateCode($length=6) {
@@ -58,13 +80,6 @@ if(isset($_GET['dom']))
 else
   $dayormonth="day";
 
-$address=$address[$srv];
-$user=$user[$srv];
-$pass=$pass[$srv];
-$db=$db[$srv];
-
-$connection=mysqli_connect("$address","$user","$pass","$db");
-
 
 
 
@@ -82,15 +97,17 @@ if (isset($_COOKIE['id']) and isset($_COOKIE['hash']))
 {
 
 if((($_GET['id']>=25) and ($_GET['id']<=29)) or ($_GET['id']==55) or ($_GET['id']==63))
-    $query = "SELECT * FROM scsq_groups WHERE id = '".intval($_COOKIE['id'])."' LIMIT 1";
+    $query = "SELECT id,hash FROM scsq_groups WHERE id = '".intval($_COOKIE['id'])."' LIMIT 1";
 else
-    $query = "SELECT * FROM scsq_alias WHERE id = '".intval($_COOKIE['id'])."' LIMIT 1";
+    $query = "SELECT id,hash FROM scsq_alias WHERE id = '".intval($_COOKIE['id'])."' LIMIT 1";
 
-$result=mysqli_query($connection,$query, MYSQLI_USE_RESULT);
-  $row=mysqli_fetch_assoc($result);
-mysqli_free_result($result);
+$result=$ssq->query($query);
+  $row=$ssq->fetch_array($result);
+$ssq->free_result($result);
 
-    if(($row['hash'] !== $_COOKIE['hash']) or ($row['id'] !== $_COOKIE['id']))
+#    if(($row['hash'] !== $_COOKIE['hash']) or ($row['id'] !== $_COOKIE['id']))
+    if(($row[1] !== $_COOKIE['hash']) or ($row[0] !== $_COOKIE['id']))
+
     {
         setcookie("id", "", 0, "/");
         setcookie("hash", "", 0, "/");
@@ -263,20 +280,20 @@ if($enableNofriends==1) {
   $friends=implode("','",explode(" ", $goodLogins));
   $friendsTmp="where name in  ('".$friends."')";
   $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
-  $result=mysqli_query($connection,$sqlGetFriendsId,MYSQLI_USE_RESULT);
-  while ($fline = mysqli_fetch_array($result,MYSQLI_NUM)) {
+  $result=$ssq->query($sqlGetFriendsId);
+  while ($fline = $ssq->fetch_array($result)) {
     $goodLoginsList=$goodLoginsList.",".$fline[0];
   }
- mysqli_free_result($result);
+ $ssq->free_result($result);
  $friends=""; 
  $friends=implode("','",explode(" ", $goodIpaddress));
  $friendsTmp="where name in ('".$friends."')";
   $sqlGetFriendsId="select id from scsq_ipaddress ".$friendsTmp."";
-  $result=mysqli_query($connection,$sqlGetFriendsId,MYSQLI_USE_RESULT);
-  while ($fline = mysqli_fetch_array($result,MYSQLI_NUM)) {
+  $result=$ssq->query($sqlGetFriendsId);
+  while ($fline = $ssq->fetch_array($result)) {
     $goodIpaddressList=$goodIpaddressList.",".$fline[0];
   }
- mysqli_free_result($result);
+ $ssq->free_result($result);
  
 }
 else {
@@ -299,7 +316,7 @@ else {
 if($showZeroTrafficInReports==1)
   $msgNoZeroTraffic="";
 else
-  $msgNoZeroTraffic=" where tmp.s!=0 ";
+  $msgNoZeroTraffic=" and tmp.s!=0 ";
 
 
 //querys for reports
@@ -309,7 +326,8 @@ $echoLoginAliasColumn="";
 if($useLoginalias==1)
 $echoLoginAliasColumn=",aliastbl.name";
 
-  $queryLoginsTraffic="
+#mysql version
+   $queryLoginsTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
@@ -341,15 +359,63 @@ $echoLoginAliasColumn=",aliastbl.name";
 		   WHERE typeid=0) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
-
+  
+  WHERE (1=1)
   ".$msgNoZeroTraffic."
 
   GROUP BY nofriends.name;";
 
+#postgre version
+if($dbtype==1)
+$queryLoginsTraffic="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    nofriends.id
+    ".$echoLoginAliasColumn."
+  FROM (SELECT 
+          login,
+          SUM(sizeinbytes) as s 
+        FROM scsq_quicktraffic 
+        WHERE  date>".$datestart."
+	   AND date<".$dateend." 
+	   AND site NOT IN (".$goodSitesList.")
+	   AND par=1
+	   GROUP BY login
+
+	) 
+	AS tmp 
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_logins 
+		    WHERE id NOT IN (".$goodLoginsList.")) 
+		    AS nofriends 
+	ON tmp.login=nofriends.id  
+ 	LEFT JOIN (SELECT 
+		      name,
+		      tableid		      
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+
+	WHERE (1=1)
+  ".$msgNoZeroTraffic."
+
+  GROUP BY nofriends.name,
+    nofriends.id,
+    tmp.s
+    ".$echoLoginAliasColumn."
+;";
+
+#echo $queryLoginsTraffic;
 
 
+#$queryLoginsTraffic=$queryLoginsTraffic1;
 
-//echo $queryLoginsTraffic;
+///echo $queryLoginsTraffic1;
 
 //echo $queryLoginsTraffic1;
 
@@ -358,6 +424,7 @@ $echoIpaddressAliasColumn="";
 if($useIpaddressalias==1)
 $echoIpaddressAliasColumn=",aliastbl.name";
 
+#mysql version
 $queryIpaddressTraffic="
   SELECT 
     nofriends.name,
@@ -388,25 +455,70 @@ $queryIpaddressTraffic="
 		   WHERE typeid=1) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
-
+	WHERE (1=1)
   ".$msgNoZeroTraffic."
 
   GROUP BY nofriends.name ;";
+  
+  #postgre version
+if($dbtype==1)
+  $queryIpaddressTraffic="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    nofriends.id 
+    ".$echoIpaddressAliasColumn."
+  FROM (SELECT 
+	  ipaddress,
+	  SUM(sizeinbytes) AS s 
+	FROM scsq_quicktraffic 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+	GROUP BY ipaddress
+	) 
+	AS tmp 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_ipaddress 
+		    WHERE id NOT IN (".$goodIpaddressList.")) AS nofriends 
+	ON tmp.ipaddress=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+  ".$msgNoZeroTraffic."
+
+  GROUP BY nofriends.name,
+    tmp.s,
+    nofriends.id 
+    ".$echoIpaddressAliasColumn."
+   ;";
 
 
 //echo $queryIpaddressTraffic;
 
+#mysql version
 $querySitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
-	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2)
+	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2),
+	 '',
+	 tmp2.cat
   
   FROM ((SELECT 
 		 sum(sizeinbytes) as s,
 		 date,
 		 login,
 		 ipaddress,
-		 site
+		 site,
+		 ".$category." as cat
 	       FROM scsq_quicktraffic
 	       LEFT  JOIN (SELECT 
 			     id 
@@ -435,11 +547,56 @@ $querySitesTraffic="
 
   ORDER BY site asc
 ;";
-////, scsq_categorylist.category
-//	  LEFT OUTER JOIN scsq_categorylist ON tmp2.site=scsq_categorylist.site
+
+#postgre version
+if($dbtype==1)
+$querySitesTraffic="
+  SELECT tmp2.site,
+	 tmp2.s,
+	 case 
+		when (concat('',(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1)) )=(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1))) then 1 else 2 
+	 end,	
+	 '',
+	 tmp2.cat
+  
+  FROM (SELECT 
+		 sum(sizeinbytes) as s,
+		 site,
+		 ".$category." as cat
+	       FROM scsq_quicktraffic
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_logins 
+			   WHERE id  IN (".$goodLoginsList.")) 
+			   AS tmplogin 
+	       ON tmplogin.id=scsq_quicktraffic.login
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_ipaddress 
+			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
+	       ON tmpipaddress.id=scsq_quicktraffic.ipaddress       	
+
+	       WHERE date>".$datestart." 
+	  	 AND date<".$dateend."
+ 		 AND par=1
+		 AND tmplogin.id IS NULL 
+	   	 AND tmpipaddress.id IS NULL
+	 	 AND site NOT IN (".$goodSitesList.")
+	      
+	       GROUP BY site
+	       
+	      ) as tmp2
+ 	  
+	 
+ 
+
+  ORDER BY site asc
+;";
+
 
 //echo $querySitesTraffic;
 
+#mysql version
 $queryTopSitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
@@ -482,7 +639,49 @@ $queryTopSitesTraffic="
   ORDER BY tmp2.s desc
   LIMIT ".$countTopSitesLimit." ";
 
+#postgre version
+if($dbtype==1)
+$queryTopSitesTraffic="
+  SELECT tmp2.site,
+	 tmp2.s,
+	 case 
+		when (concat('',(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1)) )=(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1))) then 1 else 2 
+	 end
+	   
+  FROM (SELECT 
+		 sum(sizeinbytes) as s,
+		 site
+	       FROM scsq_quicktraffic
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_logins 
+			   WHERE id  IN (".$goodLoginsList.")) 
+			   AS tmplogin 
+	       ON tmplogin.id=scsq_quicktraffic.login
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_ipaddress 
+			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
+	       ON tmpipaddress.id=scsq_quicktraffic.ipaddress       	
 
+	       WHERE date>".$datestart." 
+	  	 AND date<".$dateend."
+ 		 AND par=1
+		 AND tmplogin.id IS NULL 
+	   	 AND tmpipaddress.id IS NULL
+	 	 AND site NOT IN (".$goodSitesList.")
+
+	       GROUP BY site
+	     
+	      ) as tmp2
+ 	       
+
+	 
+  ORDER BY tmp2.s desc
+  LIMIT ".$countTopSitesLimit." ";
+
+
+#mysql version
 $queryTopLoginsTraffic="
   SELECT 
     nofriends.name,
@@ -520,7 +719,46 @@ $queryTopLoginsTraffic="
   ORDER BY s desc 
   LIMIT ".$countTopLoginLimit.";";
 
+#postgresql version
+if($dbtype==1)
+$queryTopLoginsTraffic="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    login 
+    ".$echoLoginAliasColumn."
+  FROM (SELECT 
+	  login,
+	  SUM(sizeinbytes) AS s 
+	FROM scsq_quicktraffic 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend."
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+	GROUP BY login 
+	) 
+	AS tmp 
 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_logins 
+		    WHERE id NOT IN (".$goodLoginsList.")) AS nofriends 
+	ON tmp.login=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+
+  WHERE tmp.s !=0
+
+  ORDER BY s desc 
+  LIMIT ".$countTopLoginLimit.";";
+
+#mysql version
 $queryTopIpTraffic="
   SELECT 
     nofriends.name,
@@ -560,7 +798,48 @@ $queryTopIpTraffic="
   ORDER BY s desc 
   LIMIT ".$countTopIpLimit.";";
 
+#postgre version
+if($dbtype==1)
+$queryTopIpTraffic="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    ipaddress 
+    ".$echoIpaddressAliasColumn."
+  FROM (SELECT 
+	  ipaddress,
+	  SUM(sizeinbytes) AS s 
+	FROM scsq_quicktraffic 
 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+ 	  AND par=1
+	GROUP BY ipaddress 
+	) 
+	AS tmp
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_ipaddress 
+		    WHERE id NOT IN (".$goodIpaddressList.")) 
+		    AS nofriends 
+	ON tmp.ipaddress=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+
+  WHERE tmp.s !=0
+
+  ORDER BY s desc 
+  LIMIT ".$countTopIpLimit.";";
+
+#mysql version
 $queryTrafficByHours="
   SELECT 
     FROM_UNIXTIME(tmp.date,'%H') AS d,
@@ -595,7 +874,48 @@ $queryTrafficByHours="
 	ORDER BY null) 
 	AS tmp 
 
-  GROUP BY d;";
+  GROUP BY d
+  ORDER BY d asc
+  ;";
+  
+  #postgresql version
+if($dbtype==1)
+  $queryTrafficByHours="
+  SELECT 
+    to_char(to_timestamp(tmp.date),'HH24') as d,
+    SUM(tmp.s) 
+  FROM (SELECT 
+	  date,
+	  SUM(sizeinbytes) AS s
+	FROM scsq_quicktraffic 
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is  NULL 
+	  AND tmpipaddress.id is  NULL
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+	GROUP BY date 
+	) 
+	AS tmp 
+
+  GROUP BY d
+  ORDER BY d asc
+  ;";
+
 
 
 $queryLoginsTrafficWide="
@@ -667,6 +987,80 @@ $queryLoginsTrafficWide="
 	 ON tmp.login=nofriends.id 
 
   ORDER BY nofriends.name asc,tmp.n asc;";
+  
+  
+#postgre version
+if($dbtype==1)
+$queryLoginsTrafficWide="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    tmp.login,
+    tmp.n 
+  FROM ((SELECT 
+	   login,
+	   '2' AS n,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_quicktraffic, scsq_httpstatus 
+
+	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
+	     OR scsq_httpstatus.name like '%TCP_IMS_HIT%' 
+	     OR scsq_httpstatus.name like '%TCP_MEM_HIT%' 
+	     OR scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
+	     OR scsq_httpstatus.name like '%UDP_HIT%') 
+	    AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	    AND date>".$datestart." 
+	    AND date<".$dateend." 
+	    AND site NOT IN (".$goodSitesList.")
+ 	    AND par=1
+	 GROUP BY login 
+	 ) 
+
+  UNION 
+
+	(SELECT 
+	   login,
+	   '3' AS n,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_quicktraffic, scsq_httpstatus 
+
+	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
+	   AND  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
+	   AND  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
+	   AND  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
+	   AND  scsq_httpstatus.name not like '%UDP_HIT%') 
+	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	   AND  date>".$datestart." 
+	   AND  date<".$dateend."  
+	   AND site NOT IN (".$goodSitesList.")
+	   AND par=1	  
+	 GROUP BY login 
+	 ) 
+
+  UNION 
+
+	(SELECT 
+	   login,
+	   '1' AS n,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_quicktraffic 
+	 WHERE date>".$datestart." 
+	   AND date<".$dateend."  
+	   AND site NOT IN (".$goodSitesList.")
+ 	   AND par=1	   
+	 GROUP BY login 
+	 )) 
+	 AS tmp
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_logins 
+		     WHERE id NOT IN (".$goodLoginsList.")) AS nofriends 
+	 ON tmp.login=nofriends.id 
+
+  ORDER BY nofriends.name asc,tmp.n asc;";  
+  
 
 
 $queryIpaddressTrafficWide="
@@ -737,6 +1131,77 @@ $queryIpaddressTrafficWide="
 	 ON tmp.ipaddress=nofriends.id 
 
   ORDER BY nofriends.name asc,tmp.n asc;";
+  
+#postgre version
+if($dbtype==1)  
+$queryIpaddressTrafficWide="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    tmp.ipaddress,
+    tmp.n 
+  FROM ((SELECT 
+	   ipaddress,
+	   '2' AS n,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_quicktraffic, scsq_httpstatus 
+	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
+	    OR  scsq_httpstatus.name like '%TCP_IMS_HIT%' 
+	    OR  scsq_httpstatus.name like '%TCP_MEM_HIT%' 
+	    OR  scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
+	    OR  scsq_httpstatus.name like '%UDP_HIT%') 
+	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	   AND  date>".$datestart." 
+	   AND  date<".$dateend." 
+	   AND site NOT IN (".$goodSitesList.")
+ 	   AND par=1
+	 GROUP BY ipaddress 
+	 ) 
+
+  UNION
+
+	(SELECT 
+	   ipaddress,
+	   '3' AS n,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_quicktraffic, scsq_httpstatus 
+	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
+	   AND  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
+	   AND  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
+	   AND  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
+	   AND  scsq_httpstatus.name not like '%UDP_HIT%') 
+	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	   AND  date>".$datestart." 
+	   AND  date<".$dateend."  
+	   AND site NOT IN (".$goodSitesList.")
+ 	   AND par=1
+	 GROUP BY ipaddress 
+	 ) 
+
+  UNION 
+
+	(SELECT 
+	   ipaddress,
+	   '1' AS n,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_quicktraffic 
+	 WHERE date>".$datestart." 
+	   AND date<".$dateend."  
+	   AND site NOT IN (".$goodSitesList.")
+ 	   AND par=1
+	 GROUP BY ipaddress 
+	 )) 
+	 AS tmp
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_ipaddress 
+		     WHERE id NOT IN (".$goodIpaddressList.")) 
+		     AS nofriends 
+	 ON tmp.ipaddress=nofriends.id 
+
+  ORDER BY nofriends.name asc,tmp.n asc;";
 
 
 $queryIpaddressTrafficWithResolve="
@@ -764,7 +1229,38 @@ $queryIpaddressTrafficWithResolve="
 		    WHERE id NOT IN (".$goodIpaddressList.")) 
 		    AS nofriends 
 	ON tmp.ipaddress=nofriends.id 
+WHERE (1=1)
+  ".$msgNoZeroTraffic."
 
+  ORDER BY nofriends.name asc;";
+  
+  #postgre version
+if($dbtype==1)
+  $queryIpaddressTrafficWithResolve="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    ipaddress 
+  FROM (SELECT 
+	  ipaddress,	  
+	  SUM(sizeinbytes) AS s 
+	FROM scsq_quicktraffic 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+ 	  AND par=1
+	GROUP BY ipaddress
+	) 
+	AS tmp
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_ipaddress 
+		    WHERE id NOT IN (".$goodIpaddressList.")) 
+		    AS nofriends 
+	ON tmp.ipaddress=nofriends.id 
+WHERE (1=1)
   ".$msgNoZeroTraffic."
 
   ORDER BY nofriends.name asc;";
@@ -806,6 +1302,40 @@ $queryPopularSites="
   JOIN scsq_traffic ON tmp.id=scsq_traffic.id
   WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
   ORDER BY tmp.c desc 
+  LIMIT ".$countPopularSitesLimit.";";
+  
+#postgre version
+if($dbtype==1)
+$queryPopularSites="
+  SELECT 
+	  split_part(site,'/',1) AS st,
+	  sum(sizeinbytes) AS s,
+	  count(1) AS c
+ 
+	  
+	FROM scsq_traffic 
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) as tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL
+	  AND tmpipaddress.id is NULL
+	  AND split_part(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
+
+	GROUP BY st
+  
+  ORDER BY c desc 
   LIMIT ".$countPopularSitesLimit.";";
 
 
@@ -858,6 +1388,57 @@ $queryWhoDownloadBigFiles="
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
 ";
 
+#postgre version
+if($dbtype==1)
+$queryWhoDownloadBigFiles="
+  SELECT 
+    scsq_log.name,
+    tmp.sizeinbytes,
+    scsq_ip.name, 
+    scsq_traf.site,
+    scsq_log.id,
+    scsq_ip.id 
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	LEFT OUTER JOIN (SELECT 
+			   scsq_logins.id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   scsq_ipaddress.id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+	  AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+
+  	ORDER BY sizeinbytes desc 
+  	LIMIT ".$countWhoDownloadBigFilesLimit.")
+
+
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+";
+
 $queryTrafficByPeriod="
   	SELECT
 	  FROM_UNIXTIME(scsq_quicktraffic.date,'%m.%Y') AS d1,
@@ -889,6 +1470,39 @@ $queryTrafficByPeriod="
 	GROUP BY crc32(FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m'))
 	ORDER BY FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m') asc;
 ;";
+
+#postgre version 
+if($dbtype==1)
+$queryTrafficByPeriod="
+  	SELECT
+	  to_char(to_timestamp(scsq_quicktraffic.date),'MM.YYYY') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes)
+
+	FROM scsq_quicktraffic
+
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1 
+	GROUP BY d1
+	ORDER BY d1 asc;
+;";
+
 
 
 $queryTrafficByPeriodDay="
@@ -924,6 +1538,42 @@ $queryTrafficByPeriodDay="
 	ORDER BY FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d') asc;
 ;";
 
+#postgre version
+if($dbtype==1)
+$queryTrafficByPeriodDay="
+  	SELECT
+	  to_char(to_timestamp(scsq_quicktraffic.date),'DD.MM.YYYY') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes) 
+	  
+	FROM scsq_quicktraffic
+
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND site NOT IN (".$goodSitesList.")
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1
+	ORDER BY d1 asc
+	
+;";
+
+//echo $queryTrafficByPeriodDay;
 
 $queryTrafficByPeriodDayname="
   	SELECT
@@ -956,6 +1606,40 @@ $queryTrafficByPeriodDayname="
 	  AND date<".$dateend." 
 	  AND par=1
 	GROUP BY crc32(d1)
+	
+;";
+
+#postgre version
+if($dbtype==1)
+$queryTrafficByPeriodDayname="
+  	SELECT
+	  to_char(to_timestamp(scsq_quicktraffic.date),'ID') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes)
+	  	  
+	FROM scsq_quicktraffic
+
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND site NOT IN (".$goodSitesList.")
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1
 	
 ;";
 
@@ -998,6 +1682,46 @@ $queryHttpStatus= "
   GROUP BY CRC32(httpstatus) 
   ORDER BY scsq_httpstatus.name asc;";
 
+
+#postgre version
+if($dbtype==1)
+$queryHttpStatus= "
+  SELECT 
+    scsq_httpstatus.name,
+    count(*),
+    scsq_quicktraffic.httpstatus 
+  FROM scsq_quicktraffic 
+
+  LEFT OUTER JOIN (SELECT 
+		     id,
+		     name 
+		   FROM scsq_logins 
+		   WHERE id IN (".$goodLoginsList.")) 
+		   AS tmplogin 
+  ON tmplogin.id=scsq_quicktraffic.login
+
+  LEFT OUTER JOIN (SELECT 
+		     id,
+		     name 
+		   FROM scsq_ipaddress 
+		   WHERE id IN (".$goodIpaddressList.")) 
+		   AS tmpipaddress 
+  ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+  LEFT JOIN scsq_httpstatus 
+  ON scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+
+  WHERE date>".$datestart." 
+    AND date<".$dateend." 
+    AND tmplogin.id is NULL 
+    AND tmpipaddress.id IS NULL
+    AND site NOT IN (".$goodSitesList.")
+    AND par=1
+  GROUP BY scsq_httpstatus.name, httpstatus 
+  ORDER BY scsq_httpstatus.name asc;";
+
+
+
 $queryCountIpaddressOnLogins="
   SELECT 
     scsq_logins.name,
@@ -1036,7 +1760,7 @@ $queryCountIpaddressOnLogins="
 	, scsq_logins 
 
   WHERE scsq_logins.id=tmp.login
-  GROUP BY tmp.login 
+  GROUP BY scsq_logins.id, scsq_logins.name, tmp2.name
   ORDER BY scsq_logins.name asc;";
 
 $queryCountLoginsOnIpaddress="
@@ -1077,7 +1801,7 @@ $queryCountLoginsOnIpaddress="
 
   WHERE scsq_ipaddress.id=tmp.ipaddress
 
-  GROUP BY tmp.ipaddress 
+  GROUP BY scsq_ipaddress.id, scsq_ipaddress.name, tmp2.name
   ORDER BY scsq_ipaddress.name asc;";
 
 ////КОСТЫЛЬ
@@ -1121,7 +1845,7 @@ $queryWhoVisitSiteOneHourLogin="
 		   WHERE typeid=0) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
-
+WHERE (1=1)
   ".$msgNoZeroTraffic."
 
   GROUP BY nofriends.name;";
@@ -1163,7 +1887,7 @@ $queryWhoVisitSiteOneHourIpaddress="
 		   WHERE typeid=1) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
-
+WHERE (1=1)
   ".$msgNoZeroTraffic."
 
   GROUP BY nofriends.name ;";
@@ -1201,6 +1925,40 @@ $queryMimeTypesTraffic="
   GROUP BY CRC32(mime) 
   ORDER BY st desc;";
 
+#postgre version
+if($dbtype==1)
+$queryMimeTypesTraffic="
+  SELECT 
+    mime,
+    SUM(sizeinbytes) as st
+  FROM scsq_traffic 
+
+  LEFT OUTER JOIN (SELECT 
+		     id,
+		     name 
+		   FROM scsq_logins 
+		   WHERE id IN (".$goodLoginsList.")) 
+		   AS tmplogin 
+  ON tmplogin.id=scsq_traffic.login
+
+  LEFT OUTER JOIN (SELECT 
+		     id,
+		     name 
+		   FROM scsq_ipaddress 
+		   WHERE id IN (".$goodIpaddressList.")) 
+		   AS tmpipaddress 
+  ON tmpipaddress.id=scsq_traffic.ipaddress
+
+
+  WHERE date>".$datestart." 
+    AND date<".$dateend." 
+    AND tmplogin.id is NULL 
+    AND tmpipaddress.id IS NULL
+	AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+	AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+
+  GROUP BY mime 
+  ORDER BY st desc;";
 
 $queryDomainZonesTraffic="
 	((SELECT 
@@ -1289,6 +2047,43 @@ UNION
 ";
 
 
+#postgre version
+if($dbtype==1)
+$queryDomainZonesTraffic="
+	SELECT 
+		 case
+			when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]')   then '-' 
+			else split_part(split_part((split_part(site,'/',1)),'.',2),':',1)
+		 end domzone,
+		 
+		 sum(sizeinbytes) as s
+		 
+		 FROM scsq_quicktraffic
+
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_logins 
+			   WHERE id  IN (".$goodLoginsList.")) 
+			   AS tmplogin 
+	       ON tmplogin.id=scsq_quicktraffic.login
+	       LEFT  JOIN (SELECT 
+			     id 
+			   FROM scsq_ipaddress 
+			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
+	       ON tmpipaddress.id=scsq_quicktraffic.ipaddress       	
+
+	       WHERE date>".$datestart." 
+	  	 AND date<".$dateend."
+		 AND tmplogin.id IS NULL 
+	   	 AND tmpipaddress.id IS NULL
+	 	 AND site NOT IN (".$goodSitesList.")
+		 AND par<2
+	     
+	     GROUP BY domzone	       
+;
+";
+
+
 
 $queryTrafficByHoursLogins="
 SELECT  login,
@@ -1327,6 +2122,46 @@ ORDER BY nofriends.name
 ;
 ";
 
+#postgre version
+if($dbtype==1)
+$queryTrafficByHoursLogins="
+SELECT  login,
+nofriends.name,
+sum(sizeinbytes),
+CAST (to_char(to_timestamp(date),'HH24') as int) d
+FROM scsq_quicktraffic
+	LEFT JOIN (SELECT 
+	id,
+	name 
+	FROM scsq_logins)
+	AS nofriends 
+	ON scsq_quicktraffic.login=nofriends.id  
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is  NULL 
+	  AND tmpipaddress.id is  NULL
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+GROUP BY login,d, nofriends.name
+ORDER BY nofriends.name
+;
+";
+
+
 $queryTrafficByHoursIpaddress="
 SELECT  ipaddress,
 nofriends.name,
@@ -1359,10 +2194,51 @@ FROM scsq_quicktraffic
 	  AND tmpipaddress.id is  NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-GROUP BY login,FROM_UNIXTIME(date,'%H')
+GROUP BY ipaddress,FROM_UNIXTIME(date,'%H')
 ORDER BY nofriends.name
 ;
 ";
+
+#postgre version
+if($dbtype==1)
+$queryTrafficByHoursIpaddress="
+SELECT  ipaddress,
+nofriends.name,
+sum(sizeinbytes),
+CAST(to_char(to_timestamp(date),'HH24') as int) d
+FROM scsq_quicktraffic
+	LEFT JOIN (SELECT 
+	id,
+	name 
+	FROM scsq_ipaddress)
+	AS nofriends 
+	ON scsq_quicktraffic.ipaddress=nofriends.id  
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_quicktraffic.login
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is  NULL 
+	  AND tmpipaddress.id is  NULL
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+GROUP BY ipaddress,d, nofriends.name
+ORDER BY nofriends.name, d
+;
+";
+
+
 
 $queryTrafficByHoursLoginsOneSite="
 SELECT  login,
@@ -1497,21 +2373,41 @@ $queryCategorySitesTraffic="
 //**********************************************
 //===============================================
 
+
+
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s,
-	   scsq_categorylist.category 
-	 FROM scsq_quicktraffic 
-	 LEFT OUTER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
+	   SUM(sizeinbytes) AS s
+	 FROM scsq_quicktraffic
+	 
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
-	   AND par=1
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
+	AND par=1
 	 GROUP BY CRC32(scsq_quicktraffic.site) 
 	 ORDER BY site asc
 ;";
+
+#postgre version
+if($dbtype==1)
+$queryOneLoginTraffic="
+	SELECT 
+	   scsq_quicktraffic.site,
+	   SUM(sizeinbytes) AS s
+	 FROM scsq_quicktraffic
+	 
+	 WHERE login=".$currentloginid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend." 
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
+	AND par=1
+	 GROUP BY scsq_quicktraffic.site 
+	 ORDER BY site asc
+;";
+
+//echo $queryOneLoginTraffic;
 
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
@@ -1524,6 +2420,23 @@ $queryOneLoginTopSitesTraffic="
 	   AND site NOT IN (".$goodSitesList.")
 	   AND par=1
 	 GROUP BY CRC32(site)
+	 ORDER BY s DESC
+	 LIMIT ".$countTopSitesLimit." 
+";
+
+#postgre version
+if($dbtype==1)
+$queryOneLoginTopSitesTraffic="
+	 SELECT 
+	   site, 
+	   SUM( sizeinbytes ) AS s
+	 FROM scsq_quicktraffic
+	 WHERE login=".$currentloginid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend."
+	   AND site NOT IN (".$goodSitesList.")
+	   AND par=1
+	 GROUP BY site
 	 ORDER BY s DESC
 	 LIMIT ".$countTopSitesLimit." 
 ";
@@ -1548,54 +2461,53 @@ $queryOneLoginTrafficByHours="
 
   GROUP BY d 
   ORDER BY d asc;";
-
-#костыль для правильного разбора сайтов
-if($currentloginid==1)
-if($useLoginalias==0)
-$queryWhoVisitPopularSiteLogin="
+  
+ #postgre version
+  if($dbtype==1)
+  $queryOneLoginTrafficByHours="
   SELECT 
-    nofriends.name, 
-    tmp.s,
-    'костыль',
-    nofriends.id 
+    cast(to_char(to_timestamp(tmp.date),'HH24') as int) AS d,
+    SUM(tmp.s) 
   FROM (SELECT 
-	  login,
+	  date,
 	  SUM(sizeinbytes) AS s 
-	FROM scsq_traffic
-
-	WHERE SUBSTRING_INDEX(site,'/',1)='".$currentsite."' 
-	  AND date>".$datestart." 
-	  AND date<".$dateend."
+	FROM scsq_quicktraffic 
 	
-	GROUP BY CRC32(login)) 
+	WHERE login=".$currentloginid." 
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+          AND site NOT IN (".$goodSitesList.")
+	  AND par=1	
+	GROUP BY date 
+	) 
 	AS tmp 
 
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_logins 
-		    WHERE id NOT IN (".$goodLoginsList.")) 
-		    AS nofriends 
-	ON tmp.login=nofriends.id  
+  GROUP BY d 
+  ORDER BY d asc;";
 
-  ".$msgNoZeroTraffic."
+#костыль для правильного разбора сайтов (currentloginid 1 или 2)
 
-  ORDER BY nofriends.name;";
-else
 $queryWhoVisitPopularSiteLogin="
   SELECT 
     nofriends.name, 
     tmp.s,
     tmp2.name,
     nofriends.id
+
   FROM (SELECT 
 	  login,
-	  SUM(sizeinbytes) AS s 
+	  SUM(sizeinbytes) AS s
 	FROM scsq_traffic
 
-	WHERE SUBSTRING_INDEX(site,'/',1)='".$currentsite."' 
-	  AND date>".$datestart." 
+	WHERE  
+	   date>".$datestart." 
 	  AND date<".$dateend."
+	
+	AND 	  (case
+				when (".$currentloginid."=1) and (SUBSTRING_INDEX(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentloginid."=2) and (SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)) ='".$currentsite."' then TRUE
+				else FALSE
+			end ) = TRUE
 	
 	GROUP BY CRC32(login)) 
 	AS tmp 
@@ -1614,60 +2526,38 @@ $queryWhoVisitPopularSiteLogin="
 		   WHERE typeid=0) 
 		   tmp2 
 	ON tmp2.tableid=nofriends.id
-
+WHERE (1=1)
   ".$msgNoZeroTraffic."
+  
 
   ORDER BY nofriends.name;";
 
 
-if($currentloginid==2)
-if($useLoginalias==0)
-$queryWhoVisitPopularSiteLogin="
-  SELECT 
-    nofriends.name, 
-    tmp.s,
-    'костыль',
-    nofriends.id
-  FROM (SELECT 
-	  login,
-	  SUM(sizeinbytes) AS s 
-	FROM scsq_traffic
-
-	WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
-	  AND date>".$datestart." 
-	  AND date<".$dateend."
-	
-	GROUP BY CRC32(login)) 
-	AS tmp 
-
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_logins 
-		    WHERE id NOT IN (".$goodLoginsList.")) 
-		    AS nofriends 
-	ON tmp.login=nofriends.id  
-
-  ".$msgNoZeroTraffic."
-
-  ORDER BY nofriends.name;";
-else
+#postgre version
+if($dbtype==1)
 $queryWhoVisitPopularSiteLogin="
   SELECT 
     nofriends.name, 
     tmp.s,
     tmp2.name,
     nofriends.id
+
   FROM (SELECT 
 	  login,
-	  SUM(sizeinbytes) AS s 
+	  SUM(sizeinbytes) AS s
 	FROM scsq_traffic
 
-	WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
-	  AND date>".$datestart." 
+	WHERE  
+	   date>".$datestart." 
 	  AND date<".$dateend."
 	
-	GROUP BY CRC32(login)) 
+	AND 	  (case
+				when (".$currentloginid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentloginid."=2) and (reverse(split_part(reverse(split_part(site,'/',1)),'.',2))) ='".$currentsite."' then TRUE
+				else FALSE
+			end ) = TRUE
+	
+	GROUP BY login) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
@@ -1684,10 +2574,12 @@ $queryWhoVisitPopularSiteLogin="
 		   WHERE typeid=0) 
 		   tmp2 
 	ON tmp2.tableid=nofriends.id
-
+WHERE (1=1)
   ".$msgNoZeroTraffic."
+  
 
   ORDER BY nofriends.name;";
+
 
 $queryVisitingWebsiteByTimeLogin="
   SELECT 
@@ -1705,6 +2597,29 @@ $queryVisitingWebsiteByTimeLogin="
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
   
 	ORDER BY null) 
+	AS tmp  
+  
+  ORDER BY d asc;";
+  
+  
+  #postgre version
+  if($dbtype==1)
+  $queryVisitingWebsiteByTimeLogin="
+  SELECT 
+    DISTINCT to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') AS d,
+    '0',
+    site 
+  FROM (SELECT 
+	  date,
+	  site 
+	FROM scsq_traffic 
+	WHERE login=".$currentloginid." 
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+          AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+          AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+  
+	) 
 	AS tmp  
   
   ORDER BY d asc;";
@@ -1730,21 +2645,153 @@ $queryOneLoginPopularSites="
   WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
   ORDER BY tmp.c desc 
   LIMIT ".$countPopularSitesLimit.";";
+  
+  #postgre version
+  if($dbtype==1)  
+  $queryOneLoginPopularSites="
+  SELECT 
+	  split_part(site,'/',1) AS st,
+	  count(*) AS c,
+	  sum(sizeinbytes) AS s
+	  
+	FROM scsq_traffic 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND login=".$currentloginid."
+	  AND split_part(site,'/',1) NOT IN (".$goodSitesList.")
 
+  GROUP BY st
+
+  ORDER BY c desc 
+  LIMIT ".$countPopularSitesLimit.";";
+
+
+///IP адреса на одном логине
+$queryOneLoginIpTraffic="
+  SELECT 
+    nofriends.name,
+    sum(sizeinbytes),
+    ipaddress,
+    tmp2.name 
+  FROM scsq_quicktraffic
+
+  RIGHT JOIN (SELECT 
+		id,
+		name 
+	      FROM scsq_ipaddress 
+	      WHERE id NOT IN (".$goodIpaddressList.")) 
+	      AS nofriends 
+  ON scsq_quicktraffic.ipaddress=nofriends.id 
+
+  LEFT JOIN (SELECT 
+		name,
+		tableid 
+	     FROM scsq_alias 
+	     WHERE typeid=1) 
+	     tmp2 
+  ON nofriends.id=tmp2.tableid 
+
+ where login=".$currentloginid." 
+   and date>".$datestart." 
+   and date<".$dateend." 
+   AND site NOT IN (".$goodSitesList.")
+   AND par=1
+  GROUP BY CRC32(ipaddress)";
+  
+  # postgre version
+  if($dbtype==1)
+  $queryOneLoginIpTraffic="
+  SELECT 
+    nofriends.name,
+    sum(sizeinbytes),
+    ipaddress,
+    tmp2.name 
+  FROM scsq_quicktraffic
+
+  RIGHT JOIN (SELECT 
+		id,
+		name 
+	      FROM scsq_ipaddress 
+	      WHERE id NOT IN (".$goodIpaddressList.")) 
+	      AS nofriends 
+  ON scsq_quicktraffic.ipaddress=nofriends.id 
+
+  LEFT JOIN (SELECT 
+		name,
+		tableid 
+	     FROM scsq_alias 
+	     WHERE typeid=1) 
+	     tmp2 
+  ON nofriends.id=tmp2.tableid 
+
+ where login=".$currentloginid." 
+   and date>".$datestart." 
+   and date<".$dateend." 
+   AND site NOT IN (".$goodSitesList.")
+   AND par=1
+  GROUP BY ipaddress, nofriends.name, tmp2.name ";
+
+//по типу контента
+$queryOneLoginMimeTypesTraffic="
+	SELECT 
+	   mime,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE login=".$currentloginid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend."
+	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+  GROUP BY mime
+  ORDER BY s desc ";
+
+
+
+#postgre version
+if($dbtype==1)
+$queryOneLoginMimeTypesTraffic="
+	SELECT 
+	   mime,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE login=".$currentloginid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend."
+	   AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+       AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+  GROUP BY mime
+  ORDER BY s desc ";
 
 $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
 	   sum(sizeinbytes) AS s,
-	   scsq_categorylist.category 
+	   $category 
 	 FROM scsq_quicktraffic 
-	 LEFT OUTER JOIN scsq_categorylist ON scsq_quicktraffic.site=scsq_categorylist.site
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
+	   
 	 GROUP BY CRC32(scsq_quicktraffic.site) 	 
+	 ORDER BY scsq_quicktraffic.site asc;";
+
+#postgre version
+if($dbtype==1)
+$queryOneIpaddressTraffic="
+	 SELECT 
+	   scsq_quicktraffic.site AS st,
+	   sum(sizeinbytes) AS s
+	   
+	 FROM scsq_quicktraffic 
+	 WHERE ipaddress=".$currentipaddressid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend." 
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   AND par=1
+	   
+	 GROUP BY scsq_quicktraffic.site 	 
 	 ORDER BY scsq_quicktraffic.site asc;";
 
 
@@ -1762,6 +2809,21 @@ $queryOneIpaddressTopSitesTraffic="
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
+#postgre version
+if($dbtype==1)
+$queryOneIpaddressTopSitesTraffic="
+	 SELECT 
+	   site,
+	   SUM(sizeinbytes) as s 
+	 FROM scsq_quicktraffic 
+	 WHERE ipaddress=".$currentipaddressid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend." 
+	   AND site NOT IN (".$goodSitesList.")	 
+	   AND par=1
+	 GROUP BY site 
+	 ORDER BY s desc 
+	 LIMIT ".$countTopSitesLimit." ";
 
 $queryOneIpaddressTrafficByHours="
   SELECT 
@@ -1782,61 +2844,63 @@ $queryOneIpaddressTrafficByHours="
 
   group by d 
   order by d asc;";
-
-#костыль для правильного разбора сайтов
-if($currentipaddressid==1)
-if($useIpaddressalias==0)
-$queryWhoVisitPopularSiteIpaddress="
+  
+  #postgre version
+  if($dbtype==1)
+  $queryOneIpaddressTrafficByHours="
   SELECT 
-    nofriends.name, 
-    tmp.s,
-    'костыль',
-    nofriends.id 
+    cast(to_char(to_timestamp(tmp.date),'HH24') as int) as d,
+    sum(tmp.s) 
   from (SELECT 
-	  ipaddress,
-	  sum(sizeinbytes) as s 
-	from scsq_traffic 
-	where substring_index(site,'/',1)='".$currentsite."' 
+			date,
+			sum(sizeinbytes) as s 
+	from scsq_quicktraffic 
+	where ipaddress=".$currentipaddressid." 
 	  and date>".$datestart." 
 	  and date<".$dateend." 
-	
-	group by crc32(ipaddress)) 
-	as tmp
+          AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+	group by date 
+	) 
+	as tmp 
 
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_ipaddress 
-		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
-	ON tmp.ipaddress=nofriends.id  
+  group by d 
+  order by d asc;";
 
-  ".$msgNoZeroTraffic."
 
-  order by nofriends.name;";
-else
+#костыль для правильного разбора сайтов (currentipaddressid 1 или 2)
+
 $queryWhoVisitPopularSiteIpaddress="
   SELECT 
     nofriends.name, 
     tmp.s,
     tmp2.name,
-    nofriends.id 
-  from (SELECT 
-	  ipaddress,
-	  sum(sizeinbytes) as s 
-	from scsq_traffic 
-	where substring_index(site,'/',1)='".$currentsite."' 
-	  and date>".$datestart." 
-	  and date<".$dateend." 
+    nofriends.id
+
+  FROM (SELECT 
+	  login,
+	  SUM(sizeinbytes) AS s
+	FROM scsq_traffic
+
+	WHERE  
+	   date>".$datestart." 
+	  AND date<".$dateend."
 	
-	group by crc32(ipaddress)) 
-	as tmp
+	AND 	  (case
+				when (".$currentipaddressid."=1) and (SUBSTRING_INDEX(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentipaddressid."=2) and (SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)) ='".$currentsite."' then TRUE
+				else FALSE
+			end ) = TRUE
+	
+	GROUP BY CRC32(ipaddress)) 
+	AS tmp 
 
 	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_ipaddress 
-		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
-	ON tmp.ipaddress=nofriends.id  
+					id,
+					name 
+				FROM scsq_ipaddress 
+				where id NOT IN (".$goodIpaddressList.")) as nofriends 
+	ON tmp.ipaddress=nofriends.id 
 	LEFT JOIN (SELECT 
 		      name,
 		      tableid 
@@ -1844,9 +2908,60 @@ $queryWhoVisitPopularSiteIpaddress="
 		   WHERE typeid=1) 
 		   tmp2 
 	ON tmp2.tableid=nofriends.id
+WHERE (1=1)
   ".$msgNoZeroTraffic."
+  
 
-  order by nofriends.name;";
+  ORDER BY nofriends.name;";
+
+
+#postgre version
+if($dbtype==1)
+$queryWhoVisitPopularSiteIpaddress="
+  SELECT 
+    nofriends.name, 
+    tmp.s,
+    tmp2.name,
+    nofriends.id
+
+  FROM (SELECT 
+	  login,
+	  SUM(sizeinbytes) AS s
+	FROM scsq_traffic
+
+	WHERE  
+	   date>".$datestart." 
+	  AND date<".$dateend."
+	
+	AND 	  (case
+				when (".$currentipaddressid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentipaddressid."=2) and (reverse(split_part(reverse(split_part(site,'/',1)),'.',2))) ='".$currentsite."' then TRUE
+				else FALSE
+			end ) = TRUE
+	
+	GROUP BY ipaddress) 
+	AS tmp 
+
+	RIGHT JOIN (SELECT 
+					id,
+					name 
+				FROM scsq_ipaddress 
+				where id NOT IN (".$goodIpaddressList.")) as nofriends 
+	ON tmp.ipaddress=nofriends.id 
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   tmp2 
+	ON tmp2.tableid=nofriends.id
+WHERE (1=1)
+  ".$msgNoZeroTraffic."
+  
+
+  ORDER BY nofriends.name;";
+
+
 
 
 #костылище для частных отчетов
@@ -1864,6 +2979,22 @@ $queryOneLoginOneHourTraffic="
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 	 GROUP BY CRC32(site) 
   	 ORDER BY site asc;";
+  	 
+  	 #postgre version
+  	 if($dbtype==1)
+$queryOneLoginOneHourTraffic="
+	 SELECT 
+	   site,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE login=".$currentloginid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend." 
+	   AND site NOT IN (".$goodSitesList.")
+	   AND cast(to_char(to_timestamp(date),'HH24') as int)>=".$currenthour."
+	   AND cast(to_char(to_timestamp(date),'HH24') as int)<".($currenthour+1)."
+	 GROUP BY site 
+  	 ORDER BY site asc;";
 
 $queryOneIpaddressOneHourTraffic="
  	 SELECT 
@@ -1880,72 +3011,21 @@ $queryOneIpaddressOneHourTraffic="
 	 ORDER BY st asc ";
 
 
-
-#костыль для правильного разбора сайтов
-if($currentipaddressid==2)
-if($useIpaddressalias==0)
-$queryWhoVisitPopularSiteIpaddress="
-  SELECT 
-    nofriends.name, 
-    tmp.s,
-    'костыль',
-    nofriends.id 
-  from (SELECT 
-	  ipaddress,
-	  sum(sizeinbytes) as s 
-	from scsq_traffic 
-	where SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
-	  and date>".$datestart." 
-	  and date<".$dateend." 
-	
-	group by crc32(ipaddress)) 
-	as tmp
-
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_ipaddress 
-		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
-	ON tmp.ipaddress=nofriends.id  
-
-  ".$msgNoZeroTraffic."
-
-  order by nofriends.name;";
-else
-$queryWhoVisitPopularSiteIpaddress="
-  SELECT 
-    nofriends.name, 
-    tmp.s,
-    tmp2.name,
-    nofriends.id
-  from (SELECT 
-	  ipaddress,
-	  sum(sizeinbytes) as s 
-	from scsq_traffic 
-	where SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)='".$currentsite."' 
-	  and date>".$datestart." 
-	  and date<".$dateend." 
-	
-	group by crc32(ipaddress)) 
-	as tmp
-
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_ipaddress 
-		    where id NOT IN (".$goodIpaddressList.")) as nofriends 
-	ON tmp.ipaddress=nofriends.id  
-	LEFT JOIN (SELECT 
-		      name,
-		      tableid 
-		   FROM scsq_alias 
-		   WHERE typeid=1) 
-		   tmp2 
-	ON tmp2.tableid=nofriends.id
-  ".$msgNoZeroTraffic."
-
-  order by nofriends.name;";
-
+#postgre version
+if($dbtype==1)
+$queryOneIpaddressOneHourTraffic="
+ 	 SELECT 
+	   site,
+	   sum(sizeinbytes) AS s 
+	 FROM scsq_quicktraffic 
+	 WHERE ipaddress=".$currentipaddressid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend." 
+	   AND site NOT IN (".$goodSitesList.")
+	   AND cast(to_char(to_timestamp(date),'HH24') as int)>=".$currenthour."
+	   AND cast(to_char(to_timestamp(date),'HH24') as int)<".($currenthour+1)."
+ 	 GROUP BY site 
+	 ORDER BY st asc ";
 
 $queryVisitingWebsiteByTimeIpaddress="
   SELECT DISTINCT 
@@ -1963,6 +3043,28 @@ $queryVisitingWebsiteByTimeIpaddress="
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 	
 	order by null) 
+	as tmp  
+  
+  order by d asc;";
+  
+  #postgre version
+  if($dbtype==1)
+  $queryVisitingWebsiteByTimeIpaddress="
+  SELECT DISTINCT 
+    to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') as d,
+    '0',
+    site 
+  from (SELECT 
+	  date,
+	  site 
+	from scsq_traffic 
+	where ipaddress=".$currentipaddressid." 
+	  and date>".$datestart." 
+	  and date<".$dateend." 
+      AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+	
+	) 
 	as tmp  
   
   order by d asc;";
@@ -1987,6 +3089,25 @@ $queryOneIpaddressPopularSites="
   JOIN scsq_traffic ON tmp.id=scsq_traffic.id
   WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
   ORDER BY tmp.c desc 
+  LIMIT ".$countPopularSitesLimit.";";
+
+
+#postgre version
+$queryOneIpaddressPopularSites="
+  SELECT 
+	  split_part(site,'/',1) AS st,
+	  sum(sizeinbytes) AS s,
+	  count(*) AS c
+	  
+	FROM scsq_traffic 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND ipaddress=".$currentipaddressid."
+	  AND split_part(site,'/',1) NOT IN (".$goodSitesList.")
+    
+	GROUP BY st 
+  
+  ORDER BY c desc 
   LIMIT ".$countPopularSitesLimit.";";
 
 
@@ -2021,6 +3142,42 @@ $queryLoginsHttpStatus="
     AND par=1
   group by crc32(nofriends.name) 
   order by nofriends.name asc;";
+  
+  
+#postgre version
+if($dbtype==1)  
+  $queryLoginsHttpStatus="
+  SELECT 
+    nofriends.name,
+    count(*),
+    login,
+    tmp2.name 
+  from scsq_quicktraffic 
+
+  RIGHT JOIN (SELECT 
+		id,
+		name 
+	      from scsq_logins 
+	      WHERE id NOT IN (".$goodLoginsList.")) 
+	      AS nofriends 
+  ON scsq_quicktraffic.login=nofriends.id  
+
+  LEFT JOIN (SELECT 
+	       name,
+	       tableid 
+	     FROM scsq_alias 
+	     where typeid=0) 
+	     tmp2 
+  ON nofriends.id=tmp2.tableid 
+
+  where httpstatus='".$currenthttpstatusid."' 
+    and date>".$datestart." 
+    and date<".$dateend." 
+    AND site NOT IN (".$goodSitesList.")
+    AND par=1
+  group by nofriends.name,login,tmp2.name  
+  order by nofriends.name asc;";
+  
 
 $queryIpaddressHttpStatus="
   SELECT 
@@ -2053,6 +3210,39 @@ $queryIpaddressHttpStatus="
     AND par=1
   GROUP BY crc32(nofriends.name)
   ORDER BY nofriends.name asc;";
+  
+  #postgre version
+  $queryIpaddressHttpStatus="
+  SELECT 
+    nofriends.name,
+    count(*),
+    ipaddress,
+    tmp2.name 
+  from scsq_quicktraffic 
+
+  RIGHT JOIN (SELECT 
+		id,
+		name 
+	      FROM scsq_ipaddress 
+	      where id NOT IN (".$goodIpaddressList.")) 
+	      AS nofriends 
+  ON scsq_quicktraffic.ipaddress=nofriends.id 
+
+  LEFT JOIN  (SELECT 
+		name,
+		tableid 
+	      FROM scsq_alias 
+	      where typeid=1) 
+	      tmp2 
+  ON nofriends.id=tmp2.tableid 
+
+  where httpstatus='".$currenthttpstatusid."' 
+    and date>".$datestart." 
+    and date<".$dateend." 
+    AND site NOT IN (".$goodSitesList.")
+    AND par=1
+  GROUP BY nofriends.name, ipaddress, tmp2.name 
+  ORDER BY nofriends.name asc;";
 
 $queryOneLoginOneHttpStatus="
   SELECT 
@@ -2068,6 +3258,25 @@ $queryOneLoginOneHttpStatus="
     and date<".$dateend." 
     AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
     AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+  
+  order by date asc;";
+  
+  #postgre version
+  if($dbtype==1)
+  $queryOneLoginOneHttpStatus="
+  SELECT 
+    to_char(to_timestamp(date),'DD-MM-YYYY HH24:MI:SS') as d, 
+    scsq_traffic.site 
+  FROM scsq_traffic 
+
+  LEFT JOIN scsq_logins ON scsq_logins.id=scsq_traffic.login 
+
+  WHERE login='".$currentloiid."' 
+    and httpstatus='".$currenthttpstatusid."' 
+    and date>".$datestart." 
+    and date<".$dateend." 
+    AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+    AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
   
   order by date asc;";
 
@@ -2087,38 +3296,27 @@ $queryOneIpaddressOneHttpStatus="
     AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
   ORDER BY date asc;";
-
-///IP адреса на одном логине
-$queryOneLoginIpTraffic="
+  
+  #postgre version
+  if($dbtype==1)
+  $queryOneIpaddressOneHttpStatus="
   SELECT 
-    nofriends.name,
-    sum(sizeinbytes),
-    ipaddress,
-    tmp2.name 
-  FROM scsq_quicktraffic
+    to_char(to_timestamp(date),'DD-MM-YYYY HH24:MI:SS') as d,  
+    scsq_traffic.site 
+  FROM scsq_traffic 
 
-  RIGHT JOIN (SELECT 
-		id,
-		name 
-	      FROM scsq_ipaddress 
-	      WHERE id NOT IN (".$goodIpaddressList.")) 
-	      AS nofriends 
-  ON scsq_quicktraffic.ipaddress=nofriends.id 
+  LEFT JOIN scsq_ipaddress ON scsq_ipaddress.id=scsq_traffic.ipaddress 
 
-  LEFT JOIN (SELECT 
-		name,
-		tableid 
-	     FROM scsq_alias 
-	     WHERE typeid=1) 
-	     tmp2 
-  ON nofriends.id=tmp2.tableid 
+  WHERE ipaddress='".$currentloiid."' 
+    and httpstatus='".$currenthttpstatusid."' 
+    and date>".$datestart." 
+    and date<".$dateend." 
+   AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+    AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+ 
+  ORDER BY date asc;";
 
- where login=".$currentloginid." 
-   and date>".$datestart." 
-   and date<".$dateend." 
-   AND site NOT IN (".$goodSitesList.")
-   AND par=1
-  GROUP BY CRC32(ipaddress)";
+
 
 ///Логины на одном IP адресе
 $queryOneIpaddressLoginsTraffic="
@@ -2154,19 +3352,39 @@ $queryOneIpaddressLoginsTraffic="
   GROUP BY CRC32(login)";
 
 
-$queryOneLoginMimeTypesTraffic="
-	SELECT 
-	   mime,
-	   SUM(sizeinbytes) AS s 
-	 FROM scsq_traffic 
-	 WHERE login=".$currentloginid." 
-	   AND date>".$datestart." 
-	   AND date<".$dateend."
-	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
-	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
-  GROUP BY mime
-  ORDER BY s desc ";
+#postgre version
+if($dbtype==1)
+$queryOneIpaddressLoginsTraffic="
+  SELECT 
+    nofriends.name,
+    SUM(sizeinbytes),
+    login,
+    tmp2.name 
+  from  scsq_quicktraffic
 
+  RIGHT JOIN (SELECT 
+		id,
+		name 
+	      FROM scsq_logins 
+	      where id NOT IN (".$goodLoginsList.")) 
+	      AS nofriends 
+  ON scsq_quicktraffic.login=nofriends.id 
+
+  LEFT JOIN (SELECT 
+		name,
+		tableid 
+	     from scsq_alias 
+	     where typeid=0) 
+	     tmp2 
+  ON nofriends.id=tmp2.tableid 
+
+
+  WHERE ipaddress=".$currentipaddressid." 
+    and date>".$datestart." 
+    and date<".$dateend." 
+    AND site NOT IN (".$goodSitesList.")
+    AND par=1
+  GROUP BY login, nofriends.name, tmp2.name";
 
 
 $queryOneIpaddressMimeTypesTraffic="
@@ -2179,6 +3397,21 @@ $queryOneIpaddressMimeTypesTraffic="
 	   AND date<".$dateend."
 	   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+  GROUP BY mime
+  ORDER BY s desc ";
+  
+  #postgre version
+  if($dbtype==1)
+  $queryOneIpaddressMimeTypesTraffic="
+	SELECT 
+	   mime,
+	   SUM(sizeinbytes) AS s 
+	 FROM scsq_traffic 
+	 WHERE ipaddress=".$currentipaddressid."  
+	   AND date>".$datestart." 
+	   AND date<".$dateend."
+	   AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+       AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
   GROUP BY mime
   ORDER BY s desc ";
 
@@ -2219,6 +3452,55 @@ $queryOneMime="
 	  AND tmpipaddress.id IS NULL
 	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND mime='".$currentmime."'
+  	ORDER BY sizeinbytes desc 
+  	)
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+";
+
+#postgre version
+if($dbtype==1)
+$queryOneMime="
+  SELECT 
+    scsq_log.name,
+    tmp.sizeinbytes,
+    scsq_ip.name, 
+    scsq_traf.site,
+    scsq_log.id,
+    scsq_ip.id 
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	LEFT OUTER JOIN (SELECT 
+			   scsq_logins.id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   scsq_ipaddress.id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
 	  AND mime='".$currentmime."'
   	ORDER BY sizeinbytes desc 
   	)
@@ -2273,6 +3555,51 @@ $queryOneMimeOneLogin="
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
 ";
 
+#postgre version
+$queryOneMimeOneLogin="
+  SELECT 
+    scsq_traf.site,
+    tmp.sizeinbytes
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	LEFT OUTER JOIN (SELECT 
+			   scsq_logins.id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   scsq_ipaddress.id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND mime='".$currentmime."'
+	  AND login=".$currentloginid."
+  	ORDER BY sizeinbytes desc 
+  	)
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+";
+
 $queryOneMimeOneIpaddress="
   SELECT 
     scsq_traf.site,
@@ -2306,6 +3633,51 @@ $queryOneMimeOneIpaddress="
 	  AND tmpipaddress.id IS NULL
 	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND mime='".$currentmime."'
+	  AND ipaddress=".$currentipaddressid."
+  	ORDER BY sizeinbytes desc 
+  	)
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+";
+
+#postgre version
+$queryOneMimeOneIpaddress="
+  SELECT 
+    scsq_traf.site,
+    tmp.sizeinbytes
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	LEFT OUTER JOIN (SELECT 
+			   scsq_logins.id,
+			   name 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   scsq_ipaddress.id,
+			   name 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL 
+	  AND tmpipaddress.id IS NULL
+	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
 	  AND mime='".$currentmime."'
 	  AND ipaddress=".$currentipaddressid."
   	ORDER BY sizeinbytes desc 
@@ -2396,19 +3768,86 @@ $queryGroupsTraffic="
   order by gname;";
 
 
+#postgre version
+if($dbtype==1)
+$queryGroupsTraffic="
+  SELECT
+    gname,
+    s1,
+    gid,
+    gtypeid
+  FROM ((SELECT 
+	  tmp.name as gname,
+	  sum(tmp2.s) AS s1,
+ 	  tmp.id as gid,
+     	  tmp.typeid as gtypeid 
+	FROM (SELECT 
+		id,
+		name,
+		typeid 
+	      FROM scsq_groups 
+	      WHERE typeid=0) 
+	      AS tmp 
 
-if(($typeid==0)&&($useLoginalias==0))
-$useAliasColumn="";
-if(($typeid==0)&&($useLoginalias==1))
-$useAliasColumn=",scsq_alias.name";
+	 LEFT JOIN scsq_aliasingroups ON tmp.id=scsq_aliasingroups.groupid 
+	 LEFT JOIN scsq_alias on scsq_alias.id=scsq_aliasingroups.aliasid 
+
+	 LEFT JOIN (SELECT 
+		      sum(sizeinbytes) as s,
+		      login 
+		    from scsq_quicktraffic 
+		    where scsq_quicktraffic.date>".$datestart." 
+		      and scsq_quicktraffic.date<".$dateend." 
+         	      AND site NOT IN (".$goodSitesList.")
+
+		    GROUP BY login) 
+		    tmp2 
+	 ON tmp2.login=scsq_alias.tableid
+
+   GROUP BY tmp.name, tmp.id, tmp.typeid)
+
+ UNION
+
+  (SELECT 
+     tmp.name as gname,
+     sum(tmp2.s) as s1,
+     tmp.id as gid,
+     tmp.typeid as gtypeid 
+   FROM (SELECT 
+	   id,
+	   name,
+	   typeid 
+	 FROM scsq_groups 
+	 where typeid=1) 
+	 AS tmp 
+
+	 LEFT JOIN scsq_aliasingroups ON tmp.id=scsq_aliasingroups.groupid 
+	 LEFT JOIN scsq_alias ON scsq_alias.id=scsq_aliasingroups.aliasid 
+
+	 LEFT JOIN (SELECT 
+		      sum(sizeinbytes) as s,
+		      ipaddress 
+		    FROM scsq_quicktraffic 
+		    WHERE scsq_quicktraffic.date>".$datestart." 
+		      and scsq_quicktraffic.date<".$dateend." 
+        	      AND site NOT IN (".$goodSitesList.")
+
+		    GROUP BY ipaddress) 
+		    tmp2 
+	 ON tmp2.ipaddress=scsq_alias.tableid 
+
+  GROUP BY tmp.name, tmp.id, tmp.typeid)) as grtable
+  order by gname;";
+
+
 
 if($typeid==0)
 $queryOneGroupTraffic="
   SELECT 
     scsq_logins.name,
     tmp2.s as s1,
-    tmp2.login 
-    ".$useAliasColumn."
+    tmp2.login,
+    scsq_alias.name
   FROM (SELECT 
 	  id,
 	  name 
@@ -2434,18 +3873,15 @@ $queryOneGroupTraffic="
 
 	ORDER BY scsq_logins.name asc;";
 
-if(($typeid==1)&&($useIpaddressalias==0))
-$useAliasColumn="";
-if(($typeid==1)&&($useIpaddressalias==1))
-$useAliasColumn=",scsq_alias.name";
+
 
 if($typeid==1)
 $queryOneGroupTraffic="
   SELECT 
     scsq_ipaddress.name,
     tmp2.s as s1,
-    tmp2.ipaddress
-    ".$useAliasColumn."
+    tmp2.ipaddress,
+    scsq_alias.name
   FROM (SELECT 
 	  id,
 	  name 
@@ -2471,15 +3907,78 @@ $queryOneGroupTraffic="
 	LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
 
   ORDER BY scsq_ipaddress.name asc;";
+  
+  
+ #postgre version
+ if($dbtype==1) 
+  if($typeid==0)
+$queryOneGroupTraffic="
+  SELECT 
+    scsq_logins.name,
+    tmp2.s as s1,
+    tmp2.login,
+    scsq_alias.name
+  FROM (SELECT 
+	  id,
+	  name 
+	FROM scsq_groups 
+	WHERE typeid=0 
+	  and id='".$currentgroupid."') 
+	AS tmp 
+	LEFT JOIN scsq_aliasingroups ON tmp.id=scsq_aliasingroups.groupid 
+	LEFT JOIN scsq_alias ON scsq_alias.id=scsq_aliasingroups.aliasid 
+	LEFT JOIN (SELECT 
+		     SUM(sizeinbytes) as s,
+		     login 
+		   FROM scsq_quicktraffic 
+		   WHERE scsq_quicktraffic.date>".$datestart." 
+		     and scsq_quicktraffic.date<".$dateend."
+	             AND site NOT IN (".$goodSitesList.")
+ 
+		   GROUP BY login) 
+		   tmp2 
+	ON tmp2.login=scsq_alias.tableid 
+	
+	LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
+
+	ORDER BY scsq_logins.name asc;";
 
 
+ #postgre version
+if($dbtype==1)
+if($typeid==1)
+$queryOneGroupTraffic="
+  SELECT 
+    scsq_ipaddress.name,
+    tmp2.s as s1,
+    tmp2.ipaddress,
+    scsq_alias.name
+  FROM (SELECT 
+	  id,
+	  name 
+	FROM scsq_groups 
+	WHERE typeid=1 
+	  and id='".$currentgroupid."') 
+	AS tmp 
 
+	LEFT JOIN scsq_aliasingroups ON tmp.id=scsq_aliasingroups.groupid 
+	LEFT JOIN scsq_alias on scsq_alias.id=scsq_aliasingroups.aliasid 
+	LEFT JOIN (SELECT
+		     sum(sizeinbytes) as s,
+		     ipaddress 
+		   FROM scsq_quicktraffic 
+		   WHERE scsq_quicktraffic.date>".$datestart." 
+		     and scsq_quicktraffic.date<".$dateend." 
+	             AND site NOT IN (".$goodSitesList.")
 
+		   GROUP BY ipaddress) 
+		   tmp2 
+	ON tmp2.ipaddress=scsq_alias.tableid 
 
-if(($typeid==0)&&($useLoginalias==0))
-$useAliasColumn="";
-if(($typeid==0)&&($useLoginalias==1))
-$useAliasColumn=",tmp.al";
+	LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+
+  ORDER BY scsq_ipaddress.name asc;";
+  
 
 if($typeid==0)
 $queryOneGroupTrafficWide="
@@ -2487,8 +3986,8 @@ $queryOneGroupTrafficWide="
     nofriends.name,
     tmp.s,
     tmp.login,
-    tmp.n 
-    ".$useAliasColumn."
+    tmp.n, 
+    tmp.al
   FROM ((SELECT 
 	   login,
 	   '2' as n,
@@ -2612,10 +4111,7 @@ $queryOneGroupTrafficWide="
 
   ORDER BY nofriends.name asc,tmp.n asc;";
 
-if(($typeid==1)&&($useIpaddressalias==0))
-$useAliasColumn="";
-if(($typeid==1)&&($useIpaddressalias==1))
-$useAliasColumn=",tmp.al";
+
 
 if($typeid==1)
 $queryOneGroupTrafficWide="
@@ -2623,8 +4119,9 @@ $queryOneGroupTrafficWide="
     nofriends.name,
     tmp.s,
     tmp.ipaddress,
-    tmp.n 
-    ".$useAliasColumn."
+    tmp.n,
+    tmp.al 
+  
   FROM ((SELECT 
 	   ipaddress,
 	   '2' as n,
@@ -2737,6 +4234,265 @@ $queryOneGroupTrafficWide="
 
   ORDER BY nofriends.name asc,tmp.n asc;";
 
+
+#postgre version
+if($dbtype==1)
+if($typeid==0)
+$queryOneGroupTrafficWide="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    tmp.login,
+    tmp.n, 
+    tmp.al
+  FROM ((SELECT 
+	   login,
+	   '2' as n,
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
+	 FROM scsq_quicktraffic
+
+	 RIGHT JOIN (SELECT 
+		       * 
+		     FROM scsq_alias) 
+		     AS listaliases  
+	 ON listaliases.tableid=scsq_quicktraffic.login
+
+	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=0 
+		       and id='".$currentgroupid."') 
+		     AS curgroup  
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	,scsq_httpstatus 
+
+	WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
+	   or  scsq_httpstatus.name like '%TCP_IMS_HIT%' 
+	   or  scsq_httpstatus.name like '%TCP_MEM_HIT%' 
+	   or  scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
+	   or  scsq_httpstatus.name like '%UDP_HIT%') 
+	  and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	  and  date>".$datestart." 
+	  and  date<".$dateend." 
+          AND site NOT IN (".$goodSitesList.")
+
+	GROUP BY login, listaliases.name 
+	) 
+
+  UNION 
+
+	(SELECT 
+	   login,
+	   '3' as n,
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
+	 FROM scsq_quicktraffic
+
+	 RIGHT JOIN (SELECT 
+		       * 
+		     FROM scsq_alias) 
+		     AS listaliases  
+	 ON listaliases.tableid=scsq_quicktraffic.login
+
+	 RIGHT JOIN scsq_aliasingroups ON listaliases.id=scsq_aliasingroups.aliasid 
+	 
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=0 
+		       and id='".$currentgroupid."') 
+		     AS curgroup  
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	,scsq_httpstatus 
+
+	WHERE (scsq_httpstatus.name NOT LIKE '%TCP_HIT%' 
+	  and  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
+	  and  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
+	  and  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
+	  and  scsq_httpstatus.name not like '%UDP_HIT%') 
+	  and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	  and  date>".$datestart." 
+	  and  date<".$dateend."  
+          AND site NOT IN (".$goodSitesList.")
+	
+	GROUP BY login, listaliases.name
+	) 
+
+  UNION 
+
+	(SELECT 
+	   login,
+	   '1' as n,
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
+	 from scsq_quicktraffic 
+
+	 RIGHT JOIN (select 
+		       * 
+		     from scsq_alias) 
+		     as listaliases 
+	 ON listaliases.tableid=scsq_quicktraffic.login
+
+	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=0 
+		       and id='".$currentgroupid."') 
+		     AS curgroup  
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	 WHERE date>".$datestart." 
+	   and date<".$dateend."  
+           AND site NOT IN (".$goodSitesList.")
+
+	 GROUP BY login,listaliases.name
+	 )) 
+	 AS tmp
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_logins 
+		     WHERE id NOT IN (".$goodLoginsList.")) 
+		     AS nofriends 
+	 ON tmp.login=nofriends.id
+
+  ORDER BY nofriends.name asc,tmp.n asc;";
+
+
+#postgre version
+if($dbtype==1)
+if($typeid==1)
+$queryOneGroupTrafficWide="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    tmp.ipaddress,
+    tmp.n,
+    tmp.al 
+  
+  FROM ((SELECT 
+	   ipaddress,
+	   '2' as n,
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al  
+	 FROM scsq_quicktraffic
+
+	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
+
+	 RIGHT JOIN scsq_aliasingroups ON listaliases.id=scsq_aliasingroups.aliasid 
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=1 
+		       and id='".$currentgroupid."') 
+		     AS curgroup  
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	,scsq_httpstatus 
+
+	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
+	    or  scsq_httpstatus.name like '%TCP_IMS_HIT%' 
+	    or  scsq_httpstatus.name like '%TCP_MEM_HIT%' 
+	    or  scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
+	    or  scsq_httpstatus.name like '%UDP_HIT%') 
+	   and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	   and  date>".$datestart." 
+	   and  date<".$dateend." 
+           AND site NOT IN (".$goodSitesList.")
+
+	 GROUP BY ipaddress, listaliases.name 
+	 ) 
+
+  UNION 
+
+	(SELECT 
+	   ipaddress,
+	   '3' as n,
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
+	 FROM scsq_quicktraffic
+
+	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
+
+	 RIGHT JOIN scsq_aliasingroups ON listaliases.id=scsq_aliasingroups.aliasid 
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=1 
+		       and id='".$currentgroupid."') 
+		     AS curgroup  
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	 ,scsq_httpstatus 
+
+	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
+	   and  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
+	   and  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
+	   and  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
+	   and  scsq_httpstatus.name not like '%UDP_HIT%') 
+	   and  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	   and  date>".$datestart." 
+	   and  date<".$dateend."  
+           AND site NOT IN (".$goodSitesList.")
+
+	 GROUP BY ipaddress, listaliases.name
+	 ) 
+
+  UNION 
+
+	(SELECT 
+	   ipaddress,
+	   '1' as n,
+	   sum(sizeinbytes) as s,
+	   listaliases.name as al 
+	 FROM scsq_quicktraffic 
+
+	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
+
+	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=1 
+		       and id='".$currentgroupid."') 
+		     AS curgroup 
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	 WHERE date>".$datestart." 
+	   and date<".$dateend."  
+           AND site NOT IN (".$goodSitesList.")
+
+	 GROUP BY ipaddress, listaliases.name 
+	 )) 
+	 AS tmp
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_ipaddress 
+		     WHERE id NOT IN (".$goodIpaddressList.")) 
+		     AS nofriends 
+	 ON tmp.ipaddress=nofriends.id
+
+  ORDER BY nofriends.name asc,tmp.n asc;";
+
+
 if($typeid==0)
 $queryOneGroupTopSitesTraffic="
   	 SELECT 
@@ -2799,6 +4555,70 @@ $queryOneGroupTopSitesTraffic="
 	 GROUP BY crc32(site) 
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
+
+
+#postgre version
+if($dbtype==1)
+if($typeid==0)
+$queryOneGroupTopSitesTraffic="
+  	 SELECT 
+	   site,
+	   sum(sizeinbytes) as s
+	 FROM scsq_quicktraffic 
+
+	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+
+	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=0 
+		       and id='".$currentgroupid."') 
+		     AS curgroup 
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	 WHERE date>".$datestart." 
+	   AND date<".$dateend." 
+	   AND login IN (SELECT id from scsq_logins where id NOT IN (".$goodLoginsList.")) 
+	   AND ipaddress IN (SELECT id from scsq_ipaddress where id NOT IN (".$goodIpaddressList.")) 
+	   AND site NOT IN (".$goodSitesList.")
+	 GROUP BY site 
+	 ORDER BY s desc 
+	 LIMIT ".$countTopSitesLimit." ";
+
+#postgre version
+if($dbtype==1)
+if($typeid==1)
+$queryOneGroupTopSitesTraffic="
+    	 SELECT 
+	   site,
+	   sum(sizeinbytes) as s
+	 FROM scsq_quicktraffic 
+
+	 RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
+
+	 RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+
+	 RIGHT JOIN (SELECT 
+		       id,
+		       name 
+		     FROM scsq_groups 
+		     WHERE typeid=1 
+		       and id='".$currentgroupid."') 
+		     AS curgroup 
+	 ON scsq_aliasingroups.groupid=curgroup.id
+
+	 WHERE date>".$datestart." 
+	   AND date<".$dateend." 
+	   AND login IN (SELECT id from scsq_logins where id NOT IN (".$goodLoginsList.")) 
+	   AND ipaddress IN (SELECT id from scsq_ipaddress where id NOT IN (".$goodIpaddressList.")) 
+	   AND site NOT IN (".$goodSitesList.")
+	 GROUP BY site
+	 ORDER BY s desc 
+	 LIMIT ".$countTopSitesLimit." ";
+
 
 
 if($typeid==0)
@@ -2882,6 +4702,88 @@ $queryOneGroupTrafficByHours="
   GROUP BY d;";
 
 
+#postgre version
+if($dbtype==1)
+if($typeid==0)
+$queryOneGroupTrafficByHours="
+  SELECT 
+    cast(to_char(to_timestamp(tmp.date),'HH24') as int) as d,
+    sum(tmp.s) 
+  FROM (SELECT 
+	  date,
+	  sum(sizeinbytes) as s
+
+	FROM scsq_quicktraffic 
+
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    WHERE typeid=0 
+		      and id='".$currentgroupid."') 
+		    AS curgroup 
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (SELECT id from scsq_logins where id IN (".$goodLoginsList.")) as tmplogin ON tmplogin.id=scsq_quicktraffic.login
+	LEFT OUTER JOIN (select id from scsq_ipaddress where id IN (".$goodIpaddressList.")) as tmpipaddress ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  and date<".$dateend." 
+	  and tmplogin.id is  NULL 
+	  and tmpipaddress.id is  NULL
+          AND site NOT IN (".$goodSitesList.")
+	
+	GROUP BY date 
+	) 
+	AS tmp 
+
+  GROUP BY d;";
+
+
+#postgre version
+if($dbtype==1)
+if($typeid==1)
+$queryOneGroupTrafficByHours="
+  SELECT 
+    cast(to_char(to_timestamp(tmp.date),'HH24') as int) as d,
+    sum(tmp.s) 
+  FROM (SELECT 
+	  date,
+	  sum(sizeinbytes) as s
+	FROM scsq_quicktraffic 
+
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    WHERE typeid=1 
+		      and id='".$currentgroupid."') 
+		    AS curgroup 
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (SELECT id from scsq_logins where id IN (".$goodLoginsList.")) as tmplogin ON tmplogin.id=scsq_quicktraffic.login
+	LEFT OUTER JOIN (select id from scsq_ipaddress where id IN (".$goodIpaddressList.")) as tmpipaddress ON tmpipaddress.id=scsq_quicktraffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  and date<".$dateend." 
+	  and tmplogin.id is  NULL 
+	  and tmpipaddress.id is  NULL
+          AND site NOT IN (".$goodSitesList.")
+	
+	GROUP BY date 
+	) 
+	AS tmp 
+
+  GROUP BY d;";
+
 if($typeid==0)
 $queryOneGroupWhoDownloadBigFiles="
   SELECT 
@@ -2925,7 +4827,6 @@ $queryOneGroupWhoDownloadBigFiles="
 
   WHERE scsq_logins.id=tmp.login 
     and scsq_ipaddress.id=tmp.ipaddress
-  GROUP BY site
   ORDER BY sizeinbytes desc 
   LIMIT ".$countWhoDownloadBigFilesLimit.";";
 
@@ -2978,6 +4879,116 @@ $queryOneGroupWhoDownloadBigFiles="
 	  and tmpipaddress.id IS NULL
           AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	) 
+	as tmp
+
+	,scsq_logins,scsq_ipaddress 
+
+	WHERE scsq_logins.id=tmp.login 
+	  and scsq_ipaddress.id=tmp.ipaddress
+  order by sizeinbytes desc limit ".$countWhoDownloadBigFilesLimit.";";
+
+
+#postgre version
+if($dbtype==1)
+if($typeid==0)
+$queryOneGroupWhoDownloadBigFiles="
+  SELECT 
+    scsq_logins.name,
+    sizeinbytes,
+    scsq_ipaddress.name,
+    site,
+    login,
+    ipaddress 
+  FROM (SELECT 
+	  sizeinbytes,
+	  site,
+	  login,
+	  ipaddress 
+	FROM scsq_traffic
+
+	RIGHT JOIN (select * from scsq_alias where typeid=0) as listaliases  ON listaliases.tableid=scsq_traffic.login
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    WHERE typeid=0 
+		      and id='".$currentgroupid."') 
+		    AS curgroup 
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (select id,name from scsq_logins where id IN (".$goodLoginsList.")) as tmplogin ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (select id,name from scsq_ipaddress where id IN (".$goodIpaddressList.")) as tmpipaddress ON tmpipaddress.id=scsq_traffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  and date<".$dateend." 
+	  and tmplogin.id is NULL 
+	  and tmpipaddress.id IS NULL
+   	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+	) 
+	AS tmp, scsq_logins,scsq_ipaddress 
+
+  WHERE scsq_logins.id=tmp.login 
+    and scsq_ipaddress.id=tmp.ipaddress
+  
+  ORDER BY sizeinbytes desc 
+  LIMIT ".$countWhoDownloadBigFilesLimit.";";
+
+#postgre version
+if($dbtype==1)
+if($typeid==1)
+$queryOneGroupWhoDownloadBigFiles="
+  SELECT 
+    scsq_logins.name, 
+    sizeinbytes,
+    scsq_ipaddress.name, 
+    site,
+    login,
+    ipaddress 
+  FROM (SELECT 
+	  sizeinbytes,
+	  site,
+	  login,
+	  ipaddress 
+	FROM scsq_traffic
+
+	RIGHT JOIN (select * from scsq_alias where typeid=1) as listaliases  ON listaliases.tableid=scsq_traffic.ipaddress
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    where typeid=1
+		      and id='".$currentgroupid."') 
+		    as curgroup  
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 from scsq_logins 
+			 where id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id,
+			   name 
+			 from scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) 
+			 AS tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+	where date>".$datestart." 
+	  and date<".$dateend." 
+	  and tmplogin.id is NULL 
+	  and tmpipaddress.id IS NULL
+      AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
 	) 
 	as tmp
 
@@ -3094,6 +5105,105 @@ $queryOneGroupPopularSites="
   WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
   ORDER BY tmp.c desc 
   LIMIT ".$countPopularSitesLimit.";";
+
+#postgre version
+if($dbtype==1)
+if($typeid==0)
+$queryOneGroupPopularSites="
+  
+  SELECT 
+	  split_part(site,'/',1) AS st,
+	   sum(sizeinbytes) AS s,
+	  count(*) AS c
+	  
+	FROM scsq_traffic 
+
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_traffic.login
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    where typeid=0 
+		      and id='".$currentgroupid."') 
+		    as curgroup  
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) as tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL
+	  AND tmpipaddress.id is NULL
+       AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+ 
+	GROUP BY st
+
+  ORDER BY c desc 
+  LIMIT ".$countPopularSitesLimit.";";
+
+#разность запросов в typeid и ON listaliases.tableid=scsq_traffic.login(ipaddress). костыль 
+
+#postgre version
+if($dbtype==1)
+if($typeid==1)
+$queryOneGroupPopularSites="
+  
+  SELECT 
+	  split_part(site,'/',1) AS st,
+	   sum(sizeinbytes) AS s,
+	  count(*) AS c
+	  
+	FROM scsq_traffic 
+
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_traffic.ipaddress
+
+	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_groups 
+		    where typeid=1 
+		      and id='".$currentgroupid."') 
+		    as curgroup  
+	ON scsq_aliasingroups.groupid=curgroup.id
+
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_logins 
+			 WHERE id IN (".$goodLoginsList.")) 
+			 AS tmplogin 
+	ON tmplogin.id=scsq_traffic.login
+	LEFT OUTER JOIN (SELECT 
+			   id 
+			 FROM scsq_ipaddress 
+			 WHERE id IN (".$goodIpaddressList.")) as tmpipaddress 
+	ON tmpipaddress.id=scsq_traffic.ipaddress
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND tmplogin.id is NULL
+	  AND tmpipaddress.id is NULL
+       AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+      AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+ 
+	GROUP BY st
+
+  ORDER BY c desc 
+  LIMIT ".$countPopularSitesLimit.";";
+
 
 
 //querys for group reports end
@@ -3385,7 +5495,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 
 
 
-$result=mysqli_query($connection,$queryLoginsTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryLoginsTraffic);
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="numrow";
@@ -3393,7 +5503,7 @@ $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line
 $colr[3]="line1";
 $colr[4]="line3";
 
-$row = mysqli_fetch_array($resultmax,MYSQLI_NUM);
+$row = $ssq->fetch_array($resultmax);
 $collength[4]=$row[0];
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -3426,7 +5536,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=mysqli_query($connection,$queryIpaddressTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryIpaddressTraffic);
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="numrow";
@@ -3469,7 +5579,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 $colh[6]="<th>".$colhtext[6]."</th>";
 
-$result=mysqli_query($connection,$querySitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($querySitesTraffic);
 
 
 ///if($tmpLine[1]==443)
@@ -3523,7 +5633,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
 
-$result=mysqli_query($connection,$queryTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTopSitesTraffic);
 
 
 ///if($tmpLine[1]==443)
@@ -3568,7 +5678,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=mysqli_query($connection,$queryTopLoginsTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTopLoginsTraffic);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -3604,7 +5714,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=mysqli_query($connection,$queryTopIpTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTopIpTraffic);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -3632,11 +5742,11 @@ foreach (glob("../../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysqli_query($connection,$queryTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -3661,7 +5771,7 @@ $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 if($graphtype['trafficbyhours']==1)
 {
@@ -3752,11 +5862,11 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -3798,7 +5908,7 @@ $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 echo "<tr class=sortbottom>
 <td><b>".$_lang['stTOTAL']."</b></td>
@@ -3839,7 +5949,7 @@ $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysqli_query($connection,$queryOneLoginTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -3880,7 +5990,7 @@ $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysqli_query($connection,$queryOneLoginTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginTopSitesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -3910,11 +6020,11 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryOneLoginTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -3949,7 +6059,7 @@ echo "</tr>";
 $HourCounter++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 echo "<tr class=sortbottom>
 <td><b>".$_lang['stTOTAL']."</b></td>
@@ -3986,7 +6096,7 @@ $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysqli_query($connection,$queryOneIpaddressTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4027,7 +6137,7 @@ $colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
-$result=mysqli_query($connection,$queryOneIpaddressTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressTopSitesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4056,11 +6166,11 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryOneIpaddressTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressTrafficByHours);
 $totalmb=0;
 $HourCounter=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -4150,8 +6260,8 @@ $totalincachepc=0;
 $totaloutcachepc=0;
 
 
-$result=mysqli_query($connection,$queryLoginsTrafficWide,MYSQLI_USE_RESULT);
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+$result=$ssq->query($queryLoginsTrafficWide);
+while ($line = $ssq->fetch_array($result)) {
 
 
 if(($line[3]==1)&&($havemarker>0))
@@ -4282,8 +6392,8 @@ $totalincachepc=0;
 $totaloutcachepc=0;
 
 
-$result=mysqli_query($connection,$queryIpaddressTrafficWide,MYSQLI_USE_RESULT);
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+$result=$ssq->query($queryIpaddressTrafficWide);
+while ($line = $ssq->fetch_array($result)) {
 
 
 if(($line[3]==1)&&($havemarker>0))
@@ -4348,7 +6458,7 @@ $totaloutcachemb=$totaloutcachemb+$outcachemb;
 echo "</tr>";
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 echo "<tr class=sortbottom>";
 echo "<td>&nbsp;</td>";
@@ -4390,10 +6500,10 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryIpaddressTrafficWithResolve,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryIpaddressTrafficWithResolve);
 $numrow=1;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
@@ -4405,7 +6515,7 @@ $numrow++;
 $totalmb=$totalmb+$line[1];
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 echo "<tr class=sortbottom>
 <td>&nbsp;</td>
@@ -4452,7 +6562,7 @@ $colh[5]="<th>".$colhtext[5]."</th>";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
-$result=mysqli_query($connection,$queryPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryPopularSites);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -4494,7 +6604,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
 
-$result=mysqli_query($connection,$queryWhoVisitPopularSiteLogin,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryWhoVisitPopularSiteLogin);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line3','line0','0','')>line0</a>";
@@ -4530,7 +6640,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryWhoVisitPopularSiteIpaddress,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryWhoVisitPopularSiteIpaddress);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line3','line0','1','')>line0</a>";
@@ -4569,7 +6679,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
-$result=mysqli_query($connection,$queryWhoDownloadBigFiles,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryWhoDownloadBigFiles);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
@@ -4607,7 +6717,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryTrafficByPeriod,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByPeriod);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4641,7 +6751,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryVisitingWebsiteByTimeLogin,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryVisitingWebsiteByTimeLogin);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4671,7 +6781,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryVisitingWebsiteByTimeIpaddress,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryVisitingWebsiteByTimeIpaddress);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4701,7 +6811,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryGroupsTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryGroupsTraffic);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','line2','line0',3+line3,'')\">line0</a>";
@@ -4743,7 +6853,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryOneGroupTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupTraffic);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(8+3*$typeid,'".$dayormonth."','line2','line0',0+$typeid,'')\">line0</a>";
@@ -4815,9 +6925,9 @@ $totaloutcachemb=0;
 $totalincachepc=0;
 $totaloutcachepc=0;
 
-$result=mysqli_query($connection,$queryOneGroupTrafficWide,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupTrafficWide);
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 
 if(($line[3]==1)&&($havemarker>0))
@@ -4914,7 +7024,7 @@ echo "<td><b>".(round($totaloutcachemb/$totaltrafficmb*100,2))."</b></td>";
 
 echo "</tr>";
 echo "</table>";
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 }
 
@@ -4943,7 +7053,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 ///else
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
-$result=mysqli_query($connection,$queryOneGroupTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupTopSitesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -4973,11 +7083,11 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryOneGroupTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -5018,7 +7128,7 @@ echo "<tr class=sortbottom>
 
 echo "</table>";
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 }
 
@@ -5053,7 +7163,7 @@ $colh[5]="<th>".$colhtext[5]."</th>";
 ///else
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
-$result=mysqli_query($connection,$queryOneGroupWhoDownloadBigFiles,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupWhoDownloadBigFiles);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')\">line0</a>";
@@ -5090,7 +7200,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryHttpStatus,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryHttpStatus);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -5125,7 +7235,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryLoginsHttpStatus,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryLoginsHttpStatus);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line2','line0')>line0</a>";
@@ -5160,7 +7270,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryIpaddressHttpStatus,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryIpaddressHttpStatus);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(34,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line2','line0')>line0</a>";
@@ -5192,10 +7302,10 @@ echo "
     ".$_lang['stSITE']."
     </th>";
 
-$result=mysqli_query($connection,$queryOneLoginOneHttpStatus,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginOneHttpStatus);
 $numrow=1;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 
@@ -5205,7 +7315,7 @@ echo "</tr>";
 $numrow++;
     }
 echo "</tbody></table>";
-mysqli_free_result($result);
+$ssq->free_result($result);
 }
 
 /////////// ONE LOGIN ONE HTTP STATUS REPORT END
@@ -5227,10 +7337,10 @@ echo "
     ".$_lang['stSITE']."
     </th>";
 
-$result=mysqli_query($connection,$queryOneIpaddressOneHttpStatus,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressOneHttpStatus);
 $numrow=1;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 
@@ -5264,7 +7374,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryOneLoginIpTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginIpTraffic);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0','1','')>line0</a>";
@@ -5302,7 +7412,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryOneIpaddressLoginsTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressLoginsTraffic);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a>";
@@ -5340,7 +7450,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryCountIpaddressOnLogins,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryCountIpaddressOnLogins);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a>";
@@ -5375,7 +7485,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryCountLoginsOnIpaddress,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryCountLoginsOnIpaddress);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0','1','')>line0</a>";
@@ -5412,11 +7522,11 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryTrafficByPeriodDay,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByPeriodDay);
 
 $numrow=1;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 
 echo "<tr>";
@@ -5435,7 +7545,7 @@ echo "</tr>";
 $totalmb=$totalmb+$line[1];
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 echo "<tr class=sortbottom>
 <td>&nbsp;</td>
@@ -5470,11 +7580,11 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryTrafficByPeriodDayname,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByPeriodDayname);
 
 $numrow=1;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 if($line[0]=='0')
 $linevalue[7]=$line[1];
 if($line[0]=='1')
@@ -5493,7 +7603,7 @@ $linevalue[6]=$line[1];
 $line[1]=$line[1] / 1000000;
 $totalmb=$totalmb+$line[1];
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 echo "<tr>";
 echo "<td>1</td>";
 echo "<td>".$_lang['stMONDAY']."</td>";
@@ -5570,7 +7680,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryWhoVisitSiteOneHourLogin,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryWhoVisitSiteOneHourLogin);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(43,'".$dayormonth."','line2','line0','0','".$currenthour."')>line0</a>";
@@ -5605,7 +7715,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=mysqli_query($connection,$queryWhoVisitSiteOneHourIpaddress,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryWhoVisitSiteOneHourIpaddress);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(44,'".$dayormonth."','line2','line0','1','".$currenthour."')>line0</a>";
@@ -5637,7 +7747,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryOneLoginOneHourTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginOneHourTraffic);
 
 
 ///if($tmpLine[1]==443)
@@ -5676,7 +7786,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryOneIpaddressOneHourTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressOneHourTraffic);
 
 
 ///if($tmpLine[1]==443)
@@ -5715,7 +7825,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryMimeTypesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryMimeTypesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(58,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
@@ -5745,7 +7855,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryOneLoginMimeTypesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginMimeTypesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(59,'".$dayormonth."','".$currentloginid."','line0',0,'".$currentlogin."')\">line0</a>";
@@ -5777,7 +7887,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryOneIpaddressMimeTypesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressMimeTypesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="<a href=\"javascript:GoPartlyReports(60,'".$dayormonth."','".$currentipaddressid."','line0',0,'".$currentipaddress."')\">line0</a>";
@@ -5808,7 +7918,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryDomainZonesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryDomainZonesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -5832,11 +7942,11 @@ foreach (glob("../../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysqli_query($connection,$queryTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -5861,7 +7971,7 @@ $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 if($graphtype['trafficbyhours']==1)
 {
@@ -5949,11 +8059,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryTopLoginsTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTopLoginsTraffic);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -5969,7 +8079,7 @@ break;
 $numrow++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top logins end
 
@@ -6018,11 +8128,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryTopIpTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTopIpTraffic);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -6038,7 +8148,7 @@ break;
 $numrow++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 //top ip end
 
 /// pchart top ip
@@ -6089,11 +8199,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTopSitesTraffic);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -6112,7 +8222,7 @@ break;
 $numrow++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top IP end
 
@@ -6165,11 +8275,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryPopularSites);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -6184,7 +8294,7 @@ break;
 
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top popular end
 
@@ -6325,7 +8435,7 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryTrafficByHoursLogins,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByHoursLogins);
 
 
 $HourCounter=0;
@@ -6349,11 +8459,11 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
+while($line = $ssq->fetch_array($result)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 $k=0;
 
 while($k<$j)
@@ -6500,7 +8610,7 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryTrafficByHoursIpaddress,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByHoursIpaddress);
 
 $HourCounter=0;
 $totalmb=0;
@@ -6522,12 +8632,12 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
+while($line = $ssq->fetch_array($result)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 $k=0;
 
 while($k<$j)
@@ -6602,10 +8712,10 @@ echo "
     </th>
 </tr>
 ";
-$result=mysqli_query($connection,$queryCategorySitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryCategorySitesTraffic);
 $numrow=1;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 
@@ -6622,7 +8732,7 @@ echo "</tr>";
 $numrow++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 echo "<tr class=sortbottom>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -6727,7 +8837,7 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryTrafficByHoursLoginsOneSite,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByHoursLoginsOneSite);
 
 $HourCounter=0;
 $totalmb=0;
@@ -6749,11 +8859,11 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
+while($line = $ssq->fetch_array($result)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 $k=0;
 
 while($k<$j)
@@ -6900,7 +9010,7 @@ echo "
 </tr>
 ";
 
-$result=mysqli_query($connection,$queryTrafficByHoursIpaddressOneSite,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryTrafficByHoursIpaddressOneSite);
 
 $HourCounter=0;
 $totalmb=0;
@@ -6922,11 +9032,11 @@ $i++;
 @$arrayLine="";
 $j=0;
 
-while($line = mysqli_fetch_array($result,MYSQLI_NUM)){
+while($line = $ssq->fetch_array($result)){
 @$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
 $j++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 $k=0;
 
 while($k<$j)
@@ -7014,7 +9124,7 @@ $colh[5]="<th>".$colhtext[5]."</th>";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
-$result=mysqli_query($connection,$queryOneGroupPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupPopularSites);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -7063,7 +9173,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
-$result=mysqli_query($connection,$queryOneLoginPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginPopularSites);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -7110,7 +9220,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
-$result=mysqli_query($connection,$queryOneIpaddressPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressPopularSites);
 
 $colr[0]=1;
 $colr[1]="numrow";
@@ -7151,7 +9261,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $colh[5]="<th>".$colhtext[5]."</th>";
 
-$result=mysqli_query($connection,$queryOneMime,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneMime);
 
 $colr[1]="numrow";
 $colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
@@ -7187,7 +9297,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryOneMimeOneLogin,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneMimeOneLogin);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -7220,7 +9330,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=mysqli_query($connection,$queryOneMimeOneIpaddress,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneMimeOneIpaddress);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -7245,11 +9355,11 @@ foreach (glob("../../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysqli_query($connection,$queryOneLoginTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -7274,7 +9384,7 @@ $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 if($graphtype['trafficbyhours']==1)
 {
@@ -7360,11 +9470,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryOneLoginTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginTopSitesTraffic);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -7382,7 +9492,7 @@ break;
 
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top sites end
 
@@ -7435,11 +9545,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryOneLoginPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneLoginPopularSites);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -7454,7 +9564,7 @@ break;
 
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top popular end
 
@@ -7514,11 +9624,11 @@ foreach (glob("../../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysqli_query($connection,$queryOneIpaddressTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -7542,7 +9652,7 @@ while($HourCounter<24)
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 if($graphtype['trafficbyhours']==1)
 {
 // Dataset definition 
@@ -7631,11 +9741,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryOneIpaddressTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressTopSitesTraffic);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -7653,7 +9763,7 @@ break;
 
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top sites end
 
@@ -7707,11 +9817,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryOneIpaddressPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneIpaddressPopularSites);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -7726,7 +9836,7 @@ break;
 
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top popular end
 
@@ -7782,11 +9892,11 @@ foreach (glob("../../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=mysqli_query($connection,$queryOneGroupTrafficByHours,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupTrafficByHours);
 
 $HourCounter=0;
 $totalmb=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 while($HourCounter<24)
 {
@@ -7810,7 +9920,7 @@ while($HourCounter<24)
 $arrHourMb[$HourCounter]=0;
 $HourCounter++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 if($graphtype['trafficbyhours']==1)
 {
 // Dataset definition 
@@ -7895,11 +10005,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryOneGroupTopSitesTraffic,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupTopSitesTraffic);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($line[3]=='2')
 $line[0]=$line[2];
@@ -7917,7 +10027,7 @@ break;
 
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top sites end
 
@@ -7967,11 +10077,11 @@ $arrLine1[$numrow-1]=0;
 $numrow++;
 }
 
-$result=mysqli_query($connection,$queryOneGroupPopularSites,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryOneGroupPopularSites);
 $numrow=1;
 $totalmb=0;
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
@@ -7986,7 +10096,7 @@ break;
 
 $numrow++;
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //top popular end
 
@@ -8040,7 +10150,7 @@ $totalmb=0;
 //PARSE SQL
 
 
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
+while ($line = $ssq->fetch_array($result)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / 1000000;
@@ -8108,7 +10218,7 @@ echo $colf[$i];
 echo "	</tr>";
 
 echo "</table>";
-mysqli_free_result($result);
+$ssq->free_result($result);
 ///universal table end
 }
 
@@ -8249,40 +10359,55 @@ if(isset($_POST['submit']))
 {
 echo '<script src="../../javascript/navigator.js" type="text/javascript"></script>';
 
+if($dbtype==0)
 	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE userlogin='".mysql_real_escape_string($_POST['userlogin'])."' LIMIT 1";
-	$result=mysqli_query($connection,$query, MYSQLI_USE_RESULT);
 
-	$row=mysqli_fetch_assoc($result);
+if($dbtype==1)
+	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE userlogin='".pg_escape_string($_POST['userlogin'])."' LIMIT 1";
+
+	$result=$ssq->query($query);
+
+	$row=$ssq->fetch_array($result);
 
 
 	
-	if(!isset($row['id']))
+	if(!isset($row[0]))
 		{		
-			mysqli_free_result($result);
+			$ssq->free_result($result);
+
+if($dbtype==0)
 			$query = "SELECT id, password,active,typeid FROM scsq_groups WHERE userlogin='".mysql_real_escape_string($_POST['userlogin'])."' LIMIT 1";
-			$result=mysqli_query($connection,$query, MYSQLI_USE_RESULT);
-			$row=mysqli_fetch_assoc($result);
+
+if($dbtype==1)
+			$query = "SELECT id, password,active,typeid FROM scsq_groups WHERE userlogin='".pg_escape_string($_POST['userlogin'])."' LIMIT 1";
+
+
+
+			$result=$ssq->query($query);
+			$row=$ssq->fetch_array($result);
 			$groupquery=1; //признак что сработал групповой запрос
-			
+
+		
 		}
 
-		if($row['password'] == md5(md5($_POST['password'])) && $row['active'] == 1)
+	#	if($row['password'] == md5(md5($_POST['password'])) && $row['active'] == 1)
+	if($row[1] == md5(md5($_POST['password'])) && $row[2] == 1 && $row[0]>0)
 
 		    {
        			
 		        $hash = md5(generateCode(10));
-			mysqli_free_result($result);
+			$ssq->free_result($result);
 			if($groupquery==1)
-				$query = "UPDATE scsq_groups SET hash='".$hash."' WHERE id=".$row['id'].";";
+				$query = "UPDATE scsq_groups SET hash='".$hash."' WHERE id=".$row[0].";";
 			else
-				$query = "UPDATE scsq_alias SET hash='".$hash."' WHERE id=".$row['id'].";";
+				$query = "UPDATE scsq_alias SET hash='".$hash."' WHERE id=".$row[0].";";
 
-			$result=mysqli_query($connection,$query);
-     
+			$result=$ssq->query($query);
+    
 
 			# set cookie
 
-			setcookie("id", $row['id'], 0);
+			setcookie("id", $row[0], 0);
 
 			setcookie("hash", $hash, 0);
 
@@ -8293,25 +10418,27 @@ echo '<script src="../../javascript/navigator.js" type="text/javascript"></scrip
 			setcookie("typeid", $row['typeid'], 0);
 			
 
-			mysqli_free_result($result);
+			$ssq->free_result($result);
 
 			if($groupquery==1)
 			{
-			setcookie("tableid", $row['id'], 0);
+			setcookie("tableid", $row[0], 0);
 
 
-			header("Location: reports.php?srv=0&id=25&date=".$querydate."&dom=day&login=&groupname=&typeid=".$row['typeid']."&group=".$row['id'].""); exit();
+			header("Location: reports.php?srv=0&id=25&date=".$querydate."&dom=day&login=&groupname=&typeid=".$row['typeid']."&group=".$row[0].""); exit();
 			}
 			
 			else		
 			{
-			if($row['typeid']==0){
-				setcookie("tableid", $row['tableid'], 0);
+			if($row[4]==0){
+	#			setcookie("tableid", $row['tableid'], 0);
+				setcookie("tableid", $row[3], 0);
+	
 				header("Location: reports.php?srv=0&id=8&date=".$querydate."&dom=day&login=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
 			}			
-			if($row['typeid']==1)
+			if($row[4]==1)
 			{
-				setcookie("tableid", $row['tableid'], 0);
+				setcookie("tableid", $row[3], 0);
 				header("Location: reports.php?srv=0&id=11&date=".$querydate."&dom=day&ip=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
 			}
 			}
@@ -8363,7 +10490,7 @@ echo '
 
 
 
-mysqli_free_result($result);
+$ssq->free_result($result);
 
 //}
 

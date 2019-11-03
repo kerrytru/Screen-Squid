@@ -3,7 +3,9 @@
 ?>
 
 <!doctype html public "-//W3C//DTD HTML 3.2 Final//EN">
-<?php include("config.php"); ?>
+<?php include("config.php"); 
+
+?>
 <html>
 <head>
 <meta http-Equiv="Cache-Control" Content="no-cache">

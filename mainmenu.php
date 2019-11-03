@@ -1,5 +1,5 @@
 <?php 
-#build 20170105
+#build 20191021
 ?>
 <html>
 <head>
@@ -76,6 +76,30 @@ parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+pa
 <br />
 <?php
 $srv=0;
+
+$addr=$address[$srv];
+$usr=$user[$srv];
+$psw=$pass[$srv];
+$dbase=$db[$srv];
+$dbtype=$srvdbtype[$srv];
+
+$variableSet = array();
+$variableSet['addr']=$addr;
+$variableSet['usr']=$usr;
+$variableSet['psw']=$psw;
+$variableSet['dbase']=$dbase;
+$variableSet['dbtype']=$dbtype;
+
+#в зависимости от типа БД, подключаем разные модули
+if($dbtype==0)
+include("lib/dbDriver/mysqlmodule.php");
+
+if($dbtype==1)
+include("lib/dbDriver/pgmodule.php");
+
+$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
+
 for($i=0;$i<count($srvname);$i++)
 {
 echo "
@@ -126,8 +150,6 @@ echo "
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",50)\">".$_lang['stTRAFFICBYHOURSLOGINS']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",51)\">".$_lang['stTRAFFICBYHOURSIPADDRESS']."</a></div>
 <div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",52)\">".$_lang['stTRAFFICBYCATEGORIES']."</a></div>
-<div class='linkindented1'><a href=\"javascript:GoReport(".$srv.",64)\">".$_lang['stSITESVISITORS']."</a></div>
-
 </div>
 <!--reports-->
 
@@ -154,22 +176,17 @@ echo "
 <div class='linkindented1'><a href=\"right.php?srv=".$srv."&id=7\" target=right>".$_lang['stMODULEMANAGER']."</a></div>
 ";
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
 
-$connection=mysqli_connect("$addr","$usr","$psw","$dbase");
 
 $queryModules="select name from scsq_modules order by name asc;";
 
-$result=mysqli_query($connection,$queryModules,MYSQLI_USE_RESULT);
+$result=$ssq->query($queryModules);
 
-while($line = mysqli_fetch_row($result)) {
+while($line = $ssq->fetch_array($result)) {
 
 echo "<div class='linkindented1'><a href=\"modules/".$line[0]."/index.php\" target=right>".$line[0]."</a></div>";
 }
-mysqli_free_result($result);
+$ssq->free_result($result);
 echo "
 
 </div>
