@@ -678,7 +678,7 @@ $querySitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
 	 case 
-		when (concat('',(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1)) )=(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1))) then 1 else 2 
+		when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]') then 1 else 2 
 	 end,	
 	 '',
 	 tmp2.cat
@@ -769,7 +769,7 @@ $queryTopSitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
 	 case 
-		when (concat('',(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1)) )=(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1))) then 1 else 2 
+		when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]') then 1 else 2 
 	 end
 	   
   FROM (SELECT 
@@ -804,6 +804,7 @@ $queryTopSitesTraffic="
   ORDER BY tmp2.s desc
   LIMIT ".$countTopSitesLimit." ";
 
+//echo $queryTopSitesTraffic;
 
 #mysql version
 $queryTopLoginsTraffic="
@@ -2677,7 +2678,7 @@ $queryWhoVisitPopularSiteLogin="
 	
 	AND 	  (case
 				when (".$currentloginid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentloginid."=2) and (reverse(split_part(reverse(split_part(site,'/',1)),'.',2))) ='".$currentsite."' then TRUE
+				when (".$currentloginid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
@@ -3060,7 +3061,7 @@ $queryWhoVisitPopularSiteIpaddress="
 	
 	AND 	  (case
 				when (".$currentipaddressid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentipaddressid."=2) and (reverse(split_part(reverse(split_part(site,'/',1)),'.',2))) ='".$currentsite."' then TRUE
+				when (".$currentipaddressid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
