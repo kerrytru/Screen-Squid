@@ -1,18 +1,18 @@
 #!/usr/bin/perl
 
-#build 20191024
+#build 20191110
 
 use DBI; # DBI  Perl!!!
 #=======================CONFIGURATION BEGIN============================
-my $dbtype = "1"; #type of db - 0 - MySQL, 1 - PostGRESQL
+my $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
 
 #mysql default config
 if($dbtype==0){
-my $host = "localhost"; # host s DB
-my $port = "3306"; # port DB
-my $user = "mysql-user"; # username k DB
-my $pass = "pass"; # pasword k DB
-my $db = "test4"; # name DB
+$host = "localhost"; # host s DB
+$port = "3306"; # port DB
+$user = "mysql-user"; # username k DB
+$pass = "pass"; # pasword k DB
+$db = "test"; # name DB
 }
 #postgresql default config
 if($dbtype==1){
@@ -20,7 +20,7 @@ $host = "localhost"; # host s DB
 $port = "5432"; # port DB
 $user = "postgres"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test4"; # name DB
+$db = "test"; # name DB
 }
 #==========================================================
 my $count_lines_for_one_insert=10000; 
