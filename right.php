@@ -1,6 +1,8 @@
 <?php
 #build 20170501
 
+
+
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
@@ -84,6 +86,12 @@ if($dbtype==1)
 include("lib/dbDriver/pgmodule.php");
 
 $ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
+#пустой запрос, который покажет состояние связи
+if(!$ssq->query("select count(1) from scsq_traffic;"))
+$connectionStatus="error";
+else
+$connectionStatus="ok";
 
 
 if(!isset($_GET['id']))
@@ -1294,7 +1302,7 @@ echo "
 
          <td>".$num."</td>
 
-         <td><a href=\"modules/".$file."/index.php\">".$file."</a></td>
+         <td><a href=\"modules/".$file."/index.php?srv=".$srv."\">".$file."</a></td>
          <td>".$module->GetDesc()."</td>
          <td><a href=\"right.php?srv=".$srv."&id=7&actid=10&mod=".$file."\">".$_lang['stINSTALL']."</a></td>
          <td><a href=\"right.php?srv=".$srv."&id=7&actid=11&mod=".$file."\">".$_lang['stUNINSTALL']."</a></td>
@@ -1306,26 +1314,27 @@ $num++;
 echo "	</table>
    ";
 
+		if(isset($_GET['actid']))
+		{
+			if($_GET['actid'] == 10) ///установить
+			{
+			
+			$test = new $_GET['mod']($variableSet);
+			echo $test->Install();
+				
 
-	if($_GET['actid'] == 10) ///установить
-	{
-	
-	$test = new $_GET['mod']($variableSet);
-	echo $test->Install();
-		
+			} //if($_GET['actid'] == 10) 
+			
+			if($_GET['actid'] == 11) ///удалить
+			{
+			
+			$test = new $_GET['mod']($variableSet);	
+			$test->Uninstall();
+				
 
-	} //if($_GET['actid'] == 10) 
- 	
-	if($_GET['actid'] == 11) ///удалить
-	{
-	
-	$test = new $_GET['mod']($variableSet);	
-	$test->Uninstall();
-		
+			} //if($_GET['actid'] == 11) 
 
-	} //if($_GET['actid'] == 11) 
-
-
+		} //if(isset($_GET['actid']))
                   
                   
 

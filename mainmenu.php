@@ -184,7 +184,7 @@ $result=$ssq->query($queryModules);
 
 while($line = $ssq->fetch_array($result)) {
 
-echo "<div class='linkindented1'><a href=\"modules/".$line[0]."/index.php\" target=right>".$line[0]."</a></div>";
+echo "<div class='linkindented1'><a href=\"modules/".$line[0]."/index.php?srv=".$srv."\" target=right>".$line[0]."</a></div>";
 }
 $ssq->free_result($result);
 echo "
