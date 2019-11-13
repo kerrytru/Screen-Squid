@@ -1,0 +1,8 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Module for categorize web-sites";
+
+
+?>

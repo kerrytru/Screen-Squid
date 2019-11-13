@@ -1,5 +1,5 @@
 <?php
-#20191024
+#20191113
 
 class Categorylist
 {
@@ -10,11 +10,15 @@ function __construct($variables){ //
     
 	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
+	include("langs/".$this->vars['language']); #подтянем файл языка
+  	
+	$this->lang = $_lang;
+
 }
 
   function GetDesc()
   {
-      return 'Модуль категорий сайтов'; # TODO добавить в lang
+      return $this->lang['stMODULEDESC']; 
   }
 
 

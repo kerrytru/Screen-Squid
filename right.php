@@ -77,6 +77,7 @@ $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 $variableSet['dbtype']=$dbtype;
+$variableSet['language']=$language;
 
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)

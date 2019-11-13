@@ -1,5 +1,5 @@
 <?php
-#build 20191111
+#build 20191113
 
 class LDAPClient
 {
@@ -7,16 +7,22 @@ class LDAPClient
 var $ldap_conn = false;
 
 function __construct($variables){ // 
-  
+
+	
     $this->vars = $variables;
-  
+
+	
   	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 	
+	include("langs/".$this->vars['language']); #подтянем файл языка
+  	
+	$this->lang = $_lang;
 }
 
   function GetDesc()
   {
-      return 'Модуль синхронизации с LDAP'; # TODO добавить в lang
+	  
+      return $this->lang['stMODULEDESC']; 
   }
 
   function GetConnectionLDAP()

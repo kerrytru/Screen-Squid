@@ -66,7 +66,7 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idRe
 include("../../config.php");
 include("module.php");
 include_once("../../lang/$language");
-#include_once("lang/$language");
+include_once("langs/$language");
 
 
 

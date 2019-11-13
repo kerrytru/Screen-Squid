@@ -2,6 +2,7 @@
 #build 20191111
 
 
+
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
@@ -68,8 +69,8 @@ include("../../config.php");
 
 include("config.php");
 include("module.php");
-include_once("../../lang/$language");
-#include_once("lang/$language");
+include("../../lang/$language");
+include("lang/$language");
 
 
 $addr=$address[$srv];
@@ -88,6 +89,8 @@ $variableSet['ldapserver']=$ldapserver;
 $variableSet['ldapuser']=$ldapuser;
 $variableSet['ldappass']=$ldappass;
 $variableSet['ldaptree']=$ldaptree;
+
+$variableSet['language']=$language;
 
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)

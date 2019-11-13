@@ -1,0 +1,26 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Quotas manager module";
+
+$_lang['stQUOTASMODULE'] = "Module Quotas";
+
+$_lang['stQUOTASCURRENT']="Cur. daily quota (MB)";
+$_lang['stQUOTASDAY']="Daily quota (MB)";
+$_lang['stQUOTASMONTH']="Monthly quota (MB)";
+
+$_lang['stQUOTASADDQUOTA']="Add quota";
+$_lang['stQUOTASFORMADDQUOTA']="Form to add quota";
+$_lang['stQUOTASADDED']="1 quota added";
+$_lang['stQUOTASUPDATED']="1 quota updated";
+$_lang['stQUOTASDELETED']="1 quota deleted";
+$_lang['stQUOTASSTATUS']="Status";
+$_lang['stQUOTASACTIVE']="Active?";
+$_lang['stQUOTASTRAFFICDAY']="Daily traffic (MB)";
+$_lang['stQUOTASTRAFFICMONTH']="Monthly traffic (MB)";
+
+$_lang['stQUOTASEXCLUDE']="Exclude used aliases";
+$_lang['stREFRESH']="Refresh";
+
+?>
