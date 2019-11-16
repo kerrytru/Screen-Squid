@@ -4,5 +4,26 @@
 
 $_lang['stMODULEDESC'] = "LDAP sync module";
 
+$_lang['stLDAPSYNCHRONIZETOLDAP'] = "Get CN from LDAP";
 
+$_lang['stLDAPCREATEDUPDATED']="Created/updated";
+$_lang['stLDAPALIASES']="aliases";
+
+$_lang['stLDAPATTENTIONMESSAGE'] = "Before click link <b>Get CN from LDAP</b>, you should update config values in ../LDAPClient/config.php.";
+$_lang['stLDAPIMPORTANTVARIABLES']="Required parameters:";
+$_lang['stLDAPVARIABLE']="Parameter";
+$_lang['stLDAPDEFAULTVALUE']="Default value";
+$_lang['stLDAPCOMMENT']="Comment";
+$_lang['stLDAPHOST']="\$ldapserver";
+$_lang['stLDAPHOSTVALUE']="'localhost'";
+$_lang['stLDAPHOSTCOMMENT']="LDAP host";
+$_lang['stLDAPUSER']="\$ldapuser";
+$_lang['stLDAPUSERVALUE']="cn=Manager,dc=my-domain,dc=com'";
+$_lang['stLDAPUSERCOMMENT']="LDAP username to connect";
+$_lang['stLDAPPASS']="\$ldappass";
+$_lang['stLDAPPASSVALUE']="'pass'";
+$_lang['stLDAPPASSCOMMENT']="LDAP username password";
+$_lang['stLDAPBRANCH']="\$ldaptree";
+$_lang['stLDAPBRANCHVALUE']="\"OU=Users,DC=my-domain,DC=com\"";
+$_lang['stLDAPBRANCHCOMMENT']="Branch to search for uid";
 ?>

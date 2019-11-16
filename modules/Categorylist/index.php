@@ -64,7 +64,7 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idRe
 include("../../config.php");
 include("module.php");
 include_once("../../lang/$language");
-#include_once("lang/$language");
+include("langs/$language");
 
 
 
@@ -90,7 +90,7 @@ include("../../lib/dbDriver/pgmodule.php");
 
 $start=microtime(true);
       
-echo "<h2>Модуль установлен. Чуть позже мы добавим на эту страницу статистику...</h2>";
+echo "<h2>".$_lang['stCATWAIT']."</h2>";
          
 
 

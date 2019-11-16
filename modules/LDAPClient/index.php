@@ -1,7 +1,8 @@
 <?php
 #build 20191111
 
-
+#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
+date_default_timezone_set(date_default_timezone_get());
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -70,7 +71,7 @@ include("../../config.php");
 include("config.php");
 include("module.php");
 include("../../lang/$language");
-include("lang/$language");
+include("langs/$language");
 
 
 $addr=$address[$srv];
@@ -104,42 +105,24 @@ $ldap_client = new LDAPClient($variableSet);
 
 $ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
+if($enableNofriends==1) {
+  $friends=implode("','",explode(" ", $goodLogins));
+  $friendsTmp="where name in  ('".$friends."')";
+  $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
+  $result=$ssq->query($sqlGetFriendsId);
+  while ($fline = $ssq->fetch_array($result)) {
+    $goodLoginsList=$goodLoginsList.",".$fline[0];
+  }
+}
+else
+$goodLoginsList=0;
 
 if(!isset($_GET['id']))
-echo "<h2>".$_lang['stQUOTASMODULE']."</h2><br />";
+echo "<h2>".$_lang['stMODULEDESC']."</h2><br />";
 
 $start=microtime(true);
 
 
-   
- 
-            if(isset($_GET['actid'])) //action ID.
-              $actid=$_GET['actid'];
-            else
-              $actid=0;
-
-
-              if(isset($_GET['quotaid'])) //quota ID из таблицы scsq_mod_quotas для редактирования/удаления quota.
-                $quotaid=$_GET['quotaid'];
-              else
-                $quotaid=0;
-
-	      $aliasid=$_POST['aliasid'];
-	      $quotaday=$_POST['quotaday']+0;
-	      $quotamonth=$_POST['quotamonth']+0;
-
-	      $sumday=$_POST['sumday'];
-	      $summonth=$_POST['summonth'];
-
-              if(isset($_POST['quota'])) // 
-                $quota=$_POST['quota']+0;
-              else
-                $quota=0;
-
-              if(isset($_POST['active'])) //  
-                $active=1;
-              else
-                $active=0;
 
 
 
@@ -155,8 +138,9 @@ $start=microtime(true);
 
 
 
-echo "<a href=index.php?srv=".$srv."&actid=1 target=right>Синхронизировать c LDAP</a><br />";
+echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHRONIZETOLDAP']."</a><br />";
 			}
+		if(isset($actid))
           if($actid==1) {
 
          $result=$ssq->query($queryAllLogins);
@@ -195,7 +179,7 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>Синхронизир
           }
 			$ssq->free_result($result);
 
-echo "создано/обновлено ".$numrow." алиасов";
+echo $_lang['stLDAPCREATEDUPDATED']." ".$numrow." ".$_lang['stLDAPALIASES'];
 
 
 			  
@@ -203,73 +187,74 @@ echo "создано/обновлено ".$numrow." алиасов";
 
             } //end actid=1
 
-      
+
+     
 echo "<br /><br/>
-Прежде чем нажать кнопку <b>Синхронизировать</b>, необходимо занести  параметры в файл ../LDAPClient/config.php.
-<br /><br />Необходимые параметры:
+".$_lang['stLDAPATTENTIONMESSAGE']."
+<br /><br />".$_lang['stLDAPIMPORTANTVARIABLES']."
 <br /><br />
 <table id=report_table_id_group border=1 class=sortable>
 <tr>
 	<th class=unsortable>
-		Переменная
+		".$_lang['stLDAPVARIABLE']."
 	</th>
 
 	<th class=unsortable>
-		Значение по умолчанию
+		".$_lang['stLDAPDEFAULTVALUE']."
 	</th>
 	<th class=unsortable>
-		Комментарий
+		".$_lang['stLDAPCOMMENT']."
 	</th>
 
 </tr>
 <tr>
 	<td>
-\$ldapserver
+		".$_lang['stLDAPHOST']."
 	</td>
 
 	<td>
-		'localhost';
+		".$_lang['stLDAPHOSTVALUE']."
 	</td>
 	<td>
-		//хост с LDAP
-	</td>
-
-</tr>
-<tr>
-	<td>
-\$ldapuser
-	</td>
-	<td>
-		'cn=Manager,dc=my-domain,dc=com';
-	</td>
-	<td>
-		//Имя пользователя от имени которого можно подключится
+		".$_lang['stLDAPHOSTCOMMENT']."
 	</td>
 
 </tr>
 <tr>
 	<td>
-		\$ldappass
-	</td>
-
-	<td>
-		'pass';
+		".$_lang['stLDAPUSER']."
 	</td>
 	<td>
-		//Пароль пользователя
+		".$_lang['stLDAPUSERVALUE']."
+	</td>
+	<td>
+		".$_lang['stLDAPUSERCOMMENT']."
 	</td>
 
 </tr>
 <tr>
 	<td>
-\$ldaptree
+		".$_lang['stLDAPPASS']."
 	</td>
 
 	<td>
-		\"OU=Users,DC=my-domain,DC=com\"
+		".$_lang['stLDAPPASSVALUE']."
 	</td>
 	<td>
-		//Ветка в которой искать
+		".$_lang['stLDAPPASSCOMMENT']."
+	</td>
+
+</tr>
+<tr>
+	<td>
+		".$_lang['stLDAPBRANCH']."
+	</td>
+
+	<td>
+		".$_lang['stLDAPBRANCHVALUE']."
+	</td>
+	<td>
+		".$_lang['stLDAPBRANCHCOMMENT']."
 	</td>
 	
 </tr>

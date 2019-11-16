@@ -5,4 +5,6 @@
 $_lang['stMODULEDESC'] = "Module for categorize web-sites";
 
 
+$_lang['stCATWAIT'] = "Module has been installed. Front page of module is under construction, but module worked!";
+
 ?>

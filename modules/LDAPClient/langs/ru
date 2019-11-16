@@ -4,7 +4,27 @@
 
 $_lang['stMODULEDESC'] = "Модуль синхронизации с LDAP";
 
+$_lang['stLDAPSYNCHRONIZETOLDAP'] = "Синхронизировать с LDAP";
 
+$_lang['stLDAPCREATEDUPDATED']="Создано/обновлено";
+$_lang['stLDAPALIASES']="алиасов";
 
+$_lang['stLDAPATTENTIONMESSAGE'] = "Прежде чем нажать кнопку <b>Синхронизировать</b>, необходимо занести  параметры в файл ../LDAPClient/config.php.";
+$_lang['stLDAPIMPORTANTVARIABLES']="Необходимые параметры:";
+$_lang['stLDAPVARIABLE']="Переменная";
+$_lang['stLDAPDEFAULTVALUE']="Значение по умолчанию";
+$_lang['stLDAPCOMMENT']="Комментарий";
+$_lang['stLDAPHOST']="\$ldapserver";
+$_lang['stLDAPHOSTVALUE']="'localhost'";
+$_lang['stLDAPHOSTCOMMENT']="хост с LDAP";
+$_lang['stLDAPUSER']="\$ldapuser";
+$_lang['stLDAPUSERVALUE']="cn=Manager,dc=my-domain,dc=com'";
+$_lang['stLDAPUSERCOMMENT']="Имя пользователя от имени которого можно подключится";
+$_lang['stLDAPPASS']="\$ldappass";
+$_lang['stLDAPPASSVALUE']="'pass'";
+$_lang['stLDAPPASSCOMMENT']="Пароль пользователя";
+$_lang['stLDAPBRANCH']="\$ldaptree";
+$_lang['stLDAPBRANCHVALUE']="\"OU=Users,DC=my-domain,DC=com\"";
+$_lang['stLDAPBRANCHCOMMENT']="Ветка в которой искать";
 
 ?>
