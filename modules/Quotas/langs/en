@@ -23,4 +23,7 @@ $_lang['stQUOTASTRAFFICMONTH']="Monthly traffic (MB)";
 $_lang['stQUOTASEXCLUDE']="Exclude used aliases";
 $_lang['stREFRESH']="Refresh";
 
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
 ?>

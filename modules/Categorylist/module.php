@@ -87,9 +87,8 @@ function __construct($variables){ //
 		
 
 
-		echo "Установлено<br /><br />";
-		echo "<a href=right.php?srv=".$srv."&id=7 target=right>".$_lang['stBACK']."</a>";
-   }
+		echo "".$this->lang['stINSTALLED']."<br /><br />";
+ }
   
  function Uninstall() #добавить LANG
   {
@@ -119,9 +118,8 @@ function __construct($variables){ //
 
 		$this->ssq->free_result($result);
 
-		echo "Удалено<br /><br />";
-		echo "<a href=right.php?srv=".$srv."&id=7 target=right>".$_lang['stBACK']."</a>";
-
+		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
+		
   }
 
 

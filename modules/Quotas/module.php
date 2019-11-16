@@ -250,9 +250,8 @@ $queryOneAliasTraffic="
 		
 
 
-		echo "Установлено<br /><br />";
-		echo "<a href=right.php?srv=".$srv."&id=7 target=right>".$_lang['stBACK']."</a>";
-   }
+		echo "".$this->lang['stINSTALLED']."<br /><br />";
+	 }
   
  function Uninstall() #добавить LANG
   {
@@ -272,8 +271,7 @@ $queryOneAliasTraffic="
 
 		$this->ssq->free_result($result);
 
-		echo "Удалено<br /><br />";
-		echo "<a href=right.php?srv=".$srv."&id=7 target=right>".$_lang['stBACK']."</a>";
+		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 
   }
 

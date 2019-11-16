@@ -27,4 +27,7 @@ $_lang['stLDAPBRANCH']="\$ldaptree";
 $_lang['stLDAPBRANCHVALUE']="\"OU=Users,DC=my-domain,DC=com\"";
 $_lang['stLDAPBRANCHCOMMENT']="Ветка в которой искать";
 
+$_lang['stINSTALLED']="Установлено";
+$_lang['stUNINSTALLED']="Удалено";
+
 ?>

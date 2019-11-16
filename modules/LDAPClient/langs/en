@@ -26,4 +26,8 @@ $_lang['stLDAPPASSCOMMENT']="LDAP username password";
 $_lang['stLDAPBRANCH']="\$ldaptree";
 $_lang['stLDAPBRANCHVALUE']="\"OU=Users,DC=my-domain,DC=com\"";
 $_lang['stLDAPBRANCHCOMMENT']="Branch to search for uid";
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
 ?>
