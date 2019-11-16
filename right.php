@@ -1,6 +1,8 @@
 <?php
 #build 20170501
 
+#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
+date_default_timezone_set(date_default_timezone_get());
 
 
 if(isset($_GET['srv']))
@@ -1168,7 +1170,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                     echo "</tr>";
                     $numrow++;
                   }
-		  $ssq->_free_result($result);
+		  $ssq->free_result($result);
                   echo "</table>";
 
     }  //end GET[id]=5
@@ -1177,6 +1179,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
    	
 	//определим файл который будем изменять. Это сделано для того, чтобы работая в админском интерфейсе, можно было конфигурить версию для директора:)
 	$configfile = "config.php";
+
+if(isset($_GET['actid']))
 
 	if($_GET['actid'] == 3) ///сохранить настройки
 	{
@@ -1235,7 +1239,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && $st[1]<>"v")	{
 
 	  	$expString = explode("$",$file[$i]);
-		$expParamname = explode("=",$expString[1]);
+	  	$expParamname = explode("=",$expString[1]);
 		$expParamname = str_replace("[","<",$expParamname);
 		$expParamname = str_replace("]",">",$expParamname);
 		$expParamvalue = explode(";",$expParamname[1]);		

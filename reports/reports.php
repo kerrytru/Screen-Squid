@@ -10,6 +10,9 @@ $header='<html>
 ';
 
 
+#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
+date_default_timezone_set(date_default_timezone_get());
+
 
 
 include("../config.php");
@@ -280,7 +283,7 @@ if($dayormonth=="btw")  {
 
 
 
-
+if(isset($weekdaynumber)){
 if($weekdaynumber==1)
 $dayname="(".$_lang['stMONDAY'].")";
 if($weekdaynumber==2)
@@ -295,6 +298,8 @@ if($weekdaynumber==6)
 $dayname="(".$_lang['stSATURDAY'].")";
 if($weekdaynumber==0)
 $dayname="(".$_lang['stSUNDAY'].")";
+
+}
 
 if($enableShowDayNameInReports==0)
 $dayname="";
@@ -344,7 +349,8 @@ $currenthour=$_GET['site'];
 else
 {
   $currentsite="";
-  $currenthour=$_GET['site'];
+  
+  $currenthour="";
 }
 
 if(isset($_GET['group']))
@@ -2503,7 +2509,8 @@ $queryCategorySitesTraffic="
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
+	   SUM(sizeinbytes) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid." 
@@ -2520,7 +2527,8 @@ if($dbtype==1)
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
+	   SUM(sizeinbytes) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid." 
@@ -2537,7 +2545,8 @@ $queryOneLoginTraffic="
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
 	   site, 
-	   SUM( sizeinbytes ) AS s
+	   SUM( sizeinbytes ) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
@@ -2554,7 +2563,8 @@ if($dbtype==1)
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
 	   site, 
-	   SUM( sizeinbytes ) AS s
+	   SUM( sizeinbytes ) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
@@ -2892,7 +2902,7 @@ $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
 	   sum(sizeinbytes) AS s,
-	   $category 
+	   ".$category." as cat
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
@@ -2908,7 +2918,8 @@ if($dbtype==1)
 $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
-	   sum(sizeinbytes) AS s
+	   sum(sizeinbytes) AS s,
+	   ".$category." as cat
 	   
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
@@ -2924,7 +2935,8 @@ $queryOneIpaddressTraffic="
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
 	   site,
-	   SUM(sizeinbytes) as s 
+	   SUM(sizeinbytes) as s,
+	   ".$category." as cat 
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
@@ -2940,7 +2952,8 @@ if($dbtype==1)
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
 	   site,
-	   SUM(sizeinbytes) as s 
+	   SUM(sizeinbytes) as s,
+	   ".$category." as cat 
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
@@ -3220,6 +3233,7 @@ $queryOneIpaddressPopularSites="
 
 
 #postgre version
+if($dbtype==1)
 $queryOneIpaddressPopularSites="
   SELECT 
 	  split_part(site,'/',1) AS st,
@@ -5596,8 +5610,24 @@ echo "<table>";
 echo "<tr>";
 echo "<td valign=middle>".$repheader."</td>";
 
+#если переменных нет, то скажем что они пусты
+if(isset($_GET['date2'])) $v_date2 = "&date2=".$_GET['date2']; else $v_date2="";
+if(isset($_GET['login'])) $v_login = "&login=".$_GET['login']; else $v_login="";
+if(isset($_GET['loginname'])) $v_loginname = "&loginname=".$_GET['loginname']; else $v_loginname="";
+if(isset($_GET['ip'])) $v_ip = "&ip=".$_GET['ip']; else $v_ip="";
+if(isset($_GET['ipname'])) $v_ipname = "&ipname=".$_GET['ipname']; else $v_ipname="";
+if(isset($_GET['httpstatus'])) $v_httpstatus = "&httpstatus=".$_GET['httpstatus']; else $v_httpstatus="";
+if(isset($_GET['httpname'])) $v_httpname = "&httpname=".$_GET['httpname']; else $v_httpname="";
+if(isset($_GET['loiid'])) $v_loiid = "&loiid=".$_GET['loiid']; else $v_loiid="";
+if(isset($_GET['loiname'])) $v_loiname = "&loiname=".$_GET['loiname']; else $v_loiname="";
+if(isset($_GET['site'])) $v_site = "&site=".$_GET['site']; else $v_site="";
+if(isset($_GET['group'])) $v_group = "&group=".$_GET['group']; else $v_group="";
+if(isset($_GET['groupname'])) $v_groupname = "&groupname=".$_GET['groupname']; else $v_groupname="";
+if(isset($_GET['typeid'])) $v_typeid = "&typeid=".$_GET['typeid']; else $v_typeid="";
+
+
 if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
-echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php??srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date']."&date2=".$_GET['date2']."&dom=".$_GET['dom']."&login=".$_GET['login']."&loginname=".$_GET['loginname']."&ip=".$_GET['ip']."&ipname".$_GET['ipname']."=&site=".$_GET['site']."&group=".$_GET['group']."&groupname=".$_GET['groupname']."&typeid=".$_GET['typeid']."&httpstatus=".$_GET['httpstatus']."&httpname=".$_GET['httpname']."&loiid=".$_GET['loiid']."&loiname=".$_GET['loiname']."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php??srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
 echo "</tr>";
 echo "</table>";
 }
@@ -6123,11 +6153,12 @@ if($id==9)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
-
+$colftext[4]="&nbsp;";
 
 ///$tmpLine=explode(':',$line[0]);
 
@@ -6137,20 +6168,27 @@ $colftext[3]="totalmb";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryOneLoginTopSitesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// TOP SITES FOR ONE LOGIN TRAFFIC REPORT END
@@ -6278,10 +6316,12 @@ if($id==12)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
 
 
 ///$tmpLine=explode(':',$line[0]);
@@ -6291,20 +6331,27 @@ $colftext[3]="totalmb";
 ///else
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
-
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryOneIpaddressTopSitesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// TOP SITES FOR ONE IPADDRESS TRAFFIC REPORT END
@@ -6881,8 +6928,9 @@ $result=$ssq->query($queryTrafficByPeriod);
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','$dateTmp')>Логины</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'month','$dateTmp')>IP адреса</a>";
+
+$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','')>Логины</a> / 
+<a href=javascript:LeftRightDateSwitch(2,'month','')>IP адреса</a>";
 
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -7766,42 +7814,49 @@ $ssq->free_result($result);
 echo "<tr>";
 echo "<td>1</td>";
 echo "<td>".$_lang['stMONDAY']."</td>";
+if(isset($linevalue[1]))
 $line[1]=$linevalue[1] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>2</td>";
 echo "<td>".$_lang['stTUESDAY']."</td>";
+if(isset($linevalue[2]))
 $line[1]=$linevalue[2] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>3</td>";
 echo "<td>".$_lang['stWEDNESDAY']."</td>";
+if(isset($linevalue[3]))
 $line[1]=$linevalue[3] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>4</td>";
 echo "<td>".$_lang['stTHURSDAY']."</td>";
+if(isset($linevalue[4]))
 $line[1]=$linevalue[4] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>5</td>";
 echo "<td>".$_lang['stFRIDAY']."</td>";
+if(isset($linevalue[5]))
 $line[1]=$linevalue[5] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>6</td>";
 echo "<td>".$_lang['stSATURDAY']."</td>";
+if(isset($linevalue[6]))
 $line[1]=$linevalue[6] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>7</td>";
 echo "<td>".$_lang['stSUNDAY']."</td>";
+if(isset($linevalue[7]))
 $line[1]=$linevalue[7] / 1000000;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
@@ -8364,6 +8419,7 @@ $totalmb=0;
 
 while ($line = $ssq->fetch_array($result)) {
 
+if(isset($line[3]))
 if($line[3]=='2')
 $line[0]=$line[2];
 
@@ -8627,8 +8683,10 @@ $k=0;
 
 while($k<$j)
 {
+	
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
+
 if($line[1]==$line1[1])
 $arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
 else
@@ -9635,6 +9693,7 @@ $totalmb=0;
 
 while ($line = $ssq->fetch_array($result)) {
 
+if(isset($line[3]))
 if($line[3]=='2')
 $line[0]=$line[2];
 
@@ -9906,6 +9965,7 @@ $totalmb=0;
 
 while ($line = $ssq->fetch_array($result)) {
 
+if(isset($line[3]))
 if($line[3]=='2')
 $line[0]=$line[2];
 
@@ -10326,6 +10386,7 @@ if($makepdf==0)
 echo "<table id=report_table_id class=sortable>
 	<tr>";
 
+if(isset($colh))
 for($i=1;$i<=$colh[0];$i++)
 echo $colh[$i];
 echo "	</tr>";
@@ -10344,12 +10405,19 @@ echo "<tr>";
 
 for($j=1;$j<=$colh[0];$j++){
 $resultcolr=$colr[$j];
+if(isset($line[0])) #убираем предупреждения если используются 2 или 3 элемента из массива line
 $resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
+if(isset($line[1]))
 $resultcolr=preg_replace("/line1/i", $line[1], $resultcolr);
+if(isset($line[2]))
 $resultcolr=preg_replace("/line2/i", $line[2], $resultcolr);
+if(isset($line[3]))
 $resultcolr=preg_replace("/line3/i", $line[3], $resultcolr);
+if(isset($line[4]))
 $resultcolr=preg_replace("/line4/i", $line[4], $resultcolr);
+if(isset($line[5]))
 $resultcolr=preg_replace("/line5/i", $line[5], $resultcolr);
+if(isset($i))
 $resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
 
 echo 	"<td>".$resultcolr."</td>";
@@ -10365,6 +10433,7 @@ echo "</tr>";
 
 echo "<tr class=sortbottom>";
 
+if(isset($colh))
 for($i=1;$i<=$colh[0];$i++){
 if (preg_match("/totalmb/i", $colf[$i])) {
 echo preg_replace("/totalmb/i", $totalmb, $colf[$i]);
