@@ -137,52 +137,7 @@ if($enableNofriends==1) {
         else
           $changepassword=0;
 
-if($_GET['id']==1) {
-  $queryCountRowsTraffic="select count(*) from scsq_traffic";
-  $queryCountRowsLogin="select count(*) from scsq_logins";
-  $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
-  $queryMinMaxDateTraffic="select min(date),max(date) from scsq_quicktraffic";
-  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic ";
-  $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
-  $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
-  $queryCountObjectsTraffic3="select count(id) from scsq_traffic where sizeinbytes>5000 and sizeinbytes<=10000";
-  $queryCountObjectsTraffic4="select count(id) from scsq_traffic where sizeinbytes>10000";
 
-#  $result=mysqli_query($connection,$queryCountRowsTraffic, MYSQLI_USE_RESULT);
-
-$result = $ssq->query($queryCountRowsTraffic) ;
-$CountRowsTraffic=$ssq->fetch_array($result);
-$ssq->free_result($result);
-
-$result = $ssq->query($queryCountRowsLogin) ;
-$CountRowsLogin=$ssq->fetch_array($result);
-$ssq->free_result($result);
-
-$result = $ssq->query($queryCountRowsIpaddress) ;
-$CountRowsIpaddress=$ssq->fetch_array($result);
-$ssq->free_result($result);
-
-$result = $ssq->query($queryMinMaxDateTraffic) ;
-$MinMaxDateTraffic=$ssq->fetch_array($result);
-$ssq->free_result($result);
-
-$result = $ssq->query($querySumSizeTraffic) ;
-$SumSizeTraffic=$ssq->fetch_array($result);
-$ssq->free_result($result);
-
-	if($enableTrafficObjectsInStat==1)
-	{
-	  $result=$ssq->query($queryCountObjectsTraffic1);
-	  $CountObjects1=$ssq->fetch_array($result);
-	  $result=$ssq->query($queryCountObjectsTraffic2);
-	  $CountObjects2=$ssq->fetch_array($result);
-	  $result=$ssq->query($queryCountObjectsTraffic3);
-	  $CountObjects3=$ssq->fetch_array($result);
-	  $result=$ssq->query($queryCountObjectsTraffic4);
-	  $CountObjects4=$ssq->fetch_array($result);
-	}
-
-  }
 
 
   if($connectionStatus=="error") {
@@ -190,8 +145,61 @@ $ssq->free_result($result);
   }
   else
   {
+	if(isset($_GET['id'])) {
 
-    if($_GET['id']==1) {
+    if($_GET['id']==1) { //краткая статистика
+		
+		
+			  $queryCountRowsTraffic="select count(*) from scsq_traffic";
+			  $queryCountRowsLogin="select count(*) from scsq_logins";
+			  $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
+			  $queryMinMaxDateTraffic="select min(date),max(date) from scsq_quicktraffic";
+			  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic ";
+			  $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
+			  $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
+			  $queryCountObjectsTraffic3="select count(id) from scsq_traffic where sizeinbytes>5000 and sizeinbytes<=10000";
+			  $queryCountObjectsTraffic4="select count(id) from scsq_traffic where sizeinbytes>10000";
+
+			#  $result=mysqli_query($connection,$queryCountRowsTraffic, MYSQLI_USE_RESULT);
+
+			$result = $ssq->query($queryCountRowsTraffic) ;
+			$CountRowsTraffic=$ssq->fetch_array($result);
+			$ssq->free_result($result);
+
+			$result = $ssq->query($queryCountRowsLogin) ;
+			$CountRowsLogin=$ssq->fetch_array($result);
+			$ssq->free_result($result);
+
+			$result = $ssq->query($queryCountRowsIpaddress) ;
+			$CountRowsIpaddress=$ssq->fetch_array($result);
+			$ssq->free_result($result);
+
+			$result = $ssq->query($queryMinMaxDateTraffic) ;
+			$MinMaxDateTraffic=$ssq->fetch_array($result);
+			$ssq->free_result($result);
+
+			$result = $ssq->query($querySumSizeTraffic) ;
+			$SumSizeTraffic=$ssq->fetch_array($result);
+			$ssq->free_result($result);
+
+				if($enableTrafficObjectsInStat==1)
+				{
+				  $result=$ssq->query($queryCountObjectsTraffic1);
+				  $CountObjects1=$ssq->fetch_array($result);
+				  $result=$ssq->query($queryCountObjectsTraffic2);
+				  $CountObjects2=$ssq->fetch_array($result);
+				  $result=$ssq->query($queryCountObjectsTraffic3);
+				  $CountObjects3=$ssq->fetch_array($result);
+				  $result=$ssq->query($queryCountObjectsTraffic4);
+				  $CountObjects4=$ssq->fetch_array($result);
+				}
+
+  
+		
+		
+		
+		
+		
       echo "
       <h3>".$_lang['stSTATS'].":</h3>
       <table border=1>
@@ -1236,13 +1244,15 @@ if(isset($_GET['actid']))
 	
 	$st = $file[$i];
 		#исключаем лишние строки. Также можно будет регулировать количество отображаемых параметров
-		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && $st[1]<>"v")	{
+		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && strpos($st,"vers")==0 && strpos($st,"debug")==0)	{
 
 	  	$expString = explode("$",$file[$i]);
+	  	if(isset($expString[1]))
 	  	$expParamname = explode("=",$expString[1]);
 		$expParamname = str_replace("[","<",$expParamname);
 		$expParamname = str_replace("]",">",$expParamname);
-		$expParamvalue = explode(";",$expParamname[1]);		
+		if(isset($expParamname[1]))
+	  	$expParamvalue = explode(";",$expParamname[1]);		
 		#стираем лишние символы для пользователя		
 		$expParamvalue = str_replace("\"","",$expParamvalue);
 		
@@ -1350,13 +1360,13 @@ echo "	</table>
 ///            else
 
 
-    
+ } //if(isset($_GET['id'])) {   
 
             
 
- } /// end GET[id]=1 
+ } /// else { 
 
-if(($_GET['id']!=1) && ($_GET['id']!=2) && ($_GET['id']!=3) && ($_GET['id']!=4) && ($_GET['id']!=5) && ($_GET['id']!=6))
+if($connectionStatus!="error")
 	echo $_lang['stALLISOK'];
 
 

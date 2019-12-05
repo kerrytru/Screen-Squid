@@ -17,7 +17,15 @@ li {margin-bottom:20px;}
 body {margin:0.5em;padding:0.5em}
 
 </style>
-<link rel="stylesheet" type="text/css" href="javascript/example.css"/>
+
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="themes/default/global.css"/>
+
+<!-- The xtree script file -->
+<script src="javascript/xtree.js"></script>
+
+
+
 <script language=JavaScript>
 function TwoByOne(frame1, frame2)
 {
@@ -51,18 +59,10 @@ parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+par
 }
 
 
-function toggleview (id1,id2) {
-		var obj1 = document.getElementById(id1);
-		var obj2 = document.getElementById(id2);
-		(obj1.className=="itemshown") ? obj1.className="itemhidden" : obj1.className="itemshown"; 
-		(obj1.className=="itemshown") ? obj2.innerHTML="<img border='0' src='img/gray-open.gif' alt='[&ndash;]'>" : obj2.innerHTML="<img border='0' src='images/gray-closed.gif' alt='[+]'>"; 
-	}
-
-
 
 </script>
 
-<body>
+<body class="browser">
 <br />
 <?php
 
@@ -72,6 +72,34 @@ else
   $srv=0;
 
 
+
+echo "
+<div style='float:left; top: 70px; left: 10px; height: 100%; width: 100%; padding: 5px; overflow: auto;'>
+<script language=JavaScript>
+
+webFXTreeConfig.rootIcon		= 'img/themes/default/Servers.png';
+webFXTreeConfig.openRootIcon	= 'img/themes/default/Servers.png';
+webFXTreeConfig.folderIcon		= '';
+webFXTreeConfig.openFolderIcon	= '';
+webFXTreeConfig.fileIcon		= 'img/themes/default/Report.png';
+webFXTreeConfig.iIcon			= 'img/themes/default/I.png';
+webFXTreeConfig.lIcon			= 'img/themes/default/L.png';
+webFXTreeConfig.lMinusIcon		= 'img/themes/default/Lminus.png';
+webFXTreeConfig.lPlusIcon		= 'img/themes/default/Lplus.png';
+webFXTreeConfig.tIcon			= 'img/themes/default/T.png';
+webFXTreeConfig.tMinusIcon		= 'img/themes/default/Tminus.png';
+webFXTreeConfig.tPlusIcon		= 'img/themes/default/Tplus.png';
+webFXTreeConfig.blankIcon		= 'img/themes/default/blank.png';
+webFXTreeConfig.loadingIcon		= 'img/themes/default/Loading.gif';
+webFXTreeConfig.loadingText		= 'Loading...';
+webFXTreeConfig.errorIcon		= 'img/themes/default/ObjectNotFound.png';
+webFXTreeConfig.errorLoadingText = 'Error Loading';
+webFXTreeConfig.reloadText		= 'Click to reload';
+
+if (document.getElementById) {
+
+";
+
 if(isset($_GET['id']))
   $idmenu=$_GET['id'];
 else
@@ -79,46 +107,107 @@ else
 
 
 if($idmenu==1)
-  echo "
-    <ul>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",61)\">".$_lang['stDASHBOARD']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",8)\">".$_lang['stONELOGINTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",9)\">".$_lang['stTOPSITESTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",10)\">".$_lang['stTRAFFICBYHOURS']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",22)\">".$_lang['stVISITINGWEBSITELOGINS'] ." ".$_lang['stBYDAYTIME']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",35)\">".$_lang['stONELOGINIPTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",46)\">".$_lang['stMIMETYPESTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",56)\">".$_lang['stPOPULARSITES']."</a>
-      <li><a href='mainmenu.php'>".$_lang['stBACK']."</a>
-    </ul>";
+
+echo "
+
+	var reports = new WebFXTree('".$_GET['loginname']."');
+	reports.setBehavior('classic');
+//First Level
+	
+	
+
+//Second Level
+
+	reports.icon = 'img/themes/default/User.png';
+	reports.openIcon = 'img/themes/default/User.png';
+
+	
+//Reports	
+	reports.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoPartlyReport(".$srv.",61);'));
+	reports.add(new WebFXTreeItem('".$_lang['stONELOGINTRAFFIC']."','javascript:GoPartlyReport(".$srv.",8)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTOPSITESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",9)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURS']."','javascript:GoPartlyReport(".$srv.",10)'));
+	reports.add(new WebFXTreeItem('".$_lang['stVISITINGWEBSITELOGINS']." ".$_lang['stBYDAYTIME']."','javascript:GoPartlyReport(".$srv.",22)'));
+	reports.add(new WebFXTreeItem('".$_lang['stONELOGINIPTRAFFIC']."','javascript:GoPartlyReport(".$srv.",35)'));
+	reports.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",46)'));
+	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoPartlyReport(".$srv.",56)'));
+	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
+
+	
+	
+
+";
+
+
+
 
 if($idmenu==2)
-  echo "
-    <ul>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",62)\">".$_lang['stDASHBOARD']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",11)\">".$_lang['stONEIPADRESSTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",12)\">".$_lang['stTOPSITESTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",13)\">".$_lang['stTRAFFICBYHOURS']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",23)\">".$_lang['stVISITINGWEBSITEIPADDRESS']." ".$_lang['stBYDAYTIME']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",36)\">".$_lang['stONEIPADDRESSLOGINSTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",47)\">".$_lang['stMIMETYPESTRAFFIC']."</a>
-      <li><a href=\"javascript:GoPartlyReport(".$srv.",57)\">".$_lang['stPOPULARSITES']."</a>
-      <li><a href='mainmenu.php'>".$_lang['stBACK']."</a>
-    </ul>";
+echo "
+
+
+//First Level
+
+	var reports = new WebFXTree('".$_GET['ipname']."');
+	reports.setBehavior('classic');
+	
+
+//Second Level
+
+	reports.icon = 'img/themes/default/User.png';
+	reports.openIcon = 'img/themes/default/User.png';
+
+	
+//Reports	
+	reports.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoPartlyReport(".$srv.",62);'));
+	reports.add(new WebFXTreeItem('".$_lang['stONEIPADRESSTRAFFIC']."','javascript:GoPartlyReport(".$srv.",11)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTOPSITESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",12)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURS']."','javascript:GoPartlyReport(".$srv.",13)'));
+	reports.add(new WebFXTreeItem('".$_lang['stVISITINGWEBSITEIPADDRESS']." ".$_lang['stBYDAYTIME']."','javascript:GoPartlyReport(".$srv.",23)'));
+	reports.add(new WebFXTreeItem('".$_lang['stONEIPADDRESSLOGINSTRAFFIC']."','javascript:GoPartlyReport(".$srv.",36)'));
+	reports.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",47)'));
+	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoPartlyReport(".$srv.",57)'));
+	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
+
+	
+	
+";
 
 
 if($idmenu==4)
-  echo "
-    <ul>
-      <li><a href=\"javascript:GoReport(".$srv.",63)\">".$_lang['stDASHBOARD']."</a>
-      <li><a href=\"javascript:GoReport(".$srv.",25)\">".$_lang['stONEGROUPTRAFFIC']."</a>
-      <li><a href=\"javascript:GoReport(".$srv.",26)\">".$_lang['stONEGROUPTRAFFIC']." ".$_lang['stEXTENDED']."</a>
-      <li><a href=\"javascript:GoReport(".$srv.",27)\">".$_lang['stTOPSITESTRAFFIC']."</a>
-      <li><a href=\"javascript:GoReport(".$srv.",28)\">".$_lang['stTRAFFICBYHOURS']."</a>
-      <li><a href=\"javascript:GoReport(".$srv.",29)\">".$_lang['stWHODOWNLOADBIGFILES']."</a>
-      <li><a href=\"javascript:GoReport(".$srv.",55)\">".$_lang['stPOPULARSITES']."</a>
-      <li><a href='mainmenu.php'>".$_lang['stBACK']."</a>
-    </ul>";
+echo "
+
+
+//First Level
+	var reports = new WebFXTree('".$_GET['groupname']."');
+	reports.setBehavior('classic');
+	
+//Second Level
+
+	reports.icon = 'img/themes/default/UserGroup.png';
+	reports.openIcon = 'img/themes/default/UserGroup.png';
+
+	
+//Reports	
+	reports.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoReport(".$srv.",63);'));
+	reports.add(new WebFXTreeItem('".$_lang['stONEGROUPTRAFFIC']."','javascript:GoReport(".$srv.",25)'));
+	reports.add(new WebFXTreeItem('".$_lang['stONEGROUPTRAFFIC']." ".$_lang['stEXTENDED']."','javascript:GoReport(".$srv.",26)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTOPSITESTRAFFIC']."','javascript:GoReport(".$srv.",27)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURS']."','javascript:GoReport(".$srv.",28)'));
+	reports.add(new WebFXTreeItem('".$_lang['stWHODOWNLOADBIGFILES']."','javascript:GoReport(".$srv.",29)'));
+	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoReport(".$srv.",55)'));
+	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
+
+	
+
+";
+
+
+echo "
+
+document.write(reports);
+}
+</script>
+</div>";
 ?>
 
 </body>

@@ -236,7 +236,10 @@ function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 
 function UpdateLeftMenu(id)
 {
-  parent.left.location.href='../left.php?srv=<?php echo $srv ?>&id='+id;
+  parent.left.location.href='../left.php?srv=<?php echo $srv ?>&id='+id
+  +'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
+  +'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
+  +'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value;
 }
 
 </script>
