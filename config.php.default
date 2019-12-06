@@ -23,7 +23,8 @@ $srvdbtype[0]="0";	# type of db 0 - MySQL, 1 - PostgreSQL
 #$cfgcachemgr_passwd[1]="";
 #$srvdbtype[1]="0"; # type of db 0 - MySQL, 1 - PostgreSQL
 
-#language ru = russian, en = english, ua = ukrainian
+#language ru = russian, en = english, ua = ukrainian, pt-br = portuguese-brazil
+
 $language="en";
 
 include_once("lang/$language");

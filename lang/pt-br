@@ -1,0 +1,206 @@
+<?php
+///Reports Headers BEGIN
+$_lang['stLOGINSTRAFFIC']="Tráfego de Usuários (Logins)";
+$_lang['stIPADDRESSTRAFFIC']="Tráfego de Usuários  (Endereços IP)";
+$_lang['stSITESTRAFFIC']="Tráfego de Sites";
+$_lang['stTOPSITESTRAFFIC']="Top Sites";
+$_lang['stTOPLOGINSTRAFFIC']="Top Logins";
+$_lang['stTOPIPTRAFFIC']="Top Endereços IPs";
+$_lang['stTRAFFICBYHOURS']="Por Hora";
+$_lang['stONELOGINTRAFFIC']="Tráfego de Login";
+$_lang['stONELOGINTOPSITESTRAFFIC']="Top Sites um Login";
+$_lang['stONELOGINTRAFFICBYHOURS']="Tráfego login por hora";
+$_lang['stONEIPADRESSTRAFFIC']="Tráfego de IPs";
+$_lang['stONEIPADDRESSTOPSITESTRAFFIC']="Top Sites um IP";
+$_lang['stONEIPADDRESSTRAFFICBYHOURS']="Tráfego de IPs por hora";
+$_lang['stLOGINSTRAFFICWIDE']="Tráfego de Logins Extendidos";
+$_lang['stIPADDRESSTRAFFICWIDE']="Tráfego de IP Extendidos";
+$_lang['stIPADDRESSTRAFFICWITHRESOLVE']="Tráfego de IPs com resolução";
+$_lang['stPOPULARSITES']="Sites Populares";
+$_lang['stWHOVISITSITELOGIN']="Quem Visitou (logins) Site ";
+$_lang['stWHOVISITSITEIPADDRESS']="Quem Visitou (Endereço IP) Site ";
+$_lang['stWHODOWNLOADBIGFILES']="Quem baixou grandes arquivos";
+$_lang['stTRAFFICBYPERIOD']="Tráfego por período (mês)";
+$_lang['stTRAFFICBYPERIODDAY']="Tráfego por período (dia)";
+$_lang['stTRAFFICBYPERIODDAYNAME']="Tráfego por período (nome dia)";
+$_lang['stVISITINGWEBSITELOGINS']="Sites visitados (login)";
+$_lang['stVISITINGWEBSITEIPADDRESS']="Sites visitados (IP)";
+$_lang['stGROUPSTRAFFIC']="Tráfego de Grupos";
+$_lang['stONEGROUPTRAFFIC']="Tráfego de Grupo";
+$_lang['stONEGROUPTOPSITESTRAFFIC']="Top Sites por Grupo";
+$_lang['stONEGROUPTRAFFICBYHOURS']="Tráfego de um Grupo por horas";
+$_lang['stONEGROUPWHODOWNLOADBIGFILES']="Quem baiou grandes arquivos no Grupo";
+$_lang['stHTTPSTATUSES']="HTTP Estatísticas";
+$_lang['stHTTPSTATUS']="HTTP Estatus";
+$_lang['stONELOGINIPTRAFFIC']="Endereço IP de quem Logou";
+$_lang['stONEIPADDRESSLOGINSTRAFFIC']="Logins do endereço IP";
+$_lang['stLOGINSIPTRAFFIC']="Endereço IP dos Logins";
+$_lang['stIPADDRESSLOGINSTRAFFIC']="Logins do endereço IP";
+$_lang['stFOR']="para";
+$_lang['stIPADDRESSFOR']="(Endereço IP) para";
+$_lang['stLOGINSFOR']="(Logins) para";
+$_lang['stEXTENDED']="Extendido";
+$_lang['stBYDAYTIME']="Dia-a-dia";
+///Reports Headers END
+$_lang['stDAY']="DIA";
+$_lang['stMONTH']="MÊS";
+$_lang['stFASTDATESWITCH']="Data da Troca Rápida :";
+
+$_lang['stEXECUTIONTIME']="Pagina gerada em";
+$_lang['stSECONDS']="segundos";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid created by <a href=http://break-people.ru>break-people.ru</a></font>";
+
+$_lang['stLOGIN']="Login";
+$_lang['stLOGINS']="Logins";
+$_lang['stIPADDRESS']="Endereço IP";
+$_lang['stIPADDRESSES']="Endereços de IP";
+$_lang['stSITE']="Site";
+$_lang['stHOURS']="Horas";
+$_lang['stMEGABYTES']="Megabytes";
+$_lang['stALIAS']="Alias";
+$_lang['stTOTAL']="TOTAL:";
+$_lang['stFROMCACHEMB']="Do cache(MB)";
+$_lang['stDIRECTMB']="DDireto(MB)";
+$_lang['stFROMCACHEPERCENT']="Do cache(%)";
+$_lang['stDIRECTPERCENT']="Direto(%)";
+$_lang['stHOSTNAMERESOLVE']="Resolvido";
+$_lang['stREQUESTS']="Requisições";
+$_lang['stWHO']="Quem?";
+$_lang['stFROMWEBSITE']="De onde (web-site)";
+$_lang['stMONTHYEAR']="Mês.Ano";
+$_lang['stDAYMONTHYEAR']="Dia.Mês.Ano";
+$_lang['stDAYNAME']="Nome do Dia";
+$_lang['stDATEANDTIME']="Data e hora";
+$_lang['stWEBSITE']="Web-site";
+$_lang['stGROUP']="Grupo";
+$_lang['stQUANTITY']="Quantidade";
+$_lang['stDATE']="Data";
+$_lang['stQUANTITYIPADDRESS']="Quantidade de endereços IPs";
+$_lang['stQUANTITYLOGIN']="Quantidade de Logins";
+
+$_lang['stREPORTS']="Relatórios";
+$_lang['stSTATS']="Estatísticas";
+$_lang['stALIASES']="Aliases";
+$_lang['stGROUPS']="Grupos";
+$_lang['stWELCOME']="Bem vindo ao Screen Squid v.";
+$_lang['stDONTFORGET']="<p><b>NÃO SE ESQUEÇA:</b> Antes de iniciar, crie o banco de dados e tabelas em  <a href=createdb/createdb.sql>SQL file</a>). Set up connection to DB in config.php and fetch.pl.</p>";
+$_lang['stALLISOK']="Conexão com o banco OK. Clique para <b>Relatórios</b> Continuar.";
+
+$_lang['stQUANTITYRECORDS']="O número de registros no BD";
+$_lang['stQUANTITYLOGINS']="O número de Logins";
+$_lang['stQUANTITYIPADDRESSES']="O Número de Endereços IP";
+$_lang['stMINDATE']="Data mínima";
+$_lang['stMAXDATE']="Data máxima";
+$_lang['stTRAFFICSUM']="Total contado em (MB)";
+
+$_lang['stALIASNAME']="Alias nome";
+$_lang['stTYPE']="Tipo";
+$_lang['stVALUE']="Valor";
+$_lang['stADDALIAS']="Adiciona alias";
+$_lang['stFORMADDALIAS']="Adiciona alias formulário";
+$_lang['stTYPECHECK']="Tipo (Login(não verificado)/IPaddress(verificado))";
+$_lang['stADD']="Adiciona";
+
+$_lang['stBACK']="Voltar";
+$_lang['stSAVE']="Salvar";
+$_lang['stDELETE']="Deletar";
+$_lang['stALIASADDED']="1 alias adicionado";
+$_lang['stALIASUPDATED']="1 alias atualizado";
+$_lang['stALIASDELETED']="1 alias deletado";
+
+$_lang['stGROUPNAME']="Nome do Grupo";
+$_lang['stCOMMENT']="Comentários";
+$_lang['stADDGROUP']="Adiciona Grupo";
+$_lang['stFORMADDGROUP']="Adiciona formulário de Grupo";
+$_lang['stGROUPADDED']="1 Grupo Adicionado";
+$_lang['stGROUPUPDATED']="1 Grupo Atualizado";
+$_lang['stGROUPDELETED']="1 Grupo Deletado";
+
+$_lang['stSEARCHSTRING']="Procure isso";
+$_lang['stSEARCHFORM']="Formulário de busca";
+$_lang['stSEARCH']="Busca";
+
+$_lang['stGENERAL']="Geral";
+$_lang['stBYGROUP']="Por Grupo";
+$_lang['stFASTSEARCH']="Busca rápida";
+
+$_lang['stMONDAY']="Seg";
+$_lang['stTUESDAY']="Ter";
+$_lang['stWEDNESDAY']="Qua";
+$_lang['stTHURSDAY']="Qui";
+$_lang['stFRIDAY']="Sex";
+$_lang['stSATURDAY']="Sab";
+$_lang['stSUNDAY']="Dom";
+
+$_lang['stINCLUDE']="Incluido?";
+$_lang['stQUANTITYALIASES']="Quantidade";
+
+$_lang['stWHOVISITSITES']="Quem visitou sites";
+$_lang['stFROM']="de";
+$_lang['stUNTIL']="enquanto";
+$_lang['stMIME']="tipo MIME";
+$_lang['stMIMETYPESTRAFFIC']="Tráfego por tipos MIME";
+$_lang['stDOMAINZONESTRAFFIC']="Tráfego Zonas de Domínio";
+$_lang['stDOMAINZONE']="Zona de Domínio";
+$_lang['stBACKTOGROUPLIST']="Voltar para Lista de Grupo";
+$_lang['stDASHBOARD']="Dashboard";
+$_lang['stTRAFFICOBJECTS']="Tráfego de objetos";
+
+$_lang['stLOGTABLE']="Logtable";
+$_lang['stLOGDATESTART']="Iniciar";
+$_lang['stLOGDATEEND']="Fim";
+$_lang['stLOGMESSAGE']="Mensagem";
+$_lang['stTOP']="Top";
+
+
+#новые в 2.0
+
+$_lang['stTRAFFICBYHOURSLOGINS']="Tráfego por horas (logins)";
+$_lang['stTRAFFICBYHOURSIPADDRESS']="Tráfego por horas (Endereço IP)";
+$_lang['stTRAFFICBYCATEGORIES']="Tráfego by categories";
+$_lang['stCATEGORY']="Categorias";
+$_lang['stTRAFFICBYHOURSLOGINSONESITE']="Tráfego por horas (logins) site";
+$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']="Tráfego por horas (Endereço IP) site";
+
+$_lang['stACTIVEIPADDRESS']="Endereço IP Ativo";
+$_lang['stONLINE']="Online";
+$_lang['stREFRESHED']="Refreshed in";
+$_lang['stSPEED']="kb/sec";
+
+$_lang['stCONTENT']="Conteúdo";
+$_lang['stSTART']="Iniciar";
+$_lang['stSTOP']="Parar";
+
+$_lang['stINSPECT']="Inspecionar";
+
+$_lang['stUSERS']="Usuários";
+
+$_lang['stACTIVEAUTH']="Ativar gabinete do Usuário";
+$_lang['stUSERLOGIN']="Login do Usuário";
+$_lang['stUSERPASSWORD']="Senha do Usuário";
+
+
+$_lang['stENTER']="Login";
+
+$_lang['stAUTHFAIL']="Falha no Login";
+$_lang['stCHANGEPASSWORD']="Trocar senha?";
+$_lang['stLOGINTOCABINET'] ="Login para Gabinete";
+$_lang['stLOGOUT']="Logout";
+
+//1.14
+$_lang['stPARAMNAME'] ="Parâmetro";
+$_lang['stPARAMVALUE']="Valor";
+$_lang['stCONFIG']="Configuração";
+
+//1.15
+$_lang['stSPECIFIED'] = "ESPECIFICADO";
+$_lang['stMODULEMANAGER'] = "Gerenciar Módulos";
+$_lang['stDESCRIPTION'] = "Descrição";
+$_lang['stNAME'] = "Nome";
+$_lang['stINSTALL'] = "Instalar";
+$_lang['stUNINSTALL'] = "Desistalar";
+
+$_lang['stDYNAMICOFVISITS'] = "Dinâmica das Visitas";
+$_lang['stSITESVISITORS'] = "Sites visitantes";
+?>
+
