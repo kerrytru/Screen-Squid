@@ -5630,7 +5630,7 @@ if(isset($_GET['typeid'])) $v_typeid = "&typeid=".$_GET['typeid']; else $v_typei
 
 
 if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
-echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php??srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
 echo "</tr>";
 echo "</table>";
 }
@@ -10498,6 +10498,7 @@ $i=1;
 while ($i<$numrow) {
 $line=explode(';;',$rows[$i]);
 
+
 for($j=2;$j<=$colh[0];$j++){
 $resultcolr[$j]=$colr[$j];
 $resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
@@ -10510,6 +10511,8 @@ if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
 $resultcolr[$j]=$matches[2];
 //HTML array in $matches[1]
 }
+
+
 
 if($colh[0]==4)
 {
@@ -10550,7 +10553,9 @@ $pdf->AddPage();
 $pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
 $pdf->writeHTML($pdff, true, false, true, false, 'L');
 
+
 //Close and output PDF document
+
 $pdf->Output("../output/report.pdf", 'D');
 
 
