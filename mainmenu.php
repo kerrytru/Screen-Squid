@@ -147,7 +147,7 @@ echo "
 
 //Second Level
 
-	rootproxy.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoPartlyReport(".$srv.",61);'));
+	rootproxy.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoReport(".$srv.",49);'));
 	rootproxy.icon = 'img/themes/default/Database.png';
 	rootproxy.openIcon = 'img/themes/default/Database.png';
   
