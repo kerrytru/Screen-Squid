@@ -200,6 +200,19 @@ $_lang['stNAME'] = "Name";
 $_lang['stINSTALL'] = "Install";
 $_lang['stUNINSTALL'] = "Uninstall";
 
-$_lang['stDYNAMICOFVISITS'] = "Dynamic of visits";
-$_lang['stSITESVISITORS'] = "Sites visitors";
+//1.16
+$_lang['stTODAY'] = "Today";
+
+$_lang['stJANUARY'] = "January";
+$_lang['stFEBRUARY'] = "February";
+$_lang['stMARCH'] = "March";
+$_lang['stAPRIL'] = "April";
+$_lang['stMAY'] = "May";
+$_lang['stJUNE'] = "June";
+$_lang['stJULY'] = "July";
+$_lang['stAUGUST'] = "August";
+$_lang['stSEPTEMBER'] = "September";
+$_lang['stOCTOBER'] = "October";
+$_lang['stNOVEMBER'] = "November";
+$_lang['stDECEMBER'] = "December";
 ?>

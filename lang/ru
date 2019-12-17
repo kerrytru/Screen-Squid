@@ -201,8 +201,20 @@ $_lang['stNAME'] = "Наименование";
 $_lang['stINSTALL'] = "Установить";
 $_lang['stUNINSTALL'] = "Удалить";
 
-$_lang['stSITESVISITORS'] = "Посещения сайтов";
-$_lang['stDYNAMICOFVISITS'] = "Динамика посещений";
+//1.16
+$_lang['stTODAY'] = "Сейчас";
+$_lang['stJANUARY'] = "Январь";
+$_lang['stFEBRUARY'] = "Февраль";
+$_lang['stMARCH'] = "Март";
+$_lang['stAPRIL'] = "Апрель";
+$_lang['stMAY'] = "Май";
+$_lang['stJUNE'] = "Июнь";
+$_lang['stJULY'] = "Июль";
+$_lang['stAUGUST'] = "Август";
+$_lang['stSEPTEMBER'] = "Сентябрь";
+$_lang['stOCTOBER'] = "Октябрь";
+$_lang['stNOVEMBER'] = "Ноябрь";
+$_lang['stDECEMBER'] = "Декабрь";
 
 
 ?>

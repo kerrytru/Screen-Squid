@@ -5370,8 +5370,39 @@ if(!isset($_GET['pdf'])){
 
 ?>
 
+<script type="text/javascript">
+
+//data for calendar
+a_dayname=new Array(
+'<?php echo $_lang['stMONDAY']; ?>',
+'<?php echo $_lang['stTUESDAY']; ?>',
+'<?php echo $_lang['stWEDNESDAY']; ?>',
+'<?php echo $_lang['stTHURSDAY']; ?>',
+'<?php echo $_lang['stFRIDAY']; ?>',
+'<?php echo $_lang['stSATURDAY']; ?>',
+'<?php echo $_lang['stSUNDAY']; ?>');
+
+a_today = '<?php echo $_lang['stTODAY']; ?>'; 
+//Month names
+mn=new Array(
+'<?php echo $_lang['stJANUARY']; ?>',
+'<?php echo $_lang['stFEBRUARY']; ?>',
+'<?php echo $_lang['stMARCH']; ?>',
+'<?php echo $_lang['stAPRIL']; ?>',
+'<?php echo $_lang['stMAY']; ?>',
+'<?php echo $_lang['stJUNE']; ?>',
+'<?php echo $_lang['stJULY']; ?>',
+'<?php echo $_lang['stAUGUST']; ?>',
+'<?php echo $_lang['stSEPTEMBER']; ?>',
+'<?php echo $_lang['stOCTOBER']; ?>',
+'<?php echo $_lang['stNOVEMBER']; ?>',
+'<?php echo $_lang['stDECEMBER']; ?>');
+
+</script>
+
 
 <script src="../javascript/calendar_ru.js" type="text/javascript"></script>
+
 
 <form name=fastdateswitch_form onsubmit="return false;">
 <p><?php echo $_lang['stFASTDATESWITCH']?><p>

@@ -202,5 +202,21 @@ $_lang['stUNINSTALL'] = "Desistalar";
 
 $_lang['stDYNAMICOFVISITS'] = "Dinâmica das Visitas";
 $_lang['stSITESVISITORS'] = "Sites visitantes";
+
+//1.16
+$_lang['stTODAY'] = "Hoje";
+
+$_lang['stJANUARY'] = "Janeiro";
+$_lang['stFEBRUARY'] = "Fevereiro";
+$_lang['stMARCH'] = "Março";
+$_lang['stAPRIL'] = "Abril";
+$_lang['stMAY'] = "Maio";
+$_lang['stJUNE'] = "Junho";
+$_lang['stJULY'] = "Julho";
+$_lang['stAUGUST'] = "Agosto";
+$_lang['stSEPTEMBER'] = "Setembro";
+$_lang['stOCTOBER'] = "Outubro";
+$_lang['stNOVEMBER'] = "Novembro";
+$_lang['stDECEMBER'] = "Dezembro";
 ?>
 
