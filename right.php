@@ -943,7 +943,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
             if($actid==4) { //сохранение изменений UPDATE
 
-              if (!$ssq->query($connection,$queryUpdateOneGroup)) {
+              if (!$ssq->query($queryUpdateOneGroup)) {
                 die('Error: Cant update one group');
               }
 
@@ -969,7 +969,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                 $sql=$sql.";";
               }
 
-              $ssq->query($connection,$sql);
+              $ssq->query($sql);
 
               echo "".$_lang['stGROUPUPDATED']."<br /><br />";
               echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a>";
