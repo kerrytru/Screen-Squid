@@ -140,8 +140,8 @@ $start=microtime(true);
 
 echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHRONIZETOLDAP']."</a><br />";
 			}
-		if(isset($actid))
-          if($actid==1) {
+		if(isset($_GET['actid']))
+          if($_GET['actid']==1) {
 
          $result=$ssq->query($queryAllLogins);
           $numrow=0;
