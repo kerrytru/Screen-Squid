@@ -1,0 +1,17 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "IP2Name sync module";
+
+$_lang['stIP2NAMESYNCHRONIZE'] = "Get username from file";
+
+$_lang['stIP2NAMECREATEDUPDATED']="Created/updated";
+$_lang['stIP2NAMEALIASES']="aliases";
+
+$_lang['stIP2NAMEATTENTIONMESSAGE'] = "Before click link <b>".$_lang['stIP2NAMESYNCHRONIZE']."</b>, you should update config values in ../IP2NAME/config.php.";
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
+?>

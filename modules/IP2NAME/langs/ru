@@ -1,0 +1,18 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Модуль импорта алиасов из файла";
+
+$_lang['stIP2NAMESYNCHRONIZE'] = "Синхронизировать с файлом";
+
+$_lang['stIP2NAMECREATEDUPDATED']="Создано/обновлено";
+$_lang['stIP2NAMEALIASES']="алиасов";
+
+$_lang['stIP2NAMEATTENTIONMESSAGE'] = "Прежде чем нажать кнопку <b>".$_lang['stIP2NAMESYNCHRONIZE']."</b>, необходимо занести  параметры в файл ../IP2NAME/config.php.";
+
+
+$_lang['stINSTALLED']="Установлено";
+$_lang['stUNINSTALLED']="Удалено";
+
+?>
