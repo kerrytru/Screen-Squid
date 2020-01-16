@@ -81,29 +81,9 @@ parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+pa
 <body class="browser">
 
 <?php
-$srv=0;
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
 
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("lib/dbDriver/mysqlmodule.php");
-
-if($dbtype==1)
-include("lib/dbDriver/pgmodule.php");
-
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
 
 echo "
@@ -134,11 +114,34 @@ if (document.getElementById) {
 	tree.setBehavior('classic');
 ";
 
+$variableSet = array();
+
 for($i=0;$i<count($srvname);$i++)
 {
 
-echo "
+$addr=$address[$i];
+$usr=$user[$i];
+$psw=$pass[$i];
+$dbase=$db[$i];
+$dbtype=$srvdbtype[$i];
 
+
+$variableSet['addr']=$addr;
+$variableSet['usr']=$usr;
+$variableSet['psw']=$psw;
+$variableSet['dbase']=$dbase;
+$variableSet['dbtype']=$dbtype;
+
+#в зависимости от типа БД, подключаем разные модули
+if($dbtype==0)
+include_once("lib/dbDriver/mysqlmodule.php");
+
+if($dbtype==1)
+include_once("lib/dbDriver/pgmodule.php");
+
+$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
+echo "
 
 //First Level
 	var rootproxy = new WebFXTreeItem('".$srvname[$srv]."');
