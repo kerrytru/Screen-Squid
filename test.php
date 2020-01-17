@@ -15,6 +15,9 @@ $psw=$pass[$i];
 $dbase=$db[$i];
 $dbtype=$srvdbtype[$i];
 
+$squidhost=$cfgsquidhost[$i];
+$squidport=$cfgsquidport[$i];
+$cachemgr_passwd=$cfgcachemgr_passwd[$i];
 
 
 $variableSet['addr']=$addr;
@@ -68,17 +71,21 @@ echo "Trying connect to Cachemgr...";
 $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
 
 if($fp)
-echo "Ok!";
+	{
+	echo "Ok!";
+	fclose($fp);
+	}
 else
-echo "Error! ";
-echo "<br>";
-echo "
-1. Check config.php for connection settings.<br>
-2. Check this solution https://sourceforge.net/p/screen-squid/tickets/21/<br>
-3. If you have no idea about problem, join our telegram group t.me/screensquid. We try to help you.
-";
-
-fclose($fp);
+	{
+	echo "Error! ";
+	echo "<br>";
+	echo "
+	1. Check config.php for connection settings.<br>
+	2. Disable SElinux (if you have it). <br>
+	2. Check this solution https://sourceforge.net/p/screen-squid/tickets/21/<br>
+	3. If you have no idea about problem, join our telegram group t.me/screensquid. We try to help you.
+	";
+	}
 echo "<br /><br />";
 
 }
