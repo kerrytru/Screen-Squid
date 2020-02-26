@@ -18,6 +18,7 @@ function __construct($variables){ //
 
   function GetDesc()
   {
+	  
       return $this->lang['stMODULEDESC']; 
   }
 

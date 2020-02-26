@@ -218,5 +218,8 @@ $_lang['stSEPTEMBER'] = "Setembro";
 $_lang['stOCTOBER'] = "Outubro";
 $_lang['stNOVEMBER'] = "Novembro";
 $_lang['stDECEMBER'] = "Dezembro";
+
+$_lang['stFORMEDITALIAS']="Edição em alias";
+$_lang['stFORMEDITGROUP']="Edição em grupo";
 ?>
 

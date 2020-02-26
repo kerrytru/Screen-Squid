@@ -1,6 +1,9 @@
 <?php
 #build 20191023
 
+#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
+date_default_timezone_set(date_default_timezone_get());
+
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
@@ -83,6 +86,8 @@ $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 $variableSet['dbtype']=$dbtype;
 
+$variableSet['language']=$language;
+
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)
 include("../../lib/dbDriver/mysqlmodule.php");
@@ -114,13 +119,14 @@ $start=microtime(true);
                 $quotaid=$_GET['quotaid'];
               else
                 $quotaid=0;
+		
+		  if(isset($_POST['aliasid'])) $aliasid=$_POST['aliasid']; else $aliasid='';
+	  
+	      if(isset($_POST['quotaday'])) $quotaday=$_POST['quotaday']+0;  else $quotaday=0;
+	      if(isset($_POST['quotamonth'])) $quotamonth=$_POST['quotamonth']+0;  else $quotamonth=0;
 
-	      $aliasid=$_POST['aliasid'];
-	      $quotaday=$_POST['quotaday']+0;
-	      $quotamonth=$_POST['quotamonth']+0;
-
-	      $sumday=$_POST['sumday'];
-	      $summonth=$_POST['summonth'];
+	      if(isset($_POST['sumday'])) $sumday=$_POST['sumday'];
+	      if(isset($_POST['summonth'])) $summonth=$_POST['summonth'];
 
               if(isset($_POST['quota'])) // 
                 $quota=$_POST['quota']+0;
@@ -217,6 +223,7 @@ $str = "string_agg(scsq_groups.name, ',' order by scsq_groups.name asc) as gconc
 	  WHERE alid NOT IN (select aliasid from scsq_mod_quotas)
 	  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
 	  ORDER BY alname asc";
+
 
             $queryAllQuotas="SELECT 
 				sm.id,
@@ -334,12 +341,12 @@ $datestart=strtotime($querydate);
             }
 
           if($actid==1) {
-            echo $_lang['stFORMADDQUOTA'];
+            echo $_lang['stQUOTASFORMADDQUOTA'];
               echo '
                 <form action="index.php?srv='.$srv.'&actid=2" method="post">
-                Дневная квота: <input type="text" name="quotaday" ><br />
-                Месячная квота: <input type="text" name="quotamonth"><br />
-		Активен: <input type="checkbox" name="active"><br /> 
+                '.$_lang['stQUOTASDAY'].': <input type="text" name="quotaday" ><br />
+                '.$_lang['stQUOTASMONTH'].': <input type="text" name="quotamonth"><br />
+		'.$_lang['stQUOTASACTIVE'].': <input type="checkbox" name="active"><br /> 
 		'.$_lang['stQUOTASEXCLUDE'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
                 '.$_lang['stVALUE'].':<br />';
   
@@ -432,13 +439,13 @@ $datestart=strtotime($querydate);
 	      $quotaid = $line[6];
               echo '
                 <form action="index.php?srv='.$srv.'&actid=4&quotaid='.$quotaid.'" method="post">
-	       Алиас: '.$line[5].'<br /><br />
-               Текущая дневная квота: <input type="text" name="quota" value="'.$line[1].'"><br />
-               Дневная квота: <input type="text" name="quotaday" value="'.$line[2].'"><br />
-               Месячная квота: <input type="text" name="quotamonth" value="'.$line[3].'"><br />
+	       '	.$_lang['stALIAS'].': '.$line[5].'<br /><br />
+               '.$_lang['stQUOTASCURRENT'].': <input type="text" name="quota" value="'.$line[1].'"><br />
+               '.$_lang['stQUOTASDAY'].': <input type="text" name="quotaday" value="'.$line[2].'"><br />
+               М'.$_lang['stQUOTASMONTH'].': <input type="text" name="quotamonth" value="'.$line[3].'"><br />
 	       <input type="hidden" name=sumday value="'.$line[7].'">
 	       <input type="hidden" name=summonth value="'.$line[8].'">
-               Активен: <input type="checkbox" '.$isChecked.' name="active"><br /> 
+               '.$_lang['stQUOTASACTIVE'].': <input type="checkbox" '.$isChecked.' name="active"><br /> 
 	
 		'.$_lang['stQUOTASEXCLUDE'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
                '.$_lang['stVALUE'].':<br />';

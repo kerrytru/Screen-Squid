@@ -80,10 +80,15 @@ parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+pa
 
 <body class="browser">
 
+
+	<div class="logo">
+		<a href="right.php" target="right">
+			phpPgAdmin 
+		</a>
+	</div>
+
+
 <?php
-
-
-
 
 
 echo "
@@ -141,19 +146,37 @@ include_once("lib/dbDriver/pgmodule.php");
 
 $ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
-echo "
+$ssq->query("select 1 from scsq_traffic limit 1");
 
-//First Level
+echo "//First Level
 	var rootproxy = new WebFXTreeItem('".$srvname[$srv]."');
 
-	tree.add(rootproxy);
+	tree.add(rootproxy);";
 
+
+if($ssq->db_object==true)
+{
+echo "	
 //Second Level
-
-	rootproxy.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoReport(".$srv.",49);'));
+    rootproxy.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoReport(".$srv.",49);'));
 	rootproxy.icon = 'img/themes/default/Database.png';
-	rootproxy.openIcon = 'img/themes/default/Database.png';
-  
+	rootproxy.openIcon = 'img/themes/default/Database.png';";
+
+}
+else
+{
+echo "
+
+//Second Level	
+    rootproxy.add(new WebFXTreeItem('none'));
+	rootproxy.icon = 'img/themes/default/DisconnectedDatabase.png';
+	rootproxy.openIcon = 'img/themes/default/DisconnectedDatabase.png';
+	
+
+	";
+continue;
+}  
+echo "
 //Online reports	
 	var onlinereports = new WebFXTreeItem('".$_lang['stONLINE']."');
 	

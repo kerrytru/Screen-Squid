@@ -3,7 +3,17 @@
 ?>
 
 <!doctype html public "-//W3C//DTD HTML 3.2 Final//EN">
-<?php include("config.php"); 
+<?php 
+	// Check to see if the configuration file exists, if not, explain
+	if (file_exists('config.php')) {
+
+		include("config.php"); 
+	}
+	else {
+		echo 'Configuration error: Copy config.php.default to config.php and edit appropriately.';
+		exit;
+	}
+
 
 ?>
 <html>

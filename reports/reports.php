@@ -1,10 +1,15 @@
 <?php
-#build 20191020
+#build 20200220
  
 $header='<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="../javascript/example.css"/>
+
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="../themes/default/global.css"/>
+
+
 </head>
 <body>
 ';
@@ -13,7 +18,9 @@ $header='<html>
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
 
-
+#вводим новую переменную - количество байт в мегабайте. Но не все обновят конфиг, поэтому для таких случаев сделаем переход безударным.
+if(!isset($oneMegabyte))
+$oneMegabyte=1000000;
 
 include("../config.php");
 
@@ -4817,7 +4824,7 @@ $queryOneGroupTrafficByHours="
 	  ipaddress 
 	FROM scsq_quicktraffic 
 
-	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
 
 	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
 
@@ -4900,7 +4907,7 @@ $queryOneGroupTrafficByHours="
 	  sum(sizeinbytes) as s
 	FROM scsq_quicktraffic 
 
-	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
 
 	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
 
@@ -5431,10 +5438,10 @@ mn=new Array(
 
 
 
-<a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','l')"><<</a>
+<h3><a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','l')"><<</a>
 &nbsp;<?php echo $querydate; ?>&nbsp;
 <a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','r')">>></a>
-
+</h3>
 <?php
 }
 ///CALENDAR END
@@ -5640,9 +5647,9 @@ $repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['st
 
 
 if(!isset($_GET['pdf'])){
-echo "<table>";
+echo "<table width='100%'>";
 echo "<tr>";
-echo "<td valign=middle>".$repheader."</td>";
+echo "<td valign=middle width='80%'>".$repheader."</td>";
 
 #если переменных нет, то скажем что они пусты
 if(isset($_GET['date2'])) $v_date2 = "&date2=".$_GET['date2']; else $v_date2="";
@@ -5662,6 +5669,7 @@ if(isset($_GET['typeid'])) $v_typeid = "&typeid=".$_GET['typeid']; else $v_typei
 
 if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
 echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+
 echo "</tr>";
 echo "</table>";
 }
@@ -5966,7 +5974,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -6055,7 +6063,7 @@ echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$st
 
 echo "<br /><br />";
 echo "
-<table id=report_table_id_7 class=sortable>
+<table id=report_table_id_7 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -6094,7 +6102,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
 echo "</tr>";
@@ -6232,7 +6240,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($id==10)
 {
 echo "
-<table id=report_table_id_10 class=sortable>
+<table id=report_table_id_10 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -6266,7 +6274,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 $totalmb=$totalmb+$line[1];
@@ -6395,7 +6403,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($id==13)
 {
 echo "
-<table id=report_table_id_13 class=sortable>
+<table id=report_table_id_13 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -6429,7 +6437,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
 echo "</tr>";
@@ -6460,7 +6468,7 @@ echo "</table>";
 if($id==14)
 {
 echo "
-<table id=report_table_id_14 class=sortable>
+<table id=report_table_id_14 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -6523,7 +6531,7 @@ echo "</tr>";
 $numrow++;
 }
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 if($line[3]==1)
 {
@@ -6592,7 +6600,7 @@ echo "</table>";
 if($id==15)
 {
 echo "
-<table id=report_table_id_15 class=sortable>
+<table id=report_table_id_15 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -6655,7 +6663,7 @@ echo "</tr>";
 $numrow++;
 }
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 if($line[3]==1)
 {
@@ -6722,7 +6730,7 @@ if($id==16)
 {
 
 echo "
-<table id=report_table_id_16 class=sortable>
+<table id=report_table_id_16 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -6747,7 +6755,7 @@ while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "<td>".gethostbyaddr($line[0])."</td>";
 echo "</tr>";
@@ -7117,7 +7125,7 @@ echo "<script>UpdateLeftMenu(4);</script>";
 if($id==26)
 {
 echo "
-<table id=report_table_id_26 class=sortable>
+<table id=report_table_id_26 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7190,7 +7198,7 @@ echo "</tr>";
 $numrow++;
 }
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 if($line[3]==1)
 {
@@ -7313,7 +7321,7 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 if($id==28)
 {
 echo "
-<table id=report_table_id_28 class=sortable>
+<table id=report_table_id_28 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -7347,7 +7355,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 $totalmb=$totalmb+$line[1];
@@ -7531,7 +7539,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($id==33) //неработает пока
 {
 echo "
-<table id=report_table_id_33 class=sortable>
+<table id=report_table_id_33 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7566,7 +7574,7 @@ $ssq->free_result($result);
 if($id==34) //не работает пока
 {
 echo "
-<table id=report_table_id_34 class=sortable>
+<table id=report_table_id_34 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7746,7 +7754,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($id==39)
 {
 echo "
-<table id=report_table_id_39 class=sortable>
+<table id=report_table_id_39 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7773,7 +7781,7 @@ while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 echo "<td>".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 $explodeTmp=explode(".", $line[0]);
 $dateTmp=$explodeTmp[0]."-".$explodeTmp[1]."-".$explodeTmp[2];
@@ -7807,7 +7815,7 @@ echo "</table>";
 if($id==40)
 {
 echo "
-<table id=report_table_id_40 class=sortable>
+<table id=report_table_id_40 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7841,7 +7849,7 @@ $linevalue[5]=$line[1];
 if($line[0]=='6')
 $linevalue[6]=$line[1];
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $totalmb=$totalmb+$line[1];
 }
 $ssq->free_result($result);
@@ -7849,50 +7857,65 @@ echo "<tr>";
 echo "<td>1</td>";
 echo "<td>".$_lang['stMONDAY']."</td>";
 if(isset($linevalue[1]))
-$line[1]=$linevalue[1] / 1000000;
+$line[1]=$linevalue[1] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>2</td>";
 echo "<td>".$_lang['stTUESDAY']."</td>";
 if(isset($linevalue[2]))
-$line[1]=$linevalue[2] / 1000000;
+$line[1]=$linevalue[2] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>3</td>";
 echo "<td>".$_lang['stWEDNESDAY']."</td>";
 if(isset($linevalue[3]))
-$line[1]=$linevalue[3] / 1000000;
+$line[1]=$linevalue[3] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>4</td>";
 echo "<td>".$_lang['stTHURSDAY']."</td>";
 if(isset($linevalue[4]))
-$line[1]=$linevalue[4] / 1000000;
+$line[1]=$linevalue[4] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>5</td>";
 echo "<td>".$_lang['stFRIDAY']."</td>";
 if(isset($linevalue[5]))
-$line[1]=$linevalue[5] / 1000000;
+$line[1]=$linevalue[5] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>6</td>";
 echo "<td>".$_lang['stSATURDAY']."</td>";
 if(isset($linevalue[6]))
-$line[1]=$linevalue[6] / 1000000;
+$line[1]=$linevalue[6] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>7</td>";
 echo "<td>".$_lang['stSUNDAY']."</td>";
 if(isset($linevalue[7]))
-$line[1]=$linevalue[7] / 1000000;
+$line[1]=$linevalue[7] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
+
 echo "</tr>";
 
 
@@ -8207,7 +8230,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -8315,7 +8338,7 @@ while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0]." ";
 $arrLine1[$numrow-1]=$line[1];
@@ -8384,7 +8407,7 @@ while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -8459,7 +8482,7 @@ $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -8598,7 +8621,7 @@ if($id==50)
 {
 
 echo "
-<table id=report_table_id_50 class=sortable>
+<table id=report_table_id_50 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -8722,10 +8745,10 @@ $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
 
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
@@ -8775,7 +8798,7 @@ if($id==51)
 {
 
 echo "
-<table id=report_table_id_51 class=sortable>
+<table id=report_table_id_51 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -8896,10 +8919,10 @@ while($k<$j)
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
@@ -8947,7 +8970,7 @@ echo "</table>";
 if($id==52)
 {
 echo "
-<table id=report_table_id_48 class=sortable>
+<table id=report_table_id_48 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -8976,7 +8999,7 @@ $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
 echo "<td>".$line[0]."</td>";
 echo "<td>".$line[1]."</td>";
-$line[2]=$line[2] / 1000000;
+$line[2]=$line[2] / $oneMegabyte;
 $line[2]=sprintf("%f",$line[2]); //disable scientific format e.g. 5E-10
 echo "<td>".$line[2]."</td>";
 echo "</tr>";
@@ -9002,7 +9025,7 @@ if($id==53)
 {
 
 echo "
-<table id=report_table_id_50 class=sortable>
+<table id=report_table_id_50 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -9122,10 +9145,10 @@ while($k<$j)
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
@@ -9175,7 +9198,7 @@ if($id==54)
 {
 
 echo "
-<table id=report_table_id_51 class=sortable>
+<table id=report_table_id_51 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -9295,10 +9318,10 @@ while($k<$j)
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
@@ -9623,7 +9646,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -9733,7 +9756,7 @@ $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -9893,7 +9916,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -10005,7 +10028,7 @@ $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -10162,7 +10185,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -10269,7 +10292,7 @@ $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -10404,7 +10427,7 @@ $totalmb=0;
 while ($line = $ssq->fetch_array($result)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 
 
@@ -10417,7 +10440,7 @@ if($makepdf==0)
 {
 
 ///TABLE HEADER
-echo "<table id=report_table_id class=sortable>
+echo "<table id=report_table_id class=datatable>
 	<tr>";
 
 if(isset($colh))

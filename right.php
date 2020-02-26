@@ -4,6 +4,9 @@
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
 
+#вводим новую переменную - количество байт в мегабайте. Но не все обновят конфиг, поэтому для таких случаев сделаем переход безударным.
+if(!isset($oneMegabyte))
+$oneMegabyte=1000000;
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -21,6 +24,9 @@ body {margin:0.5em;padding:0.5em}
 
 </style>
 <link rel="stylesheet" type="text/css" href="javascript/example.css"/>
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="themes/default/global.css"/>
+
 </head>
 <body>
 <br />
@@ -67,6 +73,7 @@ include("config.php");
 
 
 
+
 $addr=$address[$srv];
 $usr=$user[$srv];
 $psw=$pass[$srv];
@@ -83,18 +90,13 @@ $variableSet['language']=$language;
 
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)
-include("lib/dbDriver/mysqlmodule.php");
+include_once("lib/dbDriver/mysqlmodule.php");
 
 if($dbtype==1)
-include("lib/dbDriver/pgmodule.php");
+include_once("lib/dbDriver/pgmodule.php");
 
 $ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
-#пустой запрос, который покажет состояние связи
-if(!$ssq->query("select count(1) from scsq_traffic;"))
-$connectionStatus="error";
-else
-$connectionStatus="ok";
 
 
 if(!isset($_GET['id']))
@@ -201,8 +203,8 @@ if($enableNofriends==1) {
 		
 		
       echo "
-      <h3>".$_lang['stSTATS'].":</h3>
-      <table border=1>
+      <h2>".$_lang['stSTATS'].":</h2>
+      <table class=\"datatable\">
       <tr>
          <td>".$_lang['stQUANTITYRECORDS']."</td>
          <td>".$CountRowsTraffic[0]."</td>
@@ -225,7 +227,7 @@ if($enableNofriends==1) {
       </tr>
       <tr>
          <td>".$_lang['stTRAFFICSUM']."</td>
-         <td>".($SumSizeTraffic[0]/1000000)."</td>
+         <td>".($SumSizeTraffic[0]/$oneMegabyte)."</td>
       </tr>
 ";
 
@@ -368,11 +370,11 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
           echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
           echo "<br /><br />";
 
-          echo "<table id=report_table_id_alias border=1 class=sortable>
+          echo "<table class=\"datatable\">
        		   <tr>
-       		     <th class=unsortable><b>#</b></th>
+       		     <th ><b>#</b></th>
       		      <th><b>".$_lang['stALIASNAME']."&nbsp;</b></th>
-        		    <th class=unsortable><b>".$_lang['stTYPE']."</b></th>
+        		    <th ><b>".$_lang['stTYPE']."</b></th>
          	      <th><b>".$_lang['stVALUE']."</b></th>
          	      <th><b>".$_lang['stGROUP']."</b></th>
          	  </tr>
@@ -415,25 +417,29 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
         if($actid==1) {
 
-          echo $_lang['stFORMADDALIAS'];
+          echo "<h2>".$_lang['stFORMADDALIAS']."</h2>";
           echo '
             <form action="right.php?srv='.$srv.'&id=2&actid=2" method="post">
-           '.$_lang['stALIASNAME'].': <input type="text" name="name"><br />
-           '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
-           '.$_lang['stACTIVEAUTH'].': <input type="checkbox" name="activeauth"><br /> 
-	   '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin"><br /> 
-	   '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
-           '.$_lang['stVALUE'].':<br /> 
+            <table class=datatable >
+           <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name"></td></tr>
+           <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid"></td></tr>
+           <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" name="activeauth"></td></tr>
+		   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin"></td></tr>
+		   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
+		   </table>
+		   <br />
+           <p>'.$_lang['stVALUE'].':</p>
+           <br />
            ';
 
           $result=$ssq->query($queryAllLoginsToAdd);
           $numrow=1;
 
-          echo "<table id='loginsTable' class=sortable style='display:table;'>";
+          echo "<table id='loginsTable' class=\"datatable\" style='display:table;'>";
 	  echo "<tr>";
-	  echo "    <th class=unsortable>#</th>
-		    <th>".$_lang['stLOGIN']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
+	  echo "    <th >#</th>
+		    <th >".$_lang['stLOGIN']."</th>
+		    <th >".$_lang['stINCLUDE']."</th>
 		</tr>";
           while($line = $ssq->fetch_array($result)) {
             echo "
@@ -451,7 +457,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
           $result=$ssq->query($queryAllIpaddressToAdd);
           $numrow=1;
 
-          echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+          echo "<table id='ipaddressTable' class=\"datatable\" style='display:none;'>";
 	  echo "<tr>";
 	  echo "    <th class=unsortable>#</th>
 		    <th>".$_lang['stIPADDRESS']."</th>
@@ -528,24 +534,27 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             $activeIsChecked="";
 		
 
-
+		  echo "<h2>".$_lang['stFORMEDITALIAS']."</h2>";
           echo '
             <form action="right.php?srv='.$srv.'&id=2&actid=4&aliasid='.$aliasid.'" method="post">
-            '.$_lang['stALIASNAME'].': <input type="text" name="name" value="'.$line[0].'"><br /><br />
-            '.$_lang['stACTIVEAUTH'].': <input type="checkbox" '.$activeIsChecked.' name="activeauth"><br /> 
-	    '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin" value="'.$line[4].'"><br /> 
-	    '.$_lang['stCHANGEPASSWORD'].': <input type="checkbox" name="changepassword"><br /> 
-	    '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
-            '.$_lang['stVALUE'].':<br /> 
-          ';
+            <table class=datatable>
+           <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name" value="'.$line[0].'"></td></tr>
+           <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" '.$activeIsChecked.' name="activeauth"></td></tr>
+		   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin" value="'.$line[4].'"></td></tr>
+		   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
+		   </table>
+		   <br />
+           <p>'.$_lang['stVALUE'].':</p>
+           <br />
+                ';
 
           $result=$ssq->query($queryAllLogins);
           $numrow=1;
 
           if($isChecked=="checked")
-            echo "<table id='loginsTable' class=sortable style='display:none;'>";
+            echo "<table id='loginsTable' class=datatable style='display:none;'>";
           else
-            echo "<table id='loginsTable' class=sortable style='display:table;'>";
+            echo "<table id='loginsTable' class=datatable style='display:table;'>";
 	  echo "<tr>";
 	  echo "    <th class=unsortable>#</th>
 		    <th>".$_lang['stLOGIN']."</th>
@@ -569,9 +578,9 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
           $numrow=1;
 
           if($isChecked=="checked")
-            echo "<table id='ipaddressTable' class=sortable style='display:table;'>";
+            echo "<table id='ipaddressTable' class=datatable style='display:table;'>";
           else
-            echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+            echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
 	  echo "<tr>";
 	  echo "    <th class=unsortable>#</th>
 		    <th>".$_lang['stIPADDRESS']."</th>
@@ -705,7 +714,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
               $numrow=1;
               echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
               echo "<br /><br />";
-              echo "<table id=report_table_id_group border=1 class=sortable>
+              echo "<table id=report_table_id_group class=datatable>
               <tr>
                 <th class=unsortable><b>#</b></th>
                 <th><b>".$_lang['stGROUPNAME']."</b></th>
@@ -739,25 +748,29 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             }
 
             if($actid==1) {
-              echo $_lang['stFORMADDGROUP'];
+              echo "<h2>".$_lang['stFORMADDGROUP']."</h2>";
               echo '
-                <form action="right.php?srv='.$srv.'&id=3&actid=2" method="post">
-                '.$_lang['stGROUPNAME'].': <input type="text" name="name"><br />
-                '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br />
-                '.$_lang['stCOMMENT'].': <input type="text" name="comment"><br /> <br />
-                '.$_lang['stACTIVEAUTH'].': <input type="checkbox" name="activeauth"><br /> 
-	        '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin"><br /> 
-	    	'.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
+					<form action="right.php?srv='.$srv.'&id=3&actid=2" method="post">
+					<table class=datatable>
+					   <tr><td>'.$_lang['stGROUPNAME'].':</td> <td><input type="text" name="name"></td></tr>
+					   <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid"></td></tr>
+					   <tr><td>'.$_lang['stCOMMENT'].':</td> <td> <input type="text" name="comment"></td></tr>
+					   <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" name="activeauth"></td></tr>
+					   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin"></td></tr>
+					   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
+					</table>
+				   <br />
+				   <br />
                 '.$_lang['stVALUE'].':<br />';
 
                 $result=$ssq->query($queryAllLogins);
                 $numrow=1;
 
-              echo "<table id='loginsTable' class=sortable style='display:table;'>";
+              echo "<table id='loginsTable' class=datatable style='display:table;'>";
               echo "<tr>
-		    <th class=unsortable>#</th>
+		    <th >#</th>
 		    <th>".$_lang['stALIAS']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
+		    <th >".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
               while($line = $ssq->fetch_array($result)) {
@@ -775,7 +788,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
               $result=$ssq->query($queryAllIpaddress);
               $numrow=1;
 
-              echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+              echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
               echo "<tr>
 		    <th class=unsortable>#</th>
 		    <th>".$_lang['stALIAS']."</th>
@@ -860,15 +873,21 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		  else
 		    $activeIsChecked="";
 
-              echo '
-                <form action="right.php?srv='.$srv.'&id=3&actid=4&groupid='.$groupid.'" method="post">
-               '.$_lang['stGROUPNAME'].': <input type="text" name="name" value="'.$line[0].'"><br />
-               '.$_lang['stTYPECHECK'].': <input type="checkbox" onClick="switchTables();" name="typeid" '.$isChecked.' ><br />
-               '.$_lang['stCOMMENT'].': <input type="text" name="comment" value="'.$line[3].'"><br />
-               '.$_lang['stACTIVEAUTH'].': <input type="checkbox" '.$activeIsChecked.' name="activeauth"><br /> 
-	       '.$_lang['stUSERLOGIN'].': <input type="text" name="userlogin" value="'.$line[4].'"><br /> 
-	       '.$_lang['stCHANGEPASSWORD'].': <input type="checkbox" name="changepassword"><br /> 
-	       '.$_lang['stUSERPASSWORD'].': <input type="text" name="userpassword"><br /><br />
+ 
+			  echo "<h2>".$_lang['stFORMEDITGROUP']."</h2>";
+			  echo '
+			<form action="right.php?srv='.$srv.'&id=3&actid=4&groupid='.$groupid.'" method="post">
+					<table class=datatable>
+					   <tr><td>'.$_lang['stGROUPNAME'].':</td> <td><input type="text" name="name" value="'.$line[0].'"></td></tr>
+					   <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid" '.$isChecked.' ></td></tr>
+					   <tr><td>'.$_lang['stCOMMENT'].':</td> <td> <input type="text" name="comment" value="'.$line[3].'"></td></tr>
+					   <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" '.$activeIsChecked.' name="activeauth"></td></tr>
+					   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin" value="'.$line[4].'"></td></tr>
+					   <tr><td>'.$_lang['stCHANGEPASSWORD'].':</td> <td> <input type="checkbox" name="changepassword"></td></tr>
+					   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
+					</table>
+				   <br />			  
+				   <br />
                '.$_lang['stVALUE'].':<br />';
 
                $result=$ssq->query($queryAllLogins);
@@ -877,13 +896,13 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                $numrow=1;
 
                if($isChecked=="checked")
-                 echo "<table id='loginsTable' class=sortable style='display:none;'>";
+                 echo "<table id='loginsTable' class=datatable style='display:none;'>";
                else
-                 echo "<table id='loginsTable' class=sortable style='display:table;'>";
+                 echo "<table id='loginsTable' class=datatable style='display:table;'>";
                echo "<tr>
-		    <th class=unsortable>#</th>
+		    <th >#</th>
 		    <th>".$_lang['stALIAS']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
+		    <th >".$_lang['stINCLUDE']."</th>
 		    </tr>";
                $groupmembers=array();
                while($line = $ssq->fetch_array($result1))
@@ -908,13 +927,13 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                $numrow=1;
 
                if($isChecked=="checked")
-                 echo "<table id='ipaddressTable' class=sortable style='display:table;'>";
+                 echo "<table id='ipaddressTable' class=datatable style='display:table;'>";
                else
-                 echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+                 echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
                echo "<tr>
-		    <th class=unsortable>#</th>
+		    <th >#</th>
 		    <th>".$_lang['stALIAS']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
+		    <th >".$_lang['stINCLUDE']."</th>
 		    </tr>";
                while($line = $ssq->fetch_array($result)) {
 
@@ -998,9 +1017,9 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                while($line = $ssq->fetch_array($result)) {
 		 if($numrow==1) {
 		   echo "".$_lang['stGROUPNAME']." : <b>".$line[0]."</b><br /><br />";
-                   echo "<table id='OneGroupList' class=sortable >";
+                   echo "<table id='OneGroupList' class=datatable >";
                    echo "<tr>
-		      <th class=unsortable>#</th>
+		      <th >#</th>
 		      <th>".$_lang['stALIAS']."</th>
 		      </tr>";
 		 }
@@ -1050,11 +1069,14 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
               if(!isset($_GET['actid'])) {
 
-                echo $_lang['stSEARCHFORM'];
+                echo "<h2>".$_lang['stSEARCHFORM']."</h2>";
                 echo '
                   <form action="right.php?srv='.$srv.'&id=4&actid=1" method="post">
-                  '.$_lang['stSEARCHSTRING'].': <input type="text" name="findstr"><br />
-                  '.$_lang['stTYPECHECK'].': <input type="checkbox" name="typeid"><br />
+                 		<table class=datatable>
+					   <tr><td>'.$_lang['stSEARCHSTRING'].':</td> <td><input type="text" name="findstr"></td></tr>
+					   <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" name="typeid"></td></tr>
+						</table>
+                 <br />
                   <input type="submit" value="'.$_lang['stSEARCH'].'"><br />
                   </form>
                   <br />';
@@ -1065,8 +1087,11 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                 echo $_lang['stSEARCHFORM'];
                 echo '
                   <form action="right.php?srv='.$srv.'&id=4&actid=1" method="post">
-                  '.$_lang['stSEARCHSTRING'].': <input type="text" name="findstr"><br />
-                  '.$_lang['stTYPECHECK'].': <input type="checkbox" name="typeid"><br />
+                 		<table class=datatable>
+					   <tr><td>'.$_lang['stSEARCHSTRING'].':</td> <td><input type="text" name="findstr"></td></tr>
+					   <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" name="typeid"></td></tr>
+						</table>
+                 <br />
                   <input type="submit" value="'.$_lang['stSEARCH'].'"><br />
                   </form>
                   <br />';
@@ -1075,9 +1100,9 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
                 if($typeid==0) {
                   echo "
-                    <table id=report_table_id_1 class=sortable>
+                    <table id=report_table_id_1 class=datatable>
                     <tr>
-                      <th class=unsortable>
+                      <th >
                         #
                       </th>
                       <th>
@@ -1105,9 +1130,9 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
                 if($typeid==1) {
                   echo "
-                    <table id=report_table_id_1 class=sortable>
+                    <table id=report_table_id_1 class=datatable>
                     <tr>
-                      <th class=unsortable>
+                      <th >
                       #
                       </th>
                       <th>
@@ -1138,8 +1163,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
    if($_GET['id']==5) {
       echo "
-      <h3>".$_lang['stLOGTABLE'].":</h3>
-      <table border=1>
+      <h2>".$_lang['stLOGTABLE'].":</h2>
+      <table class=datatable>
       <tr>
          <th>#</th>
          <th>".$_lang['stLOGDATESTART']."</th>
@@ -1225,8 +1250,8 @@ if(isset($_GET['actid']))
   
 
     echo "
-      <h3>".$_lang['stCONFIG']." Screen Squid:</h3>
-      <table border=1>
+      <h2>".$_lang['stCONFIG']." Screen Squid:</h2>
+      <table class=datatable>
       <tr>
          <th>#</th>
          <th>".$_lang['stPARAMNAME']."</th>
@@ -1296,8 +1321,8 @@ $files = array_diff(scandir($path), array('.', '..'));
 
 
     echo "
-      <h3>".$_lang['stMODULEMANAGER']." Screen Squid:</h3>
-      <table border=1>
+      <h2>".$_lang['stMODULEMANAGER']." Screen Squid:</h2>
+      <table class=datatable>
       <tr>
          <th>#</th>
          <th>".$_lang['stNAME']."</th>
@@ -1366,7 +1391,9 @@ echo "	</table>
 
  } /// else { 
 
-if($connectionStatus!="error")
+//if($connectionStatus!="error")
+
+if(!isset($_GET['id']))
 	echo $_lang['stALLISOK'];
 
 

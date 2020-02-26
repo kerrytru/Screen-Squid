@@ -31,7 +31,7 @@ function sortables_init() {
 	tbls = document.getElementsByTagName("table");
 	for (ti=0;ti<tbls.length;ti++) {
 		thisTbl = tbls[ti];
-		if (((' '+thisTbl.className+' ').indexOf("sortable") != -1) && (thisTbl.id)) {
+		if (((' '+thisTbl.className+' ').indexOf("datatable") != -1) && (thisTbl.id)) {
 			//initTable(thisTbl.id);
 			ts_makeSortable(thisTbl);
 			//sum_up(thisTbl);
@@ -264,7 +264,7 @@ function replace(s, t, u) {
   return r;
 }
 
-function alternate(table) {
+function alternate(table) {/*
 	// Take object table and get all it's tbodies.
 	var tableBodies = table.getElementsByTagName("tbody");
 	// Loop through these tbodies
@@ -279,14 +279,14 @@ function alternate(table) {
 				if (tableRows[j].className == 'odd' || !(tableRows[j].className.indexOf('odd') == -1) ) {
 					tableRows[j].className = replace(tableRows[j].className, 'odd', 'even');
 				} else {
-					tableRows[j].className += " even";
+			//		tableRows[j].className += " even";
 				}
 			} else {
 				if (tableRows[j].className == 'even' || !(tableRows[j].className.indexOf('even') == -1) ) {
 					tableRows[j].className = replace(tableRows[j].className, 'even', 'odd');
 				}
-				tableRows[j].className += " odd";
+			//	tableRows[j].className += " odd";
 			} 
 		}
-	}
+	}*/
 }

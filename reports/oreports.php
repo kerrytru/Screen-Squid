@@ -2,10 +2,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="../javascript/example.css"/>
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="../themes/default/global.css"/>
+
 
 <?php
 
-#build 20191026
+#build 20200226
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -395,7 +398,7 @@ echo "<p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />";
 
 if($showInspectTable) {
 echo "
-<table id=report_table_id_10 class=sortable>
+<table id=report_table_id_10 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -453,7 +456,7 @@ echo "<br />";
 
 
 echo "
-<table id=report_table_id_10 class=sortable>
+<table id=report_table_id_10 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -743,7 +746,7 @@ if($errCheck==0)
 ///$result=mysql_query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests") or die (mysql_error());
 ///$lastUpdateDate = mysql_fetch_array($result,MYSQL_NUM);
 echo "
-<table id=report_table_id_10 class=sortable>
+<table id=report_table_id_10 class=datatable>
 <tr>
     <th class=unsortable>
     #

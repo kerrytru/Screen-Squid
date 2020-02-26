@@ -215,4 +215,7 @@ $_lang['stSEPTEMBER'] = "September";
 $_lang['stOCTOBER'] = "October";
 $_lang['stNOVEMBER'] = "November";
 $_lang['stDECEMBER'] = "December";
+
+$_lang['stFORMEDITALIAS']="Edit alias form";
+$_lang['stFORMEDITGROUP']="Edit group form";
 ?>
