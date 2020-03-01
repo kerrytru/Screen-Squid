@@ -1,21 +1,29 @@
 // Javascripts
 
 /* Change these values */
-var srv = 0;  //srvname[0] from config.php
+//var srv = 0;  //srvname[0] from config.php
 
 //if srvname[1], than you must change srvnum
 
+// возвращает куки с указанным name,
+// или 0, если ничего не найдено
+function getCookie(name) {
+  let matches = document.cookie.match(new RegExp(
+    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+  ));
+  return matches ? decodeURIComponent(matches[1]) : 0;
+}
 
 
 function deleteCookie( name ) {
  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 parent.right.location.href='reports.php';
-UpdateLeftMenu(0)
+UpdateLeftMenu(999);
 }
 
 
 
-function LeftRightDateSwitch(idReport, dom,lr)
+function LeftRightDateSwitch(idReport, dom, lr)
 {
   var stringdate=window.document.fastdateswitch_form.date_field_hidden.value;
   var arraydate=stringdate.split('-');
@@ -23,6 +31,9 @@ function LeftRightDateSwitch(idReport, dom,lr)
   var rightdate=new Date(arraydate[2],arraydate[1]-1,arraydate[0]);
   var ldate;
   var rdate;
+
+  
+  
   if(dom=='day') {
     leftdate.setDate(leftdate.getDate()-1);
     rightdate.setDate(rightdate.getDate()+1);
@@ -55,6 +66,10 @@ function LeftRightDateSwitch(idReport, dom,lr)
 
 function FastDateSwitch(idReport, dom)
 {
+  var srv;
+  
+  srv = getCookie('srv');
+
   if(window.document.fastdateswitch_form.date_field.value=='')
     parent.right.location.href='reports.php?srv='+srv+'&id='+idReport
 +'&date='+window.document.fastdateswitch_form.date_field_hidden.value
@@ -102,6 +117,8 @@ function FastDateSwitch(idReport, dom)
 
 function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 {
+var srv;
+  srv = getCookie('srv');
 
 	if(idsign==0)
 	{
@@ -155,7 +172,19 @@ function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 
 function UpdateLeftMenu(id)
 {
-  parent.left.location.href='../left.php?srv='+srv+'&id='+id;
+if(id==999)
+{
+	parent.left.location.href='../mainmenu.php';
+}
+
+else
+	{
+		var srv;
+		var namelogin;
+		  srv = getCookie('srv');
+		  namelogin = getCookie('namelogin');
+		  parent.left.location.href='../left.php?srv='+srv+'&id='+id+'&namelogin='+namelogin;
+	}
 }
 
 

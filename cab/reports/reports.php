@@ -5,6 +5,12 @@ $header='<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="../../javascript/example.css"/>
+
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="../../themes/default/global.css"/>
+
+
+
 </head>
 <body>
 ';
@@ -12,19 +18,18 @@ $header='<html>
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
-  $srv=0;
-?>
+  $srv=$_COOKIE['srv'];
 
+#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
+date_default_timezone_set(date_default_timezone_get());
 
-
-
-<?php 
-
-
-
-
+#вводим новую переменную - количество байт в мегабайте. Но не все обновят конфиг, поэтому для таких случаев сделаем переход безударным.
+if(!isset($oneMegabyte))
+$oneMegabyte=1000000;
 
 include("../../config.php");
+
+
 
 $addr=$address[$srv];
 $usr=$user[$srv];
@@ -40,13 +45,12 @@ $variableSet['dbase']=$dbase;
 
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
+include_once("../../lib/dbDriver/mysqlmodule.php");
 
 if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
+include_once("../../lib/dbDriver/pgmodule.php");
 
 $ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-
 
 
 
@@ -70,8 +74,10 @@ function generateCode($length=6) {
 
 if(isset($_GET['date']))
   $querydate=$_GET['date'];
-else
+else {
+  $_GET['date']=date("d-m-Y");
   $querydate=date("d-m-Y");
+}
 
 list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
 
@@ -80,8 +86,9 @@ if(isset($_GET['dom']))
 else
   $dayormonth="day";
 
-
-
+//fix for cabinet
+if(!isset($_GET['id']))
+  $_GET['id']=$_COOKIE['idreport'];
 
 
 
@@ -133,6 +140,7 @@ include("../../lib/tcpdf/tcpdf.php");
 if(!isset($_GET['pdf']))
 {
 echo $header;
+echo '<script src="../../javascript/navigator.js" type="text/javascript"></script>';
 $makepdf=0;
 }
 else
@@ -141,7 +149,6 @@ $makepdf=1;
 
 $start=microtime(true);
 
-echo '<script src="../../javascript/navigator.js" type="text/javascript"></script>';
 
 
 
@@ -301,6 +308,7 @@ else {
   $goodIpaddressList="0";
 }
 
+
 #create list of good sites
 if($enableNoSites==1) {
   $sitesTmp=implode("','",explode(" ", $goodSites));
@@ -319,12 +327,26 @@ else
   $msgNoZeroTraffic=" and tmp.s!=0 ";
 
 
+//проверим, есть ли модуль категорий. Если есть показываем столбец с категориями
+
+$queryExistModuleCategory = "select count(1) from scsq_modules where name = 'CATEGORYLIST';";
+$result=$ssq->query($queryExistModuleCategory);
+$line = $ssq->fetch_array($result);
+$ssq->free_result($result);
+
+if($line[0] == 0)
+$category="''";
+else
+$category="category";
+
+
 //querys for reports
 
 if($useLoginalias==0)
 $echoLoginAliasColumn="";
 if($useLoginalias==1)
 $echoLoginAliasColumn=",aliastbl.name";
+
 
 #mysql version
    $queryLoginsTraffic="
@@ -554,7 +576,7 @@ $querySitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
 	 case 
-		when (concat('',(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1)) )=(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1))) then 1 else 2 
+		when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]') then 1 else 2 
 	 end,	
 	 '',
 	 tmp2.cat
@@ -645,7 +667,7 @@ $queryTopSitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
 	 case 
-		when (concat('',(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1)) )=(LEFT(RIGHT(split_part(reverse(split_part(tmp2.site,'/',1)),'.',1),10),1))) then 1 else 2 
+		when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]') then 1 else 2 
 	 end
 	   
   FROM (SELECT 
@@ -680,6 +702,7 @@ $queryTopSitesTraffic="
   ORDER BY tmp2.s desc
   LIMIT ".$countTopSitesLimit." ";
 
+//echo $queryTopSitesTraffic;
 
 #mysql version
 $queryTopLoginsTraffic="
@@ -2378,7 +2401,8 @@ $queryCategorySitesTraffic="
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
+	   SUM(sizeinbytes) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid." 
@@ -2395,7 +2419,8 @@ if($dbtype==1)
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
+	   SUM(sizeinbytes) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid." 
@@ -2412,7 +2437,8 @@ $queryOneLoginTraffic="
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
 	   site, 
-	   SUM( sizeinbytes ) AS s
+	   SUM( sizeinbytes ) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
@@ -2429,7 +2455,8 @@ if($dbtype==1)
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
 	   site, 
-	   SUM( sizeinbytes ) AS s
+	   SUM( sizeinbytes ) AS s,
+	   ".$category." as cat
 	 FROM scsq_quicktraffic
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
@@ -2553,7 +2580,7 @@ $queryWhoVisitPopularSiteLogin="
 	
 	AND 	  (case
 				when (".$currentloginid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentloginid."=2) and (reverse(split_part(reverse(split_part(site,'/',1)),'.',2))) ='".$currentsite."' then TRUE
+				when (".$currentloginid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
@@ -2580,6 +2607,7 @@ WHERE (1=1)
 
   ORDER BY nofriends.name;";
 
+//echo $queryWhoVisitPopularSiteLogin;
 
 $queryVisitingWebsiteByTimeLogin="
   SELECT 
@@ -2766,7 +2794,7 @@ $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
 	   sum(sizeinbytes) AS s,
-	   $category 
+	   ".$category." as cat
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
@@ -2782,7 +2810,8 @@ if($dbtype==1)
 $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
-	   sum(sizeinbytes) AS s
+	   sum(sizeinbytes) AS s,
+	   ".$category." as cat
 	   
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
@@ -2798,7 +2827,8 @@ $queryOneIpaddressTraffic="
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
 	   site,
-	   SUM(sizeinbytes) as s 
+	   SUM(sizeinbytes) as s,
+	   ".$category." as cat 
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
@@ -2814,7 +2844,8 @@ if($dbtype==1)
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
 	   site,
-	   SUM(sizeinbytes) as s 
+	   SUM(sizeinbytes) as s,
+	   ".$category." as cat 
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
@@ -2878,7 +2909,7 @@ $queryWhoVisitPopularSiteIpaddress="
     nofriends.id
 
   FROM (SELECT 
-	  login,
+	  ipaddress,
 	  SUM(sizeinbytes) AS s
 	FROM scsq_traffic
 
@@ -2925,7 +2956,7 @@ $queryWhoVisitPopularSiteIpaddress="
     nofriends.id
 
   FROM (SELECT 
-	  login,
+	  ipaddress,
 	  SUM(sizeinbytes) AS s
 	FROM scsq_traffic
 
@@ -2935,7 +2966,7 @@ $queryWhoVisitPopularSiteIpaddress="
 	
 	AND 	  (case
 				when (".$currentipaddressid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentipaddressid."=2) and (reverse(split_part(reverse(split_part(site,'/',1)),'.',2))) ='".$currentsite."' then TRUE
+				when (".$currentipaddressid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
@@ -2962,6 +2993,7 @@ WHERE (1=1)
   ORDER BY nofriends.name;";
 
 
+//echo $queryWhoVisitPopularSiteIpaddress;
 
 
 #костылище для частных отчетов
@@ -3093,6 +3125,7 @@ $queryOneIpaddressPopularSites="
 
 
 #postgre version
+if($dbtype==1)
 $queryOneIpaddressPopularSites="
   SELECT 
 	  split_part(site,'/',1) AS st,
@@ -4673,7 +4706,7 @@ $queryOneGroupTrafficByHours="
 	  ipaddress 
 	FROM scsq_quicktraffic 
 
-	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
 
 	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
 
@@ -4756,7 +4789,7 @@ $queryOneGroupTrafficByHours="
 	  sum(sizeinbytes) as s
 	FROM scsq_quicktraffic 
 
-	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.login
+	RIGHT JOIN (select * from scsq_alias) as listaliases  ON listaliases.tableid=scsq_quicktraffic.ipaddress
 
 	RIGHT JOIN scsq_aliasingroups on listaliases.id=scsq_aliasingroups.aliasid 
 
@@ -5228,13 +5261,49 @@ if(!isset($_GET['pdf'])){
 
 <p align=right><a href="Javascript:deleteCookie('logged')" ><?php echo $_lang['stLOGOUT']; ?></a></p>
 
+
+<script type="text/javascript">
+
+//data for calendar
+a_dayname=new Array(
+'<?php echo $_lang['stMONDAY']; ?>',
+'<?php echo $_lang['stTUESDAY']; ?>',
+'<?php echo $_lang['stWEDNESDAY']; ?>',
+'<?php echo $_lang['stTHURSDAY']; ?>',
+'<?php echo $_lang['stFRIDAY']; ?>',
+'<?php echo $_lang['stSATURDAY']; ?>',
+'<?php echo $_lang['stSUNDAY']; ?>');
+
+a_today = '<?php echo $_lang['stTODAY']; ?>'; 
+//Month names
+mn=new Array(
+'<?php echo $_lang['stJANUARY']; ?>',
+'<?php echo $_lang['stFEBRUARY']; ?>',
+'<?php echo $_lang['stMARCH']; ?>',
+'<?php echo $_lang['stAPRIL']; ?>',
+'<?php echo $_lang['stMAY']; ?>',
+'<?php echo $_lang['stJUNE']; ?>',
+'<?php echo $_lang['stJULY']; ?>',
+'<?php echo $_lang['stAUGUST']; ?>',
+'<?php echo $_lang['stSEPTEMBER']; ?>',
+'<?php echo $_lang['stOCTOBER']; ?>',
+'<?php echo $_lang['stNOVEMBER']; ?>',
+'<?php echo $_lang['stDECEMBER']; ?>');
+
+</script>
+
+
 <script src="../../javascript/calendar_ru.js" type="text/javascript"></script>
+
 
 <form name=fastdateswitch_form onsubmit="return false;">
 <p><?php echo $_lang['stFASTDATESWITCH']?><p>
 <input type="text" name=date_field onfocus="this.select();lcs(this)"
     onclick="event.cancelBubble=true;this.select();lcs(this)">
 <a href="Javascript:FastDateSwitch(<?php echo $_GET['id'] ?>,'day')"><?php echo $_lang['stDAY']?></a>&nbsp;<a href="Javascript:FastDateSwitch(<?php echo $_GET['id']; ?>,'month')"><?php echo $_lang['stMONTH']?></a>
+<br /><br />
+<input type="text" name=date2_field onfocus="this.select();lcs(this)"
+    onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;<a href="Javascript:FastDateSwitch(<?php echo $_GET['id']; ?>,'btw')"><?php echo $_lang['stSPECIFIED']; ?></a>
 <input type="hidden" name=date_field_hidden value="<?php echo $_GET['date']; ?>">
 <input type="hidden" name=dom_field_hidden value="<?php echo $dayormonth; ?>">
 <input type="hidden" name=loginname_field_hidden value="<?php echo $currentlogin; ?>">
@@ -5254,13 +5323,19 @@ if(!isset($_GET['pdf'])){
 
 
 
-<a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','l')"><<</a>
+<h3><a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','l')"><<</a>
 &nbsp;<?php echo $querydate; ?>&nbsp;
 <a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','r')">>></a>
-
+</h3>
 <?php
 }
 ///CALENDAR END
+
+#костыль для перехода с произвольных отчетов
+if($_GET['dom']=="btw"){
+$dayname="";
+$querydate = $querydate." - ".$querydate2; 
+}
 
 ///REPORTS HEADERS
 
@@ -5457,12 +5532,29 @@ $repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['st
 
 
 if(!isset($_GET['pdf'])){
-echo "<table>";
+echo "<table width='100%'>";
 echo "<tr>";
-echo "<td valign=middle>".$repheader."</td>";
+echo "<td valign=middle width='80%'>".$repheader."</td>";
+
+#если переменных нет, то скажем что они пусты
+if(isset($_GET['date2'])) $v_date2 = "&date2=".$_GET['date2']; else $v_date2="";
+if(isset($_GET['login'])) $v_login = "&login=".$_GET['login']; else $v_login="";
+if(isset($_GET['loginname'])) $v_loginname = "&loginname=".$_GET['loginname']; else $v_loginname="";
+if(isset($_GET['ip'])) $v_ip = "&ip=".$_GET['ip']; else $v_ip="";
+if(isset($_GET['ipname'])) $v_ipname = "&ipname=".$_GET['ipname']; else $v_ipname="";
+if(isset($_GET['httpstatus'])) $v_httpstatus = "&httpstatus=".$_GET['httpstatus']; else $v_httpstatus="";
+if(isset($_GET['httpname'])) $v_httpname = "&httpname=".$_GET['httpname']; else $v_httpname="";
+if(isset($_GET['loiid'])) $v_loiid = "&loiid=".$_GET['loiid']; else $v_loiid="";
+if(isset($_GET['loiname'])) $v_loiname = "&loiname=".$_GET['loiname']; else $v_loiname="";
+if(isset($_GET['site'])) $v_site = "&site=".$_GET['site']; else $v_site="";
+if(isset($_GET['group'])) $v_group = "&group=".$_GET['group']; else $v_group="";
+if(isset($_GET['groupname'])) $v_groupname = "&groupname=".$_GET['groupname']; else $v_groupname="";
+if(isset($_GET['typeid'])) $v_typeid = "&typeid=".$_GET['typeid']; else $v_typeid="";
+
 
 if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
-echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date']."&dom=".$_GET['dom']."&login=".$_GET['login']."&loginname=".$_GET['loginname']."&ip=".$_GET['ip']."&ipname".$_GET['ipname']."=&site=".$_GET['site']."&group=".$_GET['group']."&groupname=".$_GET['groupname']."&typeid=".$_GET['typeid']."&httpstatus=".$_GET['httpstatus']."&httpname=".$_GET['httpname']."&loiid=".$_GET['loiid']."&loiname=".$_GET['loiname']."&pdf=1><img src='../../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+
 echo "</tr>";
 echo "</table>";
 }
@@ -5494,7 +5586,6 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 
 
-
 $result=$ssq->query($queryLoginsTraffic);
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
@@ -5503,8 +5594,8 @@ $colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line
 $colr[3]="line1";
 $colr[4]="line3";
 
-$row = $ssq->fetch_array($resultmax);
-$collength[4]=$row[0];
+#$row = $ssq->fetch_array($resultmax);
+#$collength[4]=$row[0];
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
@@ -5571,7 +5662,12 @@ $colftext[4]="&nbsp;";
 $colftext[5]="&nbsp;";
 $colftext[6]="&nbsp;";
 
+//если есть модуль категорий то добавим столбец
+if($category=="category")
 $colh[0]=6;
+else
+$colh[0]=5;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
@@ -5595,6 +5691,10 @@ $colr[3]="line1";
 $colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 $colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
 $colr[6]="line4"; ///category
+
+
+
+
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -5738,7 +5838,7 @@ if($id==7)
 
 //delete graph if exists
 
-foreach (glob("../../lib/pChart/pictures/*.png") as $filename) {
+foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
@@ -5759,7 +5859,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -5848,7 +5948,7 @@ echo "<img id=\"trafficbyhours\" src='../../lib/pChart/pictures/trafficbyhours".
 
 echo "<br /><br />";
 echo "
-<table id=report_table_id_7 class=sortable>
+<table id=report_table_id_7 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -5887,7 +5987,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
 echo "</tr>";
@@ -5931,11 +6031,12 @@ if($id==8)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
-
+$colftext[4]="&nbsp;";
 
 ///$tmpLine=explode(':',$line[0]);
 
@@ -5945,20 +6046,27 @@ $colftext[3]="totalmb";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryOneLoginTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
@@ -5972,11 +6080,12 @@ if($id==9)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
-
+$colftext[4]="&nbsp;";
 
 ///$tmpLine=explode(':',$line[0]);
 
@@ -5986,20 +6095,27 @@ $colftext[3]="totalmb";
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
 
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryOneLoginTopSitesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// TOP SITES FOR ONE LOGIN TRAFFIC REPORT END
@@ -6009,7 +6125,7 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 if($id==10)
 {
 echo "
-<table id=report_table_id_10 class=sortable>
+<table id=report_table_id_10 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -6043,7 +6159,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 $totalmb=$totalmb+$line[1];
@@ -6078,10 +6194,12 @@ if($id==11)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
 
 
 ///$tmpLine=explode(':',$line[0]);
@@ -6091,21 +6209,27 @@ $colftext[3]="totalmb";
 ///else
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
-
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryOneIpaddressTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0)
 echo "<script>UpdateLeftMenu(2);</script>";
 }
@@ -6119,10 +6243,12 @@ if($id==12)
 $colhtext[1]="#";
 $colhtext[2]=$_lang['stSITE'];
 $colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stCATEGORY'];
 
 $colftext[1]="&nbsp;";
 $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
 
 
 ///$tmpLine=explode(':',$line[0]);
@@ -6132,20 +6258,27 @@ $colftext[3]="totalmb";
 ///else
 ///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
 
-
+//если есть модуль категорий то добавим столбец
+if($category=="category")
+$colh[0]=4;
+else
 $colh[0]=3;
+
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryOneIpaddressTopSitesTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
+$colr[4]="line2";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// TOP SITES FOR ONE IPADDRESS TRAFFIC REPORT END
@@ -6155,7 +6288,7 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 if($id==13)
 {
 echo "
-<table id=report_table_id_13 class=sortable>
+<table id=report_table_id_13 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -6189,7 +6322,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 $totalmb=$totalmb+$line[1];
 echo "</tr>";
@@ -6220,7 +6353,7 @@ echo "</table>";
 if($id==14)
 {
 echo "
-<table id=report_table_id_14 class=sortable>
+<table id=report_table_id_14 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -6283,7 +6416,7 @@ echo "</tr>";
 $numrow++;
 }
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 if($line[3]==1)
 {
@@ -6352,7 +6485,7 @@ echo "</table>";
 if($id==15)
 {
 echo "
-<table id=report_table_id_15 class=sortable>
+<table id=report_table_id_15 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -6415,7 +6548,7 @@ echo "</tr>";
 $numrow++;
 }
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 if($line[3]==1)
 {
@@ -6482,7 +6615,7 @@ if($id==16)
 {
 
 echo "
-<table id=report_table_id_16 class=sortable>
+<table id=report_table_id_16 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -6507,7 +6640,7 @@ while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "<td>".gethostbyaddr($line[0])."</td>";
 echo "</tr>";
@@ -6722,8 +6855,9 @@ $result=$ssq->query($queryTrafficByPeriod);
 $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
-$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','$dateTmp')>Логины</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'month','$dateTmp')>IP адреса</a>";
+
+$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','')>Логины</a> / 
+<a href=javascript:LeftRightDateSwitch(2,'month','')>IP адреса</a>";
 
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -6876,7 +7010,7 @@ echo "<script>UpdateLeftMenu(4);</script>";
 if($id==26)
 {
 echo "
-<table id=report_table_id_26 class=sortable>
+<table id=report_table_id_26 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -6949,7 +7083,7 @@ echo "</tr>";
 $numrow++;
 }
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 if($line[3]==1)
 {
@@ -7072,7 +7206,7 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 if($id==28)
 {
 echo "
-<table id=report_table_id_28 class=sortable>
+<table id=report_table_id_28 class=datatable>
 <tr>
     <th class=unsortable>
     ".$_lang['stHOURS']."
@@ -7106,7 +7240,7 @@ $HourCounter++;
 
 echo "<tr>";
 echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 $totalmb=$totalmb+$line[1];
@@ -7290,7 +7424,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($id==33) //неработает пока
 {
 echo "
-<table id=report_table_id_33 class=sortable>
+<table id=report_table_id_33 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7325,7 +7459,7 @@ $ssq->free_result($result);
 if($id==34) //не работает пока
 {
 echo "
-<table id=report_table_id_34 class=sortable>
+<table id=report_table_id_34 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7505,7 +7639,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($id==39)
 {
 echo "
-<table id=report_table_id_39 class=sortable>
+<table id=report_table_id_39 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7532,7 +7666,7 @@ while ($line = $ssq->fetch_array($result)) {
 echo "<tr>";
 echo "<td>".$numrow."</td>";
 echo "<td>".$line[0]."</td>";
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 $explodeTmp=explode(".", $line[0]);
 $dateTmp=$explodeTmp[0]."-".$explodeTmp[1]."-".$explodeTmp[2];
@@ -7566,7 +7700,7 @@ echo "</table>";
 if($id==40)
 {
 echo "
-<table id=report_table_id_40 class=sortable>
+<table id=report_table_id_40 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -7600,51 +7734,73 @@ $linevalue[5]=$line[1];
 if($line[0]=='6')
 $linevalue[6]=$line[1];
 
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $totalmb=$totalmb+$line[1];
 }
 $ssq->free_result($result);
 echo "<tr>";
 echo "<td>1</td>";
 echo "<td>".$_lang['stMONDAY']."</td>";
-$line[1]=$linevalue[1] / 1000000;
+if(isset($linevalue[1]))
+$line[1]=$linevalue[1] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>2</td>";
 echo "<td>".$_lang['stTUESDAY']."</td>";
-$line[1]=$linevalue[2] / 1000000;
+if(isset($linevalue[2]))
+$line[1]=$linevalue[2] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>3</td>";
 echo "<td>".$_lang['stWEDNESDAY']."</td>";
-$line[1]=$linevalue[3] / 1000000;
+if(isset($linevalue[3]))
+$line[1]=$linevalue[3] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>4</td>";
 echo "<td>".$_lang['stTHURSDAY']."</td>";
-$line[1]=$linevalue[4] / 1000000;
+if(isset($linevalue[4]))
+$line[1]=$linevalue[4] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>5</td>";
 echo "<td>".$_lang['stFRIDAY']."</td>";
-$line[1]=$linevalue[5] / 1000000;
+if(isset($linevalue[5]))
+$line[1]=$linevalue[5] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>6</td>";
 echo "<td>".$_lang['stSATURDAY']."</td>";
-$line[1]=$linevalue[6] / 1000000;
+if(isset($linevalue[6]))
+$line[1]=$linevalue[6] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
 echo "</tr>";
 echo "<tr>";
 echo "<td>7</td>";
 echo "<td>".$_lang['stSUNDAY']."</td>";
-$line[1]=$linevalue[7] / 1000000;
+if(isset($linevalue[7]))
+$line[1]=$linevalue[7] / $oneMegabyte;
+else
+$line[1]=0;
 echo "<td>".$line[1]."</td>";
+
 echo "</tr>";
 
 
@@ -7959,7 +8115,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -8067,7 +8223,7 @@ while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0]." ";
 $arrLine1[$numrow-1]=$line[1];
@@ -8136,7 +8292,7 @@ while ($line = $ssq->fetch_array($result)) {
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -8205,12 +8361,13 @@ $totalmb=0;
 
 while ($line = $ssq->fetch_array($result)) {
 
+if(isset($line[3]))
 if($line[3]=='2')
 $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -8349,7 +8506,7 @@ if($id==50)
 {
 
 echo "
-<table id=report_table_id_50 class=sortable>
+<table id=report_table_id_50 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -8468,13 +8625,15 @@ $k=0;
 
 while($k<$j)
 {
+	
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
+
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
@@ -8524,7 +8683,7 @@ if($id==51)
 {
 
 echo "
-<table id=report_table_id_51 class=sortable>
+<table id=report_table_id_51 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -8611,7 +8770,7 @@ echo "
 ";
 
 $result=$ssq->query($queryTrafficByHoursIpaddress);
-
+//echo $queryTrafficByHoursIpaddress;
 $HourCounter=0;
 $totalmb=0;
 $curLogin=0;
@@ -8645,10 +8804,10 @@ while($k<$j)
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
@@ -8696,7 +8855,7 @@ echo "</table>";
 if($id==52)
 {
 echo "
-<table id=report_table_id_48 class=sortable>
+<table id=report_table_id_48 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -8725,7 +8884,7 @@ $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 
 echo "<td>".$line[0]."</td>";
 echo "<td>".$line[1]."</td>";
-$line[2]=$line[2] / 1000000;
+$line[2]=$line[2] / $oneMegabyte;
 $line[2]=sprintf("%f",$line[2]); //disable scientific format e.g. 5E-10
 echo "<td>".$line[2]."</td>";
 echo "</tr>";
@@ -8751,7 +8910,7 @@ if($id==53)
 {
 
 echo "
-<table id=report_table_id_50 class=sortable>
+<table id=report_table_id_50 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -8871,10 +9030,10 @@ while($k<$j)
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
@@ -8924,7 +9083,7 @@ if($id==54)
 {
 
 echo "
-<table id=report_table_id_51 class=sortable>
+<table id=report_table_id_51 class=datatable>
 <tr>
     <th class=unsortable>
     #
@@ -9044,10 +9203,10 @@ while($k<$j)
 $line=explode(';',$arrayLine[$k]);
 $line1=explode(';',$arrayLine[$k+1]);
 if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 else
 {
-$arrHourTraffic[$line[3]]=round($line[2]/1000000,2);
+$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
 			echo "<tr>";
 			echo "<td>".$numrow."</td>";	
 			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
@@ -9372,7 +9531,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -9451,7 +9610,7 @@ if($graphtype['trafficbyhours']==0)
  // Finish the graph
  $Test->setFontProperties("../../lib/pChart/Fonts/tahoma.ttf",8);
  $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../../lib/pChart/Fonts/tahoma.ttf",10);
+ $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
  $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
 }
  $Test->Render("../../lib/pChart/pictures/trafficbyhours".$start.".png");
@@ -9476,12 +9635,13 @@ $totalmb=0;
 
 while ($line = $ssq->fetch_array($result)) {
 
+if(isset($line[3]))
 if($line[3]=='2')
 $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -9641,7 +9801,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -9747,12 +9907,13 @@ $totalmb=0;
 
 while ($line = $ssq->fetch_array($result)) {
 
+if(isset($line[3]))
 if($line[3]=='2')
 $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -9909,7 +10070,7 @@ break;
 
 $HourCounter++;
 }
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 $arrHourMb[$HourCounter]=$line[1];
 $totalmb=$totalmb+$line[1];
 $HourCounter++;
@@ -10016,7 +10177,7 @@ $line[0]=$line[2];
 
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
 
 $arrLine0[$numrow-1]=$line[0];
 $arrLine1[$numrow-1]=$line[1];
@@ -10148,12 +10309,12 @@ $numrow=1;
 $totalmb=0;
 
 //PARSE SQL
-
-
 while ($line = $ssq->fetch_array($result)) {
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / 1000000;
+$line[1]=$line[1] / $oneMegabyte;
+
+
 
 $totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);
@@ -10164,9 +10325,10 @@ if($makepdf==0)
 {
 
 ///TABLE HEADER
-echo "<table id=report_table_id class=sortable>
+echo "<table id=report_table_id class=datatable>
 	<tr>";
 
+if(isset($colh))
 for($i=1;$i<=$colh[0];$i++)
 echo $colh[$i];
 echo "	</tr>";
@@ -10185,12 +10347,19 @@ echo "<tr>";
 
 for($j=1;$j<=$colh[0];$j++){
 $resultcolr=$colr[$j];
+if(isset($line[0])) #убираем предупреждения если используются 2 или 3 элемента из массива line
 $resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
+if(isset($line[1]))
 $resultcolr=preg_replace("/line1/i", $line[1], $resultcolr);
+if(isset($line[2]))
 $resultcolr=preg_replace("/line2/i", $line[2], $resultcolr);
+if(isset($line[3]))
 $resultcolr=preg_replace("/line3/i", $line[3], $resultcolr);
+if(isset($line[4]))
 $resultcolr=preg_replace("/line4/i", $line[4], $resultcolr);
+if(isset($line[5]))
 $resultcolr=preg_replace("/line5/i", $line[5], $resultcolr);
+if(isset($i))
 $resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
 
 echo 	"<td>".$resultcolr."</td>";
@@ -10206,6 +10375,7 @@ echo "</tr>";
 
 echo "<tr class=sortbottom>";
 
+if(isset($colh))
 for($i=1;$i<=$colh[0];$i++){
 if (preg_match("/totalmb/i", $colf[$i])) {
 echo preg_replace("/totalmb/i", $totalmb, $colf[$i]);
@@ -10267,6 +10437,7 @@ $i=1;
 while ($i<$numrow) {
 $line=explode(';;',$rows[$i]);
 
+
 for($j=2;$j<=$colh[0];$j++){
 $resultcolr[$j]=$colr[$j];
 $resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
@@ -10279,6 +10450,8 @@ if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
 $resultcolr[$j]=$matches[2];
 //HTML array in $matches[1]
 }
+
+
 
 if($colh[0]==4)
 {
@@ -10319,8 +10492,10 @@ $pdf->AddPage();
 $pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
 $pdf->writeHTML($pdff, true, false, true, false, 'L');
 
+
 //Close and output PDF document
-$pdf->Output("../../output/report.pdf", 'D');
+
+$pdf->Output("../output/report.pdf", 'D');
 
 
 //PDF END
@@ -10338,6 +10513,9 @@ $runtime=$end - $start;
 echo "<br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)." ".$_lang['stSECONDS']."</font><br />";
 
 echo $_lang['stCREATORS'];
+
+
+
 
 
     
@@ -10360,15 +10538,15 @@ if(isset($_POST['submit']))
 echo '<script src="../../javascript/navigator.js" type="text/javascript"></script>';
 
 if($dbtype==0)
-	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE userlogin='".mysql_real_escape_string($_POST['userlogin'])."' LIMIT 1";
+	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE userlogin='".$_POST['userlogin']."' LIMIT 1";
 
 if($dbtype==1)
-	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE userlogin='".pg_escape_string($_POST['userlogin'])."' LIMIT 1";
+	$query = "SELECT id, password,active,tableid,typeid FROM scsq_alias WHERE userlogin='".$_POST['userlogin']."' LIMIT 1";
+
 
 	$result=$ssq->query($query);
 
 	$row=$ssq->fetch_array($result);
-
 
 	
 	if(!isset($row[0]))
@@ -10376,10 +10554,10 @@ if($dbtype==1)
 			$ssq->free_result($result);
 
 if($dbtype==0)
-			$query = "SELECT id, password,active,typeid FROM scsq_groups WHERE userlogin='".mysql_real_escape_string($_POST['userlogin'])."' LIMIT 1";
+			$query = "SELECT id, password,active,'',typeid FROM scsq_groups WHERE userlogin='".$_POST['userlogin']."' LIMIT 1";
 
 if($dbtype==1)
-			$query = "SELECT id, password,active,typeid FROM scsq_groups WHERE userlogin='".pg_escape_string($_POST['userlogin'])."' LIMIT 1";
+			$query = "SELECT id, password,active,'',typeid FROM scsq_groups WHERE userlogin='".$_POST['userlogin']."' LIMIT 1";
 
 
 
@@ -10415,7 +10593,8 @@ if($dbtype==1)
 
 			
 			
-			setcookie("typeid", $row['typeid'], 0);
+			//setcookie("typeid", $row['typeid'], 0);
+			setcookie("typeid", $row[4], 0);
 			
 
 			$ssq->free_result($result);
@@ -10423,9 +10602,14 @@ if($dbtype==1)
 			if($groupquery==1)
 			{
 			setcookie("tableid", $row[0], 0);
+			setcookie("srv", $srv, 0);
+			setcookie("idreport", 25, 0);
+			setcookie("typeid", $row[4], 0);
+			setcookie("querydate", $querydate, 0);
+			setcookie("namelogin", $_POST['userlogin'], 0);
 
 
-			header("Location: reports.php?srv=0&id=25&date=".$querydate."&dom=day&login=&groupname=&typeid=".$row['typeid']."&group=".$row[0].""); exit();
+			header("Location: reports.php?srv=".$srv."&id=25&date=".$querydate."&dom=day&login=&groupname=&typeid=".$row[4]."&group=".$row[0].""); exit();
 			}
 			
 			else		
@@ -10433,13 +10617,24 @@ if($dbtype==1)
 			if($row[4]==0){
 	#			setcookie("tableid", $row['tableid'], 0);
 				setcookie("tableid", $row[3], 0);
+				setcookie("srv", $srv, 0);
+				setcookie("idreport", 8, 0);
+				setcookie("typeid", $row[4], 0);
+				setcookie("querydate", $querydate, 0);
+				setcookie("namelogin", $_POST['userlogin'], 0);
 	
-				header("Location: reports.php?srv=0&id=8&date=".$querydate."&dom=day&login=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
+				header("Location: reports.php?srv=".$srv."&id=8&date=".$querydate."&dom=day&login=".$row[3]."&groupname=&typeid=".$row[4]."&group="); exit();
 			}			
 			if($row[4]==1)
 			{
 				setcookie("tableid", $row[3], 0);
-				header("Location: reports.php?srv=0&id=11&date=".$querydate."&dom=day&ip=".$row['tableid']."&groupname=&typeid=".$row['typeid']."&group="); exit();
+				setcookie("srv", $srv, 0);
+				setcookie("idreport", 11, 0);
+				setcookie("typeid", $row[4], 0);
+				setcookie("querydate", $querydate, 0);
+				setcookie("namelogin", $_POST['userlogin'], 0);
+
+				header("Location: reports.php?srv=".$srv."&id=11&date=".$querydate."&dom=day&ip=".$row[3]."&groupname=&typeid=".$row[4]."&group="); exit();
 			}
 			}
 
@@ -10467,11 +10662,17 @@ echo "<br /><br />";
 
 echo '
 	<form method="POST">
-
-		'.$_lang['stUSERLOGIN'].' <input name="userlogin" type="text"><br>
-		'.$_lang['stUSERPASSWORD'].' <input name="password" type="password"><br>
-		<input name="submit" type="submit" value="'.$_lang['stENTER'].'">
-
+	<table class=datatable>
+		<tr>
+			<td>'.$_lang['stUSERLOGIN'].'</td> <td><input name="userlogin" type="text"></td>
+		</tr>
+		<tr>
+			<td>'.$_lang['stUSERPASSWORD'].'</td> <td><input name="password" type="password"></td>
+		</tr>
+		<tr>
+			<td colspan=2><input name="submit" type="submit" value="'.$_lang['stENTER'].'"></td>
+		</tr>
+	</table>
 	</form>
 ';
 
@@ -10490,7 +10691,7 @@ echo '
 
 
 
-$ssq->free_result($result);
+//$ssq->free_result($result);
 
 //}
 
@@ -10502,6 +10703,8 @@ $ssq->free_result($result);
 
 
 ///mysql_disconnect();
+
+
 
 ?>
 
