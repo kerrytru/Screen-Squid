@@ -83,7 +83,7 @@ parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+pa
 
 	<div class="logo">
 		<a href="right.php" target="right">
-			phpPgAdmin 
+			Screen Squid 
 		</a>
 	</div>
 
@@ -174,7 +174,10 @@ echo "
 	
 
 	";
+	
+$srv++;
 continue;
+
 }  
 echo "
 //Online reports	
