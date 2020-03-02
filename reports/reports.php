@@ -80,13 +80,25 @@ $ssq = new ScreenSquid($variableSet); #получим экземпляр кла�
 include("../lib/tcpdf/tcpdf.php");
 
 
-if(!isset($_GET['pdf']))
+//если есть команда pdf, то не выводим заголовки
+if(isset($_GET['pdf']))
+{
+$makepdf=1;
+}
+
+//если есть команда csv, то не выводим заголовки
+if(isset($_GET['csv']))
+{
+$makecsv=1;
+}
+
+//если не генерируем файл на выход, то выводим заголовки
+if(!isset($_GET['pdf'])&& !isset($_GET['csv']))
 {
 echo $header;
 $makepdf=0;
+$makecsv=0;
 }
-else
-$makepdf=1;
 
 
 $start=microtime(true);
@@ -95,7 +107,7 @@ $start=microtime(true);
 
 // Javascripts
 
-if(!isset($_GET['pdf']))
+if(!isset($_GET['pdf'])&& !isset($_GET['csv']))
 {
 ?>
 
@@ -5373,7 +5385,7 @@ $id=0;
 
 ///CALENDAR
 
-if(!isset($_GET['pdf'])){
+if(!isset($_GET['pdf'])&& !isset($_GET['csv'])){
 
 ?>
 
@@ -5646,7 +5658,7 @@ if($id==63)
 $repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 
-if(!isset($_GET['pdf'])){
+if(!isset($_GET['pdf'])&& !isset($_GET['csv'])){
 echo "<table width='100%'>";
 echo "<tr>";
 echo "<td valign=middle width='80%'>".$repheader."</td>";
@@ -5668,7 +5680,11 @@ if(isset($_GET['typeid'])) $v_typeid = "&typeid=".$_GET['typeid']; else $v_typei
 
 
 if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
-echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a></td>";
+{
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a>
+								 <a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&csv=1><img src='../img/csvicon.png' width=32 height=32 alt='Image'></a>
+	  </td>";
+}
 
 echo "</tr>";
 echo "</table>";
@@ -6182,7 +6198,7 @@ $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
 $colf[4]="<td><b>".$colftext[4]."</b></td>";
-if($makepdf==0)
+if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
 
@@ -6345,7 +6361,7 @@ $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
 $colf[4]="<td><b>".$colftext[4]."</b></td>";
-if($makepdf==0)
+if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(2);</script>";
 }
 
@@ -7113,7 +7129,7 @@ $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
 $colf[4]="<td><b>".$colftext[4]."</b></td>";
-if($makepdf==0)
+if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(4);</script>";
 }
 
@@ -7634,7 +7650,7 @@ $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
 $colf[4]="<td><b>".$colftext[4]."</b></td>";
-if($makepdf==0)
+if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
 
@@ -7672,7 +7688,7 @@ $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
 $colf[4]="<td><b>".$colftext[4]."</b></td>";
-if($makepdf==0)
+if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(2);</script>";
 }
 
@@ -8034,7 +8050,7 @@ $colr[3]="line1";
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
-if($makepdf==0)
+if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
 
@@ -8073,7 +8089,7 @@ $colr[3]="line1";
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
 $colf[3]="<td><b>".$colftext[3]."</b></td>";
-if($makepdf==0)
+if($makepdf==0 and $makecsv==0)
 echo "<script>UpdateLeftMenu(2);</script>";
 }
 
@@ -10435,7 +10451,7 @@ $totalmb=$totalmb+$line[1];
 $numrow++;
 }
 
-if($makepdf==0)
+if($makepdf==0 && $makecsv==0)
 {
 
 ///TABLE HEADER
@@ -10513,6 +10529,7 @@ $colh[0]=4;
 if($_GET['id']==39)
 $colh[0]=3;
 ///костыль end
+
 
 
 //// GENERATE PDF FILE
@@ -10620,6 +10637,112 @@ $pdf->Output("../output/report.pdf", 'D');
 
 /// GENERATE PDF FILE END
 
+/// GENERATE CSV FILE
+
+if($makecsv==1) {
+	
+
+if($colh[0]==4)
+{
+$csvfile[0][0] = $colhtext[1];
+$csvfile[0][1] = $colhtext[2];
+$csvfile[0][2] = $colhtext[3];
+$csvfile[0][3] = $colhtext[4];
+
+}
+if(($colh[0]==3)or($colh[0]==5))
+{
+$csvfile[0][0] = $colhtext[1];
+$csvfile[0][1] = $colhtext[2];
+$csvfile[0][2] = $colhtext[3];
+}
+
+$i=1;
+
+while ($i<$numrow) {
+$line=explode(';;',$rows[$i]);
+
+
+for($j=2;$j<=$colh[0];$j++){
+$resultcolr[$j]=$colr[$j];
+$resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
+$resultcolr[$j]=preg_replace("/line1/i", round($line[1],2), $resultcolr[$j]);
+$resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
+$resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
+$resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
+$resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
+if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
+$resultcolr[$j]=$matches[2];
+
+
+}
+
+
+
+if($colh[0]==4)
+{
+$csvfile[$i][0] = $i;
+$csvfile[$i][1] = $resultcolr[2];
+$csvfile[$i][2] = $resultcolr[3];
+$csvfile[$i][3] = $resultcolr[4];
+	
+}
+if(($colh[0]==3)or($colh[0]==5))
+{
+$csvfile[$i][0] = $i;
+$csvfile[$i][1] = $resultcolr[2];
+$csvfile[$i][2] = $resultcolr[3];
+}
+
+for($j=1;$j<=$colh[0];$j++)
+$resultcolr[$j]="";
+
+$i++;
+}
+
+for($i=1;$i<=$colh[0];$i++){
+if (preg_match("/totalmb/i", $colf[$i])) {
+preg_replace("/totalmb/i", $totalmb, $colf[$i]);
+$colftext[$i]=round($totalmb,2);
+}
+}
+
+
+$i = count($csvfile);
+
+if($colh[0]==4)
+{
+$csvfile[$i][0] = $colftext[1];
+$csvfile[$i][1] = $colftext[2];
+$csvfile[$i][2] = $colftext[3];
+$csvfile[$i][3] = $colftext[4];
+}
+if(($colh[0]==3)or($colh[0]==5))
+{
+$csvfile[$i][0] = $colftext[1];
+$csvfile[$i][1] = $colftext[2];
+$csvfile[$i][2] = $colftext[3];
+}
+
+	
+$output = fopen("php://output",'w') or die("Can't open php://output");
+header("Content-Type:application/csv"); 
+header("Content-Disposition:attachment;filename=report.csv"); 
+
+
+foreach($csvfile as $product) {
+    fputcsv($output, $product,';');
+}
+fclose($output) or die("Can't close php://output");
+
+;	
+	
+}
+
+/// GENERATE CSV FILE END
+
+if(!isset($_GET['pdf'])&& !isset($_GET['csv'])) {
+
 $end=microtime(true);
 
 $runtime=$end - $start;
@@ -10631,7 +10754,11 @@ echo $_lang['stCREATORS'];
 
 ///mysql_disconnect();
 
-?>
 
+echo "
 </body>
-</html>
+</html>";
+
+} // if(!isset($_GET['pdf'])&& !isset($_GET['csv']))
+
+?>
