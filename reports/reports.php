@@ -8728,7 +8728,6 @@ $i++;
 }
 
 
-@$arrayLine="";
 $j=0;
 
 while($line = $ssq->fetch_array($result)){
@@ -8885,7 +8884,7 @@ echo "
 ";
 
 $result=$ssq->query($queryTrafficByHoursIpaddress);
-
+//echo $queryTrafficByHoursIpaddress;
 $HourCounter=0;
 $totalmb=0;
 $curLogin=0;
@@ -8903,7 +8902,7 @@ $hourTotalmb[$i]=0;
 $i++;
 }
 
-@$arrayLine="";
+
 $j=0;
 
 while($line = $ssq->fetch_array($result)){
@@ -9130,7 +9129,7 @@ $hourTotalmb[$i]=0;
 $i++;
 }
 
-@$arrayLine="";
+
 $j=0;
 
 while($line = $ssq->fetch_array($result)){
@@ -9303,7 +9302,7 @@ $hourTotalmb[$i]=0;
 $i++;
 }
 
-@$arrayLine="";
+
 $j=0;
 
 while($line = $ssq->fetch_array($result)){
