@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS `scsq_quicktraffic` (
   `sizeinbytes` int(11) DEFAULT NULL,
   `httpstatus` int(11) DEFAULT NULL,
   `par` int(11) NOT NULL,
+  `numproxy` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `date` (`date`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

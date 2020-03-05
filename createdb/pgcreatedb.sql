@@ -156,6 +156,7 @@ CREATE TABLE IF NOT EXISTS scsq_quicktraffic
   sizeinbytes integer,
   httpstatus integer,
   par integer NOT NULL,
+  numproxy integer,
   CONSTRAINT scsq_quicktraffic_pkey PRIMARY KEY (id)
 )
 WITH (
@@ -186,6 +187,7 @@ CREATE TABLE IF NOT EXISTS scsq_temptraffic
   method text,
   mime text,
   httpstatus text,
+  numproxy integer,
   CONSTRAINT scsq_temptraffic_pkey PRIMARY KEY (id)
 )
 WITH (
@@ -211,6 +213,7 @@ CREATE TABLE IF NOT EXISTS scsq_traffic
   sizeinbytes integer,
   method text,
   mime text,
+  numproxy integer,
   CONSTRAINT scsq_traffic_pkey PRIMARY KEY (id)
 )
 WITH (

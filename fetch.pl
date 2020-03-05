@@ -6,7 +6,9 @@ use DBI; # DBI  Perl!!!
 
 #=======================CONFIGURATION BEGIN============================
 
-my $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
+$dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
+
+$numproxy = "0"; #num proxy default 0, but you can use one db to many access.log. server1 : $numproxy="0", server2 : $numproxy="1" etc.
 
 #mysql default config
 if($dbtype==0){
@@ -87,19 +89,19 @@ $dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
 
 #delete data stored more than $deleteperiod days
 if($enabledelete==1){
-  $sql_getlastdate="select max(date) from scsq_traffic";
+  $sql_getlastdate="select max(date) from scsq_traffic where numproxy=".$numproxy."";
   $sth = $dbh->prepare($sql_getlastdate);
   $sth->execute; #
   @row=$sth->fetchrow_array;
   $lastdate=$row[0];
   $deldate=$lastdate - $deleteperiod * 86400;
-  $sql_deleteperiod="delete from scsq_traffic where date<$deldate";
+  $sql_deleteperiod="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
   $sth = $dbh->prepare($sql_deleteperiod);
   $sth->execute; #
 }
 
 #get last date in table with data. It used to prevent importing data from log which could be in table yet.
-$sql_getlastdate="select max(date) from scsq_traffic";
+$sql_getlastdate="select max(date) from scsq_traffic where numproxy=".$numproxy."";
 $sth = $dbh->prepare($sql_getlastdate);
 $sth->execute; #
 @row=$sth->fetchrow_array;
@@ -109,11 +111,11 @@ $lastdate=$row[0];
 #get last date in table with data. It used to prevent importing data from log which could be in table yet.
 
 if($dbtype==0){
-$sql_getlastdate="select unix_timestamp(from_unixtime(max(date),'%Y-%m-%d')) from scsq_quicktraffic";
+$sql_getlastdate="select unix_timestamp(from_unixtime(max(date),'%Y-%m-%d')) from scsq_quicktraffic where numproxy=".$numproxy."";
 }
 
 if($dbtype==1){
-$sql_getlastdate="select EXTRACT(epoch from timestamptz (to_char(TO_TIMESTAMP(max(date)),'YYYY-MM-DD'))) from scsq_quicktraffic";
+$sql_getlastdate="select EXTRACT(epoch from timestamptz (to_char(TO_TIMESTAMP(max(date)),'YYYY-MM-DD'))) from scsq_quicktraffic where numproxy=".$numproxy."";
 }
 
 $sth = $dbh->prepare($sql_getlastdate);
@@ -126,14 +128,14 @@ $lastday=0;
 }
 
 #clear last date in table with data.
-$sql_clearlastday="delete from scsq_quicktraffic where date>".$lastday."";
+$sql_clearlastday="delete from scsq_quicktraffic where date>".$lastday." and numproxy=".$numproxy."";
 $sth = $dbh->prepare($sql_clearlastday);
 $sth->execute; #
 
 
 
 #clear temptable to be sure, that table have no strange data before import.
-$sql_cleartemptable="truncate scsq_temptraffic";
+$sql_cleartemptable="delete from scsq_temptraffic where numproxy=".$numproxy."";
 $sth = $dbh->prepare($sql_cleartemptable);
 $sth->execute; #
 
@@ -200,12 +202,12 @@ print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/s
 
       #collect an sql insert statement with data. 
       if($count==0) {
-        $sqltext="INSERT INTO scsq_temptraffic (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime) VALUES";
+        $sqltext="INSERT INTO scsq_temptraffic (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES";
       }
   
       $count++;
       if(eof or $count>=$count_lines_for_one_insert) {
-        $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]')";
+        $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]',$numproxy)";
         $count=0;
         $sth = $dbh->prepare($sqltext);
         $sth->execute;
@@ -232,20 +234,22 @@ $sth->execute;
 #copy data from temptable to main table
 
 if($dbtype==0){
-$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime from scsq_temptraffic
+$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
 LEFT JOIN (select id,name from scsq_ipaddress
 RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
 LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
 LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+WHERE numproxy=".$numproxy."
 ;";
 }
 
 if($dbtype==1){
-$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime from scsq_temptraffic
+$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
 LEFT JOIN (select id,name from scsq_ipaddress
 RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
 LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
 LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+WHERE numproxy=".$numproxy."
 ;";
 }
 
@@ -253,7 +257,7 @@ $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
 #clear temptable.
-$sql_cleartemptable="truncate scsq_temptraffic";
+$sql_cleartemptable="delete from scsq_temptraffic where numproxy=".$numproxy."";
 $sth = $dbh->prepare($sql_cleartemptable);
 $sth->execute; #
 
@@ -263,7 +267,7 @@ $sqltext="";
       }
 
       if($count<$count_lines_for_one_insert and $count>0) {
-        $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]'),";
+        $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]',$numproxy),";
       }
     }
   }
@@ -288,7 +292,7 @@ $sqltext="";
 
 if($dbtype==0){
 
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par)
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par, numproxy)
 SELECT 
 date,
 tmp2.login,
@@ -296,7 +300,8 @@ tmp2.ipaddress,
 sum(tmp2.sizeinbytes),
 tmp2.st,
 tmp2.httpstatus,
-1
+1,
+".$numproxy."
 
 FROM (SELECT 
 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
@@ -306,7 +311,7 @@ login,
 ipaddress,
 httpstatus
 FROM scsq_traffic
-where date>".$lastday."
+where date>".$lastday." and numproxy=".$numproxy."
 
 ) as tmp2
 
@@ -319,7 +324,7 @@ ORDER BY null;
 
 if($dbtype==1){
 
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par)
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par,numproxy)
 SELECT 
 date,
 tmp2.login,
@@ -327,7 +332,8 @@ tmp2.ipaddress,
 sum(tmp2.sizeinbytes),
 tmp2.st,
 tmp2.httpstatus,
-1
+1,
+".$numproxy."
 
 FROM (SELECT 
 case
@@ -343,7 +349,7 @@ login,
 ipaddress,
 httpstatus
 FROM scsq_traffic
-where date>".$lastday."
+where date>".$lastday." and numproxy=".$numproxy."
 
 ) as tmp2
 
@@ -360,21 +366,22 @@ $sth->execute;
 $sqltext="";
 
 if($dbtype==0) {
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par)
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par, numproxy)
 SELECT 
 tmp2.date,
 '0',
 '0',
 tmp2.sums,
 tmp2.st,
-2
+2,
+".$numproxy."
 
 FROM (SELECT 
 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
 sum(sizeinbytes) as sums,
 date
 FROM scsq_traffic
-where date>".$lastday."
+where date>".$lastday." and numproxy=".$numproxy."
 GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st)
 
 ) as tmp2
@@ -386,14 +393,15 @@ ORDER BY null;
 
 if($dbtype==1){
 
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par)
+$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par,numproxy)
 SELECT 
 tmp2.date,
 '0',
 '0',
 tmp2.sums,
 tmp2.st,
-2
+2,
+".$numproxy."
 
 FROM (SELECT 
 case
@@ -407,7 +415,7 @@ case
 sum(sizeinbytes) as sums,
 date
 FROM scsq_traffic
-where date>".$lastday."
+where date>".$lastday." and numproxy=".$numproxy."
 GROUP BY to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),st,date
 
 ) as tmp2
