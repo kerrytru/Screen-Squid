@@ -10642,7 +10642,10 @@ $pdf->Output("../output/report.pdf", 'D');
 /// GENERATE CSV FILE
 
 if($makecsv==1) {
-	
+
+header("Content-Type:application/csv"); 
+header("Content-Disposition:attachment;filename=report.csv"); 
+echo "\xEF\xBB\xBF"; // UTF-8 BOM
 
 if($colh[0]==4)
 {
@@ -10726,10 +10729,9 @@ $csvfile[$i][1] = $colftext[2];
 $csvfile[$i][2] = $colftext[3];
 }
 
+
 	
 $output = fopen("php://output",'w') or die("Can't open php://output");
-header("Content-Type:application/csv"); 
-header("Content-Disposition:attachment;filename=report.csv"); 
 
 
 foreach($csvfile as $product) {
