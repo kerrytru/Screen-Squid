@@ -791,7 +791,7 @@ $queryTopSitesTraffic="
   ORDER BY tmp2.s desc
   LIMIT ".$countTopSitesLimit." ";
 
-echo $queryTopSitesTraffic;
+//echo $queryTopSitesTraffic;
 
 #postgre version
 if($dbtype==1)
