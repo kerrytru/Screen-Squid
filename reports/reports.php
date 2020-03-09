@@ -664,7 +664,7 @@ $querySitesTraffic="
 	 '',
 	 tmp2.cat
   
-  FROM ((SELECT 
+  FROM (SELECT 
 		 sum(sizeinbytes) as s,
 		 date,
 		 login,
@@ -694,7 +694,7 @@ $querySitesTraffic="
 	       ORDER BY null
 	      ) as tmp2
  	  
-	 )
+	 
  
 
   ORDER BY site asc
@@ -754,7 +754,7 @@ $queryTopSitesTraffic="
 	 tmp2.s,
 	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2)
   
-  FROM ((SELECT 
+  FROM (SELECT 
 		 sum(sizeinbytes) as s,
 		 date,
 		 login,
@@ -785,11 +785,13 @@ $queryTopSitesTraffic="
 	      ) as tmp2
  	       
 	  
-	 )
+	 
  
 	 
   ORDER BY tmp2.s desc
   LIMIT ".$countTopSitesLimit." ";
+
+echo $queryTopSitesTraffic;
 
 #postgre version
 if($dbtype==1)
@@ -5865,7 +5867,7 @@ $colh[5]="<th>".$colhtext[5]."</th>";
 
 
 $result=$ssq->query($queryTopSitesTraffic);
-
+//echo $queryTopSitesTraffic;
 
 ///if($tmpLine[1]==443)
 ///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
