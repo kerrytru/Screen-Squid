@@ -764,9 +764,11 @@ $numrow=1;
 
 $totalspeed=0;
 
+
+
 $upt[0]=floor(($uptime/3600)/24); //days
 $upt[1]=floor(($uptime-$upt[0]*86400)/3600); ///hours
-$upt[2]=floor(($uptime-($upt[1]*3600))/60); //mins
+$upt[2]=floor(($uptime - ($upt[0]*86400 + $upt[1]*3600 ))/60); //mins
 $upt[3]=$upt[0]."_days_".$upt[1]."_hours_".$upt[2]."_min";
 
 echo "	<tr>
