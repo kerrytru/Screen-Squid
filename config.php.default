@@ -120,5 +120,5 @@ ini_set('display_errors',1);
 #how many bytes in megabyte. by default 1000000, but its not true. 1024*1024 = 1048576
 $oneMegabyte=1000000; 
 
-$vers="1.16b";
+$vers="1.17b";
 ?>

@@ -752,10 +752,10 @@ echo "
     #
     </th>
     <th  class=unsortable>
-    Параметр
+    ".$_lang['stPARAMNAME']."
     </th>
     <th  class=unsortable>
-    Значение
+    ".$_lang['stPARAMVALUE']."
     </th>
 
 </tr>

@@ -6989,8 +6989,8 @@ $colr[1]="numrow";
 $colr[2]="line0";
 $colr[3]="line1";
 
-$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','')>Логины</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'month','')>IP адреса</a>";
+$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','')>".$_lang['stLOGINS']."</a> / 
+<a href=javascript:LeftRightDateSwitch(2,'month','')>".$_lang['stIPADDRESSES']."</a>";
 
 
 $colf[1]="<td>".$colftext[1]."</td>";
@@ -7803,8 +7803,8 @@ $line[1]=$line[1] / $oneMegabyte;
 echo "<td>".$line[1]."</td>";
 $explodeTmp=explode(".", $line[0]);
 $dateTmp=$explodeTmp[0]."-".$explodeTmp[1]."-".$explodeTmp[2];
-echo "<td><a href=javascript:LeftRightDateSwitch(1,'day','$dateTmp')>Логины</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'day','$dateTmp')>IP адреса</a></td>";
+echo "<td><a href=javascript:LeftRightDateSwitch(1,'day','$dateTmp')>".$_lang['stLOGINS']."</a> / 
+<a href=javascript:LeftRightDateSwitch(2,'day','$dateTmp')>".$_lang['stIPADDRESS']."</a></td>";
 
 
 echo "</tr>";
