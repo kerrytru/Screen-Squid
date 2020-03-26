@@ -4,7 +4,7 @@
 
 =com
 
-This script is quota helper. If user1 reach quota, helper send to squid signal to block user1 access.
+This script is quota helper. If user1 reach quota, helper send to squid signal to limit speed user1 access.
 
 As other perl script in Screen Squid, you need to configure DB section.
 
@@ -14,28 +14,62 @@ If your authorization by IP, you need to set it in 1.
 
 IMPORTANT: When you configure this script, you need to configure squid.conf.
 
+IMPORTANT 2: Your squid must be >= 3.5 version.
+
 This lines you need to add to conf:
 
 If your authorization by login:
 
 #acl section
-external_acl_type e_block ttl=10 negative_ttl=10 %LOGIN /path/to/script/quotablock.pl
-acl a_block external e_block
+external_acl_type e_speed ttl=10 negative_ttl=10 %LOGIN /var/www/html/freetime/modules/Quotas/quotaspeed.pl
+acl a_speed external e_speed
 
 If your authorization by IP address:
 
 #acl section
-external_acl_type e_block ttl=10 negative_ttl=10 %SRC /path/to/script/quotablock.pl
-acl a_block external e_block
+external_acl_type e_speed ttl=10 negative_ttl=10 %SRC /var/www/html/freetime/modules/Quotas/quotaspeed.pl
+acl a_speed external e_speed
 
 For both authorization
 
-#http rules section
-http_access allow a_block
+#http rules section 
+http_access allow a_speed
+
+
+#delay pools section
+
+delay_pools 2
+delay_class 1 5
+delay_class 2 5
+
+
+#acl some_group external -m=' ' tag slowspeed
+#slowspeed and fastspeed are passphrases which we tell squid. 
+
+acl slowclient note tag slowspeed
+
+acl fastclient note tag1 fastspeed
+
+
+
+# Fast clients in a first pool.
+delay_access 1 allow fastclient
+delay_access 1 deny all
+
+# Slow clients in a second pool
+delay_access 2 allow slowclient
+delay_access 2 deny all
+
+#Limit speed to delay pools
+
+#First unlimited
+delay_parameters 1 -1/16000
+
+#Second set 64 kbit/s
+
+delay_parameters 2 8000/8000
 
 =cut
-
-
 
 use DBI; # DBI  Perl!!!
 
@@ -130,13 +164,14 @@ $row[0]=-1;
 
 #if quota status = 0 then all is good (pass user) 
         	if($row[0] == 0) {
-				$answ='OK';
+				$answ='OK tag1=fastspeed';
 			}
 				else
 			{
 				#otherwise block
-				$answ='ERR';
-				
+		#		$answ='ERR';
+				$answ='OK tag=slowspeed';
+		
 			}
         
         return $answ;
@@ -150,11 +185,11 @@ while (<STDIN>) {
         chomp;
         &debug ("Got $_ from squid");
 
-   #     print STDERR "Got from squid";
-   
 	#some fix for login
 		@item = split " -", $_;
 		$_=$item[0];
+
+   #     print STDERR "Got from squid";
    
    #get information from squid
         $auth = $_;
