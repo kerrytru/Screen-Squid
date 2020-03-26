@@ -1,0 +1,21 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "User manager module";
+
+$_lang['stUSERMANAGERMODULE'] = "Module Usermanager";
+
+$_lang['stUSERMANAGERUPDATED']="1 user updated";
+
+$_lang['stUSERMANAGERACTIVE']="Active?";
+
+$_lang['stREFRESH']="Refresh";
+
+$_lang['stUSERMANAGERALIASCOPIED'] = "Aliases copied";
+
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
+?>

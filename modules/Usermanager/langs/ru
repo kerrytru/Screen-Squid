@@ -1,0 +1,19 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Менеджер доступа пользователей";
+
+$_lang['stUSERMANAGERMODULE'] = "Моудль Пользователи";
+
+$_lang['stUSERMANAGERUPDATED']="1 пользователь обновлен";
+
+$_lang['stUSERMANAGERACTIVE']="Актив?";
+
+$_lang['stUSERMANAGERALIASCOPIED'] = "Алиасы обновлены";
+
+$_lang['stREFRESH']="Обновить";
+
+$_lang['stINSTALLED']="Установлено";
+$_lang['stUNINSTALLED']="Удалено";
+?>
