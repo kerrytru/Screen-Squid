@@ -155,8 +155,8 @@ if($enableNofriends==1) {
 			  $queryCountRowsTraffic="select count(*) from scsq_traffic";
 			  $queryCountRowsLogin="select count(*) from scsq_logins";
 			  $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
-			  $queryMinMaxDateTraffic="select min(date),max(date) from scsq_quicktraffic";
-			  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic ";
+			  $queryMinMaxDateTraffic="select min(date),max(date) from scsq_traffic";
+			  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic where par=1";
 			  $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
 			  $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
 			  $queryCountObjectsTraffic3="select count(id) from scsq_traffic where sizeinbytes>5000 and sizeinbytes<=10000";
@@ -541,6 +541,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
            <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name" value="'.$line[0].'"></td></tr>
            <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" '.$activeIsChecked.' name="activeauth"></td></tr>
 		   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin" value="'.$line[4].'"></td></tr>
+		   <tr><td>'.$_lang['stCHANGEPASSWORD'].':</td> <td> <input type="checkbox" name="changepassword"></td></tr>
 		   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
 		   </table>
 		   <br />
