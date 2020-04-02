@@ -1,0 +1,219 @@
+<?php
+///Comienzo de los encabezados de los informes
+$_lang['stLOGINSTRAFFIC']="Tr&aacute;fico de usuarios (Sesi&oacute;n)";
+$_lang['stIPADDRESSTRAFFIC']="Tr&aacute;fico de usuarios (direcci&oacute;n IP)";
+$_lang['stSITESTRAFFIC']="Tr&aacute;fico por sitios";
+$_lang['stTOPSITESTRAFFIC']="Sitios de mayor tr&aacute;fico";
+$_lang['stTOPLOGINSTRAFFIC']="Sesiones de usuarios de mayor tr&aacute;fico";
+$_lang['stTOPIPTRAFFIC']="Direcciones IP de mayor tr&aacute;fico";
+$_lang['stTRAFFICBYHOURS']="Por hora";
+$_lang['stONELOGINTRAFFIC']="Tr&aacute;fico de usuarios";
+$_lang['stONELOGINTOPSITESTRAFFIC']="Top sites one login";
+$_lang['stONELOGINTRAFFICBYHOURS']="Tr&aacute;fico de sesiones por hora";
+$_lang['stONEIPADRESSTRAFFIC']="Tr&aacute;fico de direcciones IP ";
+$_lang['stONEIPADDRESSTOPSITESTRAFFIC']="Mayores Sitio por una IP";
+$_lang['stONEIPADDRESSTRAFFICBYHOURS']="Dirección IP de tráfico por hora";
+$_lang['stLOGINSTRAFFICWIDE']="Ancho de tr&aacute;fico por sesi&oacute;n";
+$_lang['stIPADDRESSTRAFFICWIDE']="Ancho de tr&aacute;fico de direcciones IP";
+$_lang['stIPADDRESSTRAFFICWITHRESOLVE']="Tr&aacute;fico de direcciones IP con resoluci&oacute;n";
+$_lang['stPOPULARSITES']="Sitios populares";
+$_lang['stWHOVISITSITELOGIN']="Quien visita (sesi&oacute;n) sitios ";
+$_lang['stWHOVISITSITEIPADDRESS']="Quien visita (direccion IP) sitios ";
+$_lang['stWHODOWNLOADBIGFILES']="Qui&eacute;n descarga ficheros grandes";
+$_lang['stTRAFFICBYPERIOD']="Tr&aacute;fico por per&iacute;odo (por mes)";
+$_lang['stTRAFFICBYPERIODDAY']="Tr&aacute;fico por per&iacute;odo (por d&iacute;a)";
+$_lang['stTRAFFICBYPERIODDAYNAME']="Tr&aacute;fico por per&iacute;odo (d&iacute;a)";
+$_lang['stVISITINGWEBSITELOGINS']="Sitios Web visitados (sesi&oacute;n)";
+$_lang['stVISITINGWEBSITEIPADDRESS']="Sitios WEb visitados (direcciones IP)";
+$_lang['stGROUPSTRAFFIC']="Tr&aacute;fico de grupos";
+$_lang['stONEGROUPTRAFFIC']="Tr&aacute;fico de grupo";
+$_lang['stONEGROUPTOPSITESTRAFFIC']="Mayor sitio por grupo";
+$_lang['stONEGROUPTRAFFICBYHOURS']="Un tr&aacute;fico grupal por hora";
+$_lang['stONEGROUPWHODOWNLOADBIGFILES']="Quien descarga archivos grandes en grupo";
+$_lang['stHTTPSTATUSES']="Estados HTTP";
+$_lang['stHTTPSTATUS']="Estado HTTP";
+$_lang['stONELOGINIPTRAFFIC']="Direcciones IP desde sesi&oacute;n";
+$_lang['stONEIPADDRESSLOGINSTRAFFIC']="Sesi&oacute;n desde direcciones IP";
+$_lang['stLOGINSIPTRAFFIC']="Direcciones IP  desde sesiones";
+$_lang['stIPADDRESSLOGINSTRAFFIC']="Sesiones desde direcciones IP";
+$_lang['stFOR']="para";
+$_lang['stIPADDRESSFOR']="(IP ) para";
+$_lang['stLOGINSFOR']="(Sesiones) para";
+$_lang['stEXTENDED']="extendido";
+$_lang['stBYDAYTIME']="De d&iacute;a";
+///FIN Encabezados de informe
+$_lang['stDAY']="D&Iacute;A";
+$_lang['stMONTH']="MES";
+$_lang['stFASTDATESWITCH']="Cambio r&aacute;pido de fecha:";
+
+$_lang['stEXECUTIONTIME']="P&aacute;gina generada en";
+$_lang['stSECONDS']="segundos";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid creado por <a href=http://break-people.ru>break-people.ru</a></font>";
+
+$_lang['stLOGIN']="Sesi&oacute;n";
+$_lang['stLOGINS']="Sesiones";
+$_lang['stIPADDRESS']="Direcciones IP";
+$_lang['stIPADDRESSES']="Direcciones IP";
+$_lang['stSITE']="Sitio";
+$_lang['stHOURS']="Horas";
+$_lang['stMEGABYTES']="Megabytes";
+$_lang['stALIAS']="Alias";
+$_lang['stTOTAL']="TOTAL:";
+$_lang['stFROMCACHEMB']="Desde cache(MB)";
+$_lang['stDIRECTMB']="Directo(MB)";
+$_lang['stFROMCACHEPERCENT']="Desde cache(%)";
+$_lang['stDIRECTPERCENT']="Directo(%)";
+$_lang['stHOSTNAMERESOLVE']="Resolver";
+$_lang['stREQUESTS']="Solicitudes";
+$_lang['stWHO']="¿Qui&eacute;n?";
+$_lang['stFROMWEBSITE']="De donde(sitio-web)";
+$_lang['stMONTHYEAR']="Mes.Año";
+$_lang['stDAYMONTHYEAR']="D&iacute;a.Mes.Año";
+$_lang['stDAYNAME']="D&iacute;a";
+$_lang['stDATEANDTIME']="Fecha y hora";
+$_lang['stWEBSITE']="Sitio-Web";
+$_lang['stGROUP']="Grupo";
+$_lang['stQUANTITY']="Cantidad";
+$_lang['stDATE']="Fecha";
+$_lang['stQUANTITYIPADDRESS']="Cantidad de direcciones IP";
+$_lang['stQUANTITYLOGIN']="Cantidad de Sesiones";
+
+$_lang['stREPORTS']="Reportes";
+$_lang['stSTATS']="Estad&iacute;sticas";
+$_lang['stALIASES']="Alias";
+$_lang['stGROUPS']="Grupos";
+$_lang['stWELCOME']="Bienvenido a Screen Squid";
+$_lang['stDONTFORGET']="<p><b>NO OLVIDE:</b> Al comienzo, cree la BD mysql con tablas, usando el archivo SQL <a href=createdb/createdb.sql></a>). Configure la conexi&oacute;n a la BD en config.php y fetch.pl.</p>";
+$_lang['stALLISOK']="DB Conexi&oacute;n establecida. Haga click en <b>Reportes</b> para continuar.";
+
+$_lang['stQUANTITYRECORDS']="N&uacute;mero de entradas en la DB";
+$_lang['stQUANTITYLOGINS']="N&uacute;mero de Sesiones";
+$_lang['stQUANTITYIPADDRESSES']="N&uacute;mero de direcciones IP.";
+$_lang['stMINDATE']="Fecha m&iacute;nima";
+$_lang['stMAXDATE']="Fecha m&aacute;xima";
+$_lang['stTRAFFICSUM']="Total contado(MB)";
+
+$_lang['stALIASNAME']="Nombre del alias";
+$_lang['stTYPE']="Tipo";
+$_lang['stVALUE']="Valor";
+$_lang['stADDALIAS']="Adicionar alias";
+$_lang['stFORMADDALIAS']="Formulario adicionar alias";
+$_lang['stTYPECHECK']="Tipo (Sesi&oacute;n(sin marcar)/Dirección IP (marcado))";
+$_lang['stADD']="Adicionar";
+
+$_lang['stBACK']="Atr&aacute;s";
+$_lang['stSAVE']="Salvar";
+$_lang['stDELETE']="Borrar";
+$_lang['stALIASADDED']="1 alias adicionado";
+$_lang['stALIASUPDATED']="1 alias actualizado";
+$_lang['stALIASDELETED']="1 alias borrado";
+
+$_lang['stGROUPNAME']="Nombre de grupo";
+$_lang['stCOMMENT']="Comentario";
+$_lang['stADDGROUP']="Adicionar grupo";
+$_lang['stFORMADDGROUP']="Formulario de adicionar grupo";
+$_lang['stGROUPADDED']="1 grupo adicionado";
+$_lang['stGROUPUPDATED']="1 grupo actualizado";
+$_lang['stGROUPDELETED']="1 grupo borrado";
+
+$_lang['stSEARCHSTRING']="B&uacute;scalo";
+$_lang['stSEARCHFORM']="Formulario de b&uacute;squeda";
+$_lang['stSEARCH']="B&uacute;squeda";
+
+$_lang['stGENERAL']="General";
+$_lang['stBYGROUP']="Por grupo";
+$_lang['stFASTSEARCH']="B&uacute;squeda r&aacute;pida";
+
+$_lang['stMONDAY']="Lun";
+$_lang['stTUESDAY']="Mar";
+$_lang['stWEDNESDAY']="Mier";
+$_lang['stTHURSDAY']="Jue";
+$_lang['stFRIDAY']="Vie";
+$_lang['stSATURDAY']="Sab";
+$_lang['stSUNDAY']="Dom";
+
+$_lang['stINCLUDE']="¿Incluir?";
+$_lang['stQUANTITYALIASES']="Cantidad";
+
+$_lang['stWHOVISITSITES']="Quien visita sitios";
+$_lang['stFROM']="desde";
+$_lang['stUNTIL']="hasta";
+$_lang['stMIME']="Tipos MIME";
+$_lang['stMIMETYPESTRAFFIC']="Tr&aacute;fico por tipos MIME";
+$_lang['stDOMAINZONESTRAFFIC']="Tr&aacute;fico por zona de dominios";
+$_lang['stDOMAINZONE']="Zona de dominio";
+$_lang['stBACKTOGROUPLIST']="Volver a la lista de grupo";
+$_lang['stDASHBOARD']="Dashboard";
+$_lang['stTRAFFICOBJECTS']="Objetos de tr&aacute;fico";
+
+$_lang['stLOGTABLE']="Registro";
+$_lang['stLOGDATESTART']="Comienzo";
+$_lang['stLOGDATEEND']="Final";
+$_lang['stLOGMESSAGE']="Mensaje";
+$_lang['stTOP']="Mayor";
+
+
+$_lang['stTRAFFICBYHOURSLOGINS']="Tr&aacute;fico por horas (Sesiones)";
+$_lang['stTRAFFICBYHOURSIPADDRESS']="Tr&aacute;fico por horas (Direcciones IP)";
+$_lang['stTRAFFICBYCATEGORIES']="Tr&aacute;fico por categor&iacute;as";
+$_lang['stCATEGORY']="Categor&iacute;a";
+$_lang['stTRAFFICBYHOURSLOGINSONESITE']="Sitios Tr&aacute;fico por horas (Sesiones)";
+$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']="Sitios Tr&aacute;fico por horas (Direcciones IP)";
+
+$_lang['stACTIVEIPADDRESS']="Direcciones IP activas";
+$_lang['stONLINE']="En l&iacute;nea";
+$_lang['stREFRESHED']="Refrescar en";
+$_lang['stSPEED']="kb/seg";
+
+$_lang['stCONTENT']="Contenido";
+$_lang['stSTART']="Iniciar";
+$_lang['stSTOP']="Detener";
+
+$_lang['stINSPECT']="Monitorear";
+
+$_lang['stUSERS']="Usuarios";
+
+$_lang['stACTIVEAUTH']="Activar gabinete de usuario";
+$_lang['stUSERLOGIN']="Inicio de sesión de usuarios";
+$_lang['stUSERPASSWORD']="Contrase&ntilde;a de Usuario";
+
+
+$_lang['stENTER']="Inicio de sesi&oacute;n";
+
+$_lang['stAUTHFAIL']="Inicio sesi&oacute;n fallido";
+$_lang['stCHANGEPASSWORD']="Cambiar contrase&ntilde;a?";
+$_lang['stLOGINTOCABINET'] ="Inicio de sesi&oacute;n en el gabinete";
+$_lang['stLOGOUT']="Cerrar sesi&oacute;n";
+
+//1.14
+$_lang['stPARAMNAME'] ="Par&aacute;metro";
+$_lang['stPARAMVALUE']="Valor";
+$_lang['stCONFIG']="Configuraci&oacute;n";
+
+//1.15
+$_lang['stSPECIFIED'] = "ESPECIFICADO";
+$_lang['stMODULEMANAGER'] = "Administrador de M&oacute;dulos";
+$_lang['stDESCRIPTION'] = "Descripci&oacute;n";
+$_lang['stNAME'] = "Nombre";
+$_lang['stINSTALL'] = "Instalar";
+$_lang['stUNINSTALL'] = "Desinstalar";
+
+//1.16
+$_lang['stTODAY'] = "Hoy";
+
+$_lang['stJANUARY'] = "Enero";
+$_lang['stFEBRUARY'] = "Febrero";
+$_lang['stMARCH'] = "Marzo";
+$_lang['stAPRIL'] = "Abril";
+$_lang['stMAY'] = "Mayo";
+$_lang['stJUNE'] = "Junio";
+$_lang['stJULY'] = "Julio";
+$_lang['stAUGUST'] = "Augosto";
+$_lang['stSEPTEMBER'] = "Septiembre";
+$_lang['stOCTOBER'] = "Octubre";
+$_lang['stNOVEMBER'] = "Noviembre";
+$_lang['stDECEMBER'] = "Deciembre";
+
+$_lang['stFORMEDITALIAS']="Editar formulario de alias";
+$_lang['stFORMEDITGROUP']="Editar formulario de grupo";
+?>
