@@ -1805,6 +1805,7 @@ $queryTrafficByPeriodDayname="
 $queryHttpStatus= "
   SELECT 
     scsq_httpstatus.name,
+    '',
     count(*),
     scsq_quicktraffic.httpstatus 
   FROM scsq_quicktraffic 
@@ -1843,6 +1844,7 @@ if($dbtype==1)
 $queryHttpStatus= "
   SELECT 
     scsq_httpstatus.name,
+    '',
     count(*),
     scsq_quicktraffic.httpstatus 
   FROM scsq_quicktraffic 
@@ -3279,6 +3281,7 @@ $queryOneIpaddressPopularSites="
 $queryLoginsHttpStatus="
   SELECT 
     nofriends.name,
+    '',
     count(*),
     login,
     tmp2.name 
@@ -3314,6 +3317,7 @@ if($dbtype==1)
   $queryLoginsHttpStatus="
   SELECT 
     nofriends.name,
+    '',
     count(*),
     login,
     tmp2.name 
@@ -3347,6 +3351,7 @@ if($dbtype==1)
 $queryIpaddressHttpStatus="
   SELECT 
     nofriends.name,
+    '',
     count(*),
     ipaddress,
     tmp2.name 
@@ -3380,6 +3385,7 @@ $queryIpaddressHttpStatus="
   $queryIpaddressHttpStatus="
   SELECT 
     nofriends.name,
+    '',
     count(*),
     ipaddress,
     tmp2.name 
@@ -7471,8 +7477,8 @@ $result=$ssq->query($queryHttpStatus);
 
 $colr[1]="numrow";
 $colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="<a href=javascript:GoPartlyReports(31,'".$dayormonth."','line2','line0','5','')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(32,'".$dayormonth."','line2','line0','5','')>".$_lang['stIPADDRESSES']."</a>";
+$colr[3]="line2";
+$colr[4]="<a href=javascript:GoPartlyReports(31,'".$dayormonth."','line3','line0','5','')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(32,'".$dayormonth."','line3','line0','5','')>".$_lang['stIPADDRESSES']."</a>";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -7505,9 +7511,9 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryLoginsHttpStatus);
 
 $colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line2','line0')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
+$colr[2]="<a href=javascript:GoPartlyReports(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line3','line0')>line0</a>";
+$colr[3]="line2";
+$colr[4]="line4";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -7540,9 +7546,9 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryIpaddressHttpStatus);
 
 $colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(34,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line2','line0')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
+$colr[2]="<a href=javascript:GoPartlyReports(34,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line3','line0')>line0</a>";
+$colr[3]="line2";
+$colr[4]="line4";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
