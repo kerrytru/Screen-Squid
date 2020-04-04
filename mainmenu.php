@@ -146,7 +146,6 @@ include_once("lib/dbDriver/pgmodule.php");
 
 $ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
-$ssq->query("select 1 from scsq_traffic limit 1");
 
 echo "//First Level
 	var rootproxy = new WebFXTreeItem('".$srvname[$srv]."');
@@ -154,7 +153,7 @@ echo "//First Level
 	tree.add(rootproxy);";
 
 
-if($ssq->db_object==true)
+if($ssq->db_object!=null)
 {
 echo "	
 //Second Level
@@ -162,23 +161,6 @@ echo "
 	rootproxy.icon = 'img/themes/default/Database.png';
 	rootproxy.openIcon = 'img/themes/default/Database.png';";
 
-}
-else
-{
-echo "
-
-//Second Level	
-    rootproxy.add(new WebFXTreeItem('none'));
-	rootproxy.icon = 'img/themes/default/DisconnectedDatabase.png';
-	rootproxy.openIcon = 'img/themes/default/DisconnectedDatabase.png';
-	
-
-	";
-	
-$srv++;
-continue;
-
-}  
 echo "
 //Online reports	
 	var onlinereports = new WebFXTreeItem('".$_lang['stONLINE']."');
@@ -252,6 +234,25 @@ $ssq->free_result($result);
 echo "rootproxy.add(modulemanager);";
 
 $srv++;
+
+}
+else
+{
+echo "
+
+//Second Level	
+    rootproxy.add(new WebFXTreeItem('none'));
+	rootproxy.icon = 'img/themes/default/DisconnectedDatabase.png';
+	rootproxy.openIcon = 'img/themes/default/DisconnectedDatabase.png';
+	
+
+	";
+	
+$srv++;
+continue;
+
+}  
+
 }
 
 echo "

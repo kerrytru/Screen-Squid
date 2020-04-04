@@ -10,6 +10,8 @@ var $query_object = false;
 
 function __construct($variables){ // 
     $this->vars = $variables;
+
+    $this->db_object = $this->GetConnectionDB();
 }
 
   function GetDesc()
@@ -21,17 +23,17 @@ function __construct($variables){ //
   {
 
 	$conn_string = "host=".$this->vars['addr']." port=5432 dbname=".$this->vars['dbase']." user=".$this->vars['usr']." password=".$this->vars['psw']."";
-	$this->db_object = pg_connect($conn_string);
+	$con = pg_connect($conn_string);
 
- 	return true;
+ 	return $con;
 
   }
 
   function query($query)
   {
 
-	if(!$this->GetConnectionDB())
-		$this->GetConnectionDB();
+if(!isset($this->db_object))
+	$this->GetConnectionDB();
 
  	return pg_query($query);
 
@@ -41,7 +43,6 @@ function __construct($variables){ //
   
   function fetch_array($result)
   {
-
 	
 	return pg_fetch_array($result,NULL,PGSQL_NUM);
 

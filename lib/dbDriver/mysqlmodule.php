@@ -4,12 +4,16 @@
 class ScreenSquid
 {
 
-var $db_object = false;
+var $db_object = null;
 var $query_object = false;
 
 
+ 
+
 function __construct($variables){ // 
     $this->vars = $variables;
+    
+    $this->db_object = $this->GetConnectionDB();
 }
 
   function GetDesc()
@@ -19,23 +23,20 @@ function __construct($variables){ //
 
   function GetConnectionDB()
   {
+	
+		$con = @mysqli_connect($this->vars['addr'],$this->vars['usr'],$this->vars['psw'],$this->vars['dbase']);
 
-
-  $this->db_object = @mysqli_connect($this->vars['addr'],$this->vars['usr'],$this->vars['psw'],$this->vars['dbase']);
-
- return true;
-
+	return $con;
  }
+
+
 
   function query($query)
   {
 	
-#$result = mysqli_query($connection,$query, MYSQLI_USE_RESULT);
 
-#return $result; 
-
-	if(!$this->GetConnectionDB())
-		$this->GetConnectionDB();
+if(!isset($this->db_object))
+	$this->GetConnectionDB();
 
 	 $this->query_object = mysqli_query( $this->db_object, $query );
 
