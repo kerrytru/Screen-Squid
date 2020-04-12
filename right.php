@@ -155,7 +155,7 @@ if($enableNofriends==1) {
 			  $queryCountRowsTraffic="select count(*) from scsq_traffic";
 			  $queryCountRowsLogin="select count(*) from scsq_logins";
 			  $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
-			  $queryMinMaxDateTraffic="select min(date),max(date) from scsq_traffic";
+			  $queryMinMaxDateTraffic="select from_unixtime(t.mindate,'%d-%m-%Y %H:%i:%s'),from_unixtime(t.maxdate,'%d-%m-%Y %H:%i:%s') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
 			  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic where par=1";
 			  $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
 			  $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
@@ -219,11 +219,11 @@ if($enableNofriends==1) {
       </tr>
       <tr>
          <td>".$_lang['stMINDATE']."</td>
-         <td>".(date('d-m-Y H:m:s',$MinMaxDateTraffic[0]))."</td>
+         <td>".$MinMaxDateTraffic[0]."</td>
       </tr>
       <tr>
          <td>".$_lang['stMAXDATE']."</td>
-         <td>".(date('d-m-Y H:m:s',$MinMaxDateTraffic[1]))."</td>
+         <td>".$MinMaxDateTraffic[1]."</td>
       </tr>
       <tr>
          <td>".$_lang['stTRAFFICSUM']."</td>
