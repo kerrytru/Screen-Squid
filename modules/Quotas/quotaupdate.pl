@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-#build 20191110
+#Build date Thursday 16th of April 2020 17:31:34 PM
+#Build revision 1.2
 
 use DBI; # DBI  Perl!!!
 
@@ -14,7 +15,7 @@ $host = "localhost"; # host s DB
 $port = "3306"; # port DB
 $user = "mysql-user"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test"; # name DB
+$db = "test5"; # name DB
 }
 #postgresql default config
 if($dbtype==1){
@@ -25,6 +26,8 @@ $pass = "pass"; # pasword k DB
 $db = "test"; # name DB
 }
 
+print $now=localtime;
+
 #make conection to DB
 if($dbtype==0){ #mysql
 $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
@@ -34,15 +37,59 @@ if($dbtype==1){ #postgre
 $dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
 }
 
+$countQuotas=0;
+
 #очистим таблицу квот от алиасов, которые были удалены, а в таблице квот остались
 $sql_refreshquota="delete from scsq_mod_quotas where aliasid not in (select id from scsq_alias);";
 $sth = $dbh->prepare($sql_refreshquota);
 $sth->execute; #
 
+#соберем даты по квотам. для дневной
+if($dbtype==0){
+$queryd="date(sysdate())";
+$sql_queryDate = " unix_timestamp($queryd) ";
+}
+
+if($dbtype==1){
+	
+$queryd="current_date";
+#$queryd="to_timestamp('2019-08-07','YYYY-MM-DD')"; #for debug
+
+$sql_queryDate = " extract(epoch from $queryd) ";
+}
 
 
-#get aliasid from quotas module
-$sql_getquota="select aliasid,active, quota, quotamonth, datemodified, quotaday from scsq_mod_quotas";
+#$queryd="'2018-11-26'"; #for debug
+
+#для месячной
+
+if($dbtype==0){
+$queryd="sysdate()";
+$querydstart="DATE_FORMAT($queryd,\"%Y-%m-1\")";
+$querydend="DATE_FORMAT($queryd + INTERVAL 1 MONTH,\"%Y-%m-1\")";
+
+$sql_queryDate .= ",unix_timestamp($querydstart),unix_timestamp($querydend)";
+}
+
+if($dbtype==1){
+$queryd="current_date";
+#$queryd="to_timestamp('2019-08-07','YYYY-MM-DD')"; #for debug
+$querydstart="to_char($queryd,'YYYY-MM-1')";
+$querydend="to_char($queryd + INTERVAL '1 MONTH','YYYY-MM-1')";
+
+$sql_queryDate .= ",extract(epoch from to_timestamp($querydstart,'YYYY-MM-DD')),extract(epoch from to_timestamp($querydend,'YYYY-MM-DD'))";
+}
+
+$sql_queryDate = "select ".$sql_queryDate;
+
+$sth = $dbh->prepare($sql_queryDate);
+$sth->execute; #
+@datenow=$sth->fetchrow_array;
+
+#get aliasid from quotas module 
+$sql_getquota="select aliasid,q.active, quota, quotamonth, datemodified, quotaday ,a.tableid, a.typeid, sumday, summonth , status 
+				from scsq_mod_quotas q, scsq_alias a
+				where a.id=q.aliasid";
 $sthr = $dbh->prepare($sql_getquota);
 $sthr->execute; #
 
@@ -56,12 +103,14 @@ $quotamonth = $row[3];
 $datemodified = $row[4];
 $quotaday = $row[5];
 
-$sql_queryAlias = "SELECT tableid, typeid FROM scsq_alias WHERE id=".$aliasid.";";
-$sth = $dbh->prepare($sql_queryAlias);
-$sth->execute; #
-@rowAlias=$sth->fetchrow_array;
+$tableid = $row[6];
+$typeid = $row[7];
 
-if($rowAlias[1] eq 0){
+$sumday = $row[8];
+$summonth = $row[9];
+$statusquota = $row[10];
+
+if($typeid == 0){
 $columnname = "login";
 }
 else
@@ -69,28 +118,7 @@ else
 $columnname = "ipaddress";
 }
 
-#$queryd="'2018-11-26'"; #for debug
-
-if($dbtype==0){
-$queryd="date(sysdate())";
-$sql_queryDate = "SELECT unix_timestamp($queryd) ;";
-}
-
-if($dbtype==1){
-	
-$queryd="current_date";
-#$queryd="to_timestamp('2019-08-07','YYYY-MM-DD')"; #for debug
-
-$sql_queryDate = "SELECT extract(epoch from $queryd) ;";
-}
-
-
-$sth = $dbh->prepare($sql_queryDate);
-$sth->execute; #
-@datenow=$sth->fetchrow_array;
-
-
-$querydate=$datenow[0];
+$querydate=$datenow[0]; #curday
 
 $datestart=$querydate;
 $dateend=$querydate + 86400;
@@ -102,7 +130,7 @@ $queryOneAliasTraffic="
 		   FROM scsq_quicktraffic 
 		   WHERE date>".$datestart." 
 		     AND date<".$dateend."
-	             AND ".$columnname." = ".$rowAlias[0]." 
+	             AND ".$columnname." = ".$tableid." 
 		   GROUP BY ".$columnname."
 	;";
 
@@ -118,32 +146,8 @@ $DaySumSizeTraffic = int(($DaySumSizeTraffic + 0)/1024/1024);
 #month quota
 
 
-#$queryd="'2018-11-26'"; #for debug
-
-if($dbtype==0){
-$queryd="sysdate()";
-$querydstart="DATE_FORMAT($queryd,\"%Y-%m-1\")";
-$querydend="DATE_FORMAT($queryd + INTERVAL 1 MONTH,\"%Y-%m-1\")";
-
-$sql_queryDate = "SELECT unix_timestamp($querydstart),unix_timestamp($querydend) ;";
-}
-
-if($dbtype==1){
-$queryd="current_date";
-#$queryd="to_timestamp('2019-08-07','YYYY-MM-DD')"; #for debug
-$querydstart="to_char($queryd,'YYYY-MM-1')";
-$querydend="to_char($queryd + INTERVAL '1 MONTH','YYYY-MM-1')";
-
-$sql_queryDate = "SELECT extract(epoch from to_timestamp($querydstart,'YYYY-MM-DD')),extract(epoch from to_timestamp($querydend,'YYYY-MM-DD')) ;";
-}
-
-$sth = $dbh->prepare($sql_queryDate);
-$sth->execute; #
-@datenow=$sth->fetchrow_array;
-
-
-$datestart=$datenow[0];
-$dateend=$datenow[1];
+$datestart=$datenow[1]; #first day in month
+$dateend=$datenow[2]; #first day next month
 	
 $queryOneAliasTraffic="
  	SELECT 
@@ -152,7 +156,7 @@ $queryOneAliasTraffic="
 		   FROM scsq_quicktraffic 
 		   WHERE date>".$datestart." 
 		     AND date<".$dateend."
-	             AND ".$columnname." = ".$rowAlias[0]." 
+	             AND ".$columnname." = ".$tableid." 
 		   GROUP BY ".$columnname."
 	;";
 
@@ -205,13 +209,19 @@ $newdayquota="";
 
 #print $querydate." - ".$datemodified;
 
+#update if we have something to update.
+if($statusquota!=$status or $summonth!=$MonthSumSizeTraffic or $sumday!=$DaySumSizeTraffic) {
 $sql_updatequota = "UPDATE scsq_mod_quotas SET $newdayquota sumday=$DaySumSizeTraffic,summonth=$MonthSumSizeTraffic, status=$status where aliasid=$aliasid;";
 $sth = $dbh->prepare($sql_updatequota);
 $sth->execute; #
-
+$countQuotas=$countQuotas+1;
+}
 
      }
-print "Quotas updated";
+
+print "\n";
+print $now=localtime;
+print "\nQuotas updated (".$countQuotas." items)";
 
 
 #disconnecting from DB

@@ -1,5 +1,8 @@
 <?php
-#build 20191023
+
+#Build date Thursday 16th of April 2020 17:32:40 PM
+#Build revision 1.1
+
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -303,8 +306,8 @@ $datestart=strtotime($querydate);
                 <th class=unsortable><b>".$_lang['stQUOTASTRAFFICDAY']."</b></th>
                 <th class=unsortable><b>".$_lang['stQUOTASMONTH']."</b></th>
                 <th class=unsortable><b>".$_lang['stQUOTASTRAFFICMONTH']."</b></th>
-		<th><b>".$_lang['stQUOTASACTIVE']."</b></th>
-
+				<th><b>".$_lang['stQUOTASACTIVE']."</b></th>
+				<th><b>Action</b></th>
               </tr>";
 
               while($line = $ssq->fetch_array($result)) {
@@ -329,7 +332,10 @@ $datestart=strtotime($querydate);
 		    <td align=center>".$line[3]."</td>
                     <td align=center>".$line[6]."&nbsp;</td>
   		    <td align=center>".$line[4]."</td>                 
-		    <td align=center>".$line[9]."</td>                 
+		    <td align=center>".$line[9]."</td>  
+		     <td align=center><a href=index.php?srv=".$srv."&actid=5&quotaid=".$line[0].">Delete&nbsp;</a></td>
+		    
+		                   
 		</tr>";
                 $numrow++;
               }
@@ -442,7 +448,7 @@ $datestart=strtotime($querydate);
 	       '	.$_lang['stALIAS'].': '.$line[5].'<br /><br />
                '.$_lang['stQUOTASCURRENT'].': <input type="text" name="quota" value="'.$line[1].'"><br />
                '.$_lang['stQUOTASDAY'].': <input type="text" name="quotaday" value="'.$line[2].'"><br />
-               М'.$_lang['stQUOTASMONTH'].': <input type="text" name="quotamonth" value="'.$line[3].'"><br />
+               '.$_lang['stQUOTASMONTH'].': <input type="text" name="quotamonth" value="'.$line[3].'"><br />
 	       <input type="hidden" name=sumday value="'.$line[7].'">
 	       <input type="hidden" name=summonth value="'.$line[8].'">
                '.$_lang['stQUOTASACTIVE'].': <input type="checkbox" '.$isChecked.' name="active"><br /> 

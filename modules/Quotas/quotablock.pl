@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-#build 20200311
+#Build date Thursday 16th of April 2020 17:37:05 PM
+#Build revision 1.1
 
 =com
 
@@ -68,14 +69,7 @@ $debug=0;
 
 
 
-#make conection to DB
-if($dbtype==0){ #mysql
-$dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
-}
 
-if($dbtype==1){ #postgre
-$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
-}
 
 
 # Disable output buffering
@@ -95,6 +89,15 @@ sub debug {
 # Check if a user belongs to a group
 #
 sub check {
+
+#make conection to DB
+if($dbtype==0){ #mysql
+$dbh = DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass);
+}
+
+if($dbtype==1){ #postgre
+$dbh = DBI->connect_cached("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+}
 
 #get quota status
 
