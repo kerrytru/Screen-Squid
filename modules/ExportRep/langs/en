@@ -1,0 +1,16 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Bulk export reports to PDF and CSV";
+
+$_lang['stEXPORTREPMODULE'] = "Bulk export (PDF, CSV)";
+
+$_lang['stSETDATEPERIOD'] = "Select two date for generate report";
+
+$_lang['stEXPORTREPNAME'] = "Report name";
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
+?>

@@ -1,0 +1,15 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Автоэкспорт отчетов в PDF, CSV";
+
+$_lang['stEXPORTREPMODULE'] = "Экспорт отчетов (PDF, CSV)";
+
+$_lang['stSETDATEPERIOD'] = "Укажите период за который нужен отчет";
+
+$_lang['stEXPORTREPNAME'] = "Название отчета";
+
+$_lang['stINSTALLED']="Установлено";
+$_lang['stUNINSTALLED']="Удалено";
+?>
