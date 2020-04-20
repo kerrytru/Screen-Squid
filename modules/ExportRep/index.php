@@ -1,10 +1,18 @@
 <?php
 
-#Build date Sunday 19th of April 2020 22:37:30 PM
-#Build revision 1.0
+#Build date Monday 20th of April 2020 15:44:58 PM
+#Build revision 1.1
+
+
+include("config.php");
+include("../../config.php");
+include("module.php");
+include_once("../../lang/$language");
+include_once("langs/$language");
+
 
 #добавим себе время для исполнения скрипта. в секундах
-set_time_limit(600);
+set_time_limit($timelimit);
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -16,10 +24,8 @@ else
 
 
 
-include("../../config.php");
-include("module.php");
-include_once("../../lang/$language");
-include_once("langs/$language");
+
+
 
 $header='<html>
 <head>
@@ -74,7 +80,7 @@ $ssq = new ScreenSquid($variableSet); #получим экземпляр кла�
 <script language=JavaScript>
 
 
-function CreatePDF(actid)
+function CreateDoc(actid)
 {
     parent.right.location.href='index.php?srv=<?php echo $srv ?>&actid='+actid
 +'&date='+window.document.checkdate_form.date_field.value
@@ -206,14 +212,14 @@ else {
     	<tr>
 			<td>1</td>
 			<td><?php echo $_lang['stONELOGINTRAFFIC']; ?></td>
-			<td><a href="Javascript:CreatePDF(1)">PDF</a></td>
-			<td>CSV</td>
+			<td><a href="Javascript:CreateDoc(1)">PDF</a></td>
+			<td><a href="Javascript:CreateDoc(3)">CSV</a></td>
 		</tr>	
     	<tr>
 			<td>2</td>
 			<td><?php echo $_lang['stONEIPADRESSTRAFFIC']; ?></td>
-			<td><a href="Javascript:CreatePDF(2)">PDF</a></td>
-			<td>CSV</td>
+			<td><a href="Javascript:CreateDoc(2)">PDF</a></td>
+			<td><a href="Javascript:CreateDoc(4)">CSV</a></td>
 		</tr>	
 	</table>
 </form>
@@ -228,11 +234,13 @@ $repvars['querydate'] = $querydate;
 $repvars['querydate2'] = $querydate2; 
 $repvars['goodSitesList'] = $goodSitesList;
 $repvars['oneMegabyte'] = $oneMegabyte;
+$repvars['sortcolumn'] = $sortcolumn;
+$repvars['sortorder'] = $sortorder;
 
 
 if(isset($_GET['actid'])){
 {
-		if($_GET['actid']==1) {//сформировать отчёты по логинам
+		if($_GET['actid']==1) {//сформировать отчёты по логинам PDF
 
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
@@ -247,7 +255,7 @@ if(isset($_GET['actid'])){
 		  }
 		 } //actid=1
 		  		  
-		if($_GET['actid']==2) {//сформировать отчёты по логинам
+		if($_GET['actid']==2) {//сформировать отчёты по ip адресам PDF
 
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
@@ -262,11 +270,40 @@ if(isset($_GET['actid'])){
 		 }
 		} //actid=2
 		
+				if($_GET['actid']==3) {//сформировать отчёты по логинам CSV
+
+		  $numrow=0;
+		  $sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
+		  $result=$ssq->query($sqlGetId);
+		  
+		  echo "proccess started<br />";
+		  while ($line = $ssq->fetch_array($result)) {
+			$repvars['currentloginid'] = $line[0];
+			$repvars['currentlogin'] = $line[1];
+			$exportrep_ex->CreateLoginsCSV($repvars);
+			$numrow++;
+		  }
+		 } //actid=3
+		 
+		 		if($_GET['actid']==4) {//сформировать отчёты по ip адресам CSV
+
+		  $numrow=0;
+		  $sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
+		  $result=$ssq->query($sqlGetId);
+		  
+		  echo "proccess started<br />";
+		  while ($line = $ssq->fetch_array($result)) {
+			$repvars['currentipaddressid'] = $line[0];
+			$repvars['currentipaddress'] = $line[1];
+			$exportrep_ex->CreateIpaddressCSV($repvars);
+			$numrow++;
+		  }
+		 } //actid=4
 		
 		
 		 $ssq->free_result($result);
 		
-		echo $numrow." files created (check output direcory)";
+		echo $numrow." files created (check output directory)";
 
 	} //isset actid
 
