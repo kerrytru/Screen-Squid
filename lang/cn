@@ -1,0 +1,221 @@
+<?php
+///Reports Headers BEGIN
+$_lang['stLOGINSTRAFFIC']="用户流量使用";
+$_lang['stIPADDRESSTRAFFIC']="IP流量使用";
+$_lang['stSITESTRAFFIC']="网站流量使用";
+$_lang['stTOPSITESTRAFFIC']="网站流量排名";
+$_lang['stTOPLOGINSTRAFFIC']="用户流量排名";
+$_lang['stTOPIPTRAFFIC']="IP流量排名";
+$_lang['stTRAFFICBYHOURS']="每小时";
+$_lang['stONELOGINTRAFFIC']="用户流量";
+$_lang['stONELOGINTOPSITESTRAFFIC']="单用户网站流量排名";
+$_lang['stONELOGINTRAFFICBYHOURS']="用户每小时的流量";
+$_lang['stONEIPADRESSTRAFFIC']="IP地址流量统计";
+$_lang['stONEIPADDRESSTOPSITESTRAFFIC']="单IP网站流量排名";
+$_lang['stONEIPADDRESSTRAFFICBYHOURS']="IP每小时的流量";
+$_lang['stLOGINSTRAFFICWIDE']="用户流量信息拓展";
+$_lang['stIPADDRESSTRAFFICWIDE']="IP流量拓展";
+$_lang['stIPADDRESSTRAFFICWITHRESOLVE']="带有IP解析的流量";
+$_lang['stPOPULARSITES']="常登录网站";
+$_lang['stWHOVISITSITELOGIN']="谁访问了网站 ";
+$_lang['stWHOVISITSITEIPADDRESS']="哪个IP访问的网站 ";
+$_lang['stWHODOWNLOADBIGFILES']="谁下载大文件";
+$_lang['stTRAFFICBYPERIOD']="每月流量统计";
+$_lang['stTRAFFICBYPERIODDAY']="每日流量统计";
+$_lang['stTRAFFICBYPERIODDAYNAME']="每周流量统计";
+$_lang['stVISITINGWEBSITELOGINS']="用户访问的网站";
+$_lang['stVISITINGWEBSITEIPADDRESS']="IP访问的网站";
+$_lang['stGROUPSTRAFFIC']="多组流量";
+$_lang['stONEGROUPTRAFFIC']="单组流量";
+$_lang['stONEGROUPTOPSITESTRAFFIC']="组访问网站排名";
+$_lang['stONEGROUPTRAFFICBYHOURS']="组每小时流量";
+$_lang['stONEGROUPWHODOWNLOADBIGFILES']="组成员中谁在下载大文件";
+$_lang['stHTTPSTATUSES']="多HTTP状态";
+$_lang['stHTTPSTATUS']="单HTTP状态";
+$_lang['stONELOGINIPTRAFFIC']="IP所属用户";
+$_lang['stONEIPADDRESSLOGINSTRAFFIC']="用户登录IP";
+$_lang['stLOGINSIPTRAFFIC']="IP所属用户";
+$_lang['stIPADDRESSLOGINSTRAFFIC']="用户登录IP";
+$_lang['stFOR']="在";
+$_lang['stIPADDRESSFOR']="IP地址";
+$_lang['stLOGINSFOR']="用户";
+$_lang['stEXTENDED']="信息拓展";
+$_lang['stBYDAYTIME']="整日流量";
+///Reports Headers END
+$_lang['stDAY']="日";
+$_lang['stMONTH']="月";
+$_lang['stFASTDATESWITCH']="快速切换日期:";
+
+$_lang['stEXECUTIONTIME']="生成此页面所用时间为";
+$_lang['stSECONDS']="秒";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid 开发者 <a href=http://break-people.ru>break-people.ru</a></font>";
+
+$_lang['stLOGIN']="用户";
+$_lang['stLOGINS']="用户";
+$_lang['stIPADDRESS']="IP地址";
+$_lang['stIPADDRESSES']="IP地址";
+$_lang['stSITE']="网址";
+$_lang['stHOURS']="小时";
+$_lang['stMEGABYTES']="MB";
+$_lang['stALIAS']="关联";
+$_lang['stTOTAL']="总计:";
+$_lang['stFROMCACHEMB']="来自缓存(MB)";
+$_lang['stDIRECTMB']="直连(MB)";
+$_lang['stFROMCACHEPERCENT']="来自缓存(%)";
+$_lang['stDIRECTPERCENT']="直连(%)";
+$_lang['stHOSTNAMERESOLVE']="解析";
+$_lang['stREQUESTS']="请求数";
+$_lang['stWHO']="登录者?";
+$_lang['stFROMWEBSITE']="网站来源";
+$_lang['stMONTHYEAR']="月.年";
+$_lang['stDAYMONTHYEAR']="日.月.年";
+$_lang['stDAYNAME']="星期几";
+$_lang['stDATEANDTIME']="日期和时间";
+$_lang['stWEBSITE']="网址";
+$_lang['stGROUP']="组";
+$_lang['stQUANTITY']="数量";
+$_lang['stDATE']="日期";
+$_lang['stQUANTITYIPADDRESS']="IP地址数量";
+$_lang['stQUANTITYLOGIN']="登录数量";
+
+$_lang['stREPORTS']="报告";
+$_lang['stSTATS']="数据";
+$_lang['stALIASES']="关联";
+$_lang['stGROUPS']="组";
+$_lang['stWELCOME']="欢迎使用Screen Squid";
+$_lang['stDONTFORGET']="<p><b>请注意:</b> 在第一次使用时, 使用 <a href=createdb/createdb.sql>SQL file</a>)来创建MySql表. 在config.php和fetch.pl中进行连接数据库的相关设置</p>";
+$_lang['stALLISOK']="数据库连接成功. 点击 <b>报告</b> 以继续";
+
+$_lang['stQUANTITYRECORDS']="数据库中的记录数量";
+$_lang['stQUANTITYLOGINS']="登录总数";
+$_lang['stQUANTITYIPADDRESSES']="IP地址总数";
+$_lang['stMINDATE']="最小日期";
+$_lang['stMAXDATE']="最大日期";
+$_lang['stTRAFFICSUM']="总计流量(MB)";
+
+$_lang['stALIASNAME']="关联名";
+$_lang['stTYPE']="类型";
+$_lang['stVALUE']="值";
+$_lang['stADDALIAS']="添加关联";
+$_lang['stFORMADDALIAS']="添加关联";
+$_lang['stTYPECHECK']="类型 (登陆名(不勾选)/IP地址(勾选))";
+$_lang['stADD']="添加";
+
+$_lang['stBACK']="返回";
+$_lang['stSAVE']="保存";
+$_lang['stDELETE']="删除";
+$_lang['stALIASADDED']="成功添加1个关联";
+$_lang['stALIASUPDATED']="成功更新1个关联";
+$_lang['stALIASDELETED']="成功删除1个关联";
+
+$_lang['stGROUPNAME']="组名";
+$_lang['stCOMMENT']="备注";
+$_lang['stADDGROUP']="添加组";
+$_lang['stFORMADDGROUP']="添加组";
+$_lang['stGROUPADDED']="成功添加1个组";
+$_lang['stGROUPUPDATED']="成功更新1个组";
+$_lang['stGROUPDELETED']="成功删除1个组";
+
+$_lang['stSEARCHSTRING']="查找内容";
+$_lang['stSEARCHFORM']="查找";
+$_lang['stSEARCH']="开始查找";
+
+$_lang['stGENERAL']="默认";
+$_lang['stBYGROUP']="分组";
+$_lang['stFASTSEARCH']="快速查找";
+
+$_lang['stMONDAY']="周一";
+$_lang['stTUESDAY']="周二";
+$_lang['stWEDNESDAY']="周三";
+$_lang['stTHURSDAY']="周四";
+$_lang['stFRIDAY']="周五";
+$_lang['stSATURDAY']="周六";
+$_lang['stSUNDAY']="周日";
+
+$_lang['stINCLUDE']="包含?";
+$_lang['stQUANTITYALIASES']="数量";
+
+$_lang['stWHOVISITSITES']="谁访问了网站";
+$_lang['stFROM']="从";
+$_lang['stUNTIL']="直到";
+$_lang['stMIME']="MIME分类";
+$_lang['stMIMETYPESTRAFFIC']="MIME类型流量";
+$_lang['stDOMAINZONESTRAFFIC']="域名流量";
+$_lang['stDOMAINZONE']="域名后缀";
+$_lang['stBACKTOGROUPLIST']="返回组列表";
+$_lang['stDASHBOARD']="仪表盘";
+$_lang['stTRAFFICOBJECTS']="流量包数量";
+
+$_lang['stLOGTABLE']="日志表";
+$_lang['stLOGDATESTART']="开始时间";
+$_lang['stLOGDATEEND']="结束时间";
+$_lang['stLOGMESSAGE']="信息";
+$_lang['stTOP']="排名";
+
+
+#новые в 2.0
+
+$_lang['stTRAFFICBYHOURSLOGINS']="用户每小时使用流量统计";
+$_lang['stTRAFFICBYHOURSIPADDRESS']="IP地址每小时使用流量统计";
+$_lang['stTRAFFICBYCATEGORIES']="流量分类";
+$_lang['stCATEGORY']="种类";
+$_lang['stTRAFFICBYHOURSLOGINSONESITE']="每小时网站流量统计";
+$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']="每小时IP地址流量统计";
+
+$_lang['stACTIVEIPADDRESS']="在线IP地址";
+$_lang['stONLINE']="在线";
+$_lang['stREFRESHED']="刷新时间";
+$_lang['stSPEED']="kb/sec";
+
+$_lang['stCONTENT']="内容";
+$_lang['stSTART']="开始";
+$_lang['stSTOP']="结束";
+
+$_lang['stINSPECT']="审查";
+
+$_lang['stUSERS']="用户";
+
+$_lang['stACTIVEAUTH']="激活此用户的流量查看权限";
+$_lang['stUSERLOGIN']="用户名";
+$_lang['stUSERPASSWORD']="密码";
+
+
+$_lang['stENTER']="登录";
+
+$_lang['stAUTHFAIL']="登陆失败";
+$_lang['stCHANGEPASSWORD']="修改密码?";
+$_lang['stLOGINTOCABINET'] ="登录查看流量";
+$_lang['stLOGOUT']="退出登录";
+
+//1.14
+$_lang['stPARAMNAME'] ="参数";
+$_lang['stPARAMVALUE']="值";
+$_lang['stCONFIG']="配置";
+
+//1.15
+$_lang['stSPECIFIED'] = "自定义";
+$_lang['stMODULEMANAGER'] = "管理模块";
+$_lang['stDESCRIPTION'] = "介绍";
+$_lang['stNAME'] = "模块名";
+$_lang['stINSTALL'] = "安装";
+$_lang['stUNINSTALL'] = "卸载";
+
+//1.16
+$_lang['stTODAY'] = "今天";
+
+$_lang['stJANUARY'] = "一月";
+$_lang['stFEBRUARY'] = "二月";
+$_lang['stMARCH'] = "三月";
+$_lang['stAPRIL'] = "四月";
+$_lang['stMAY'] = "五月";
+$_lang['stJUNE'] = "六月";
+$_lang['stJULY'] = "七月";
+$_lang['stAUGUST'] = "八月";
+$_lang['stSEPTEMBER'] = "九月";
+$_lang['stOCTOBER'] = "十月";
+$_lang['stNOVEMBER'] = "十一月";
+$_lang['stDECEMBER'] = "十二月";
+
+$_lang['stFORMEDITALIAS']="编辑关联表";
+$_lang['stFORMEDITGROUP']="编辑组表";
+?>
