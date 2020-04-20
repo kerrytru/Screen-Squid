@@ -4,7 +4,7 @@
 
 $_lang['stMODULEDESC'] = "Менеджер доступа пользователей";
 
-$_lang['stUSERMANAGERMODULE'] = "Моудль Пользователи";
+$_lang['stUSERMANAGERMODULE'] = "Модуль Пользователи";
 
 $_lang['stUSERMANAGERUPDATED']="1 пользователь обновлен";
 
