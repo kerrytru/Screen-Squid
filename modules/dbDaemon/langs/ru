@@ -1,0 +1,12 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Принимает логи Squid напрямую в БД без access.log";
+
+$_lang['stDBDAEMONMODULE'] = "Модуль dbDaemon";
+
+
+$_lang['stINSTALLED']="Установлено";
+$_lang['stUNINSTALLED']="Удалено";
+?>

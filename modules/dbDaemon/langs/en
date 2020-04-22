@@ -1,0 +1,14 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Fetch log entries direct to DB from squid";
+
+$_lang['stDBDAEMONMODULE'] = "Module Fetch to DB";
+
+
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
+?>
