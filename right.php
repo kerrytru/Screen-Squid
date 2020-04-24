@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 05:32:11 AM
-#Build version 1.10
+#Build date Friday 24th of April 2020 05:56:49 AM
+#Build revision 1.10
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
