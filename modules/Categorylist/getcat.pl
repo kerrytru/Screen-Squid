@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-#build 20191110
+#Build date Friday 24th of April 2020 09:26:33 AM
+#Build revision 1.1
 
 use DBI; # DBI  Perl!!!
 #=======================CONFIGURATION BEGIN============================
@@ -12,7 +13,7 @@ $host = "localhost"; # host s DB
 $port = "3306"; # port DB
 $user = "mysql-user"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test"; # name DB
+$db = "test4"; # name DB
 }
 #postgresql default config
 if($dbtype==1){

@@ -1,7 +1,7 @@
 <?php
 
-#Build date Wednesday 22nd of April 2020 16:22:56 PM
-#Build revision 1.0
+#Build date Friday 24th of April 2020 09:26:50 AM
+#Build revision 1.1
 
 class dbDaemon
 {
@@ -12,8 +12,10 @@ function __construct($variables){ //
   
 	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
-	include("langs/".$this->vars['language']); #подтянем файл языка
-  	
+	if (file_exists("langs/".$this->vars['language']))
+		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский.  	
 	$this->lang = $_lang;
 }
 

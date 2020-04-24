@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-#build 20191110
+#Build date Friday 24th of April 2020 09:26:33 AM
+#Build revision 1.1
 
 use DBI; # DBI  Perl!!!
 #=======================CONFIGURATION BEGIN============================

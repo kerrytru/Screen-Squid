@@ -1,21 +1,28 @@
 <?php
 
-#Build date Monday 20th of April 2020 15:44:58 PM
-#Build revision 1.1
+#Build date Friday 24th of April 2020 07:48:43 AM
+#Build revision 1.2
+
+#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
+date_default_timezone_set(date_default_timezone_get());
 
 
 include("config.php");
 include("../../config.php");
 include("module.php");
 include_once("../../lang/$language");
-include_once("langs/$language");
+
+	if (file_exists("langs/".$language))
+		include("langs/".$language);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+
 
 
 #добавим себе время для исполнения скрипта. в секундах
 set_time_limit($timelimit);
 
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
+
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];

@@ -1,7 +1,7 @@
 <?php
 
-#Build date Monday 20th of April 2020 15:45:18 PM
-#Build revision 1.1
+#Build date Friday 24th of April 2020 07:50:26 AM
+#Build revision 1.2
 
 
 class ExportRep
@@ -14,8 +14,13 @@ function __construct($variables){ //
 	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 	// create new PDF document
 
-	include("langs/".$this->vars['language']); #подтянем файл языка
-  	include("../../lang/".$this->vars['language']); #подтянем глобальный файл языка
+	if (file_exists("langs/".$this->vars['language']))
+		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+
+	if (file_exists("../../lang/".$this->vars['language']))
+		include("../../lang/".$this->vars['language']); #подтянем глобальный файл языка
   	
 	$this->lang = $_lang;
 }

@@ -143,12 +143,14 @@ if($enableNofriends==1) {
 
 
 
-
-  if($connectionStatus=="error") {
+  if($ssq->db_object==null) {
     echo $_lang['stDONTFORGET'];
   }
   else
   {
+	if(!isset($_GET['id'])) 
+			echo $_lang['stALLISOK'];
+	  
 	if(isset($_GET['id'])) {
 
     if($_GET['id']==1) { //краткая статистика
@@ -1396,10 +1398,7 @@ echo "	</table>
 
 //if($connectionStatus!="error")
 
-if($ssq->db_object!=null)
-	echo $_lang['stALLISOK'];
-else
-echo $_lang['stDONTFORGET'];
+
 
 
 $end=microtime(true);

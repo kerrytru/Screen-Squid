@@ -1,7 +1,7 @@
 <?php
 
-#Build date Thursday 16th of April 2020 17:32:40 PM
-#Build revision 1.1
+#Build date Friday 24th of April 2020 09:19:54 AM
+#Build revision 1.2
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -72,9 +72,10 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idRe
 include("../../config.php");
 include("module.php");
 include_once("../../lang/$language");
-include_once("langs/$language");
-
-
+	if (file_exists("langs/".$language))
+		include("langs/".$language);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
 $addr=$address[$srv];
 $usr=$user[$srv];

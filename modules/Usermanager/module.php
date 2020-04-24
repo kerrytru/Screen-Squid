@@ -1,5 +1,8 @@
 <?php
-#20200326
+
+#Build date Friday 24th of April 2020 09:15:27 AM
+#Build revision 1.1
+
 
 class Usermanager
 {
@@ -10,8 +13,11 @@ function __construct($variables){ //
   
 	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
-	include("langs/".$this->vars['language']); #подтянем файл языка
-  	
+	if (file_exists("langs/".$this->vars['language']))
+		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+		  	
 	$this->lang = $_lang;
 }
 
@@ -23,49 +29,6 @@ function __construct($variables){ //
   }
 
  
-
-  
-
- function GetAliasValue($aliasid) #по алиасу возвращаем элемент из таблицы логинов/ip адресов
-  {
-
-
-$queryAlias = "
- 	SELECT 
-	   tableid,
-	   typeid
- 		   FROM scsq_alias 
-		   WHERE id=".$aliasid."
-	;";
-
-	$result=$this->ssq->query($queryAlias) or die ("Can`t get alias");
-
-	$row=$this->ssq->fetch_array($result);
-		$this->ssq->free_result($result);
-
-if($row[1] == 0)
-$tablename = "logins";
-else
-$tablename = "ipaddress";
-
-
-$queryOneAliasValue="
- 	SELECT 
-	   name
- 		   FROM scsq_".$tablename." 
-		   WHERE id =".$row[0]." 
-	 ;";
-
-	$result=$this->ssq->query($queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
-	$row=$this->ssq->fetch_array($result);
-	$this->ssq->free_result($result);
-
-    return $row[0];
-
-    
-}
-
-
   function Install()
   {
 

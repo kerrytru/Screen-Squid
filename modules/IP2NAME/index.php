@@ -1,5 +1,7 @@
 <?php
-#build 20191111
+
+#Build date Friday 24th of April 2020 09:24:45 AM
+#Build revision 1.1
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -71,7 +73,10 @@ include("../../config.php");
 include("config.php");
 include("module.php");
 include("../../lang/$language");
-include("langs/$language");
+	if (file_exists("langs/".$language))
+		include("langs/".$language);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
 
 $addr=$address[$srv];

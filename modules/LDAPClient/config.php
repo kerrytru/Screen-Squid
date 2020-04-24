@@ -1,5 +1,7 @@
 <?php
-#build 20191110
+
+#Build date Friday 24th of April 2020 09:21:54 AM
+#Build revision 1.1
 
 // config connection to LDAP server
 //Конфигурация подключения к LDAP серверу

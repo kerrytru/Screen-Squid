@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-#build 20200326
+#Build date Friday 24th of April 2020 09:17:37 AM
+#Build revision 1.2
 
 =com
 This script is quota helper. If user1 reach quota, helper send to squid signal to block user1 access.

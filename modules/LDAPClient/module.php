@@ -1,5 +1,7 @@
 <?php
-#build 20191113
+
+#Build date Friday 24th of April 2020 09:23:35 AM
+#Build revision 1.1
 
 class LDAPClient
 {
@@ -14,8 +16,11 @@ function __construct($variables){ //
 	
   	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 	
-	include("langs/".$this->vars['language']); #подтянем файл языка
-  	
+	if (file_exists("langs/".$this->vars['language']))
+		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+		  	
 	$this->lang = $_lang;
 }
 

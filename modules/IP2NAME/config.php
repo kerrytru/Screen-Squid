@@ -1,5 +1,7 @@
 <?php
-#build 20200112
+
+#Build date Friday 24th of April 2020 09:24:14 AM
+#Build revision 1.1
 
 // config
 // Конфигурация

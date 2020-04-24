@@ -1,5 +1,11 @@
 <?php
-#build 20191024
+
+#Build date Friday 24th of April 2020 09:26:33 AM
+#Build revision 1.1
+
+#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
+date_default_timezone_set(date_default_timezone_get());
+
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -64,8 +70,10 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idRe
 include("../../config.php");
 include("module.php");
 include_once("../../lang/$language");
-include("langs/$language");
-
+	if (file_exists("langs/".$language))
+		include("langs/".$language);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
 
 $addr=$address[$srv];
