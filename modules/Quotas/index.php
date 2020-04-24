@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 09:19:54 AM
-#Build revision 1.2
+#Build date Friday 24th of April 2020 13:27:35 PM
+#Build revision 1.3
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -12,27 +12,29 @@ if(isset($_GET['srv']))
 else
   $srv=0;
 
+include("../../config.php");
+include("module.php");
+include_once("../../lang/$language");
+	if (file_exists("langs/".$language))
+		include("langs/".$language);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
 ?>
 
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
-* {padding:0;margin:0;}
-ul {list-style-type:none;padding-left:1em}
-body {margin:0.5em;padding:0.5em}
 
-</style>
-<link rel="stylesheet" type="text/css" href="../../javascript/example.css"/>
+<!-- special css for module -->
 <link rel="stylesheet" type="text/css" href="css/example.css"/>
+
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme;?>/global.css"/>
 
 </head>
 <body>
-<br />
 
-
-<br />
 <script type="text/javascript" src="../../javascript/sortable.js"></script>
 <script language=javascript>
 
@@ -53,15 +55,6 @@ document.getElementById("ipaddressTable").style.display="table";
 
 }
 
-function PartlyReportsLogin(idReport, dom, login,loginname,site)
-{
-parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&login='+login+'&loginname='+loginname+'&site='+site;
-}
-
-function PartlyReportsIpaddress(idReport, dom, ip,ipname,site)
-{
-parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&ip='+ip+'&ipname='+ipname+'&site='+site;
-}
 
 
 </script>
@@ -69,13 +62,6 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idRe
 
 <?php
 
-include("../../config.php");
-include("module.php");
-include_once("../../lang/$language");
-	if (file_exists("langs/".$language))
-		include("langs/".$language);  #подтянем файл языка если это возможно
-	else	
-		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
 $addr=$address[$srv];
 $usr=$user[$srv];
@@ -295,7 +281,7 @@ $datestart=strtotime($querydate);
               $numrow=1;
 	      echo "<a href=index.php?srv=".$srv.">".$_lang['stREFRESH']."</a>";
               echo "<br /><br />";
-              echo "<table id=report_table_id_group border=1 class=sortable>
+              echo "<table class=datatable>
       
              <tr>
                 <th class=unsortable><b>#</b></th>
@@ -322,19 +308,19 @@ $datestart=strtotime($querydate);
 			$alarmclass="class=quotaAlm2"; #месячная превышена
 
                 
-               echo "<tr ".$alarmclass.">
+               echo "<tr >
 	       
-                    <td>".$numrow."</td>
-                    <td align=center>".$line[8]."</td>                 
-                    <td align=center><a href=index.php?srv=".$srv."&actid=3&quotaid=".$line[0].">".$line[2]."&nbsp;</a></td>
-		    <td>".$quotaex->GetAliasValue($line[10])."</td>
-                    <td align=center>".$line[7]."&nbsp;</td>
-                    <td align=center>".$line[5]."&nbsp;</td>
-		    <td align=center>".$line[3]."</td>
-                    <td align=center>".$line[6]."&nbsp;</td>
-  		    <td align=center>".$line[4]."</td>                 
-		    <td align=center>".$line[9]."</td>  
-		     <td align=center><a href=index.php?srv=".$srv."&actid=5&quotaid=".$line[0].">Delete&nbsp;</a></td>
+                    <td $alarmclass>".$numrow."</td>
+                    <td align=center $alarmclass>".$line[8]."</td>                 
+                    <td align=center $alarmclass><a href=index.php?srv=".$srv."&actid=3&quotaid=".$line[0].">".$line[2]."&nbsp;</a></td>
+		    <td $alarmclass>".$quotaex->GetAliasValue($line[10])."</td>
+                    <td align=center $alarmclass>".$line[7]."&nbsp;</td>
+                    <td align=center $alarmclass>".$line[5]."&nbsp;</td>
+		    <td align=center $alarmclass>".$line[3]."</td>
+                    <td align=center $alarmclass>".$line[6]."&nbsp;</td>
+  		    <td align=center $alarmclass>".$line[4]."</td>                 
+		    <td align=center $alarmclass>".$line[9]."</td>  
+		     <td align=center $alarmclass><a href=index.php?srv=".$srv."&actid=5&quotaid=".$line[0].">Delete&nbsp;</a></td>
 		    
 		                   
 		</tr>";
@@ -361,7 +347,7 @@ $datestart=strtotime($querydate);
                 $result=$ssq->query($queryAllAliases) or die ('Error: Cant select aliases from scsq_alias table');
          $numrow=1;
 
-              echo "<table id='loginsTable' class=sortable style='display:table;'>";
+              echo "<table id='loginsTable' class=datatable style='display:table;'>";
               echo "<tr>
 		    <th class=unsortable>#</th>
 		    <th>".$_lang['stALIAS']."</th>
@@ -383,7 +369,7 @@ $datestart=strtotime($querydate);
 	$result=$ssq->query($queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
          $numrow=1;
 
-              echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+              echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
               echo "<tr>
 		    <th class=unsortable>#</th>
 		    <th>".$_lang['stALIAS']."</th>
@@ -462,7 +448,7 @@ $datestart=strtotime($querydate);
                 $result=$ssq->query($queryAllAliases) or die('Error: Cant select all aliases from scsq_alias');
                 $numrow=1;
 
-              echo "<table id='loginsTable' class=sortable style='display:table;'>";
+              echo "<table id='loginsTable' class=datatable style='display:table;'>";
               echo "<tr>
 		    <th class=unsortable>#</th>
 		    <th>".$_lang['stALIAS']."</th>
@@ -487,7 +473,7 @@ else
 		$result=$ssq->query($queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
          $numrow=1;
 
-              echo "<table id='ipaddressTable' class=sortable style='display:none;'>";
+              echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
               echo "<tr>
 		    <th class=unsortable>#</th>
 		    <th>".$_lang['stALIAS']."</th>
@@ -560,9 +546,9 @@ $newdate=date("d-m-Y",$newdate);
 <form name=fastdateswitch_form>
     <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
     <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
-    <input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
-    <input type="hidden" name=typeid_field_hidden value="<?php echo $typeid; ?>">
+    <input type="hidden" name=group_field_hidden value=0>
+    <input type="hidden" name=groupname_field_hidden value=0>
+    <input type="hidden" name=typeid_field_hidden value=0>
     </form>
 </body>
 </html>

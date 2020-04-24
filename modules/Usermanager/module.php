@@ -28,6 +28,45 @@ function __construct($variables){ //
    
   }
 
+
+function GetAliasValue($aliasid) #по алиасу возвращаем элемент из таблицы логинов/ip адресов
+  {
+
+
+$queryAlias = "
+ 	SELECT 
+	   tableid,
+	   typeid
+ 		   FROM scsq_alias 
+		   WHERE id=".$aliasid."
+	;";
+
+	$result=$this->ssq->query($queryAlias) or die ("Can`t get alias");
+
+	$row=$this->ssq->fetch_array($result);
+		$this->ssq->free_result($result);
+
+if($row[1] == 0)
+$tablename = "logins";
+else
+$tablename = "ipaddress";
+
+
+$queryOneAliasValue="
+ 	SELECT 
+	   name
+ 		   FROM scsq_".$tablename." 
+		   WHERE id =".$row[0]." 
+	 ;";
+
+	$result=$this->ssq->query($queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
+	$row=$this->ssq->fetch_array($result);
+	$this->ssq->free_result($result);
+
+    return $row[0];
+
+    
+}
  
   function Install()
   {

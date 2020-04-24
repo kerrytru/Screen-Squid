@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 05:54:33 AM
-#Build revision 1.0
+#Build date Friday 24th of April 2020 12:57:23 PM
+#Build revision 1.1
 
 #server #0
 $srvname[0]="Proxy0"; #nickname of server
@@ -122,5 +122,8 @@ ini_set('display_errors',1);
 #how many bytes in megabyte. by default 1000000, but its not true. 1024*1024 = 1048576
 $oneMegabyte=1000000; 
 
-$vers="1.16b";
+#theme
+$globaltheme="default";
+
+$vers="1.17b";
 ?>

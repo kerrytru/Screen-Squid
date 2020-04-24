@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 05:56:49 AM
-#Build revision 1.10
+#Build date Friday 24th of April 2020 16:08:28 PM
+#Build revision 1.11
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -14,20 +14,17 @@ if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
   $srv=0;
+  
+  include("config.php");
+
 ?>
 
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
-* {padding:0;margin:0;}
-ul {list-style-type:none;padding-left:1em}
-body {margin:0.5em;padding:0.5em}
 
-</style>
-<link rel="stylesheet" type="text/css" href="javascript/example.css"/>
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="themes/default/global.css"/>
+<link rel="stylesheet" type="text/css" href="themes/<?php echo $globaltheme; ?>/global.css"/>
 
 </head>
 <body>
@@ -70,9 +67,6 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idRe
 
 
 <?php
-
-include("config.php");
-
 
 
 
@@ -1417,9 +1411,9 @@ $newdate=date("d-m-Y",$newdate);
 <form name=fastdateswitch_form>
     <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
     <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
-    <input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
-    <input type="hidden" name=typeid_field_hidden value="<?php echo $typeid; ?>">
+    <input type="hidden" name=group_field_hidden value="<?php if(isset($currentgroupid)) echo $currentgroupid; else echo "0"; ?>">
+    <input type="hidden" name=groupname_field_hidden value="<?php if(isset($currentgroup)) echo $currentgroup; else echo "0"; ?>">
+    <input type="hidden" name=typeid_field_hidden value="<?php if(isset($typeid)) echo $typeid; else echo "0";?>">
     </form>
 </body>
 </html>

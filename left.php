@@ -1,5 +1,8 @@
 <?php
-#build 20170203
+
+#Build date Friday 24th of April 2020 16:31:16 PM
+#Build revision 1.1
+
 include("config.php");
 
 if(isset($_GET['srv']))
@@ -10,16 +13,10 @@ else
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
-* {padding:0;margin:0;}
-ul {list-style-type:none;margin:0.5em}
-li {margin-bottom:20px;}
-body {margin:0.5em;padding:0.5em}
 
-</style>
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="themes/default/global.css"/>
+<link rel="stylesheet" type="text/css" href="themes/<?php echo $globaltheme;?>/global.css"/>
 
 <!-- The xtree script file -->
 <script src="javascript/xtree.js"></script>

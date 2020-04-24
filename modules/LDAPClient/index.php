@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 09:22:21 AM
-#Build revision 1.1
+#Build date Friday 24th of April 2020 13:24:45 PM
+#Build revision 1.2
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -12,63 +12,6 @@ if(isset($_GET['srv']))
 else
   $srv=0;
 
-
-?>
-
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
-* {padding:0;margin:0;}
-ul {list-style-type:none;padding-left:1em}
-body {margin:0.5em;padding:0.5em}
-
-</style>
-<link rel="stylesheet" type="text/css" href="../../javascript/example.css"/>
-<link rel="stylesheet" type="text/css" href="css/example.css"/>
-
-</head>
-<body>
-<br />
-
-
-<br />
-<script type="text/javascript" src="../../javascript/sortable.js"></script>
-<script language=javascript>
-
-function switchTables()
-{
-   if (document.getElementById("loginsTable").style.display == "table" ) {
-          document.getElementById("loginsTable").style.display="none";
-
-} else {
-document.getElementById("loginsTable").style.display="table";
-}
-   if (document.getElementById("ipaddressTable").style.display == "table" ) {
-          document.getElementById("ipaddressTable").style.display="none";
-
-} else {
-document.getElementById("ipaddressTable").style.display="table";
-}
-
-}
-
-function PartlyReportsLogin(idReport, dom, login,loginname,site)
-{
-parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&login='+login+'&loginname='+loginname+'&site='+site;
-}
-
-function PartlyReportsIpaddress(idReport, dom, ip,ipname,site)
-{
-parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&ip='+ip+'&ipname='+ipname+'&site='+site;
-}
-
-
-</script>
-
-
-<?php
-
 include("../../config.php");
 
 include("config.php");
@@ -78,6 +21,24 @@ include("../../lang/$language");
 		include("langs/".$language);  #подтянем файл языка если это возможно
 	else	
 		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+
+?>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme;?>/global.css"/>
+
+</head>
+<body>
+
+<script type="text/javascript" src="../../javascript/sortable.js"></script>
+
+
+<?php
+
 
 
 $addr=$address[$srv];
@@ -199,7 +160,7 @@ echo "<br /><br/>
 ".$_lang['stLDAPATTENTIONMESSAGE']."
 <br /><br />".$_lang['stLDAPIMPORTANTVARIABLES']."
 <br /><br />
-<table id=report_table_id_group border=1 class=sortable>
+<table class=datatable>
 <tr>
 	<th class=unsortable>
 		".$_lang['stLDAPVARIABLE']."
@@ -288,9 +249,9 @@ $newdate=date("d-m-Y",$newdate);
 <form name=fastdateswitch_form>
     <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
     <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
-    <input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
-    <input type="hidden" name=typeid_field_hidden value="<?php echo $typeid; ?>">
+    <input type="hidden" name=group_field_hidden value=0>
+    <input type="hidden" name=groupname_field_hidden value=0>
+    <input type="hidden" name=typeid_field_hidden value=0>
     </form>
 </body>
 </html>

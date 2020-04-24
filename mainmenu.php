@@ -1,14 +1,12 @@
 <?php 
-#build 20191021
+
+#Build date Friday 24th of April 2020 16:31:16 PM
+#Build revision 1.1
+
 ?>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
-* {padding:0;margin:0;}
-ul {list-style-type:none;padding-left:1em}
-body {margin:0.5em;padding:0.5em}
-</style>
 
 <?php include("config.php");
 
@@ -19,7 +17,7 @@ else
  ?>
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="themes/default/global.css"/>
+<link rel="stylesheet" type="text/css" href="themes/<?php echo $globaltheme; ?>/global.css"/>
 
 <!-- The xtree script file -->
 <script src="javascript/xtree.js"></script>
