@@ -1,5 +1,7 @@
 <?php
-#build 20170501
+
+#Build date Friday 24th of April 2020 05:32:11 AM
+#Build version 1.10
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -1394,8 +1396,10 @@ echo "	</table>
 
 //if($connectionStatus!="error")
 
-if(!isset($_GET['id']))
+if($ssq->db_object!=null)
 	echo $_lang['stALLISOK'];
+else
+echo $_lang['stDONTFORGET'];
 
 
 $end=microtime(true);

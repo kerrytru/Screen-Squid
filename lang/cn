@@ -83,7 +83,7 @@ $_lang['stSTATS']="数据";
 $_lang['stALIASES']="关联";
 $_lang['stGROUPS']="组";
 $_lang['stWELCOME']="欢迎使用Screen Squid";
-$_lang['stDONTFORGET']="<p><b>请注意:</b> 在第一次使用时, 使用 <a href=createdb/createdb.sql>SQL file</a>)来创建MySql表. 在config.php和fetch.pl中进行连接数据库的相关设置</p>";
+$_lang['stDONTFORGET']="<p><b>请注意:</b> 在第一次使用时, 使用 <a href=createdb/createdb.sql>SQL file</a>)来创建MySql表. 在config.php和fetch.pl中进行连接数据库的相关设置 <br>Try check our <a href=test.php>TEST PAGE</a></p>";
 $_lang['stALLISOK']="数据库连接成功. 点击 <b>报告</b> 以继续";
 
 $_lang['stQUANTITYRECORDS']="数据库中的记录数量";

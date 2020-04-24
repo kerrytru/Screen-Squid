@@ -83,7 +83,7 @@ $_lang['stSTATS']="Statistics";
 $_lang['stALIASES']="Aliases";
 $_lang['stGROUPS']="Groups";
 $_lang['stWELCOME']="Welcome to Screen Squid v.";
-$_lang['stDONTFORGET']="<p><b>DON`T FORGET:</b> At first start, create mysql DB with tables, using <a href=createdb/createdb.sql>SQL file</a>). Set up connection to DB in config.php and fetch.pl.</p>";
+$_lang['stDONTFORGET']="<p><b>DON`T FORGET:</b> At first start, create mysql DB with tables, using <a href=createdb/createdb.sql>SQL file</a>). Set up connection to DB in config.php and fetch.pl.<br>Try check our <a href=test.php>TEST PAGE</a></p>";
 $_lang['stALLISOK']="DB Connection established. Click <b>Reports</b> to continue.";
 
 $_lang['stQUANTITYRECORDS']="The number of records in the DB";

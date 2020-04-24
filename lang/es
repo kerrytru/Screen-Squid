@@ -83,7 +83,7 @@ $_lang['stSTATS']="Estad&iacute;sticas";
 $_lang['stALIASES']="Alias";
 $_lang['stGROUPS']="Grupos";
 $_lang['stWELCOME']="Bienvenido a Screen Squid";
-$_lang['stDONTFORGET']="<p><b>NO OLVIDE:</b> Al comienzo, cree la BD mysql con tablas, usando el archivo SQL <a href=createdb/createdb.sql></a>). Configure la conexi&oacute;n a la BD en config.php y fetch.pl.</p>";
+$_lang['stDONTFORGET']="<p><b>NO OLVIDE:</b> Al comienzo, cree la BD mysql con tablas, usando el archivo SQL <a href=createdb/createdb.sql></a>). Configure la conexi&oacute;n a la BD en config.php y fetch.pl. <br>Try check our <a href=test.php>TEST PAGE</a></p>";
 $_lang['stALLISOK']="DB Conexi&oacute;n establecida. Haga click en <b>Reportes</b> para continuar.";
 
 $_lang['stQUANTITYRECORDS']="N&uacute;mero de entradas en la DB";

@@ -83,7 +83,7 @@ $_lang['stSTATS']="Estatísticas";
 $_lang['stALIASES']="Aliases";
 $_lang['stGROUPS']="Grupos";
 $_lang['stWELCOME']="Bem vindo ao Screen Squid v.";
-$_lang['stDONTFORGET']="<p><b>NÃO SE ESQUEÇA:</b> Antes de iniciar, crie o banco de dados e tabelas em  <a href=createdb/createdb.sql>SQL file</a>). Set up connection to DB in config.php and fetch.pl.</p>";
+$_lang['stDONTFORGET']="<p><b>NÃO SE ESQUEÇA:</b> Antes de iniciar, crie o banco de dados e tabelas em  <a href=createdb/createdb.sql>SQL file</a>). Set up connection to DB in config.php and fetch.pl.<br>Try check our <a href=test.php>TEST PAGE</a></p>";
 $_lang['stALLISOK']="Conexão com o banco OK. Clique para <b>Relatórios</b> Continuar.";
 
 $_lang['stQUANTITYRECORDS']="O número de registros no BD";
@@ -222,3 +222,4 @@ $_lang['stDECEMBER'] = "Dezembro";
 $_lang['stFORMEDITALIAS']="Edição em alias";
 $_lang['stFORMEDITGROUP']="Edição em grupo";
 ?>
+
