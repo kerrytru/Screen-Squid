@@ -36,7 +36,7 @@ function __construct($variables){ //
 
 
 
-# Table structure for table `scsq_mod_usermanager`
+# Table structure for table `scsq_mod_dbDaemon`
 
 		if($this->vars['dbtype']==0) #mysql version
 		$CreateTable = "
@@ -51,7 +51,7 @@ function __construct($variables){ //
 		
 		
 		$UpdateModules = "
-		INSERT INTO scsq_modules (name,link) VALUES ('dbDaemon','modules/Usermanager/index.php');";
+		INSERT INTO scsq_modules (name,link) VALUES ('dbDaemon','modules/dbDaemon/index.php');";
 
 
 		
