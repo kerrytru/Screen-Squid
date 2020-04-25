@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 09:26:33 AM
-#Build revision 1.1
+#Build date Friday 24th of April 2020 12:57:48 PM
+#Build revision 1.2
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -11,33 +11,6 @@ if(isset($_GET['srv']))
 else
   $srv=0;
 
-
-?>
-
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
-* {padding:0;margin:0;}
-ul {list-style-type:none;padding-left:1em}
-body {margin:0.5em;padding:0.5em}
-
-</style>
-
-</head>
-<body>
-<br />
-
-
-<br />
-
-
-
-</script>
-
-
-<?php
-
 include("../../config.php");
 include("module.php");
 include_once("../../lang/$language");
@@ -45,6 +18,23 @@ include_once("../../lang/$language");
 		include("langs/".$language);  #подтянем файл языка если это возможно
 	else	
 		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+
+
+?>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme;?>/global.css"/>
+
+</head>
+<body>
+
+
+
+<?php
 
 
 $addr=$address[$srv];
@@ -74,16 +64,13 @@ $dbDaemon_ex = new dbDaemon($variableSet);
 
 $ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
 
-
-if(!isset($_GET['id']))
 echo "<h2>".$_lang['stDBDAEMONMODULE']."</h2><br />";
 
 $start=microtime(true);
 
-
    
  
-echo "<h2>It`s ok, if you see only this line.</h2>";
+echo "<br><p>It`s ok, if you see only this line.</p>";
          
 
 
@@ -104,9 +91,9 @@ $newdate=date("d-m-Y",$newdate);
 <form name=fastdateswitch_form>
     <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
     <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
-    <input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
-    <input type="hidden" name=typeid_field_hidden value="<?php echo $typeid; ?>">
+    <input type="hidden" name=group_field_hidden value=0>
+    <input type="hidden" name=groupname_field_hidden value=0>
+    <input type="hidden" name=typeid_field_hidden value=0>
     </form>
 </body>
 </html>
