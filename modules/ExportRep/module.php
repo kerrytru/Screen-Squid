@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 07:50:26 AM
-#Build revision 1.2
+#Build date Thursday 7th of May 2020 18:40:17 PM
+#Build revision 1.3
 
 
 class ExportRep
@@ -11,7 +11,13 @@ function __construct($variables){ //
     $this->vars = $variables;
     	
   
-	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	    #в зависимости от типа БД, подключаем разные модули
+		if($this->vars['dbtype']==0)
+		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
+		if($this->vars['dbtype']==1)
+		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
 	// create new PDF document
 
 	if (file_exists("langs/".$this->vars['language']))

@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 13:24:45 PM
-#Build revision 1.2
+#Build date Thursday 7th of May 2020 18:45:18 PM
+#Build revision 1.3
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -70,8 +70,13 @@ include("../../lib/dbDriver/pgmodule.php");
 $ldap_client = new LDAPClient($variableSet);
 
 
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
-
+    #в зависимости от типа БД, подключаем разные модули
+		if($dbtype==0)
+		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
+		if($dbtype==1)
+		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
 if($enableNofriends==1) {
   $friends=implode("','",explode(" ", $goodLogins));
   $friendsTmp="where name in  ('".$friends."')";

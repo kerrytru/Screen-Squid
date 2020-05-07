@@ -1,5 +1,8 @@
 <?php
-#build 20200220
+
+#Build date Thursday 7th of May 2020 18:24:54 PM
+#Build revision 1.5
+
  
 $header='<html>
 <head>
@@ -63,12 +66,16 @@ $variableSet['dbase']=$dbase;
 
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)
+{
 include("../lib/dbDriver/mysqlmodule.php");
+$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+}
 
 if($dbtype==1)
+{
 include("../lib/dbDriver/pgmodule.php");
-
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+}
 
 
 

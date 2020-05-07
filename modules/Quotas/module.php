@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 09:20:33 AM
-#Build revision 1.1
+#Build date Thursday 7th of May 2020 18:47:37 PM
+#Build revision 1.2
 
 class Quotas
 {
@@ -10,8 +10,13 @@ function __construct($variables){ //
     $this->vars = $variables;
     	
   
-	$this->ssq = new ScreenSquid($variables); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
-
+	    #в зависимости от типа БД, подключаем разные модули
+		if($this->vars['dbtype']==0)
+		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
+		if($this->vars['dbtype']==1)
+		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
 	else	

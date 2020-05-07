@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 16:08:28 PM
-#Build revision 1.11
+#Build date Thursday 7th of May 2020 18:28:19 PM
+#Build revision 1.12
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -28,10 +28,7 @@ else
 
 </head>
 <body>
-<br />
 
-
-<br />
 <script type="text/javascript" src="javascript/sortable.js"></script>
 <script language=javascript>
 
@@ -86,13 +83,16 @@ $variableSet['language']=$language;
 
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)
-include_once("lib/dbDriver/mysqlmodule.php");
+{
+include("lib/dbDriver/mysqlmodule.php");
+$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+}
 
 if($dbtype==1)
-include_once("lib/dbDriver/pgmodule.php");
-
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
-
+{
+include("lib/dbDriver/pgmodule.php");
+$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+}
 
 
 if(!isset($_GET['id']))
@@ -154,6 +154,11 @@ if($enableNofriends==1) {
 			  $queryCountRowsLogin="select count(*) from scsq_logins";
 			  $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
 			  $queryMinMaxDateTraffic="select from_unixtime(t.mindate,'%d-%m-%Y %H:%i:%s'),from_unixtime(t.maxdate,'%d-%m-%Y %H:%i:%s') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
+			  
+			  if($dbtype==1) #postgres 
+			  $queryMinMaxDateTraffic="select to_char(to_timestamp(t.mindate),'YYYY-MM-DD-HH24-MI-SS'),to_char(to_timestamp(t.maxdate),'YYYY-MM-DD-HH24-MI-SS') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
+			  
+			  
 			  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic where par=1";
 			  $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
 			  $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";

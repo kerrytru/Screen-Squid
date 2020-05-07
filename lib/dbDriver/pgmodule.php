@@ -1,10 +1,12 @@
 <?php
 
+#Build date Thursday 7th of May 2020 18:21:28 PM
+#Build revision 1.1
 
-class ScreenSquid
+class p_ScreenSquid
 {
 
-var $db_object = false;
+var $db_object = null;
 var $query_object = false;
 
 
@@ -23,7 +25,7 @@ function __construct($variables){ //
   {
 
 	$conn_string = "host=".$this->vars['addr']." port=5432 dbname=".$this->vars['dbase']." user=".$this->vars['usr']." password=".$this->vars['psw']."";
-	$con = pg_connect($conn_string);
+	$con = @pg_connect($conn_string);
 
  	return $con;
 

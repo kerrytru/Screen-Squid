@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 13:27:35 PM
-#Build revision 1.3
+#Build date Thursday 7th of May 2020 18:47:19 PM
+#Build revision 1.4
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -88,8 +88,13 @@ include("../../lib/dbDriver/pgmodule.php");
 $quotaex = new Quotas($variableSet);
 
 
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
-
+    #в зависимости от типа БД, подключаем разные модули
+		if($dbtype==0)
+		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
+		if($dbtype==1)
+		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
 
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stQUOTASMODULE']."</h2><br />";

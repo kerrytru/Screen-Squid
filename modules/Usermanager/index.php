@@ -81,8 +81,13 @@ include("../../lib/dbDriver/pgmodule.php");
 $usermanagerex = new Usermanager($variableSet);
 
 
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
-
+    #в зависимости от типа БД, подключаем разные модули
+		if($dbtype==0)
+		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
+		if($dbtype==1)
+		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	
 
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stUSERMANAGERMODULE']."</h2><br />";

@@ -1,7 +1,7 @@
 <?php 
 
-#Build date Friday 24th of April 2020 16:31:16 PM
-#Build revision 1.1
+#Build date Thursday 7th of May 2020 18:21:45 PM
+#Build revision 1.2
 
 ?>
 <html>
@@ -142,13 +142,22 @@ include_once("lib/dbDriver/mysqlmodule.php");
 if($dbtype==1)
 include_once("lib/dbDriver/pgmodule.php");
 
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+if($dbtype==0)
+$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
+
+if($dbtype==1)
+$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
+
+
 
 
 echo "//First Level
 	var rootproxy = new WebFXTreeItem('".$srvname[$srv]."');
 
 	tree.add(rootproxy);";
+
 
 
 if($ssq->db_object!=null)
@@ -250,7 +259,7 @@ $srv++;
 continue;
 
 }  
-
+unset($ssq);
 }
 
 echo "

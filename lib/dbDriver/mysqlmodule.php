@@ -1,7 +1,9 @@
 <?php
 
+#Build date Thursday 7th of May 2020 18:49:57 PM
+#Build revision 1.1
 
-class ScreenSquid
+class m_ScreenSquid
 {
 
 var $db_object = null;

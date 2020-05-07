@@ -1,5 +1,8 @@
 <?php
 
+#Build date Thursday 7th of May 2020 18:22:02 PM
+#Build revision 1.1
+
 include("config.php");
 
 echo "Test page<br /><br />";
@@ -46,7 +49,15 @@ if($dbtype==1)
 
 echo "Trying connect to DB...";
 
-$ssq = new ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+if($dbtype==0)
+$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
+
+if($dbtype==1)
+$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
+
+
+
 
 $ssq->query("select 1 from scsq_traffic limit 1");
 
@@ -63,7 +74,7 @@ echo "
 5. If you have no idea about problem, join our telegram group t.me/screensquid. We try to help you.
 ";
 }
-
+unset($ssq);
 echo "<br /><br />";
 
 echo "Trying connect to Cachemgr...";
