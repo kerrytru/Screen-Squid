@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-#Build date Wednesday 22nd of April 2020 17:08:01 PM
-#Build revision 1.1
+#Build date Friday 15th of May 2020 13:22:03 PM
+#Build revision 1.2
 
 
 use DBI; # DBI  Perl!!!
@@ -42,26 +42,20 @@ $pass = "pass"; # pasword k DB
 $db = "test5"; # name DB
 }
 
-#didnt test on postgre! 
 
 #postgresql default config
-#if($dbtype==1){
-#$host = "localhost"; # host s DB
-#$port = "5432"; # port DB
-#$user = "postgres"; # username k DB
-#$pass = "pass"; # pasword k DB
-#$db = "test"; # name DB
-#}
+if($dbtype==1){
+$host = "localhost"; # host s DB
+$port = "5432"; # port DB
+$user = "postgres"; # username k DB
+$pass = "pass"; # pasword k DB
+$db = "postgres"; # name DB
+}
 
 
 #=======================CONFIGURATION END==============================
 
 $|=1;
-
-
-if($dbtype==1){ #postgre
-$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
-}
 
 
 
@@ -79,11 +73,29 @@ while (<STDIN>) {
     if ( $cmd eq 'L' ) {
 
 #make conection to DB
-if($dbtype==0){ #mysql
+	if($dbtype==0){ #mysql
+		
+			eval {                  # we catch db errors 
+				#$dbh = DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass);
+				DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass,{PrintError => 0});
+			
+			};
+			if ($EVAL_ERROR) { #no connect then exit and dont crash squid. It is quiet mode
+				print "Error";
+				exit;
+			}
+			else
+			{
+				$dbh = DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass,{PrintError => 0}); #if you need log to cache.log set it to 1.
+			}
+			
+		}
 	
-        eval {                  # we catch db errors 
-			#$dbh = DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass);
-			DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass,{PrintError => 0});
+	
+	if($dbtype==1){ #postgre
+
+       eval {                  # we catch db errors 
+			$dbh = DBI->connect_cached("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 0});
         
         };
 		if ($EVAL_ERROR) { #no connect then exit and dont crash squid. It is quiet mode
@@ -92,10 +104,12 @@ if($dbtype==0){ #mysql
 		}
 		else
 		{
-			$dbh = DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass,{PrintError => 0}); #if you need log to cache.log set it to 1.
+			$dbh = DBI->connect_cached("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 0}); #if you need log to cache.log set it to 1.
 		}
-		
+
 	}
+	
+	#insert string
 		$sql_insert="INSERT INTO scsq_mod_dbDaemon (date, lineitem, numproxy) VALUES (".$startdate.",'".$line."',".$numproxy.")";
 
         eval {                  # we catch db errors 

@@ -25,7 +25,7 @@ $host = "localhost"; # host s DB
 $port = "5432"; # port DB
 $user = "postgres"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test"; # name DB
+$db = "postgres"; # name DB
 }
 #==========================================================
 #Count lines for one insert. You can change it, if its needed.

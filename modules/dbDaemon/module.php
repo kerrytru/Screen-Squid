@@ -1,7 +1,7 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:36:07 PM
-#Build revision 1.2
+#Build date Friday 15th of May 2020 13:18:35 PM
+#Build revision 1.3
 
 class dbDaemon
 {
@@ -51,6 +51,19 @@ function __construct($variables){ //
 			  numproxy tinyint(4) DEFAULT '0',
 			  PRIMARY KEY (id)
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+		";
+		
+				if($this->vars['dbtype']==1) #postgre version
+		$CreateTable = "
+		CREATE TABLE IF NOT EXISTS scsq_mod_dbDaemon (
+			  id serial NOT NULL,
+			  date integer NOT NULL,
+			  lineitem text,
+			  numproxy integer DEFAULT 0,
+			  CONSTRAINT scsq_mod_dbDaemon_pkey PRIMARY KEY (id)
+			);
+		ALTER TABLE scsq_mod_dbDaemon
+			OWNER TO postgres;
 		";
 		
 		

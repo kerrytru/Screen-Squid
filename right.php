@@ -156,7 +156,7 @@ if($enableNofriends==1) {
 			  $queryMinMaxDateTraffic="select from_unixtime(t.mindate,'%d-%m-%Y %H:%i:%s'),from_unixtime(t.maxdate,'%d-%m-%Y %H:%i:%s') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
 			  
 			  if($dbtype==1) #postgres 
-			  $queryMinMaxDateTraffic="select to_char(to_timestamp(t.mindate),'YYYY-MM-DD-HH24-MI-SS'),to_char(to_timestamp(t.maxdate),'YYYY-MM-DD-HH24-MI-SS') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
+			  $queryMinMaxDateTraffic="select to_char(to_timestamp(t.mindate),'DD-MM-YYYY HH24:MI:SS'),to_char(to_timestamp(t.maxdate),'DD-MM-YYYY HH24:MI:SS') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
 			  
 			  
 			  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic where par=1";
