@@ -1,7 +1,7 @@
 <?php 
 
-#Build date Thursday 7th of May 2020 18:21:45 PM
-#Build revision 1.2
+#Build date Friday 15th of May 2020 17:33:36 PM
+#Build revision 1.3
 
 ?>
 <html>
@@ -90,7 +90,7 @@ parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+pa
 
 
 echo "
-<div style='float:left; top: 70px; left: 10px; height: 100%; width: 100%; padding: 5px; overflow: auto;'>
+<div style='float:left; top: 70px; left: 10px; height: 85%; width: 100%; padding: 5px; overflow:auto;'>
 <script language=JavaScript>
 
 webFXTreeConfig.rootIcon		= 'img/themes/default/Servers.png';
