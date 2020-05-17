@@ -224,10 +224,12 @@ else
   $currenthour="";
 }
 
-if(isset($_GET['group']))
-  $currentgroupid=$_GET['group'];
+//fix for cabinet!
+if($_COOKIE['tableid'])
+  $currentgroupid=$_COOKIE['tableid'];
 else
   $currentgroupid="";
+
 
 if(isset($_COOKIE['typeid']))
   $typeid=$_COOKIE['typeid'];
