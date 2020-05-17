@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 
-#Build date Friday 24th of April 2020 09:17:37 AM
-#Build revision 1.2
+#Build date Monday 27th of April 2020 13:01:29 PM
+#Build revision 1.3
 
 =com
-This script is quota helper. If user1 reach quota, helper send to squid signal to block user1 access.
+This script is user manager helper. If user1 active = false, helper send to squid signal to block user1 access.
 
 As other perl script in Screen Squid, you need to configure DB section.
 
@@ -94,7 +94,7 @@ sub debug {
 #
 sub check {
 
-#get quota status
+
 
 #if auth by login
 if($typeid == 0) {

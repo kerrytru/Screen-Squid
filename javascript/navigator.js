@@ -7,6 +7,15 @@
 
 // возвращает куки с указанным name,
 // или 0, если ничего не найдено
+
+function deleteCookie(name) {   
+    document.cookie = name+'=; Max-Age=-99999999;';  
+setCookie(name,0,0);
+parent.location.href='../login.php';
+UpdateLeftMenu(999);
+
+}
+
 function getCookie(name) {
   let matches = document.cookie.match(new RegExp(
     "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
@@ -14,13 +23,15 @@ function getCookie(name) {
   return matches ? decodeURIComponent(matches[1]) : 0;
 }
 
-
-function deleteCookie( name ) {
- document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-parent.right.location.href='reports.php';
-UpdateLeftMenu(999);
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
-
 
 
 function LeftRightDateSwitch(idReport, dom, lr)

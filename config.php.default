@@ -125,5 +125,5 @@ $oneMegabyte=1000000;
 #theme
 $globaltheme="default";
 
-$vers="1.17b";
+$vers="1.18b";
 ?>

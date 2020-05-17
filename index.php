@@ -1,5 +1,5 @@
 <?php
-#build 20160301
+#build 20200227
 ?>
 
 <!doctype html public "-//W3C//DTD HTML 3.2 Final//EN">
@@ -24,8 +24,8 @@
 <title>Screen Squid <?php echo $vers; ?></title>
 </head>
 <frameset cols="400,*" >
-    <frame name="left" src="mainmenu.php" frameborder="0" scrolling="no">
-<frame name="right" src="right.php" frameborder="0">
+    <frame name="left" src="mainmenu.php" frameborder="0" scrolling="no" />
+<frame name="right" src="right.php" frameborder="0" />
 <noframes>
 <body>
 <p>This page uses frames, but your browser doesn't support them.</p>

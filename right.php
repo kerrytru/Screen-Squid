@@ -1,7 +1,7 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:28:19 PM
-#Build revision 1.12
+#Build date Sunday 17th of May 2020 08:13:18 AM
+#Build revision 1.13
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -369,7 +369,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
         if(!isset($_GET['actid'])) {
           $result=$ssq->query($queryAllAliases);
           $numrow=1;
-	 
+		echo 	"<h2>".$_lang['stALIASES'].":</h2>";
           echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
           echo "<br /><br />";
 
@@ -716,6 +716,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
             if(!isset($_GET['actid'])) {
               $result=$ssq->query($queryAllGroups);
               $numrow=1;
+              echo 	"<h2>".$_lang['stGROUPS'].":</h2>";
               echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
               echo "<br /><br />";
               echo "<table id=report_table_id_group class=datatable>
