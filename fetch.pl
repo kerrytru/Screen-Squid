@@ -177,7 +177,7 @@ print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/s
 
 #check date before add to sqltext
   
-  if($item[0]+1>$lastdate) {
+  if($item[0]>$lastdate+1) {
     if($item[4]>$minbytestoparse) {
       #count how much lines added
       $countadded=$countadded+1;
