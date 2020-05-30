@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-#build 20191105
+#Build date Saturday 30th of May 2020 11:09:03 AM
+#Build revision 1.1
 
 use DBI; # DBI  Perl!!!
 
@@ -176,7 +177,7 @@ print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/s
 
 #check date before add to sqltext
   
-  if($item[0]>$lastdate) {
+  if($item[0]+1>$lastdate) {
     if($item[4]>$minbytestoparse) {
       #count how much lines added
       $countadded=$countadded+1;
@@ -304,7 +305,12 @@ tmp2.httpstatus,
 ".$numproxy."
 
 FROM (SELECT 
-IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
+case
+
+	when (SUBSTRING_INDEX(site,'/',1) REGEXP '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?')  
+		then SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)
+		else SUBSTRING_INDEX(site,'/',1) 
+	end as st, 
 sizeinbytes,
 date,
 login,
@@ -377,12 +383,17 @@ tmp2.st,
 ".$numproxy."
 
 FROM (SELECT 
-IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
+case
+
+	when (SUBSTRING_INDEX(site,'/',1) REGEXP '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?')  
+		then SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)
+		else SUBSTRING_INDEX(site,'/',1) 
+	end as st, 
 sum(sizeinbytes) as sums,
 date
 FROM scsq_traffic
 where date>".$lastday." and numproxy=".$numproxy."
-GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st)
+GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st),date,site
 
 ) as tmp2
 

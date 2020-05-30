@@ -8,8 +8,8 @@
 
 <?php
 
-#Build date Thursday 7th of May 2020 18:24:54 PM
-#Build revision 1.5
+#Build date Saturday 30th of May 2020 13:31:47 PM
+#Build revision 1.6
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -186,12 +186,28 @@ $queryActiveUsers1="select substring_index(ipaddress,':',1) as ipaddr,
 //		   ON nofriends.id=aliastbl.tableid 
 //
 if($dbtype==0) #mysql version
-$queryActiveUsers="select table1.ipaddr,sum(table1.sums/1024/table1.seconds) as s, table1.username, table1.id,table1.aliasname from 
-(select DISTINCT substring_index(ipaddress,':',1) as ipaddr,sizeinbytes as sums, seconds, username, ipaddresstbl.id,aliastbl.name as aliasname from scsq_sqper_activerequests
-LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,substring_index(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON substring_index(ipaddress,':',1)=ipaddresstbl.name 
-LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid 
-) as table1
-where table1.ipaddr not IN ('".$friendsIpaddress."') AND trim(table1.username) not IN ('".$friendsLogin."') group by table1.ipaddr,table1.username; 
+$queryActiveUsers="select 
+	table1.ipaddr,
+	sum(table1.sums/1024/table1.seconds) as s, 
+	table1.username, table1.id,table1.aliasname 
+from 
+		(select 
+			DISTINCT substring_index(ipaddress,':',1) as ipaddr,
+			sizeinbytes as sums, 
+			seconds, 
+			username, 
+			ipaddresstbl.id,
+			aliastbl.name as aliasname 
+	from scsq_sqper_activerequests
+	LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,substring_index(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON substring_index(ipaddress,':',1)=ipaddresstbl.name 
+	LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid 
+	) as table1
+
+	where 
+		table1.ipaddr not IN ('".$friendsIpaddress."') 
+	AND trim(table1.username) not IN ('".$friendsLogin."') 
+	
+	group by table1.ipaddr,table1.username,table1.id,table1.aliasname ; 
 	
 ";
 

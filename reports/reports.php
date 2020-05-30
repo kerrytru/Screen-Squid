@@ -1,7 +1,7 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:24:54 PM
-#Build revision 1.5
+#Build date Saturday 30th of May 2020 13:31:55 PM
+#Build revision 1.6
 
  
 $header='<html>
@@ -500,7 +500,7 @@ $echoLoginAliasColumn=",aliastbl.name";
 	   AND date<".$dateend." 
 	   AND site NOT IN (".$goodSitesList.")
 	   AND par=1
-	GROUP BY CRC32(login)
+	GROUP BY CRC32(login),login
 	ORDER BY null) 
 	AS tmp 
 
@@ -522,7 +522,10 @@ $echoLoginAliasColumn=",aliastbl.name";
   WHERE (1=1)
   ".$msgNoZeroTraffic."
 
-  GROUP BY nofriends.name;";
+  GROUP BY nofriends.name,
+		   nofriends.id,
+		   tmp.s
+		   ".$echoLoginAliasColumn.";";
 
 #postgre version
 if($dbtype==1)
@@ -598,7 +601,7 @@ $queryIpaddressTraffic="
 	  AND date<".$dateend." 
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-	GROUP BY CRC32(ipaddress)
+	GROUP BY CRC32(ipaddress),ipaddress
 	ORDER BY null) 
 	AS tmp 
 	RIGHT JOIN (SELECT 
@@ -617,8 +620,12 @@ $queryIpaddressTraffic="
 	WHERE (1=1)
   ".$msgNoZeroTraffic."
 
-  GROUP BY nofriends.name ;";
-  
+  GROUP BY nofriends.name,
+    tmp.s,
+    nofriends.id 
+    ".$echoIpaddressAliasColumn."
+   ;";
+   
   #postgre version
 if($dbtype==1)
   $queryIpaddressTraffic="
@@ -667,15 +674,16 @@ WHERE (1=1)
 $querySitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
-	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2),
+	 case
+		when (SUBSTRING_INDEX(site,'/',1) REGEXP '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?')  
+			then 2
+			else 1
+		end, 
 	 '',
 	 tmp2.cat
   
   FROM (SELECT 
 		 sum(sizeinbytes) as s,
-		 date,
-		 login,
-		 ipaddress,
 		 site,
 		 ".$category." as cat
 	       FROM scsq_quicktraffic
@@ -697,12 +705,10 @@ $querySitesTraffic="
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
 	 	 AND site NOT IN (".$goodSitesList.")
-	       GROUP BY CRC32(site)
+	       GROUP BY CRC32(site),site
 	       ORDER BY null
 	      ) as tmp2
- 	  
-	 
- 
+
 
   ORDER BY site asc
 ;";
@@ -759,13 +765,14 @@ $querySitesTraffic="
 $queryTopSitesTraffic="
   SELECT tmp2.site,
 	 tmp2.s,
-	 IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(tmp2.site,'/',1),'.',-1),10),1)),1,2)
-  
+	 case
+		when (SUBSTRING_INDEX(site,'/',1) REGEXP '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?')  
+			then 2
+			else 1
+		end
+		 
   FROM (SELECT 
 		 sum(sizeinbytes) as s,
-		 date,
-		 login,
-		 ipaddress,
 		 site
 	       FROM scsq_quicktraffic
 	       LEFT  JOIN (SELECT 
@@ -787,7 +794,7 @@ $queryTopSitesTraffic="
 	   	 AND tmpipaddress.id IS NULL
 	 	 AND site NOT IN (".$goodSitesList.")
 
-	       GROUP BY CRC32(site)
+	       GROUP BY CRC32(site),site
 	       ORDER BY null
 	      ) as tmp2
  	       
@@ -858,7 +865,7 @@ $queryTopLoginsTraffic="
 	  AND date<".$dateend."
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-	GROUP BY CRC32(login) 
+	GROUP BY CRC32(login),login 
 	ORDER BY null) 
 	AS tmp 
 
@@ -936,7 +943,7 @@ $queryTopIpTraffic="
 	  AND date<".$dateend." 
 	  AND site NOT IN (".$goodSitesList.")
  	  AND par=1
-	GROUP BY CRC32(ipaddress) 
+	GROUP BY CRC32(ipaddress),ipaddress 
 	ORDER BY null) 
 	AS tmp
 
@@ -1008,9 +1015,7 @@ $queryTrafficByHours="
     SUM(tmp.s) 
   FROM (SELECT 
 	  date,
-	  SUM(sizeinbytes) AS s,
-	  login,
-	  ipaddress 
+	  SUM(sizeinbytes) AS s
 	FROM scsq_quicktraffic 
 	LEFT OUTER JOIN (SELECT 
 			   id 
@@ -1032,7 +1037,7 @@ $queryTrafficByHours="
 	  AND tmpipaddress.id is  NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-	GROUP BY CRC32(date) 
+	GROUP BY CRC32(date),date 
 	ORDER BY null) 
 	AS tmp 
 
@@ -1102,7 +1107,7 @@ $queryLoginsTrafficWide="
 	    AND date<".$dateend." 
 	    AND site NOT IN (".$goodSitesList.")
  	    AND par=1
-	 GROUP BY CRC32(login) 
+	 GROUP BY CRC32(login) ,login
 	 ORDER BY null) 
 
   UNION 
@@ -1123,7 +1128,7 @@ $queryLoginsTrafficWide="
 	   AND  date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
 	   AND par=1	  
-	 GROUP BY CRC32(login) 
+	 GROUP BY CRC32(login) ,login
 	 ORDER BY null) 
 
   UNION 
@@ -1137,7 +1142,7 @@ $queryLoginsTrafficWide="
 	   AND date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
  	   AND par=1	   
-	 GROUP BY crc32(login) 
+	 GROUP BY crc32(login) ,login
 	 ORDER BY null)) 
 	 AS tmp
 
@@ -1246,7 +1251,7 @@ $queryIpaddressTrafficWide="
 	   AND  date<".$dateend." 
 	   AND site NOT IN (".$goodSitesList.")
  	   AND par=1
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY CRC32(ipaddress) ,ipaddress
 	 ORDER BY null) 
 
   UNION
@@ -1266,7 +1271,7 @@ $queryIpaddressTrafficWide="
 	   AND  date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
  	   AND par=1
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY CRC32(ipaddress) ,ipaddress
 	 ORDER BY null) 
 
   UNION 
@@ -1280,7 +1285,7 @@ $queryIpaddressTrafficWide="
 	   AND date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
  	   AND par=1
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY CRC32(ipaddress) ,ipaddress
 	 ORDER BY null)) 
 	 AS tmp
 
@@ -1373,14 +1378,13 @@ $queryIpaddressTrafficWithResolve="
     ipaddress 
   FROM (SELECT 
 	  ipaddress,
-	  date,
 	  SUM(sizeinbytes) AS s 
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND site NOT IN (".$goodSitesList.")
  	  AND par=1
-	GROUP BY CRC32(ipaddress) 
+	GROUP BY CRC32(ipaddress) , ipaddress
 	ORDER BY null) 
 	AS tmp
 
@@ -1429,14 +1433,11 @@ WHERE (1=1)
 
 
 $queryPopularSites="
-  SELECT SUBSTRING_INDEX(scsq_traffic.site,'/',1) as stt,
-	 tmp.s,
-	 tmp.c
-  FROM (SELECT 
-	  CRC32(SUBSTRING_INDEX(site,'/',1)) AS st,
-	  count(*) AS c,
+	SELECT 
+	  SUBSTRING_INDEX(site,'/',1) AS st,
 	  sum(sizeinbytes) AS s,
-	  scsq_traffic.id
+	  count(1) AS c
+	  
 	  
 	FROM scsq_traffic 
 
@@ -1456,14 +1457,11 @@ $queryPopularSites="
 	  AND date<".$dateend." 
 	  AND tmplogin.id is NULL
 	  AND tmpipaddress.id is NULL
-   
+	  AND SUBSTRING_INDEX(site,'/',1) NOT IN (".$goodSitesList.")
 
-	GROUP BY st
-	ORDER BY null) 
-	AS tmp 
-  JOIN scsq_traffic ON tmp.id=scsq_traffic.id
-  WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
-  ORDER BY tmp.c desc 
+   GROUP BY st
+   
+  ORDER BY c desc 
   LIMIT ".$countPopularSitesLimit.";";
   
 #postgre version
@@ -1604,9 +1602,7 @@ $queryWhoDownloadBigFiles="
 $queryTrafficByPeriod="
   	SELECT
 	  FROM_UNIXTIME(scsq_quicktraffic.date,'%m.%Y') AS d1,
-	  SUM(scsq_quicktraffic.sizeinbytes), 
-	  ipaddress,
-	  login
+	  SUM(scsq_quicktraffic.sizeinbytes)
 
 	FROM scsq_quicktraffic
 
@@ -1629,7 +1625,7 @@ $queryTrafficByPeriod="
 	  AND tmpipaddress.id IS NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1 
-	GROUP BY crc32(FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m'))
+	GROUP BY crc32(FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m')),d1
 	ORDER BY FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m') asc;
 ;";
 
@@ -1670,9 +1666,8 @@ $queryTrafficByPeriod="
 $queryTrafficByPeriodDay="
   	SELECT
 	  FROM_UNIXTIME(scsq_quicktraffic.date,'%d.%m.%Y') AS d1,
-	  SUM(scsq_quicktraffic.sizeinbytes), 
-	  ipaddress,
-	  login
+	  SUM(scsq_quicktraffic.sizeinbytes)
+
 	FROM scsq_quicktraffic
 
 	LEFT OUTER JOIN (SELECT 
@@ -1696,7 +1691,7 @@ $queryTrafficByPeriodDay="
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
-	GROUP BY crc32(FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d'))
+	GROUP BY crc32(FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d')),d1
 	ORDER BY FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d') asc;
 ;";
 
@@ -1740,9 +1735,7 @@ $queryTrafficByPeriodDay="
 $queryTrafficByPeriodDayname="
   	SELECT
 	  FROM_UNIXTIME(scsq_quicktraffic.date,'%w') AS d1,
-	  SUM(scsq_quicktraffic.sizeinbytes), 
-	  ipaddress,
-	  login
+	  SUM(scsq_quicktraffic.sizeinbytes)
 	  
 	FROM scsq_quicktraffic
 
@@ -1767,7 +1760,7 @@ $queryTrafficByPeriodDayname="
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
-	GROUP BY crc32(d1)
+	GROUP BY crc32(d1),d1
 	
 ;";
 
@@ -1842,7 +1835,7 @@ $queryHttpStatus= "
     AND tmpipaddress.id IS NULL
     AND site NOT IN (".$goodSitesList.")
     AND par=1
-  GROUP BY CRC32(httpstatus) 
+  GROUP BY CRC32(httpstatus),httpstatus,scsq_httpstatus.name
   ORDER BY scsq_httpstatus.name asc;";
 
 
@@ -2086,7 +2079,7 @@ $queryMimeTypesTraffic="
     AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
     AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-  GROUP BY CRC32(mime) 
+  GROUP BY CRC32(mime) ,mime
   ORDER BY st desc;";
 
 #postgre version
@@ -2125,10 +2118,15 @@ $queryMimeTypesTraffic="
   ORDER BY st desc;";
 
 $queryDomainZonesTraffic="
-	((SELECT 
-		 '-',
-		 sum(sizeinbytes) as s,
-		 LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1) as lastnum
+	SELECT 
+		 case
+			when (SUBSTRING_INDEX(site,'/',1) REGEXP '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$')  
+			then SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(concat(site,'/'),'/',1),'.',-1),':',1)
+			else '-'
+		 end domzone,
+		 
+		 sum(sizeinbytes) as s
+		 
 		 FROM scsq_quicktraffic
 
 	       LEFT  JOIN (SELECT 
@@ -2144,69 +2142,13 @@ $queryDomainZonesTraffic="
 	       ON tmpipaddress.id=scsq_quicktraffic.ipaddress       	
 
 	       WHERE date>".$datestart." 
-	  	 AND date<".$dateend."
-		 AND tmplogin.id IS NULL 
-	   	 AND tmpipaddress.id IS NULL
-	 	 AND site NOT IN (".$goodSitesList.")
-		 AND concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1) = LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)
-		 AND par<2
-	       ORDER BY null
-	     ) )	       
-
-UNION
-
-
- (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(concat(site,'/'),'/',1),'.',-1),':',1),
-	 tmp.s,
-	 tmp.stn
-  
-  FROM 	(SELECT 
-	  '2' as stn,
-	   tmp3.s,
-	   tmp3.login,
-	   tmp3.ipaddress,
-	   tmp3.site
-	 FROM (SELECT 
-		 site,
-		 sum(sizeinbytes) as s,
-		 date,
-		 login,
-		 ipaddress,
-		 LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1) as lastnum
-	       FROM scsq_quicktraffic
-
-	       LEFT  JOIN (SELECT 
-		 	     id 
-			   FROM scsq_logins 
-			   WHERE id  IN (".$goodLoginsList.")) 
-			   AS tmplogin 
-	       ON tmplogin.id=scsq_quicktraffic.login
-
-	       LEFT  JOIN (SELECT 
-			     id 
-			   FROM scsq_ipaddress 
-			   WHERE id  IN (".$goodIpaddressList.")) as tmpipaddress 
-	       ON tmpipaddress.id=scsq_quicktraffic.ipaddress       
-
-	       WHERE date>".$datestart." 
- 	         AND date<".$dateend."
-		 AND tmplogin.id IS NULL 
-	         AND tmpipaddress.id IS NULL
-	   	 AND site NOT IN (".$goodSitesList.")
-		 AND par<2
-	       GROUP BY CRC32(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(concat(site,'/'),'/',1),'.',-1),':',1))
-	       ORDER BY site asc
-	      ) as tmp3
-	
-	 WHERE concat('',lastnum * 1) <> lastnum
-
-	 
-
-       ) AS tmp 
-
-
-  ORDER BY site asc
-)
+			 AND date<".$dateend."
+			 AND tmplogin.id IS NULL 
+			 AND tmpipaddress.id IS NULL
+			 AND site NOT IN (".$goodSitesList.")
+			 AND par<2
+			 
+	     GROUP BY domzone	       
 ;
 ";
 
@@ -2253,7 +2195,8 @@ $queryTrafficByHoursLogins="
 SELECT  login,
 nofriends.name,
 sum(sizeinbytes),
-FROM_UNIXTIME(date,'%k')
+FROM_UNIXTIME(date,'%k') d
+
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
 	id,
@@ -2281,7 +2224,7 @@ FROM scsq_quicktraffic
 	  AND tmpipaddress.id is  NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-GROUP BY login,FROM_UNIXTIME(date,'%H')
+GROUP BY login, d, nofriends.name
 ORDER BY nofriends.name
 ;
 ";
@@ -2330,7 +2273,7 @@ $queryTrafficByHoursIpaddress="
 SELECT  ipaddress,
 nofriends.name,
 sum(sizeinbytes),
-FROM_UNIXTIME(date,'%k')
+FROM_UNIXTIME(date,'%k') d
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
 	id,
@@ -2358,7 +2301,7 @@ FROM scsq_quicktraffic
 	  AND tmpipaddress.id is  NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-GROUP BY ipaddress,FROM_UNIXTIME(date,'%H')
+GROUP BY ipaddress,d, nofriends.name
 ORDER BY nofriends.name
 ;
 ";
@@ -2408,7 +2351,7 @@ $queryTrafficByHoursLoginsOneSite="
 SELECT  login,
 nofriends.name,
 sum(sizeinbytes),
-FROM_UNIXTIME(date,'%k')
+FROM_UNIXTIME(date,'%k') d
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
 	id,
@@ -2437,7 +2380,7 @@ FROM scsq_quicktraffic
 	  AND site='".$currentsite."'
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-GROUP BY login,FROM_UNIXTIME(date,'%H')
+GROUP BY login,d,nofriends.name
 ORDER BY nofriends.name
 ;
 ";
@@ -2446,7 +2389,7 @@ $queryTrafficByHoursIpaddressOneSite="
 SELECT  ipaddress,
 nofriends.name,
 sum(sizeinbytes),
-FROM_UNIXTIME(date,'%k')
+FROM_UNIXTIME(date,'%k') d
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
 	id,
@@ -2475,7 +2418,7 @@ FROM scsq_quicktraffic
 	  AND site='".$currentsite."'
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-GROUP BY ipaddress,FROM_UNIXTIME(date,'%H')
+GROUP BY ipaddress,d,nofriends.name
 ORDER BY nofriends.name
 ;
 ";
@@ -2551,7 +2494,7 @@ $queryOneLoginTraffic="
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
 	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) 
+	 GROUP BY CRC32(scsq_quicktraffic.site) ,site
 	 ORDER BY site asc
 ;";
 
@@ -2586,7 +2529,7 @@ $queryOneLoginTopSitesTraffic="
 	   AND date<".$dateend."
 	   AND site NOT IN (".$goodSitesList.")
 	   AND par=1
-	 GROUP BY CRC32(site)
+	 GROUP BY CRC32(site), site
 	 ORDER BY s DESC
 	 LIMIT ".$countTopSitesLimit." 
 ";
@@ -2623,7 +2566,7 @@ $queryOneLoginTrafficByHours="
 	  AND date<".$dateend." 
           AND site NOT IN (".$goodSitesList.")
 	  AND par=1	
-	GROUP BY CRC32(date) 
+	GROUP BY CRC32(date) , date
 	ORDER BY null) 
 	AS tmp 
 
@@ -2677,7 +2620,7 @@ $queryWhoVisitPopularSiteLogin="
 				else FALSE
 			end ) = TRUE
 	
-	GROUP BY CRC32(login)) 
+	GROUP BY CRC32(login), login) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
@@ -2794,27 +2737,23 @@ $queryVisitingWebsiteByTimeLogin="
   ORDER BY d asc;";
 
 $queryOneLoginPopularSites="
-  SELECT SUBSTRING_INDEX(scsq_traffic.site,'/',1) as stt,
-	 tmp.s,
-	 tmp.c
-  FROM (SELECT 
-	  CRC32(SUBSTRING_INDEX(site,'/',1)) AS st,
-	  count(*) AS c,
-	  sum(sizeinbytes) AS s,
-	  scsq_traffic.id
+  SELECT 
+	  SUBSTRING_INDEX(site,'/',1) AS st,
+      sum(sizeinbytes) AS s,
+	  count(*) AS c
+
 	  
 	FROM scsq_traffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND login=".$currentloginid."
+	  AND SUBSTRING_INDEX(site,'/',1) NOT IN (".$goodSitesList.")
 	GROUP BY st
-	ORDER BY null) 
-	AS tmp 
-  JOIN scsq_traffic ON tmp.id=scsq_traffic.id
-  WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
-  ORDER BY tmp.c desc 
+	
+  ORDER BY c desc 
   LIMIT ".$countPopularSitesLimit.";";
-  
+
+
   #postgre version
   if($dbtype==1)  
   $queryOneLoginPopularSites="
@@ -2865,7 +2804,7 @@ $queryOneLoginIpTraffic="
    and date<".$dateend." 
    AND site NOT IN (".$goodSitesList.")
    AND par=1
-  GROUP BY CRC32(ipaddress)";
+  GROUP BY CRC32(ipaddress), ipaddress";
   
   # postgre version
   if($dbtype==1)
@@ -2943,7 +2882,7 @@ $queryOneIpaddressTraffic="
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
 	   
-	 GROUP BY CRC32(scsq_quicktraffic.site) 	 
+	 GROUP BY CRC32(scsq_quicktraffic.site),site	 
 	 ORDER BY scsq_quicktraffic.site asc;";
 
 #postgre version
@@ -2976,7 +2915,7 @@ $queryOneIpaddressTopSitesTraffic="
 	   AND date<".$dateend." 
 	   AND site NOT IN (".$goodSitesList.")	 
 	   AND par=1
-	 GROUP BY CRC32(site) 
+	 GROUP BY CRC32(site) ,site
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
@@ -3010,7 +2949,7 @@ $queryOneIpaddressTrafficByHours="
 	  and date<".$dateend." 
           AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-	group by crc32(date) 
+	group by crc32(date),date 
 	order by null) 
 	as tmp 
 
@@ -3064,7 +3003,7 @@ $queryWhoVisitPopularSiteIpaddress="
 				else FALSE
 			end ) = TRUE
 	
-	GROUP BY CRC32(ipaddress)) 
+	GROUP BY CRC32(ipaddress),ipaddress) 
 	AS tmp 
 
 	RIGHT JOIN (SELECT 
@@ -3243,25 +3182,19 @@ $queryVisitingWebsiteByTimeIpaddress="
   order by d asc;";
 
 $queryOneIpaddressPopularSites="
-  SELECT SUBSTRING_INDEX(scsq_traffic.site,'/',1) as stt,
-	 tmp.s,
-	 tmp.c
-  FROM (SELECT 
-	  CRC32(SUBSTRING_INDEX(site,'/',1)) AS st,
-	  count(*) AS c,
+	SELECT 
+	  SUBSTRING_INDEX(site,'/',1) AS st,
 	  sum(sizeinbytes) AS s,
-	  scsq_traffic.id
-	  
+	  count(*) AS c
+
 	FROM scsq_traffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND ipaddress=".$currentipaddressid."
+	  AND SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
+
 	GROUP BY st
-	ORDER BY null) 
-	AS tmp 
-  JOIN scsq_traffic ON tmp.id=scsq_traffic.id
-  WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
-  ORDER BY tmp.c desc 
+  ORDER BY c desc 
   LIMIT ".$countPopularSitesLimit.";";
 
 
@@ -3527,7 +3460,7 @@ $queryOneIpaddressLoginsTraffic="
     and date<".$dateend." 
     AND site NOT IN (".$goodSitesList.")
     AND par=1
-  GROUP BY CRC32(login)";
+  GROUP BY CRC32(login),login";
 
 
 #postgre version
@@ -3910,7 +3843,7 @@ $queryGroupsTraffic="
 		    tmp2 
 	 ON tmp2.login=scsq_alias.tableid 
 
-   GROUP BY crc32(tmp.name))
+   GROUP BY crc32(tmp.name),tmp.name, tmp.id, tmp.typeid)
 
  UNION
 
@@ -3942,7 +3875,7 @@ $queryGroupsTraffic="
 		    tmp2 
 	 ON tmp2.ipaddress=scsq_alias.tableid 
 
-  GROUP BY crc32(tmp.name))) as grtable
+  GROUP BY crc32(tmp.name),tmp.name, tmp.id, tmp.typeid)) as grtable
   order by gname;";
 
 
@@ -4043,7 +3976,7 @@ $queryOneGroupTraffic="
 		     and scsq_quicktraffic.date<".$dateend."
 	             AND site NOT IN (".$goodSitesList.")
  
-		   GROUP BY crc32(login)) 
+		   GROUP BY crc32(login),login) 
 		   tmp2 
 	ON tmp2.login=scsq_alias.tableid 
 	
@@ -4078,7 +4011,7 @@ $queryOneGroupTraffic="
 		     and scsq_quicktraffic.date<".$dateend." 
 	             AND site NOT IN (".$goodSitesList.")
 
-		   GROUP BY crc32(ipaddress)) 
+		   GROUP BY crc32(ipaddress),ipaddress) 
 		   tmp2 
 	ON tmp2.ipaddress=scsq_alias.tableid 
 
@@ -4201,7 +4134,7 @@ $queryOneGroupTrafficWide="
 	  and  date<".$dateend." 
           AND site NOT IN (".$goodSitesList.")
 
-	GROUP BY crc32(login) 
+	GROUP BY crc32(login),login, listaliases.name
 	ORDER BY null) 
 
   UNION 
@@ -4242,7 +4175,7 @@ $queryOneGroupTrafficWide="
 	  and  date<".$dateend."  
           AND site NOT IN (".$goodSitesList.")
 	
-	GROUP BY crc32(login) 
+	GROUP BY crc32(login) ,login, listaliases.name
 	ORDER BY null) 
 
   UNION 
@@ -4275,7 +4208,7 @@ $queryOneGroupTrafficWide="
 	   and date<".$dateend."  
            AND site NOT IN (".$goodSitesList.")
 
-	 GROUP BY crc32(login) 
+	 GROUP BY crc32(login) ,login, listaliases.name
 	 ORDER BY null)) 
 	 AS tmp
 
@@ -4332,7 +4265,7 @@ $queryOneGroupTrafficWide="
 	   and  date<".$dateend." 
            AND site NOT IN (".$goodSitesList.")
 
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY CRC32(ipaddress) ,ipaddress, listaliases.name
 	 ORDER BY null) 
 
   UNION 
@@ -4369,7 +4302,7 @@ $queryOneGroupTrafficWide="
 	   and  date<".$dateend."  
            AND site NOT IN (".$goodSitesList.")
 
-	 GROUP BY CRC32(ipaddress) 
+	 GROUP BY CRC32(ipaddress) , ipaddress, listaliases.name
 	 ORDER BY null) 
 
   UNION 
@@ -4398,7 +4331,7 @@ $queryOneGroupTrafficWide="
 	   and date<".$dateend."  
            AND site NOT IN (".$goodSitesList.")
 
-	 GROUP BY crc32(ipaddress) 
+	 GROUP BY crc32(ipaddress) , ipaddress, listaliases.name
 	 ORDER BY null)) 
 	 AS tmp
 
@@ -4698,7 +4631,7 @@ $queryOneGroupTopSitesTraffic="
 	   AND login IN (SELECT id from scsq_logins where id NOT IN (".$goodLoginsList.")) 
 	   AND ipaddress IN (SELECT id from scsq_ipaddress where id NOT IN (".$goodIpaddressList.")) 
 	   AND site NOT IN (".$goodSitesList.")
-	 GROUP BY crc32(site) 
+	 GROUP BY crc32(site), site, login,ipaddress
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
@@ -4730,7 +4663,7 @@ $queryOneGroupTopSitesTraffic="
 	   AND login IN (SELECT id from scsq_logins where id NOT IN (".$goodLoginsList.")) 
 	   AND ipaddress IN (SELECT id from scsq_ipaddress where id NOT IN (".$goodIpaddressList.")) 
 	   AND site NOT IN (".$goodSitesList.")
-	 GROUP BY crc32(site) 
+	 GROUP BY crc32(site), site ,login, ipaddress
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
@@ -4833,7 +4766,7 @@ $queryOneGroupTrafficByHours="
 	  and tmpipaddress.id is  NULL
           AND site NOT IN (".$goodSitesList.")
 	
-	GROUP BY crc32(date) 
+	GROUP BY crc32(date) ,date, login, ipaddress
 	ORDER BY null) 
 	AS tmp 
 
@@ -4873,7 +4806,7 @@ $queryOneGroupTrafficByHours="
 	  and tmpipaddress.id is  NULL
           AND site NOT IN (".$goodSitesList.")
 	
-	GROUP BY crc32(date) 
+	GROUP BY crc32(date) ,date, login, ipaddress
 	ORDER BY null) 
 	AS tmp 
 
@@ -5179,14 +5112,10 @@ $queryOneGroupWhoDownloadBigFiles="
 
 if($typeid==0)
 $queryOneGroupPopularSites="
-  SELECT SUBSTRING_INDEX(scsq_traffic.site,'/',1) as stt,
-	 tmp.s,
-	 tmp.c
-  FROM (SELECT 
-	  CRC32(SUBSTRING_INDEX(site,'/',1)) AS st,
-	  count(*) AS c,
+	SELECT 
+	  SUBSTRING_INDEX(site,'/',1) AS st,
 	  sum(sizeinbytes) AS s,
-	  scsq_traffic.id
+	  count(*) AS c
 	  
 	FROM scsq_traffic 
 
@@ -5223,11 +5152,8 @@ $queryOneGroupPopularSites="
    
 
 	GROUP BY st
-	ORDER BY null) 
-	AS tmp 
-  JOIN scsq_traffic ON tmp.id=scsq_traffic.id
-  WHERE SUBSTRING_INDEX(scsq_traffic.site,'/',1) NOT IN (".$goodSitesList.")
-  ORDER BY tmp.c desc 
+	
+  ORDER BY c desc 
   LIMIT ".$countPopularSitesLimit.";";
 
 #разность запросов в typeid и ON listaliases.tableid=scsq_traffic.login(ipaddress). костыль 
