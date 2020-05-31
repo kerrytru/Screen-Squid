@@ -1,7 +1,7 @@
 <?php
 
-#Build date Saturday 30th of May 2020 13:31:55 PM
-#Build revision 1.6
+#Build date Sunday 31st of May 2020 14:14:40 PM
+#Build revision 1.7
 
  
 $header='<html>
@@ -2463,6 +2463,136 @@ $queryCategorySitesTraffic="
   GROUP BY scsq_categorylist.category	  
 
 ;";
+
+
+
+
+
+#mysql version
+   $queryLoginsTimeOnline="
+  SELECT 
+    nofriends.name,
+    '',
+    count(1) cnt,
+    round(count(1)/60,0)cntMin,
+    nofriends.id
+    ".$echoLoginAliasColumn."
+  FROM (SELECT DISTINCT
+          login,
+          date
+           
+        FROM scsq_traffic 
+        WHERE  date>".$datestart."
+	   AND date<".$dateend." 
+	   AND site NOT IN (".$goodSitesList.")
+	
+	ORDER BY null) 
+	AS tmp 
+
+	LEFT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_logins 
+		    WHERE id NOT IN (".$goodLoginsList.")) 
+		    AS nofriends 
+	ON tmp.login=nofriends.id  
+ 	LEFT JOIN (SELECT 
+		      name,
+		      tableid		      
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+  
+  WHERE (1=1)
+  
+
+  GROUP BY nofriends.name,
+		   nofriends.id
+		   ".$echoLoginAliasColumn.";";
+
+
+#mysql version
+$queryIpaddressTimeOnline="
+  SELECT 
+	nofriends.name,
+    '',
+    count(1) cnt,
+    round(count(1)/60,0)cntMin,
+    nofriends.id
+    ".$echoIpaddressAliasColumn."
+  FROM (SELECT DISTINCT
+	  ipaddress,
+	  date 
+	FROM scsq_traffic 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+	
+	ORDER BY null) 
+	AS tmp 
+	LEFT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_ipaddress 
+		    WHERE id NOT IN (".$goodIpaddressList.")) AS nofriends 
+	ON tmp.ipaddress=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+	WHERE (1=1)
+
+
+  GROUP BY nofriends.name,
+    nofriends.id 
+    ".$echoIpaddressAliasColumn."
+   ;";
+   
+  #postgre version
+if($dbtype==1)
+  $queryIpaddressTimeOnline="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    nofriends.id 
+    ".$echoIpaddressAliasColumn."
+  FROM (SELECT 
+	  ipaddress,
+	  SUM(sizeinbytes) AS s 
+	FROM scsq_quicktraffic 
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1
+	GROUP BY ipaddress
+	) 
+	AS tmp 
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_ipaddress 
+		    WHERE id NOT IN (".$goodIpaddressList.")) AS nofriends 
+	ON tmp.ipaddress=nofriends.id  
+	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+  ".$msgNoZeroTraffic."
+
+  GROUP BY nofriends.name,
+    tmp.s,
+    nofriends.id 
+    ".$echoIpaddressAliasColumn."
+   ;";
+
 
 
 
@@ -10372,6 +10502,90 @@ echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='
 
 /////////////// ONE GROUP DASHBOARD REPORT END
 
+
+/////////// LOGINS TIME ONLINE REPORT
+
+
+if($id==64)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stSECONDSMINUTES'];
+$colhtext[4]=$_lang['stALIAS'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
+$colftext[4]="&nbsp;";
+
+$colh[0]=3+$useLoginalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+//$colh[2]="<th>".$colhtext[2]."</th>";
+//$colh[3]="<th>".$colhtext[3]."</th>";
+//$colh[4]="<th>".$colhtext[4]."</th>";
+
+$colh[2]="<th>".$colhtext[2]."<a href=?></a></th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+
+
+$result=$ssq->query($queryLoginsTimeOnline);
+
+$colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
+$colr[1]="numrow";
+$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0',0,'')\">line0</a>";
+$colr[3]="line2";
+$colr[4]="line5";
+
+#$row = $ssq->fetch_array($resultmax);
+#$collength[4]=$row[0];
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
+
+}
+
+/////////// LOGINS TIME ONLINE REPORT END
+
+
+//////////// IPADDRESS TIME ONLINE REPORT
+
+
+
+if($id==65)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stIPADDRESS'];
+$colhtext[3]=$_lang['stSECONDSMINUTES'];
+$colhtext[4]=$_lang['stALIAS'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]="&nbsp;";
+$colftext[4]="&nbsp;";
+
+$colh[0]=3+$useIpaddressalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$result=$ssq->query($queryIpaddressTimeOnline);
+
+$colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
+$colr[1]="numrow";
+$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line4','line0',1,'')\">line0</a>";
+$colr[3]="line2";
+$colr[4]="line5";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
+
+}
+
+/////////////// IPADDRESS TIME ONLINE REPORT END
 
 
 /////universal table

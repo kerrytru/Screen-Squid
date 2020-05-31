@@ -216,4 +216,9 @@ $_lang['stDECEMBER'] = "Deciembre";
 
 $_lang['stFORMEDITALIAS']="Editar formulario de alias";
 $_lang['stFORMEDITGROUP']="Editar formulario de grupo";
+
+//1.17
+$_lang['stLOGINSTIMEONLINE']="Time online logins";
+$_lang['stIPADDRESSTIMEONLINE']="Time online IP address";
+$_lang['stSECONDSMINUTES']="Seconds (Minutes)";
 ?>

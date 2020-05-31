@@ -1,7 +1,7 @@
 <?php 
 
-#Build date Friday 15th of May 2020 17:33:36 PM
-#Build revision 1.3
+#Build date Sunday 31st of May 2020 14:15:03 PM
+#Build revision 1.4
 
 ?>
 <html>
@@ -204,7 +204,8 @@ echo "
 	reports.add(new WebFXTreeItem('".$_lang['stDOMAINZONESTRAFFIC']."','javascript:GoReport(".$srv.",48)'));
 	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURSLOGINS']."','javascript:GoReport(".$srv.",50)'));
 	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURSIPADDRESS']."','javascript:GoReport(".$srv.",51)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYCATEGORIES']."','javascript:GoReport(".$srv.",52)'));
+	reports.add(new WebFXTreeItem('".$_lang['stLOGINSTIMEONLINE']."','javascript:GoReport(".$srv.",64)'));
+	reports.add(new WebFXTreeItem('".$_lang['stIPADDRESSTIMEONLINE']."','javascript:GoReport(".$srv.",65)'));
 
 	reports.icon = 'img/themes/default/Reports.png';
 	reports.openIcon = 'img/themes/default/Reports.png';

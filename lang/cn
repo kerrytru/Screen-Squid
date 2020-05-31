@@ -218,4 +218,10 @@ $_lang['stDECEMBER'] = "十二月";
 
 $_lang['stFORMEDITALIAS']="编辑关联表";
 $_lang['stFORMEDITGROUP']="编辑组表";
+
+//1.17
+$_lang['stLOGINSTIMEONLINE']="Time online logins";
+$_lang['stIPADDRESSTIMEONLINE']="Time online IP address";
+$_lang['stSECONDSMINUTES']="Seconds (Minutes)";
+
 ?>

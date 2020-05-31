@@ -218,4 +218,12 @@ $_lang['stDECEMBER'] = "Декабрь";
 
 $_lang['stFORMEDITALIAS']="Редактирование алиаса";
 $_lang['stFORMEDITGROUP']="Редактирование группы";
+
+//1.17
+$_lang['stLOGINSTIMEONLINE']="Время онлайн логины";
+$_lang['stIPADDRESSTIMEONLINE']="Время онлайн IP адреса";
+$_lang['stSECONDSMINUTES']="Секунд (Минут)";
+
+
+
 ?>
