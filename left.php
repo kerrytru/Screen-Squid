@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 16:31:16 PM
-#Build revision 1.1
+#Build date Tuesday 2nd of June 2020 16:29:37 PM
+#Build revision 1.2
 
 include("config.php");
 
@@ -128,6 +128,7 @@ echo "
 	reports.add(new WebFXTreeItem('".$_lang['stONELOGINIPTRAFFIC']."','javascript:GoPartlyReport(".$srv.",35)'));
 	reports.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",46)'));
 	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoPartlyReport(".$srv.",56)'));
+	reports.add(new WebFXTreeItem('".$_lang['stBIGFILES']."','javascript:GoPartlyReport(".$srv.",66)'));
 	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
 
 	
@@ -163,6 +164,8 @@ echo "
 	reports.add(new WebFXTreeItem('".$_lang['stONEIPADDRESSLOGINSTRAFFIC']."','javascript:GoPartlyReport(".$srv.",36)'));
 	reports.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",47)'));
 	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoPartlyReport(".$srv.",57)'));
+	reports.add(new WebFXTreeItem('".$_lang['stBIGFILES']."','javascript:GoPartlyReport(".$srv.",67)'));
+
 	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
 
 	

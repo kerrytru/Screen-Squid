@@ -1,7 +1,7 @@
 <?php
 
-#Build date Sunday 31st of May 2020 14:14:40 PM
-#Build revision 1.7
+#Build date Tuesday 2nd of June 2020 16:58:41 PM
+#Build revision 1.8
 
  
 $header='<html>
@@ -1502,13 +1502,12 @@ $queryPopularSites="
 $queryWhoDownloadBigFiles="
   SELECT 
     scsq_log.name,
-    tmp.sizeinbytes,
+    scsq_traf.sizeinbytes,
     scsq_ip.name, 
     scsq_traf.site,
     scsq_log.id,
     scsq_ip.id 
   FROM (SELECT 
-	  sizeinbytes,
 	  scsq_traffic.id,
 	  scsq_traffic.login,
 	  scsq_traffic.ipaddress 
@@ -1537,29 +1536,32 @@ $queryWhoDownloadBigFiles="
 	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
 	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 
-  	ORDER BY sizeinbytes desc 
-  	LIMIT ".$countWhoDownloadBigFilesLimit.")
+  	)
+  	
 
 
 	  AS tmp
-
+ 
   INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
   INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+  
+  	ORDER BY sizeinbytes desc 
+    LIMIT ".$countWhoDownloadBigFilesLimit."
 ";
+
 
 #postgre version
 if($dbtype==1)
 $queryWhoDownloadBigFiles="
   SELECT 
     scsq_log.name,
-    tmp.sizeinbytes,
+    scsq_traf.sizeinbytes,
     scsq_ip.name, 
     scsq_traf.site,
     scsq_log.id,
     scsq_ip.id 
   FROM (SELECT 
-	  sizeinbytes,
 	  scsq_traffic.id,
 	  scsq_traffic.login,
 	  scsq_traffic.ipaddress 
@@ -1588,8 +1590,7 @@ $queryWhoDownloadBigFiles="
 	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
 	  AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
 
-  	ORDER BY sizeinbytes desc 
-  	LIMIT ".$countWhoDownloadBigFilesLimit.")
+  )
 
 
 	  AS tmp
@@ -1597,6 +1598,8 @@ $queryWhoDownloadBigFiles="
   INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
   INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+  	ORDER BY sizeinbytes desc 
+  	LIMIT ".$countWhoDownloadBigFilesLimit."
 ";
 
 $queryTrafficByPeriod="
@@ -3000,6 +3003,73 @@ $queryOneLoginMimeTypesTraffic="
   GROUP BY mime
   ORDER BY s desc ";
 
+
+$queryLoginDownloadBigFiles="
+  SELECT 
+    scsq_log.name,
+    tmp.sizeinbytes,
+    scsq_ip.name, 
+    scsq_traf.site,
+    scsq_log.id,
+    scsq_ip.id 
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND login=".$currentloginid." 
+  	)
+
+
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+  ORDER BY sizeinbytes desc 
+  	LIMIT ".$countWhoDownloadBigFilesLimit."
+";
+
+#postgre version
+if($dbtype==1)
+$queryLoginDownloadBigFiles="
+  SELECT 
+    scsq_log.name,
+    tmp.sizeinbytes,
+    scsq_ip.name, 
+    scsq_traf.site,
+    scsq_log.id,
+    scsq_ip.id 
+  FROM (SELECT 
+	  sizeinbytes,
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+	  AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND login=".$currentloginid." 
+  	)
+
+
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+  ORDER BY sizeinbytes desc 
+  	LIMIT ".$countWhoDownloadBigFilesLimit."
+";
+
 $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
@@ -3203,7 +3273,69 @@ WHERE (1=1)
   ORDER BY nofriends.name;";
 
 
-//echo $queryWhoVisitPopularSiteIpaddress;
+$queryIpaddressDownloadBigFiles="
+  SELECT 
+    scsq_log.name,
+    scsq_traf.sizeinbytes,
+    scsq_ip.name, 
+    scsq_traf.site,
+    scsq_log.id,
+    scsq_ip.id 
+  FROM (SELECT 
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
+	  AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND ipaddress=".$currentipaddressid." 
+  )
+
+
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+  	ORDER BY sizeinbytes desc 
+  	LIMIT ".$countWhoDownloadBigFilesLimit."
+";
+
+#postgre version
+if($dbtype==1)
+$queryIpaddressDownloadBigFiles="
+  SELECT 
+    scsq_log.name,
+    scsq_traf.sizeinbytes,
+    scsq_ip.name, 
+    scsq_traf.site,
+    scsq_log.id,
+    scsq_ip.id 
+  FROM (SELECT 
+	  scsq_traffic.id,
+	  scsq_traffic.login,
+	  scsq_traffic.ipaddress 
+	FROM scsq_traffic
+	
+	WHERE date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
+	  AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
+	  AND ipaddress=".$currentipaddressid." 
+  )
+
+
+	  AS tmp
+
+  INNER JOIN scsq_traffic as scsq_traf on scsq_traf.id=tmp.id
+  INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
+  INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
+  	ORDER BY sizeinbytes desc 
+  	LIMIT ".$countWhoDownloadBigFilesLimit."
+";
 
 
 #костылище для частных отчетов
@@ -5727,6 +5859,18 @@ $repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentipaddress."</b> ".$_lang
 
 if($id==63)
 $repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==64)
+$repheader= "<h2>".$_lang['stLOGINSTIMEONLINE']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==65)
+$repheader= "<h2>".$_lang['stIPADDRESSTIMEONLINE']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==66)
+$repheader= "<h2>".$_lang['stLOGINBIGFILES']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==67)
+$repheader= "<h2>".$_lang['stIPADDRESSBIGFILES']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])){
@@ -10587,6 +10731,90 @@ $colf[4]="<td>".$colftext[4]."</td>";
 
 /////////////// IPADDRESS TIME ONLINE REPORT END
 
+
+/////////////// LOGIN DOWNLOAD BIG FILES REPORT
+
+if($id==66)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stIPADDRESS'];
+$colhtext[4]=$_lang['stMEGABYTES'];
+$colhtext[5]=$_lang['stFROMWEBSITE'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]=$_lang['stTOTAL'];
+$colftext[4]="totalmb";
+$colftext[5]="&nbsp;";
+
+$colh[0]=5;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
+
+$result=$ssq->query($queryLoginDownloadBigFiles);
+
+$colr[1]="numrow";
+$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
+$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
+$colr[4]="line1";
+$colr[5]="line3";
+
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
+}
+
+/////////////// LOGIN DOWNLOAD BIG FILES REPORT END
+
+/////////////// IPADDRESS DOWNLOAD BIG FILES REPORT
+
+if($id==67)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stIPADDRESS'];
+$colhtext[4]=$_lang['stMEGABYTES'];
+$colhtext[5]=$_lang['stFROMWEBSITE'];
+
+
+$colftext[1]="&nbsp;";
+$colftext[2]="&nbsp;";
+$colftext[3]=$_lang['stTOTAL'];
+$colftext[4]="totalmb";
+$colftext[5]="&nbsp;";
+
+$colh[0]=5;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$colh[5]="<th>".$colhtext[5]."</th>";
+
+$result=$ssq->query($queryIpaddressDownloadBigFiles);
+
+$colr[1]="numrow";
+$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
+$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
+$colr[4]="line1";
+$colr[5]="line3";
+
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td><b>".$colftext[4]."</b></td>";
+$colf[5]="<td><b>".$colftext[5]."</b></td>";
+}
+
+/////////////// IPADDRESS DOWNLOAD BIG FILES REPORT END
 
 /////universal table
 
