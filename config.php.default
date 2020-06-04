@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 12:57:23 PM
-#Build revision 1.1
+#Build date Thursday 4th of June 2020 17:34:21 PM
+#Build revision 1.2
 
 #server #0
 $srvname[0]="Proxy0"; #nickname of server
@@ -124,6 +124,10 @@ $oneMegabyte=1000000;
 
 #theme
 $globaltheme="default";
+
+#use urldecode to decode % characters in request
+#использовать urldecode to decode % символы в строке запроса.
+$enableUseDecode="0";
 
 $vers="1.18b";
 ?>

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-#Build date Saturday 30th of May 2020 11:09:03 AM
-#Build revision 1.1
+#Build date Thursday 4th of June 2020 17:32:05 PM
+#Build revision 1.2
 
 use DBI; # DBI  Perl!!!
 
@@ -182,8 +182,11 @@ print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/s
       #count how much lines added
       $countadded=$countadded+1;
       #parse sitename from item
-      @matches=($item[6]=~ /^(http:\/\/(www\.)?)?([\S]+)/i);
-      #replace apostrophes to &quot; 
+      @matches=($item[6]=~ /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?([\S]+)/i);
+      #Регулярка была изменена потому что не работала в режиме SSL BUMP. и чтобы дальше не менять воткнем костыль.
+	  $matches[2] = $matches[1];
+	  
+	  #replace apostrophes to &quot; 
       $item[2]=~s|'|&()quot;|g; #ipaddress
       $item[3]=~s|'|&()quot;|g; #httpstatus
       $item[4]=~s|'|&()quot;|g; #size in bytes

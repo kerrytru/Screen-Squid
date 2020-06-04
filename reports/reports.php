@@ -1,7 +1,7 @@
 <?php
 
-#Build date Tuesday 2nd of June 2020 16:58:41 PM
-#Build revision 1.8
+#Build date Thursday 4th of June 2020 17:35:48 PM
+#Build revision 1.9
 
  
 $header='<html>
@@ -2827,10 +2827,11 @@ WHERE (1=1)
 //echo $queryWhoVisitPopularSiteLogin;
 
 $queryVisitingWebsiteByTimeLogin="
-  SELECT 
-    DISTINCT FROM_UNIXTIME(tmp.date,'%d-%m-%Y %H:%i:%s') AS d,
-    '0',
-    site 
+  SELECT DISTINCT 
+	site,
+	'0',
+    FROM_UNIXTIME(tmp.date,'%d-%m-%Y %H:%i:%s') AS d
+     
   FROM (SELECT 
 	  date,
 	  site 
@@ -2850,10 +2851,11 @@ $queryVisitingWebsiteByTimeLogin="
   #postgre version
   if($dbtype==1)
   $queryVisitingWebsiteByTimeLogin="
-  SELECT 
-    DISTINCT to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') AS d,
+  SELECT DISTINCT 
+    site,
     '0',
-    site 
+    to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') AS d
+   
   FROM (SELECT 
 	  date,
 	  site 
@@ -3403,9 +3405,10 @@ $queryOneIpaddressOneHourTraffic="
 
 $queryVisitingWebsiteByTimeIpaddress="
   SELECT DISTINCT 
-    from_unixtime(tmp.date,'%d-%m-%Y %H:%i:%s') as d,
+    site,
     '0',
-    site 
+    from_unixtime(tmp.date,'%d-%m-%Y %H:%i:%s') as d
+     
   from (SELECT 
 	  date,
 	  site 
@@ -3425,9 +3428,10 @@ $queryVisitingWebsiteByTimeIpaddress="
   if($dbtype==1)
   $queryVisitingWebsiteByTimeIpaddress="
   SELECT DISTINCT 
-    to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') as d,
-    '0',
-    site 
+     site ,
+     '0',
+	 to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') as d
+    
   from (SELECT 
 	  date,
 	  site 
@@ -7234,8 +7238,8 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $result=$ssq->query($queryVisitingWebsiteByTimeLogin);
 
 $colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line2";
+$colr[2]="line2";
+$colr[3]="line0";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -7264,8 +7268,8 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 $result=$ssq->query($queryVisitingWebsiteByTimeIpaddress);
 
 $colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line2";
+$colr[2]="line2";
+$colr[3]="line0";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -10823,8 +10827,15 @@ $totalmb=0;
 
 //PARSE SQL
 while ($line = $ssq->fetch_array($result)) {
+
+if($enableUseDecode==1)
+$line[0]=urldecode($line[0]);
+
 if($enableUseiconv==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
+
+
+
 $line[1]=$line[1] / $oneMegabyte;
 
 
