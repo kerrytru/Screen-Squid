@@ -1,21 +1,10 @@
 <?php
 
-#Build date Thursday 4th of June 2020 17:35:48 PM
-#Build revision 1.9
+#Build date Thursday 25th of June 2020 17:49:44 PM
+#Build revision 1.10
 
  
-$header='<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="../javascript/example.css"/>
 
-<!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../themes/default/global.css"/>
-
-
-</head>
-<body>
-';
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -27,6 +16,16 @@ $oneMegabyte=1000000;
 
 include("../config.php");
 
+$header='<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<!-- The themes file -->
+<link rel="stylesheet" type="text/css" href="../themes/'.$globaltheme.'/global.css"/>
+
+</head>
+<body>
+';
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -10845,10 +10844,235 @@ $totalmb=$totalmb+$line[1];
 $numrow++;
 }
 
+
+
+if($tableStyle == 1)  //div
 if($makepdf==0 && $makecsv==0)
 {
 
 ///TABLE HEADER
+echo '<div class="result_area">
+		<div class="line">
+		<div class="line1">
+		<div class="head">'
+		;
+
+
+if(isset($colh))
+for($i=1;$i<=$colh[0];$i++)
+
+	{
+		if($i==1)
+		echo 	'<div class="num">'.$colh[$i]."</div>";
+
+		if($i==2)
+		echo 	'<div class="col1">'.$colh[$i].'<a href="#" class="sortheader" onclick="res_sort(\'Col1\');return false;"><span class="sortarrow1" sortdir="nosort">&nbsp;&nbsp;<img src="../img/arrow-none.gif" alt="&darr;"/></span></a></div>';
+
+		if($i==3)
+		echo 	'<div class="col2">'.$colh[$i].'<a href="#" class="sortheader" onclick="res_sort(\'Col2\');return false;"><span class="sortarrow2" sortdir="nosort">&nbsp;&nbsp;<img src="../img/arrow-none.gif" alt="&darr;"/></span></a></div>';
+												
+		if($i==4)
+		echo 	'<div class="col3">'.$colh[$i].'<a href="#" class="sortheader" onclick="res_sort(\'Col3\');return false;"><span class="sortarrow3" sortdir="nosort">&nbsp;&nbsp;<img src="../img/arrow-none.gif" alt="&darr;"/></span></a></div>';
+												
+		if($i==5)
+		echo 	'<div class="col4">'.$colh[$i]."</div>";
+	}
+echo '</div>'; #head
+echo '</div>'; #line
+echo '</div>'; #line1
+
+
+
+//TABLE BODY
+
+echo '<div class="line">';
+	  
+
+
+for($i=1;$i<$numrow;$i++) {
+$line=explode(';;',$rows[$i]);
+$line[1]=sprintf("%f",$line[1]);  //disable scientific format, like 5E-10
+if($roundTrafficDigit>=0){
+$line[1]=round($line[1],$roundTrafficDigit);
+$totalmb=round($totalmb,$roundTrafficDigit);
+}
+echo '<div class="row" data-col1="'.$i.'" data-col2="'.$line[1].'" data-col3="'.$line[3].'"><div class="line1">'; #tr
+
+for($j=1;$j<=$colh[0];$j++){
+$resultcolr=$colr[$j];
+if(isset($line[0])) #убираем предупреждения если используются 2 или 3 элемента из массива line
+$resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
+if(isset($line[1]))
+$resultcolr=preg_replace("/line1/i", $line[1], $resultcolr);
+if(isset($line[2]))
+$resultcolr=preg_replace("/line2/i", $line[2], $resultcolr);
+if(isset($line[3]))
+$resultcolr=preg_replace("/line3/i", $line[3], $resultcolr);
+if(isset($line[4]))
+$resultcolr=preg_replace("/line4/i", $line[4], $resultcolr);
+if(isset($line[5]))
+$resultcolr=preg_replace("/line5/i", $line[5], $resultcolr);
+if(isset($i))
+$resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
+
+if($j==1)
+echo 	'<div class="num">'.$resultcolr."</div>";
+if($j==2)
+echo 	'<div class="col1">'.$resultcolr."</div>";
+if($j==3)
+echo 	'<div class="col2">'.$resultcolr."</div>";
+if($j==4)
+echo 	'<div class="col3">'.$resultcolr."</div>";
+if($j==5)
+echo 	'<div class="col4">'.$resultcolr."</div>";
+
+}
+
+
+
+echo "</div></div>"; #</tr>
+
+}
+echo "</div>"; #</line>
+///TABLE FOOTER
+
+
+
+echo '	<div class="line">
+		<div class="line1">
+		<div class="head">'
+		;
+if(isset($colh))
+for($i=1;$i<=$colh[0];$i++){
+
+if (preg_match("/totalmb/i", $colf[$i])) {
+$colf[$i] = preg_replace("/totalmb/i", $totalmb, $colf[$i]);
+$colftext[$i]=$totalmb;
+}
+
+	
+		if($i==1)
+		echo 	'<div class="num">'.$colf[$i]."</div>";
+		if($i==2)
+		echo 	'<div class="col1">'.$colf[$i]."</div>";
+		if($i==3)
+		echo 	'<div class="col2">'.$colf[$i]."</div>";
+		if($i==4)
+		echo 	'<div class="col3">'.$colf[$i]."</div>";
+		if($i==5)
+		echo 	'<div class="col4">'.$colf[$i]."</div>";
+	}
+
+
+
+echo '</div>'; #head
+echo '</div>'; #line
+echo '</div>'; #line1
+
+
+
+
+echo "</div>"; #</result_area>
+
+
+
+?>
+<script language=javascript>
+
+const orderFunctions = {
+	
+	//первый столбец (обычно по нему уже отсортировано)
+   ascendingByCol1: (a, b) =>  ('' + a.dataset.col1).localeCompare(b.dataset.col1),
+  descendingByCol1: (a, b) => ('' + b.dataset.col1).localeCompare(a.dataset.col1),
+	
+	//второй столбец (обычно цифра - мегабайты)
+   ascendingByCol2: (a, b) => a.dataset.col2 - b.dataset.col2,
+  descendingByCol2: (a, b) => b.dataset.col2 - a.dataset.col2,
+	//третий столбец (обычно строка, например алиасы)
+   ascendingByCol3: (a, b) => ('' + a.dataset.col3).localeCompare(b.dataset.col3),
+  descendingByCol3: (a, b) => ('' + b.dataset.col3).localeCompare(a.dataset.col3)
+
+
+}
+
+
+
+//const order = function() {
+function res_sort(sortOrder){
+
+var ordered;
+var el,el1,el2,el3;
+var ARROW;
+
+el1 = document.getElementsByClassName('sortarrow1')[0];
+el2 = document.getElementsByClassName('sortarrow2')[0];
+el3 = document.getElementsByClassName('sortarrow3')[0];
+
+ if(sortOrder == 'Col1')
+	el=el1;
+ if(sortOrder == 'Col2')
+	el=el2;
+ if(sortOrder == 'Col3')
+	el=el3;
+	
+//unset arrows	
+	ARROW = '&nbsp;&nbsp;<img src=../img/arrow-none.gif alt="&uarr;"/>';
+	el1.innerHTML = ARROW;
+	el2.innerHTML = ARROW;
+	el3.innerHTML = ARROW;
+
+//set correct arrow
+	if (el.getAttribute('sortdir') == 'down') {
+			ARROW = '&nbsp;&nbsp;<img src=../img/arrow-up.gif alt="&uarr;"/>';
+			el.setAttribute('sortdir','up');
+	} else {
+			ARROW = '&nbsp;&nbsp;<img src=../img/arrow-down.gif alt="&darr;"/>';
+			el.setAttribute('sortdir','down');
+
+	} 
+//set arrow
+	el.innerHTML = ARROW;
+
+  if(sortOrder == 'Col1' && el.getAttribute('sortdir') == 'up')
+      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.ascendingByCol1)
+  
+  if(sortOrder == 'Col1' && el.getAttribute('sortdir') == 'down') 
+      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.descendingByCol1)
+
+  if(sortOrder == 'Col2' && el.getAttribute('sortdir') == 'up')
+      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.ascendingByCol2)
+  
+  if(sortOrder == 'Col2' && el.getAttribute('sortdir') == 'down')
+      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.descendingByCol2)
+
+
+  if(sortOrder == 'Col3' && el.getAttribute('sortdir') == 'up')
+      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.ascendingByCol3)
+  
+  if(sortOrder == 'Col3' && el.getAttribute('sortdir') == 'down') 
+      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.descendingByCol3)
+
+  
+  ordered.forEach((elem, index) => {
+    elem.style.order = index
+  })
+}
+
+</script>
+
+<?php
+
+$ssq->free_result($result);
+///universal table end
+}
+
+
+if($tableStyle == 0)  //table
+if($makepdf==0 && $makecsv==0)
+{
+
+
+///TABLE HEADER old style
 echo "<table id=report_table_id class=datatable>
 	<tr>";
 
