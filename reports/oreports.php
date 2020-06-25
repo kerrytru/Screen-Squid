@@ -1,15 +1,14 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="../javascript/example.css"/>
 <!-- The themes file -->
 <link rel="stylesheet" type="text/css" href="../themes/default/global.css"/>
 
 
 <?php
 
-#Build date Saturday 30th of May 2020 13:31:47 PM
-#Build revision 1.6
+#Build date Thursday 25th of June 2020 18:14:58 PM
+#Build revision 1.7
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];

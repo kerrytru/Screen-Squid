@@ -5974,7 +5974,7 @@ $colftext[4]="&nbsp;";
 $colh[0]=3+$useIpaddressalias;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[3]="<th aligh=right>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryIpaddressTraffic);
 

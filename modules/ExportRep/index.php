@@ -1,7 +1,7 @@
 <?php
 
-#Build date Friday 24th of April 2020 13:20:14 PM
-#Build revision 1.3
+#Build date Thursday 25th of June 2020 18:15:26 PM
+#Build revision 1.4
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -37,7 +37,6 @@ else
 $header='<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="../../javascript/example.css"/>
 
 <!-- The themes file -->
 <link rel="stylesheet" type="text/css" href="../../themes/'.$globaltheme.'/global.css"/>
