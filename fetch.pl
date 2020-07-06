@@ -56,6 +56,11 @@ my $deleteperiod=100; #days
 #Kolichestvo bait, menshe kotorogo dannie ne budut zapisivatsa v bazu. Ukazivaetsia v baitah. Mozhet ispolzovatsa, chtobi ne zapisivat v bazu dannie o bannerah.
 #Количество байт, меньше которого данные не будут записываться в базу. Указывается в байтах. Может использоваться, чтобы не записывать в базу данные о баннерах.
 my $minbytestoparse=-1; #bytes, default -1
+#==========================================================
+#Print the last two requests on the screen..
+#Pechatat' posledniye dva zaprosa na ekran.
+#Печатать последние два запроса на экран.
+my $printrequest=0; #default 0
 
 #=======================CONFIGURATION END==============================
 
@@ -366,7 +371,9 @@ GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,h
 ";
 }
 
-print $sqltext;
+if (printrequest == 1){
+  print $sqltext;
+}
 $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
@@ -437,6 +444,9 @@ GROUP BY to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),st,date
 ";
 }
 
+if (printrequest == 1){
+  print $sqltext;
+}
 print $sqltext;
 $sth = $dbh->prepare($sqltext);
 $sth->execute;
@@ -448,6 +458,7 @@ $sth->execute;
 #print datetime when import ended
 print "\n";
 print $now=localtime;
+print "\n";
 $endnow=time;
 
 #print datetime when parsing ended
