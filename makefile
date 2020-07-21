@@ -34,4 +34,5 @@ install-copy:
 fix-permission:
 	chown $(WWW-USER):$(WWW-GROUP) -R $(PREFIX)/$(DIR)
 	chmod 775 -R $(PREFIX)/$(DIR)/modules/Chart/pictures
+	chmod 775 -R $(PREFIX)/$(DIR)/modules/Chart/data
 	chmod +x -R $(PREFIX)/$(DIR)/*.pl
