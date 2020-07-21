@@ -47,7 +47,7 @@ function __construct($variables){ //
 
 	  #data serie
  
-	$fp = fopen('/var/www/html/freetime/modules/Chart/data/'.$userData['chartname'].'_val.txt', 'w');
+	$fp = fopen('../modules/Chart/data/'.$userData['chartname'].'_val.txt', 'w');
     
 		fputcsv($fp, $userData['arrSerie1'],';');
 
@@ -57,7 +57,7 @@ function __construct($variables){ //
 		$userData['arrSerie2'] = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23);
 	 
 
-	$fp = fopen('/var/www/html/freetime/modules/Chart/data/'.$userData['chartname'].'_label.txt', 'w');
+	$fp = fopen('../modules/Chart/data/'.$userData['chartname'].'_label.txt', 'w');
 		fputcsv($fp, $userData['arrSerie2'],';');
 	fclose($fp);
 
@@ -87,13 +87,13 @@ function __construct($variables){ //
   {
 	  //Тут просто. В зависимости от типа графика запускаем скрипт рисования. Возвращаем результат эхом.
 	  if($userData['charttype']=="line"){
-			echo passthru("python /var/www/html/freetime/modules/Chart/pygal/line.py ".$userData['chartname']."");
-			echo file_get_contents('/var/www/html/freetime/modules/Chart/pictures/'.$userData['chartname'].'.svg');
+			echo passthru("python ../modules/Chart/pygal/line.py ".$userData['chartname']."");
+			echo file_get_contents('../modules/Chart/pictures/'.$userData['chartname'].'.svg');
 	  }
 
 	  if($userData['charttype']=="pie"){
-			echo passthru("python /var/www/html/freetime/modules/Chart/pygal/pie.py ".$userData['chartname']."");
-			echo file_get_contents('/var/www/html/freetime/modules/Chart/pictures/'.$userData['chartname'].'.svg');
+			echo passthru("python ..modules/Chart/pygal/pie.py ".$userData['chartname']."");
+			echo file_get_contents('../modules/Chart/pictures/'.$userData['chartname'].'.svg');
 	  }
 
 
