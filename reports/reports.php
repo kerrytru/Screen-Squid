@@ -1,7 +1,7 @@
 <?php
 
-#Build date Thursday 25th of June 2020 17:49:44 PM
-#Build revision 1.10
+#Build date Tuesday 21st of July 2020 13:11:00 PM
+#Build revision 1.11
 
  
 
@@ -77,10 +77,14 @@ $ssq = new p_ScreenSquid($variableSet); #получим экземпляр кл�
 }
 
 
+include("../modules/Chart/module.php");
+
+$grap = new Chart($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+
 
  // Standard pChart inclusions
- include("../lib/pChart/pChart/pData.class");
- include("../lib/pChart/pChart/pChart.class");
+ #include("../lib/pChart/pChart/pData.class");
+ #include("../lib/pChart/pChart/pChart.class");
 
 // Include the main TCPDF library (search for installation path).
 include("../lib/tcpdf/tcpdf.php");
@@ -6187,7 +6191,7 @@ if($id==7)
 
 //delete graph if exists
 
-foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
@@ -6222,76 +6226,19 @@ $HourCounter++;
 
 $ssq->free_result($result);
 
-if($graphtype['trafficbyhours']==1)
-{
-// Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
+#соберем данные для графика
+$userData['charttype']="line";
+$userData['chartname']="trafficbyhours";
+$userData['charttitle']="";
+$userData['arrSerie1']=$arrHourMb;
+$userData['arrSerie2']="";
 
- $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
- $DataSet->AddAllSeries();
- $DataSet->RemoveSerie("Serie3");
- $DataSet->SetAbsciseLabelSerie("Serie3");
- $DataSet->SetSerieName("Traffic","Serie1");
- $DataSet->SetYAxisName("Megabytes");
 
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(120,20,675,190);
- $Test->drawGraphArea(213,217,221,FALSE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
- $Test->drawGraphAreaGradient(163,203,167,50);
- $Test->drawGrid(4,TRUE,230,230,230,20);
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- // Draw the bar chart
- $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
-
- // Draw the legend
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
-
- // Render the picture
- $Test->addBorder(2);
-}
-
-if($graphtype['trafficbyhours']==0)
-{
-//pChart Graph 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("Traffic","Serie1");
-
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(50,30,585,200);
- $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
- $Test->drawGraphArea(255,255,255,TRUE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
- $Test->drawGrid(4,TRUE,230,230,230,50);
-
- // Draw the 0 line
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
- $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-
- // Draw the cubic curve graph
- $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
-
- // Finish the graph
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
-}
-
- $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
-
-echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+//display
+echo $pathtoimage;
 
 ///pChart Graph END
 
@@ -8443,7 +8390,7 @@ if($id==49)
 
 //delete graph if exists
 
-foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
@@ -8478,78 +8425,17 @@ $HourCounter++;
 
 $ssq->free_result($result);
 
-if($graphtype['trafficbyhours']==1)
-{
-// Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
+$userData['charttype']="line";
+$userData['chartname']="trafficbyhours";
+$userData['charttitle']="";
+$userData['arrSerie1']=$arrHourMb;
+$userData['arrSerie2']="";
 
- $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
- $DataSet->AddAllSeries();
- $DataSet->RemoveSerie("Serie3");
- $DataSet->SetAbsciseLabelSerie("Serie3");
- $DataSet->SetSerieName("Traffic","Serie1");
- $DataSet->SetYAxisName("Megabytes");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(120,20,675,190);
- $Test->drawGraphArea(213,217,221,FALSE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
- $Test->drawGraphAreaGradient(163,203,167,50);
- $Test->drawGrid(4,TRUE,230,230,230,20);
-
- // Draw the bar chart
- $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
-
- // Draw the legend
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
-
- // Render the picture
- $Test->addBorder(2);
-}
-
-if($graphtype['trafficbyhours']==0)
-{
-
-//pChart Graph BY hours
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("Traffic","Serie1");
-
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(50,30,585,200);
- $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
- $Test->drawGraphArea(255,255,255,TRUE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
- $Test->drawGrid(4,TRUE,230,230,230,50);
-
- // Draw the 0 line
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
- $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-
- // Draw the cubic curve graph
- $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
-
- // Finish the graph
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
-}
- $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
-
-
-echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+//display
+echo $pathtoimage;
 
 ///pChart Graph BY HOURS END
 
@@ -8591,35 +8477,18 @@ $ssq->free_result($result);
 
 /// pchart top Logins
 
+ 
+$userData['charttype']="pie";
+$userData['chartname']="toplogins";
+$userData['charttitle']=$_lang['stTOPLOGINSTRAFFIC']." (".$_lang['stTOP']."-".$countTopLoginLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
- $DataSet->AddPoint($arrLine0,"Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stTOPLOGINSTRAFFIC']." (".$_lang['stTOP']."-".$countTopLoginLimit.")",50,50,50,585);
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/toplogins".$start.".png");
-
-echo "<img id=\"toplogins\" src='../lib/pChart/pictures/toplogins".$start.".png' alt='Image'>";
-
+//display
+echo $pathtoimage;
 
 /// pchart top logins end
 
@@ -8658,39 +8527,17 @@ $ssq->free_result($result);
 
 /// pchart top ip
 
+$userData['charttype']="pie";
+$userData['chartname']="topips";
+$userData['charttitle']=$_lang['stTOPIPTRAFFIC']." (".$_lang['stTOP']."-".$countTopIpLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
-// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
-/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
-
- $DataSet->AddPoint($arrLine0,"Serie2");
-
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stTOPIPTRAFFIC']." (".$_lang['stTOP']."-".$countTopIpLimit.")",50,50,50,585);
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/topips".$start.".png");
-
-echo "<img id=\"topips\" src='../lib/pChart/pictures/topips".$start.".png' alt='Image'>";
-
+//display
+echo $pathtoimage;
 
 /// pchart top ip end
 
@@ -8735,39 +8582,17 @@ $ssq->free_result($result);
 /// pchart top sites
 
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
-// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+$userData['charttype']="pie";
+$userData['chartname']="topsites";
+$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
-/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- $DataSet->AddPoint($arrLine0,"Serie2");
-
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")",50,50,50,585);
-
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
-
-echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
-
+//display
+echo $pathtoimage;
 
 /// pchart top sites end
 
@@ -8808,38 +8633,17 @@ $ssq->free_result($result);
 /// pchart top popular
 
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
-// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+$userData['charttype']="pie";
+$userData['chartname']="toppop";
+$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
-/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- $DataSet->AddPoint($arrLine0,"Serie2");
-
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")",50,50,50,585);
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
-
-echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
-
+//display
+echo $pathtoimage;
 
 /// pchart top popular end
 
@@ -9858,7 +9662,7 @@ if($id==61)
 
 //delete graph if exists
 
-foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
@@ -9927,43 +9731,18 @@ if($graphtype['trafficbyhours']==1)
  $Test->addBorder(2);
 }
 
-if($graphtype['trafficbyhours']==0)
-{
+$userData['charttype']="line";
+$userData['chartname']="trafficbyhours";
+$userData['charttitle']=$_lang['stTRAFFICBYHOURS'];
+$userData['arrSerie1']=$arrHourMb;
+$userData['arrSerie2']="";
 
-//pChart Graph BY hours
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("Traffic","Serie1");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(50,30,585,200);
- $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
- $Test->drawGraphArea(255,255,255,TRUE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
- $Test->drawGrid(4,TRUE,230,230,230,50);
+//display
+echo $pathtoimage;
 
- // Draw the 0 line
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
- $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-
- // Draw the cubic curve graph
- $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
-
- // Finish the graph
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
-}
- $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
-
-echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
 
 ///pChart Graph BY HOURS END
 
@@ -10007,39 +9786,17 @@ $ssq->free_result($result);
 
 /// pchart top sites
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
-// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+$userData['charttype']="pie";
+$userData['chartname']="topsites";
+$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
-/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- $DataSet->AddPoint($arrLine0,"Serie2");
-
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")",50,50,50,585);
-
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
-
-echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
-
+//display
+echo $pathtoimage;
 
 /// pchart top sites end
 
@@ -10079,39 +9836,17 @@ $ssq->free_result($result);
 
 /// pchart top popular
 
+$userData['charttype']="pie";
+$userData['chartname']="toppop";
+$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
-// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
-/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
-
- $DataSet->AddPoint($arrLine0,"Serie2");
-
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")",50,50,50,585);
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
-
-echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
-
+//display
+echo $pathtoimage;
 
 /// pchart top popular end
 
@@ -10128,7 +9863,7 @@ if($id==62)
 
 //delete graph if exists
 
-foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
@@ -10195,46 +9930,17 @@ if($graphtype['trafficbyhours']==1)
  $Test->addBorder(2);
 }
 
-if($graphtype['trafficbyhours']==0)
-{
+$userData['charttype']="line";
+$userData['chartname']="trafficbyhours";
+$userData['charttitle']=$_lang['stTRAFFICBYHOURS'];
+$userData['arrSerie1']=$arrHourMb;
+$userData['arrSerie2']="";
 
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
-//pChart Graph BY hours
-
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("Traffic","Serie1");
-# $DataSet->SetSerieName("February","Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(50,30,585,200);
- $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
- $Test->drawGraphArea(255,255,255,TRUE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
- $Test->drawGrid(4,TRUE,230,230,230,50);
-
- // Draw the 0 line
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
- $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-
- // Draw the cubic curve graph
- $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
-
- // Finish the graph
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
-}
- $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
-
-echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+//display
+echo $pathtoimage;
 
 ///pChart Graph BY HOURS END
 
@@ -10280,38 +9986,17 @@ $ssq->free_result($result);
 /// pchart top sites
 
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
-// $DataSet->AddPoint(array(10,2,3,5,3,12),"Serie1");
+$userData['charttype']="pie";
+$userData['chartname']="topsites";
+$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
-/// $DataSet->AddPoint(array("Jan","Feb","Mar","Apr","May","111"),"Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- $DataSet->AddPoint($arrLine0,"Serie2");
-
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")",50,50,50,585);
-
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
-
-echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
+//display
+echo $pathtoimage;
 
 
 /// pchart top sites end
@@ -10352,34 +10037,17 @@ $ssq->free_result($result);
 
 /// pchart top popular
 
+$userData['charttype']="pie";
+$userData['chartname']="toppop";
+$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
- $DataSet->AddPoint($arrLine0,"Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
-
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
-
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")",50,50,50,585);
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
-
-echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
+//display
+echo $pathtoimage;
 
 
 /// pchart top popular end
@@ -10397,9 +10065,7 @@ if($id==63)
 
 //delete graph if exists
 
-foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
-   unlink($filename);
-}
+
 
 $result=$ssq->query($queryOneGroupTrafficByHours);
 
@@ -10464,43 +10130,17 @@ if($graphtype['trafficbyhours']==1)
  $Test->addBorder(2);
 }
 
-if($graphtype['trafficbyhours']==0)
-{
+$userData['charttype']="line";
+$userData['chartname']="trafficbyhours";
+$userData['charttitle']=$_lang['stTRAFFICBYHOURS'];
+$userData['arrSerie1']=$arrHourMb;
+$userData['arrSerie2']="";
 
-//pChart Graph BY hours
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("Traffic","Serie1");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(50,30,585,200);
- $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
- $Test->drawGraphArea(255,255,255,TRUE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
- $Test->drawGrid(4,TRUE,230,230,230,50);
-
- // Draw the 0 line
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
- $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-
- // Draw the cubic curve graph
- $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
-
- // Finish the graph
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawTitle(50,22,$_lang['stTRAFFICBYHOURS'],50,50,50,585);
-}
- $Test->Render("../lib/pChart/pictures/trafficbyhours".$start.".png");
-
-echo "<img id=\"trafficbyhours\" src='../lib/pChart/pictures/trafficbyhours".$start.".png' alt='Image'>";
+//display
+echo $pathtoimage;
 
 ///pChart Graph BY HOURS END
 
@@ -10544,34 +10184,18 @@ $ssq->free_result($result);
 /// pchart top sites
 
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
- $DataSet->AddPoint($arrLine0,"Serie2");
+$userData['charttype']="pie";
+$userData['chartname']="topsites";
+$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+//display
+echo $pathtoimage;
 
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")",50,50,50,585);
-
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/topsites".$start.".png");
-
-echo "<img id=\"topsites\" src='../lib/pChart/pictures/topsites".$start.".png' alt='Image'>";
 
 
 /// pchart top sites end
@@ -10613,33 +10237,18 @@ $ssq->free_result($result);
 /// pchart top popular
 
 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrLine1,"Serie1");
- $DataSet->AddPoint($arrLine0,"Serie2");
+$userData['charttype']="pie";
+$userData['chartname']="toppop";
+$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+$userData['arrSerie1']=$arrLine1;
+$userData['arrSerie2']=$arrLine0;
 
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie("Serie2");
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- // Initialise the graph
- $Test = new pChart(700,400);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,395,5,230,230,230);
+//display
+echo $pathtoimage;
 
- // Draw the pie chart
- $Test->AntialiasQuality = 0;
- $Test->setShadowProperties(2,2,200,200,200);
- $Test->drawFlatPieGraphWithShadow($DataSet->GetData(),$DataSet->GetDataDescription(),220,200,120,PIE_PERCENTAGE,8);
- $Test->clearShadow();
-
- $Test->drawTitle(50,22,$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")",50,50,50,585);
-
- $Test->drawPieLegend(430,45,$DataSet->GetData(),$DataSet->GetDataDescription(),250,250,250);
-
- $Test->Render("../lib/pChart/pictures/toppop".$start.".png");
-
-echo "<img id=\"toppop\" src='../lib/pChart/pictures/toppop".$start.".png' alt='Image'>";
 
 
 /// pchart top popular end

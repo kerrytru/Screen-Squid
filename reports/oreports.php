@@ -1,14 +1,15 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../themes/default/global.css"/>
+
 
 
 <?php
 
-#Build date Thursday 25th of June 2020 18:14:58 PM
-#Build revision 1.7
+#Build date Tuesday 21st of July 2020 13:20:10 PM
+#Build revision 1.8
+
+
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -16,6 +17,10 @@ else
   $srv=0;
 
 include("../config.php");
+
+//<!-- The themes file -->
+echo '<link rel="stylesheet" type="text/css" href="../themes/'.$globaltheme.'/global.css"/>';
+
 
 $addr=$address[$srv];
 $usr=$user[$srv];
@@ -55,8 +60,13 @@ $ssq = new p_ScreenSquid($variableSet); #получим экземпляр кл�
 }
 
  // Standard pChart inclusions
- include("../lib/pChart/pChart/pData.class");
- include("../lib/pChart/pChart/pChart.class");
+# include("../lib/pChart/pChart/pData.class");
+# include("../lib/pChart/pChart/pChart.class");
+
+
+include("../modules/Chart/module.php");
+
+$grap = new Chart($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
 
 $start=microtime(true);
@@ -553,38 +563,21 @@ $countValues++;
 }
 $ssq->free_result($result);
 //pChart Graph 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrValues,"Serie1");
 
-$DataSet->AddAllSeries();
-$DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("Traffic","Serie1");
+#соберем данные для графика
+$userData['charttype']="line";
+$userData['chartname']="trafficbyhours";
+$userData['charttitle']="";
+$userData['arrSerie1']=$arrValues;
+$userData['arrSerie2']="";
 
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->setFixedScale(0,$bandwidth/8*1000);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(50,30,585,200);
- $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
- $Test->drawGraphArea(255,255,255,TRUE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
 
- // Draw the 0 line
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
- $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
+//create chart
+$pathtoimage = $grap->drawImage($userData);
 
- // Draw the cubic curve graph
- $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
+//display
+echo $pathtoimage;
 
- // Finish the graph
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->Render("../lib/pChart/pictures/trend".$start.".png");
-
-echo "<img src='../lib/pChart/pictures/trend".$start.".png' alt='Image'>";
 
 ///pChart Graph END
 } ///if no error. errCheck=0

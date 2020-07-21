@@ -230,7 +230,7 @@ if($enableNofriends==1) {
       </tr>
       <tr>
          <td>".$_lang['stTRAFFICSUM']."</td>
-         <td>".($SumSizeTraffic[0]/$oneMegabyte)."</td>
+         <td>".($SumSizeTraffic[0])/$oneMegabyte."</td>
       </tr>
 ";
 
