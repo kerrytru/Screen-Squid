@@ -92,7 +92,7 @@ function __construct($variables){ //
 	  }
 
 	  if($userData['charttype']=="pie"){
-			echo passthru("python ..modules/Chart/pygal/pie.py ".$userData['chartname']."");
+			echo passthru("python ../modules/Chart/pygal/pie.py ".$userData['chartname']."");
 			echo file_get_contents('../modules/Chart/pictures/'.$userData['chartname'].'.svg');
 	  }
 
