@@ -1,6 +1,6 @@
 
-#Build date Wednesday 3rd of June 2020 10:59:28 AM
-#Build revision 1.0
+#Build date Tuesday 21th of July 2020 10:59:28 AM
+#Build revision 1.1
 
 #Author: Rid-lin (https://github.com/Rid-lin)
 
@@ -33,5 +33,5 @@ install-copy:
 
 fix-permission:
 	chown $(WWW-USER):$(WWW-GROUP) -R $(PREFIX)/$(DIR)
-	chmod 775 -R $(PREFIX)/$(DIR)/lib/pChart/pictures
+	chmod 775 -R $(PREFIX)/$(DIR)/modules/Chart/pictures
 	chmod +x -R $(PREFIX)/$(DIR)/*.pl
