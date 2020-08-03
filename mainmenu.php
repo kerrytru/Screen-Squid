@@ -135,6 +135,7 @@ $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 $variableSet['dbtype']=$dbtype;
 
+
 #в зависимости от типа БД, подключаем разные модули
 if($dbtype==0)
 include_once("lib/dbDriver/mysqlmodule.php");
@@ -263,7 +264,11 @@ continue;
 unset($ssq);
 }
 
+//Пункт для добавления удаления БД
 echo "
+
+
+    tree.add(new WebFXTreeItem('add / remove','javascript:GoRightReport(".$srv.",8)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
 
 document.write(tree);
 }

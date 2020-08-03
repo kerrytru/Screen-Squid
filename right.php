@@ -1387,6 +1387,8 @@ echo "	</table>
 
 
 
+
+
 ///            else
 
 
@@ -1398,6 +1400,157 @@ echo "	</table>
 
 //if($connectionStatus!="error")
 
+if($_GET['id']==8) {
+   	
+   	if(!isset($_GET['actid'])){
+   	             echo "<a href=right.php?srv=".$srv."&id=8&actid=1>".$_lang['stADD']."</a>";
+              echo "<br /><br />";
+              echo "<table id=report_table_id_group class=datatable>
+              <tr>
+                <th class=unsortable><b>#</b></th>
+                <th><b>SRVNAME</b></th>
+                <th class=unsortable><b>Config file name</b></th>
+                <th class=unsortable><b>Action</b></th>
+
+              </tr>";
+
+#try to get conf
+$path    = 'conf/';
+$files = array_diff(scandir($path), array('.', '..'));
+$numrow=1;
+			foreach($files as $file) {
+			 $config= include 'conf/'.$file;
+
+                echo "
+                  <tr>
+                    <td>".$numrow."</td>
+                    <td align=center><a href=right.php?srv=".$srv."&id=8&actid=2&filename=".$file.">".$config['srvname']."</a></td>
+                    <td align=center>".$file."</td>
+                    <td align=center><a href=right.php?srv=".$srv."&id=8&actid=5&filename=".$file.">DELETE</a></td>
+                 </tr>";
+                $numrow++;
+              }
+              echo "</table>";
+              echo "<br />";
+              echo "<a href=right.php?srv=".$srv."&id=8&actid=1>".$_lang['stADD']."</a>";
+              echo "<br />";
+   	
+   	
+ } // 	if(!isset($_GET['actid'])){
+
+if(isset($_GET['actid']))
+		{
+			
+			if($_GET['actid'] == 1) ///добавить
+			{
+			   echo "<h2>Add new DB Screen Squid:</h2>";
+			   echo '
+                  <form action="right.php?srv='.$srv.'&id=8&actid=1" method="post">
+                 		<table class=datatable>
+					   <tr><td>srvname:</td> <td><input type="text" name="srvname"></td></tr>
+					   <tr><td>db:</td> <td><input type="text" name="db"></td></tr>
+					   <tr><td>user:</td> <td><input type="text" name="user"></td></tr>
+					   <tr><td>pass:</td> <td><input type="text" name="pass"></td></tr>
+					   <tr><td>address:</td> <td><input type="text" name="address"></td></tr>
+					   <tr><td>cfgsquidhost:</td> <td><input type="text" name="cfgsquidhost"></td></tr>
+					   <tr><td>cfgsquidport:</td> <td><input type="text" name="cfgsquidport"></td></tr>
+					   <tr><td>cfgcachemgr_passwd:</td> <td><input type="text" name="cfgcachemgr_passwd"></td></tr>
+					   <tr><td>srvdbtype:</td> <td><input type="text" name="srvdbtype"></td></tr>
+					   <tr><td>enabled:</td> <td><input type="text" name="enabled"></td></tr>
+						</table>
+                 <br />
+                  <input type="submit" name=submit value="'.$_lang['stADD'].'"><br />
+                  </form>
+                  ';
+			
+				if(isset($_POST['submit'])){
+				$config['enabled']=$_POST['enabled'];
+				$config['srvname']=$_POST['srvname'];
+				$config['db']=$_POST['db'];
+				$config['user']=$_POST['user'];
+				$config['pass']=$_POST['pass'];
+				$config['address']=$_POST['address'];
+				$config['cfgsquidhost']=$_POST['cfgsquidhost'];
+				$config['cfgsquidport']=$_POST['cfgsquidport'];
+				$config['cfgcachemgr_passwd']=$_POST['cfgcachemgr_passwd'];
+				$config['srvdbtype']=$_POST['srvdbtype'];
+
+					
+				file_put_contents('conf/db'.$start.'.php', '<?php return '. var_export($config, true) . ';?>');
+				
+				echo '<script type="text/javascript">parent.left.location.href="mainmenu.php?srv=0";parent.right.location.href="right.php?srv=0&id=8";</script>';
+				}
+
+			} //if($_GET['actid'] == 1) 
+			
+			if($_GET['actid'] == 2) ///редактировать
+			{
+				
+				$config = include("conf/".$_GET['filename']);
+				
+			   echo "<h2>Edit DB Screen Squid:</h2>";
+			   echo '
+                  <form action="right.php?srv='.$srv.'&id=8&actid=3&filename='.$_GET['filename'].'" method="post">
+                 		<table class=datatable>
+					   <tr><td>srvname:</td> <td><input type="text" name="srvname" value="'.$config['srvname'].'"></td></tr>
+					   <tr><td>db:</td> <td><input type="text" name="db"  value="'.$config['db'].'"></td></tr>
+					   <tr><td>user:</td> <td><input type="text" name="user"  value="'.$config['user'].'"></td></tr>
+					   <tr><td>pass:</td> <td><input type="text" name="pass"  value="'.$config['pass'].'"></td></tr>
+					   <tr><td>address:</td> <td><input type="text" name="address"  value="'.$config['address'].'"></td></tr>
+					   <tr><td>cfgsquidhost:</td> <td><input type="text" name="cfgsquidhost"  value="'.$config['cfgsquidhost'].'"></td></tr>
+					   <tr><td>cfgsquidport:</td> <td><input type="text" name="cfgsquidport"  value="'.$config['cfgsquidport'].'"></td></tr>
+					   <tr><td>cfgcachemgr_passwd:</td> <td><input type="text" name="cfgcachemgr_passwd"  value="'.$config['cfgcachemgr_passwd'].'"></td></tr>
+					   <tr><td>srvdbtype:</td> <td><input type="text" name="srvdbtype"  value="'.$config['srvdbtype'].'"></td></tr>
+					   <tr><td>enabled:</td> <td><input type="text" name="enabled"  value="'.$config['enabled'].'"></td></tr>
+						</table>
+                 <br />
+                  <input type="submit" name=submit value="'.$_lang['stSAVE'].'"><br />
+                  </form>
+                  ';
+			
+				
+
+			} //if($_GET['actid'] == 2) 
+			
+			if($_GET['actid'] == 3) ///сохранить
+			{
+				
+				$config['enabled']=$_POST['enabled'];
+				$config['srvname']=$_POST['srvname'];
+				$config['db']=$_POST['db'];
+				$config['user']=$_POST['user'];
+				$config['pass']=$_POST['pass'];
+				$config['address']=$_POST['address'];
+				$config['cfgsquidhost']=$_POST['cfgsquidhost'];
+				$config['cfgsquidport']=$_POST['cfgsquidport'];
+				$config['cfgcachemgr_passwd']=$_POST['cfgcachemgr_passwd'];
+				$config['srvdbtype']=$_POST['srvdbtype'];
+
+					
+				file_put_contents('conf/'.$_GET['filename'], '<?php return '. var_export($config, true) . ';?>');
+				
+				echo '<script type="text/javascript">parent.left.location.href="mainmenu.php?srv=0";parent.right.location.href="right.php?srv=0&id=8";</script>';
+
+				
+
+			} //if($_GET['actid'] == 3) 
+			
+			if($_GET['actid'] == 5) ///удалить
+			{
+				if(unlink("conf/".$_GET['filename'])) echo "Delete successfully";
+				
+				echo '<script type="text/javascript">parent.right.location.href="right.php?srv='.$srv.'&id=8";</script>';
+
+				
+
+			} //if($_GET['actid'] == 5) 
+
+		} //if(isset($_GET['actid']))
+
+
+                  
+
+    }  //end GET[id]=8
 
 
 

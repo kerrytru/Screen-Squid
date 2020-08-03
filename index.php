@@ -1,5 +1,8 @@
 <?php
-#build 20200227
+
+#Build date Monday 3rd of August 2020 16:14:38 PM
+#Build revision 1.0
+
 ?>
 
 <!doctype html public "-//W3C//DTD HTML 3.2 Final//EN">
@@ -10,7 +13,9 @@
 		include("config.php"); 
 	}
 	else {
-		echo 'Configuration error: Copy config.php.default to config.php and edit appropriately.';
+		echo '<script type="text/javascript">parent.location.href="install/index.php";</script>';
+
+		#echo 'Configuration error: Copy config.php.default to config.php and edit appropriately.';
 		exit;
 	}
 
