@@ -8,7 +8,7 @@ $i=0;
 
 #try to get conf
 $path    = 'conf/';
-$files = array_diff(scandir($path), array('.', '..'));
+$files = array_diff(scandir($path), array('.', '..','.gitignore'));
 
 foreach($files as $file) {
  $config= include 'conf/'.$file;
