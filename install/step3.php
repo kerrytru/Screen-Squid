@@ -54,6 +54,13 @@ $start=microtime(true);
 					}
 					
 		}
+
+#try to undertand root path of your screen squid
+$referer='http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+preg_match('/(.*)\install/',$referer,$link);
+
+
+
 ?>
 
 <html><head>
@@ -102,7 +109,8 @@ $start=microtime(true);
 
 <br/>
   <div >
-      Process complete. The installation process has completed, at your request database tables were created. Config file has been reset and all pre-installation tests have passed. Thank you, and here is your <a href="http://localhost/test7">Screen Squid</a>
+	  
+      Process complete. The installation process has completed, at your request database tables were created. Config file has been reset and all pre-installation tests have passed. Thank you, and here is your <a href="<?php echo $link[1];  ?>">Screen Squid</a>. If something went wrong, you can type in address string http://your_ip/path_where_screen_squid_installed.
     </div>
 
 	</article>
