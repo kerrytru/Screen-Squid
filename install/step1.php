@@ -411,7 +411,7 @@ $passed1=$passdbms+$passms + $passcl + $passgd + $passlb + $passwr + $passwr1+$p
 #postgresql
 $passed2=$passdbps+$passps + $passcl + $passgd + $passlb + $passwr + $passwr1+$passwr2;
 
-if($passed1==8 or $passed2==8) 
+if($passed1>=7 or $passed2>=7) 
 
 echo '
 <form method="post" action="step2.php">
