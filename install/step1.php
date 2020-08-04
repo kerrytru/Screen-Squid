@@ -209,7 +209,7 @@
 	
 					Checking for GD library
 					<br />You have 
-					<?php $output = shell_exec('php -i |grep "GD Version"'); 
+					<?php $output = shell_exec('php -i |grep "GD"'); 
 						  preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $output, $version); 
 						  if($version[0] !="") {
 							$passgd=1;
