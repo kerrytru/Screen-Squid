@@ -1,7 +1,7 @@
 <?php 
 
-#Build date Sunday 31st of May 2020 14:15:03 PM
-#Build revision 1.4
+#Build date Tuesday 4th of August 2020 16:30:36 PM
+#Build revision 1.5
 
 ?>
 <html>
@@ -220,7 +220,6 @@ echo "
 	rootproxy.add(new WebFXTreeItem('".$_lang['stLOGTABLE']."','javascript:GoRightReport(".$srv.",5)','','img/themes/default/Job.png','img/themes/default/Job.png'));
 	rootproxy.add(new WebFXTreeItem('".$_lang['stALIASES']."','javascript:GoRightReport(".$srv.",2)','','img/themes/default/Users.png','img/themes/default/Users.png'));
 	rootproxy.add(new WebFXTreeItem('".$_lang['stGROUPS']."','javascript:GoRightReport(".$srv.",3)','','img/themes/default/UserGroups.png','img/themes/default/UserGroups.png'));
-	rootproxy.add(new WebFXTreeItem('".$_lang['stCONFIG']."','javascript:GoRightReport(".$srv.",6)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
 
 //Modules	
 	var modulemanager = new WebFXTreeItem('".$_lang['stMODULEMANAGER']."','javascript:GoRightReport(".$srv.",7)','','img/themes/default/Nodes.png','img/themes/default/Nodes.png');
@@ -266,9 +265,9 @@ unset($ssq);
 
 //Пункт для добавления удаления БД
 echo "
-
-
     tree.add(new WebFXTreeItem('add / remove','javascript:GoRightReport(".$srv.",8)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
+
+    tree.add(new WebFXTreeItem('".$_lang['stCONFIG']."','javascript:GoRightReport(".$srv.",6)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
 
 document.write(tree);
 }

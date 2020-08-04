@@ -1,7 +1,7 @@
 <?php
 
-#Build date Sunday 17th of May 2020 08:13:18 AM
-#Build revision 1.13
+#Build date Tuesday 4th of August 2020 17:00:41 PM
+#Build revision 1.14
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -135,15 +135,17 @@ if($enableNofriends==1) {
         else
           $changepassword=0;
 
+	if(!isset($_GET['id'])) echo "OK"; //удалить надо
+			//echo $_lang['stALLISOK'];
 
-
-  if($ssq->db_object==null) {
-    echo $_lang['stDONTFORGET'];
+  if($ssq->db_object==null) { 
+  //  echo $_lang['stDONTFORGET']; //и это тоже удалить
+	echo ""; 
   }
   else
   {
-	if(!isset($_GET['id'])) 
-			echo $_lang['stALLISOK'];
+	  
+	
 	  
 	if(isset($_GET['id'])) {
 
@@ -1213,111 +1215,12 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
     }  //end GET[id]=5
 
- if($_GET['id']==6) {
-   	
-	//определим файл который будем изменять. Это сделано для того, чтобы работая в админском интерфейсе, можно было конфигурить версию для директора:)
-	$configfile = "config.php";
-
-if(isset($_GET['actid']))
-
-	if($_GET['actid'] == 3) ///сохранить настройки
-	{
-		$file=file($configfile); 
-
-		foreach($_POST as $key => $val) {
-		
-		$stkey = str_replace("<","[",$key);
-		$stkey = str_replace(">","]",$stkey);
-		
-		
-		for($i=0;$i<sizeof($file);$i++)
-		  {
-			$st = $file[$i];
-			#исключаем лишние строки. Чтоб не изменять лишнее.
-			if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i")
-			
-				if(strpos($file[$i],$stkey)){
-					$st = '$'.$stkey.'="'.$val.'";'.PHP_EOL;
-					$file[$i] = $st; 
-				}
-		  }
-	
-		}
-	
-		$fp=fopen($configfile,"w"); 
-		fputs($fp,implode("",$file)); 
-		fclose($fp);
-		
-
-	} //if($_GET['actid'] == 3) 
-	
-
-  
-
-    echo "
-      <h2>".$_lang['stCONFIG']." Screen Squid:</h2>
-      <table class=datatable>
-      <tr>
-         <th>#</th>
-         <th>".$_lang['stPARAMNAME']."</th>
-         <th>".$_lang['stPARAMVALUE']."</th>
-         <th>".$_lang['stCOMMENT']."</th>
-      </tr>
-   ";
-	$file=file($configfile); 
-	
-	$num = 1; //
-	
-	echo '<form name=configphp_form action="right.php?srv='.$srv.'&id=6&actid=3" method="post">';
-	
-	for($i=0;$i<sizeof($file);$i++){
-	
-	$st = $file[$i];
-		#исключаем лишние строки. Также можно будет регулировать количество отображаемых параметров
-		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && strpos($st,"vers")==0 && strpos($st,"debug")==0)	{
-
-	  	$expString = explode("$",$file[$i]);
-	  	if(isset($expString[1]))
-	  	$expParamname = explode("=",$expString[1]);
-		$expParamname = str_replace("[","<",$expParamname);
-		$expParamname = str_replace("]",">",$expParamname);
-		if(isset($expParamname[1]))
-	  	$expParamvalue = explode(";",$expParamname[1]);		
-		#стираем лишние символы для пользователя		
-		$expParamvalue = str_replace("\"","",$expParamvalue);
-		
-
-		echo '
-			<tr>
-				<td>'.$num.'</td>
-				<td>'.trim($expParamname[0]).'</td>
-				<td><input type="text" name="'.trim($expParamname[0]).'" value="'.trim($expParamvalue[0]).'"></td>
-				<td></td>
-			</tr>
-		';
-		$num++;
-		}
-	
-	} //end for
-
-	
-	echo "</table>";
-	echo "<br />";
-	echo '<input type="submit" value="'.$_lang['stSAVE'].'"><br />';
-   	echo " </form>";
-
-
-                  
-                  
-
-    }  //end GET[id]=6
+//id==6 перенесен ниже
 
 
  if($_GET['id']==7) {
    	
-	$configfile = "config.php";
-	
-	
+
 	
 
 $path    = 'modules/';
@@ -1399,6 +1302,113 @@ echo "	</table>
  } /// else { 
 
 //if($connectionStatus!="error")
+
+ if($_GET['id']==6) {
+   	
+	//определим файл который будем изменять. Это сделано для того, чтобы работая в админском интерфейсе, можно было конфигурить версию для директора:)
+	$configfile = "config.php";
+
+if(isset($_GET['actid']))
+
+	if($_GET['actid'] == 3) ///сохранить настройки
+	{
+		$file=file($configfile); 
+
+		foreach($_POST as $key => $val) {
+		
+		$stkey = str_replace("<","[",$key);
+		$stkey = str_replace(">","]",$stkey);
+		
+		
+		for($i=0;$i<sizeof($file);$i++)
+		  {
+			$st = $file[$i];
+			#исключаем лишние строки. Чтоб не изменять лишнее.
+			if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i")
+			
+				if(strpos($file[$i],$stkey)){
+					$st = '$'.$stkey.'="'.$val.'";'.PHP_EOL;
+					$file[$i] = $st; 
+				}
+		  }
+	
+		}
+	
+		$fp=fopen($configfile,"w"); 
+		fputs($fp,implode("",$file)); 
+		fclose($fp);
+		
+
+	} //if($_GET['actid'] == 3) 
+	
+
+  
+
+    echo "
+      <h2>".$_lang['stCONFIG']." Screen Squid:</h2>
+      <table class=datatable>
+      <tr>
+         <th>#</th>
+         <th>".$_lang['stPARAMNAME']."</th>
+         <th>".$_lang['stPARAMVALUE']."</th>
+         <th>".$_lang['stCOMMENT']."</th>
+      </tr>
+   ";
+	$file=file($configfile); 
+	
+	$num = 1; //
+	
+	echo '<form name=configphp_form action="right.php?srv='.$srv.'&id=6&actid=3" method="post">';
+	
+	for($i=0;$i<sizeof($file);$i++){
+
+	
+	$st = $file[$i];
+	
+	#отделяем служебную часть от изменяемой
+	
+	if($i<32) continue;
+
+		#исключаем лишние строки. Также можно будет регулировать количество отображаемых параметров
+		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && strpos($st,"vers")==0 && strpos($st,"debug")==0)	{
+
+	  	$expString = explode("$",$file[$i]);
+	  	if(isset($expString[1]))
+	  	$expParamname = explode("=",$expString[1]);
+		$expParamname = str_replace("[","<",$expParamname);
+		$expParamname = str_replace("]",">",$expParamname);
+		if(isset($expParamname[1]))
+	  	$expParamvalue = explode(";",$expParamname[1]);		
+		#стираем лишние символы для пользователя		
+		$expParamvalue = str_replace("\"","",$expParamvalue);
+		
+
+		echo '
+			<tr>
+				<td>'.$num.'</td>
+				<td>'.trim($expParamname[0]).'</td>
+				<td><input type="text" name="'.trim($expParamname[0]).'" value="'.trim($expParamvalue[0]).'"></td>
+				<td></td>
+			</tr>
+		';
+		$num++;
+		}
+	
+	
+	
+	} //end for
+
+	
+	echo "</table>";
+	echo "<br />";
+	echo '<input type="submit" value="'.$_lang['stSAVE'].'"><br />';
+   	echo " </form>";
+
+
+                  
+                  
+
+    }  //end GET[id]=6
 
 if($_GET['id']==8) {
    	

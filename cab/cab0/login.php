@@ -30,8 +30,6 @@ date_default_timezone_set(date_default_timezone_get());
 include("../../config.php");
 include("config.php");
 
-
-
 $addr=$address[$srv];
 $usr=$user[$srv];
 $psw=$pass[$srv];

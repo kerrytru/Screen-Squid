@@ -28,7 +28,7 @@ $start=microtime(true);
 			}
 			#set default config as new config
 		
-			rename("../config.php.default","../config.php");
+			copy("../config.php.default","../config.php");
 			
 
 			

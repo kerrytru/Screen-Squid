@@ -1,14 +1,15 @@
 <?php
 
-#Build date Tuesday 21st of July 2020 12:11:40 PM
-#Build revision 1.0
+#Build date Tuesday 4th of August 2020 18:56:12 PM
+#Build revision 1.1
 
 class Chart
 {
 var $DataSet;
 var $graphPchart;
-
+var $maindir;
 var $chartlib;
+var $link;
 
 function __construct($variables){ // 
     $this->vars = $variables;
@@ -16,15 +17,24 @@ function __construct($variables){ //
 	 include("pChart/pChart/pChart.class");	
 	 
 	 include("config.php"); //module config	
+
+	#set main dir
+	$this->maindir=__DIR__;
+	
+	#try to undertand root path of your screen squid
+	$referer='http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+	preg_match('/(.*?)((cab\/)|(reports\/))/',$referer,$this->link);
+
+
 	
 	$this->chartlib = $chartlib;
 	
 	#clean directory for svg
-	foreach (glob("../modules/Chart/pictures/*.svg") as $filename) {
+	foreach (glob($this->maindir."/pictures/*.svg") as $filename) {
 	    unlink($filename);
 	}
 	#clean directory for png
-	foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
+	foreach (glob($this->maindir."/pictures/*.png") as $filename) {
 		unlink($filename);
 	}
 }
@@ -47,7 +57,7 @@ function __construct($variables){ //
 
 	  #data serie
  
-	$fp = fopen('../modules/Chart/data/'.$userData['chartname'].'_val.txt', 'w');
+	$fp = fopen($this->maindir.'/data/'.$userData['chartname'].'_val.txt', 'w');
     
 		fputcsv($fp, $userData['arrSerie1'],';');
 
@@ -57,7 +67,7 @@ function __construct($variables){ //
 		$userData['arrSerie2'] = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23);
 	 
 
-	$fp = fopen('../modules/Chart/data/'.$userData['chartname'].'_label.txt', 'w');
+	$fp = fopen($this->maindir.'/data/'.$userData['chartname'].'_label.txt', 'w');
 		fputcsv($fp, $userData['arrSerie2'],';');
 	fclose($fp);
 
@@ -87,13 +97,13 @@ function __construct($variables){ //
   {
 	  //Тут просто. В зависимости от типа графика запускаем скрипт рисования. Возвращаем результат эхом.
 	  if($userData['charttype']=="line"){
-			echo passthru("python ../modules/Chart/pygal/line.py ".$userData['chartname']."");
-			echo file_get_contents('../modules/Chart/pictures/'.$userData['chartname'].'.svg');
+			echo passthru("python ".$this->maindir."/pygal/line.py ".$userData['chartname']."");
+			echo file_get_contents($this->maindir.'/pictures/'.$userData['chartname'].'.svg');
 	  }
 
 	  if($userData['charttype']=="pie"){
-			echo passthru("python ../modules/Chart/pygal/pie.py ".$userData['chartname']."");
-			echo file_get_contents('../modules/Chart/pictures/'.$userData['chartname'].'.svg');
+			echo passthru("python ".$this->maindir."/pygal/pie.py ".$userData['chartname']."");
+			echo file_get_contents($this->maindir.'/pictures/'.$userData['chartname'].'.svg');
 	  }
 
 
@@ -153,7 +163,7 @@ if($graphtype['trafficbyhours']==1)
 
  // Initialise the graph
  $graphPchart = new pChart(700,230);
- $graphPchart->setFontProperties("../modules/Chart/pChart/Fonts/tahoma.ttf",8);
+ $graphPchart->setFontProperties($this->maindir."/pChart/Fonts/tahoma.ttf",8);
  $graphPchart->setGraphArea(50,30,585,200);
  $graphPchart->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
  $graphPchart->drawRoundedRectangle(5,5,695,225,5,230,230,230);
@@ -162,7 +172,7 @@ if($graphtype['trafficbyhours']==1)
  $graphPchart->drawGrid(4,TRUE,230,230,230,50);
 
  // Draw the 0 line
- $graphPchart->setFontProperties("../modules/Chart/pChart/Fonts/tahoma.ttf",6);
+ $graphPchart->setFontProperties($this->maindir."/pChart/Fonts/tahoma.ttf",6);
  $graphPchart->drawTreshold(0,143,55,72,TRUE,TRUE);
 
  // Draw the cubic curve graph
@@ -171,9 +181,9 @@ if($graphtype['trafficbyhours']==1)
  $graphPchart->drawTitle(50,22,$userData['charttitle'],50,50,50,585);
 
  // Finish the graph
- $graphPchart->setFontProperties("../modules/Chart/pChart/Fonts/tahoma.ttf",8);
+ $graphPchart->setFontProperties($this->maindir."/pChart/Fonts/tahoma.ttf",8);
  $graphPchart->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $graphPchart->setFontProperties("../modules/Chart/pChart/Fonts/tahoma.ttf",10);
+ $graphPchart->setFontProperties($this->maindir."/pChart/Fonts/tahoma.ttf",10);
 //}
 
 }
@@ -191,7 +201,7 @@ if($graphtype['trafficbyhours']==1)
 
  // Initialise the graph
  $graphPchart = new pChart(700,400);
- $graphPchart->setFontProperties("../modules/Chart/pChart/Fonts/tahoma.ttf",10);
+ $graphPchart->setFontProperties($this->maindir."/pChart/Fonts/tahoma.ttf",10);
  $graphPchart->drawFilledRoundedRectangle(7,7,693,393,5,240,240,240);
  $graphPchart->drawRoundedRectangle(5,5,695,395,5,230,230,230);
 
@@ -209,9 +219,9 @@ if($graphtype['trafficbyhours']==1)
 
 
 
-  $graphPchart->Render("../modules/Chart/pictures/".$userData['chartname']."".$start.".png");
+  $graphPchart->Render($this->maindir."/pictures/".$userData['chartname']."".$start.".png");
     
-  return "<img id=\"".$userData['chartname']."\" src='../modules/Chart/pictures/".$userData['chartname']."".$start.".png' alt='Image'>";
+  return "<img id=\"".$userData['chartname']."\" src='".$this->link[1]."/modules/Chart/pictures/".$userData['chartname']."".$start.".png' alt='Image'>";
 }
 
 

@@ -1,7 +1,7 @@
 
 
-#Build date Tuesday 21st of July 2020 11:54:50 AM
-#Build revision 1.0
+#Build date Tuesday 4th of August 2020 18:34:49 PM
+#Build revision 1.1
 
 import os
 from numpy import genfromtxt
@@ -10,14 +10,15 @@ import pygal
 
 
 
-root = os.getcwd()
+
+root = os.path.dirname(os.path.realpath(argv[0]))
 
 #go to script directory
 
 os.chdir(root)
 
 #get one level up
-os.chdir("../modules/Chart/")
+os.chdir("../")
 
 #for debug
 #os.chdir("../")

@@ -1,13 +1,15 @@
 <?php
 
-#Build date Monday 3rd of August 2020 16:12:34 PM
-#Build revision 1.4
+#Build date Tuesday 4th of August 2020 17:12:42 PM
+#Build revision 1.5
 
+#set main dir
+$maindir=__DIR__;
 
 $i=0;
 
 #try to get conf
-$path    = 'conf/';
+$path    = $maindir.'/conf/';
 $files = array_diff(scandir($path), array('.', '..','.gitignore'));
 
 foreach($files as $file) {
@@ -34,7 +36,7 @@ foreach($files as $file) {
 
 $language="en";
 
-include_once("lang/$language");
+include_once("$maindir/lang/$language");
 
 #Show aliases logins/ipaddresses in reports enable=1, disable=0.
 #Pokazivat aliasi - logini i/ili IP adresa. Vkl=1, Vikl=0
