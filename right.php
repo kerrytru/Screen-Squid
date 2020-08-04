@@ -1367,7 +1367,7 @@ if(isset($_GET['actid']))
 	
 	#отделяем служебную часть от изменяемой
 	
-	if($i<32) continue;
+	if($i<34) continue;
 
 		#исключаем лишние строки. Также можно будет регулировать количество отображаемых параметров
 		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && strpos($st,"vers")==0 && strpos($st,"debug")==0)	{
@@ -1426,7 +1426,7 @@ if($_GET['id']==8) {
 
 #try to get conf
 $path    = 'conf/';
-$files = array_diff(scandir($path), array('.', '..'));
+$files = array_diff(scandir($path), array('.', '..','.gitignore'));
 $numrow=1;
 			foreach($files as $file) {
 			 $config= include 'conf/'.$file;
