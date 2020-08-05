@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-#Build date Thursday 16th of April 2020 17:31:34 PM
-#Build revision 1.2
+#Build date Wednesday 5th of August 2020 16:58:54 PM
+#Build revision 1.3
 
 use DBI; # DBI  Perl!!!
 
@@ -221,7 +221,7 @@ $countQuotas=$countQuotas+1;
 
 print "\n";
 print $now=localtime;
-print "\nQuotas updated (".$countQuotas." items)";
+print "\nQuotas updated (".$countQuotas." items)\n";
 
 
 #disconnecting from DB

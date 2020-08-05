@@ -366,7 +366,7 @@ GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,h
 ";
 }
 
-print $sqltext;
+#print $sqltext;
 $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
@@ -437,7 +437,7 @@ GROUP BY to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),st,date
 ";
 }
 
-print $sqltext;
+#print $sqltext;
 $sth = $dbh->prepare($sqltext);
 $sth->execute;
 
