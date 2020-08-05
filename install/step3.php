@@ -1,8 +1,8 @@
 <?php
 
 
-#Build date Monday 3rd of August 2020 17:04:43 PM
-#Build revision 1.0
+#Build date Wednesday 5th of August 2020 16:33:26 PM
+#Build revision 1.1
 
 $start=microtime(true);
 
@@ -36,6 +36,7 @@ $start=microtime(true);
 			
 					#try to create tables
 							
+							#mysql
 					if($_POST['srvdbtype']==0)
 					{
 						$query=file_get_contents("../createdb/createdb.sql");
@@ -46,6 +47,26 @@ $start=microtime(true);
 						else
 						
 						if(!mysqli_multi_query($con,$query))
+						
+						echo "Error: Cant execute query." . PHP_EOL;
+						
+						
+					
+					}
+					
+					#postgresql
+					if($_POST['srvdbtype']==1)
+					{
+						$query=file_get_contents("../createdb/pgcreatedb.sql");
+						
+						$conn_string = "host=".$_POST['address']." port=5432 dbname=".$_POST['db']." user=".$_POST['user']." password=".$_POST['pass']."";
+						$con = pg_connect($conn_string);
+						
+						if (!$con) 	echo "Error: Cant connect to PostgreSQL server." . PHP_EOL;
+						
+						else
+						
+						if(!pg_query($con,$query))
 						
 						echo "Error: Cant execute query." . PHP_EOL;
 						

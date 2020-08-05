@@ -230,4 +230,9 @@ $_lang['stSECONDSMINUTES']="Seconds (Minutes)";
 $_lang['stBIGFILES']="Big files";
 $_lang['stLOGINBIGFILES']="Big files login";
 $_lang['stIPADDRESSBIGFILES']="Big files IP address";
+
+$_lang['stADDREMOVE']="Add / Remove";
+$_lang['stDBNAME']="Database name";
+$_lang['stCONFIGFILE']="Config file name";
+$_lang['stACTION']="Action";
 ?>

@@ -1,7 +1,7 @@
 <?php
 
-#Build date Tuesday 4th of August 2020 17:00:41 PM
-#Build revision 1.14
+#Build date Wednesday 5th of August 2020 16:21:57 PM
+#Build revision 1.15
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -81,7 +81,11 @@ $variableSet['dbase']=$dbase;
 $variableSet['dbtype']=$dbtype;
 $variableSet['language']=$language;
 
+
+
 #в зависимости от типа БД, подключаем разные модули
+
+	
 if($dbtype==0)
 {
 include("lib/dbDriver/mysqlmodule.php");
@@ -93,6 +97,7 @@ if($dbtype==1)
 include("lib/dbDriver/pgmodule.php");
 $ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 }
+
 
 
 if(!isset($_GET['id']))
@@ -135,7 +140,7 @@ if($enableNofriends==1) {
         else
           $changepassword=0;
 
-	if(!isset($_GET['id'])) echo "OK"; //удалить надо
+if(!isset($_GET['id'])) echo "OK"; //удалить надо
 			//echo $_lang['stALLISOK'];
 
   if($ssq->db_object==null) { 
@@ -1411,16 +1416,19 @@ if(isset($_GET['actid']))
     }  //end GET[id]=6
 
 if($_GET['id']==8) {
+	
+	
    	
    	if(!isset($_GET['actid'])){
+		echo "<h2>".$_lang['stADDREMOVE']." DB Screen Squid:</h2>";
    	             echo "<a href=right.php?srv=".$srv."&id=8&actid=1>".$_lang['stADD']."</a>";
               echo "<br /><br />";
               echo "<table id=report_table_id_group class=datatable>
               <tr>
                 <th class=unsortable><b>#</b></th>
-                <th><b>SRVNAME</b></th>
-                <th class=unsortable><b>Config file name</b></th>
-                <th class=unsortable><b>Action</b></th>
+                <th><b>".$_lang['stDBNAME']."</b></th>
+                <th class=unsortable><b>".$_lang['stCONFIGFILE']."</b></th>
+                <th class=unsortable><b>".$_lang['stACTION']."</b></th>
 
               </tr>";
 
@@ -1436,7 +1444,7 @@ $numrow=1;
                     <td>".$numrow."</td>
                     <td align=center><a href=right.php?srv=".$srv."&id=8&actid=2&filename=".$file.">".$config['srvname']."</a></td>
                     <td align=center>".$file."</td>
-                    <td align=center><a href=right.php?srv=".$srv."&id=8&actid=5&filename=".$file.">DELETE</a></td>
+                    <td align=center><a href=right.php?srv=".$srv."&id=8&actid=5&filename=".$file.">".$_lang['stDELETE']."</a></td>
                  </tr>";
                 $numrow++;
               }
@@ -1456,17 +1464,30 @@ if(isset($_GET['actid']))
 			   echo "<h2>Add new DB Screen Squid:</h2>";
 			   echo '
                   <form action="right.php?srv='.$srv.'&id=8&actid=1" method="post">
-                 		<table class=datatable>
-					   <tr><td>srvname:</td> <td><input type="text" name="srvname"></td></tr>
-					   <tr><td>db:</td> <td><input type="text" name="db"></td></tr>
-					   <tr><td>user:</td> <td><input type="text" name="user"></td></tr>
-					   <tr><td>pass:</td> <td><input type="text" name="pass"></td></tr>
-					   <tr><td>address:</td> <td><input type="text" name="address"></td></tr>
-					   <tr><td>cfgsquidhost:</td> <td><input type="text" name="cfgsquidhost"></td></tr>
-					   <tr><td>cfgsquidport:</td> <td><input type="text" name="cfgsquidport"></td></tr>
-					   <tr><td>cfgcachemgr_passwd:</td> <td><input type="text" name="cfgcachemgr_passwd"></td></tr>
-					   <tr><td>srvdbtype:</td> <td><input type="text" name="srvdbtype"></td></tr>
-					   <tr><td>enabled:</td> <td><input type="text" name="enabled"></td></tr>
+                 	<table class=datatable>
+                 		<tr>
+						<td>Database Type:</td>
+						<td>
+							<select name="srvdbtype">
+								<option value="0" />MySQL (MariaDB)</option>
+								<option value="1" />PostgreSQL 9</option>
+							</select>
+						</td>
+						</tr>
+					   <tr><td>Proxy name:</td> <td><input type="text" name="srvname" value="Proxy0"></td></tr>
+					   <tr><td>Database name:</td> <td><input type="text" name="db" value="screensquid"></td></tr>
+					   <tr><td>Username:</td> <td><input type="text" name="user" value="mysql-user"></td></tr>
+					   <tr><td>Password:</td> <td><input type="text" name="pass" value="pass"></td></tr>
+					   <tr><td>Database host address:</td> <td><input type="text" name="address" value="localhost"></td></tr>
+					   <tr><td>Squid host:</td> <td><input type="text" name="cfgsquidhost" value="localhost"></td></tr>
+					   <tr><td>Squid port:</td> <td><input type="text" name="cfgsquidport" value="3128"></td></tr>
+					   <tr><td>Cachemgr password:</td> <td><input type="text" name="cfgcachemgr_passwd"></td></tr>
+					   	<tr class="row2">
+							<td>Enabled</td>
+							<td><input type="checkbox" name="enabled" checked="checked" />
+							<br/>Normally this field should be checked at all times.  Use caution when disabling this feature</td>
+						</tr>
+				   	
 						</table>
                  <br />
                   <input type="submit" name=submit value="'.$_lang['stADD'].'"><br />
@@ -1501,18 +1522,33 @@ if(isset($_GET['actid']))
 			   echo "<h2>Edit DB Screen Squid:</h2>";
 			   echo '
                   <form action="right.php?srv='.$srv.'&id=8&actid=3&filename='.$_GET['filename'].'" method="post">
-                 		<table class=datatable>
-					   <tr><td>srvname:</td> <td><input type="text" name="srvname" value="'.$config['srvname'].'"></td></tr>
-					   <tr><td>db:</td> <td><input type="text" name="db"  value="'.$config['db'].'"></td></tr>
-					   <tr><td>user:</td> <td><input type="text" name="user"  value="'.$config['user'].'"></td></tr>
-					   <tr><td>pass:</td> <td><input type="text" name="pass"  value="'.$config['pass'].'"></td></tr>
-					   <tr><td>address:</td> <td><input type="text" name="address"  value="'.$config['address'].'"></td></tr>
-					   <tr><td>cfgsquidhost:</td> <td><input type="text" name="cfgsquidhost"  value="'.$config['cfgsquidhost'].'"></td></tr>
-					   <tr><td>cfgsquidport:</td> <td><input type="text" name="cfgsquidport"  value="'.$config['cfgsquidport'].'"></td></tr>
-					   <tr><td>cfgcachemgr_passwd:</td> <td><input type="text" name="cfgcachemgr_passwd"  value="'.$config['cfgcachemgr_passwd'].'"></td></tr>
-					   <tr><td>srvdbtype:</td> <td><input type="text" name="srvdbtype"  value="'.$config['srvdbtype'].'"></td></tr>
-					   <tr><td>enabled:</td> <td><input type="text" name="enabled"  value="'.$config['enabled'].'"></td></tr>
+                 			<table class=datatable>
+                 		<tr>
+						<td>Database Type:</td>
+						<td>
+							<select name="srvdbtype">
+								<option value="0" />MySQL (MariaDB)</option>
+								<option value="1" />PostgreSQL 9</option>
+							</select>
+						</td>
+						</tr>
+					   <tr><td>Proxy name:</td> <td><input type="text" name="srvname" value="'.$config['srvname'].'"></td></tr>
+					   <tr><td>Database name:</td> <td><input type="text" name="db" value="'.$config['db'].'"></td></tr>
+					   <tr><td>Username:</td> <td><input type="text" name="user" value="'.$config['user'].'"></td></tr>
+					   <tr><td>Password:</td> <td><input type="text" name="pass" value="'.$config['pass'].'"></td></tr>
+					   <tr><td>Database host address:</td> <td><input type="text" name="address" value="'.$config['address'].'"></td></tr>
+					   <tr><td>Squid host:</td> <td><input type="text" name="cfgsquidhost" value="'.$config['cfgsquidhost'].'"></td></tr>
+					   <tr><td>Squid port:</td> <td><input type="text" name="cfgsquidport" value="'.$config['cfgsquidport'].'"></td></tr>
+					   <tr><td>Cachemgr password:</td> <td><input type="text" name="cfgcachemgr_passwd" value="'.$config['cfgcachemgr_passwd'].'"></td></tr>
+					   	<tr class="row2">
+							<td>Enabled</td>
+							<td><input type="checkbox" name="enabled" ';if($config['enabled']==1) echo "checked=checked"; echo ' />
+							<br/>Normally this field should be checked at all times.  Use caution when disabling this feature</td>
+						</tr>
+				   		
 						</table>
+                 		
+  
                  <br />
                   <input type="submit" name=submit value="'.$_lang['stSAVE'].'"><br />
                   </form>
@@ -1524,8 +1560,8 @@ if(isset($_GET['actid']))
 			
 			if($_GET['actid'] == 3) ///сохранить
 			{
+				if(isset($_POST['enabled'])) $config['enabled']=1; else $config['enabled']=0;
 				
-				$config['enabled']=$_POST['enabled'];
 				$config['srvname']=$_POST['srvname'];
 				$config['db']=$_POST['db'];
 				$config['user']=$_POST['user'];
