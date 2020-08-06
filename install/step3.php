@@ -1,10 +1,11 @@
 <?php
 
 
-#Build date Wednesday 5th of August 2020 16:33:26 PM
-#Build revision 1.1
+#Build date Thursday 6th of August 2020 12:58:11 PM
+#Build revision 1.2
 
 $start=microtime(true);
+
 
 		#write config from step2
 			if(isset($_POST['submit'])){
@@ -39,9 +40,17 @@ $start=microtime(true);
 							#mysql
 					if($_POST['srvdbtype']==0)
 					{
-						$query=file_get_contents("../createdb/createdb.sql");
-						$con=mysqli_connect($_POST['address'],$_POST['user'],$_POST['pass'],$_POST['db']);
 					
+						
+						$query=file_get_contents("../createdb/createdb.sql");
+					
+					try {
+						$con=mysqli_connect($_POST['address'],$_POST['user'],$_POST['pass'],$_POST['db']);
+					}
+					catch (Exception $e) {
+						echo 'Error: php-mysqli not activated. Restart web-server and try again.';
+						exit;
+					}
 						if (!$con) 	echo "Error: Cant connect to mysql server." . PHP_EOL;
 						
 						else
@@ -59,8 +68,17 @@ $start=microtime(true);
 					{
 						$query=file_get_contents("../createdb/pgcreatedb.sql");
 						
+						
 						$conn_string = "host=".$_POST['address']." port=5432 dbname=".$_POST['db']." user=".$_POST['user']." password=".$_POST['pass']."";
-						$con = pg_connect($conn_string);
+					
+							try {
+									$con = pg_connect($conn_string);
+								}
+								catch (Exception $e) {
+									echo 'Error: php-pgsql not activated. Restart web-server and try again.';
+									exit;
+								}
+								
 						
 						if (!$con) 	echo "Error: Cant connect to PostgreSQL server." . PHP_EOL;
 						
