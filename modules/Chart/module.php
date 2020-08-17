@@ -1,7 +1,7 @@
 <?php
 
-#Build date Tuesday 4th of August 2020 18:56:12 PM
-#Build revision 1.1
+#Build date Monday 17th of August 2020 10:09:48 AM
+#Build revision 1.2
 
 class Chart
 {
@@ -21,11 +21,16 @@ function __construct($variables){ //
 	#set main dir
 	$this->maindir=__DIR__;
 	
-	#try to undertand root path of your screen squid
-	$referer='http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+	#try to understand root path of your screen squid
+	if ($_SERVER['SERVER_PORT'] == '80') {
+		$referer = 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+	} 
+	else {
+		$referer = 'http://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI'];
+	}
+	
 	preg_match('/(.*?)((cab\/)|(reports\/))/',$referer,$this->link);
-
-
+	
 	
 	$this->chartlib = $chartlib;
 	
