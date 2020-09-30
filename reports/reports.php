@@ -1,7 +1,7 @@
 <?php
 
-#Build date Tuesday 21st of July 2020 13:11:00 PM
-#Build revision 1.11
+#Build date Wednesday 30th of September 2020 16:58:37 PM
+#Build revision 1.12
 
  
 
@@ -5984,7 +5984,7 @@ $result=$ssq->query($queryIpaddressTraffic);
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0',1,'')\">line0</a>";
+$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0 (line3)',1,'')\">line0</a>";
 $colr[3]="line1";
 $colr[4]="line3";
 
@@ -6171,7 +6171,7 @@ $result=$ssq->query($queryTopIpTraffic);
 
 $colr[0]=1;
 $colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0',1,'')\">line0</a>";
+$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0 (line3)',1,'')\">line0</a>";
 $colr[3]="line1";
 $colr[4]="line3";
 
@@ -7072,7 +7072,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $result=$ssq->query($queryWhoVisitPopularSiteIpaddress);
 
 $colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line3','line0','1','')>line0</a>";
+$colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line3','line0 (line2)','1','')>line0</a>";
 $colr[3]="line1";
 $colr[4]="line2";
 
