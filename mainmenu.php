@@ -207,6 +207,8 @@ echo "
 	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURSIPADDRESS']."','javascript:GoReport(".$srv.",51)'));
 	reports.add(new WebFXTreeItem('".$_lang['stLOGINSTIMEONLINE']."','javascript:GoReport(".$srv.",64)'));
 	reports.add(new WebFXTreeItem('".$_lang['stIPADDRESSTIMEONLINE']."','javascript:GoReport(".$srv.",65)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTOPLOGINSTRAFFIC']." new','javascript:GoReport(".$srv.",68)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTOPIPTRAFFIC']." new','javascript:GoReport(".$srv.",69)'));
 
 	reports.icon = 'img/themes/default/Reports.png';
 	reports.openIcon = 'img/themes/default/Reports.png';

@@ -461,6 +461,8 @@ else {
   $goodSitesList="''";
 }
 
+#split working hours
+list($workStart1, $workEnd1, $workStart2, $workEnd2) = explode(":", $workingHours);
 
 if($showZeroTrafficInReports==1)
   $msgNoZeroTraffic="";
@@ -1086,7 +1088,168 @@ if($dbtype==1)
   ORDER BY d asc
   ;";
 
+#mysql version
+$queryTopLoginsWorkingHoursTraffic="
+SELECT 
+nofriends.name,
+tmp.s,
+nofriends.id
+".$echoLoginAliasColumn."
+FROM (SELECT 
+	  login,
+	  SUM(sizeinbytes) as 's' 
+	FROM scsq_quicktraffic 
+	WHERE  date>".$datestart."
+   AND date<".$dateend." 
+   AND site NOT IN (".$goodSitesList.")
+   AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
+   OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
+   AND par=1
+GROUP BY CRC32(login) 
+ORDER BY null) 
+AS tmp 
 
+RIGHT JOIN (SELECT 
+		  id,
+		  name 
+		FROM scsq_logins 
+		WHERE id NOT IN (".$goodLoginsList.")) 
+		AS nofriends 
+ON tmp.login=nofriends.id  
+ LEFT JOIN (SELECT 
+		  name,
+		  tableid 
+	   FROM scsq_alias 
+	   WHERE typeid=0) 
+	   AS aliastbl 
+ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+".$msgNoZeroTraffic."
+
+GROUP BY nofriends.name;";
+
+#postgresql version не тестировалось
+if($dbtype==1)
+$queryTopLoginsWorkingHoursTraffic="
+SELECT 
+nofriends.name,
+tmp.s,
+nofriends.id
+".$echoLoginAliasColumn."
+FROM (SELECT 
+	  login,
+	  SUM(sizeinbytes) as 's' 
+	FROM scsq_quicktraffic 
+	WHERE  date>".$datestart."
+   AND date<".$dateend." 
+   AND site NOT IN (".$goodSitesList.")
+   AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
+   OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
+	 
+   AND par=1
+GROUP BY CRC32(login) 
+ORDER BY null) 
+AS tmp 
+
+RIGHT JOIN (SELECT 
+		  id,
+		  name 
+		FROM scsq_logins 
+		WHERE id NOT IN (".$goodLoginsList.")) 
+		AS nofriends 
+ON tmp.login=nofriends.id  
+ LEFT JOIN (SELECT 
+		  name,
+		  tableid 
+	   FROM scsq_alias 
+	   WHERE typeid=0) 
+	   AS aliastbl 
+ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+".$msgNoZeroTraffic."
+
+GROUP BY nofriends.name;";
+
+#mysql version
+$queryTopIpWorkingHoursTraffic="
+SELECT 
+nofriends.name,
+tmp.s,
+nofriends.id 
+".$echoIpaddressAliasColumn."
+FROM (SELECT 
+  ipaddress,
+  SUM(sizeinbytes) AS s 
+FROM scsq_quicktraffic 
+WHERE date>".$datestart." 
+  AND date<".$dateend." 
+  AND site NOT IN (".$goodSitesList.")
+  AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
+  OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
+	
+  AND par=1
+GROUP BY CRC32(ipaddress) 
+ORDER BY null) 
+AS tmp 
+RIGHT JOIN (SELECT 
+		  id,
+		  name 
+		FROM scsq_ipaddress 
+		WHERE id NOT IN (".$goodIpaddressList.")) AS nofriends 
+ON tmp.ipaddress=nofriends.id  
+LEFT JOIN (SELECT 
+		  name,
+		  tableid 
+	   FROM scsq_alias 
+	   WHERE typeid=1) 
+	   AS aliastbl 
+ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+".$msgNoZeroTraffic."
+
+GROUP BY nofriends.name 
+  ORDER BY tmp.s desc;";
+
+#postgre version не проверялось
+if($dbtype==1)
+$queryTopIpWorkingHoursTraffic="
+SELECT 
+nofriends.name,
+tmp.s,
+nofriends.id 
+".$echoIpaddressAliasColumn."
+FROM (SELECT 
+  ipaddress,
+  SUM(sizeinbytes) AS s 
+FROM scsq_quicktraffic 
+WHERE date>".$datestart." 
+  AND date<".$dateend." 
+  AND site NOT IN (".$goodSitesList.")
+  AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
+  OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
+	
+  AND par=1
+GROUP BY CRC32(ipaddress) 
+ORDER BY null) 
+AS tmp 
+RIGHT JOIN (SELECT 
+		  id,
+		  name 
+		FROM scsq_ipaddress 
+		WHERE id NOT IN (".$goodIpaddressList.")) AS nofriends 
+ON tmp.ipaddress=nofriends.id  
+LEFT JOIN (SELECT 
+		  name,
+		  tableid 
+	   FROM scsq_alias 
+	   WHERE typeid=1) 
+	   AS aliastbl 
+ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+".$msgNoZeroTraffic."
+
+GROUP BY nofriends.name 
+  ORDER BY tmp.s desc;";
 
 $queryLoginsTrafficWide="
   SELECT 
@@ -10427,6 +10590,77 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 }
 
 /////////////// IPADDRESS DOWNLOAD BIG FILES REPORT END
+
+/////////////// TOP LOGINS TRAFFIC WORKING HOURS REPORT
+
+if($id==68)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stLOGIN'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=3+$useLoginalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$result=$ssq->query($queryTopLoginsWorkingHoursTraffic);
+
+$colr[0]=1;
+$colr[1]="numrow";
+$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
+$colr[3]="line1";
+$colr[4]="line3";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
+
+}
+
+/////////////// TOP LOGINS TRAFFIC WORKING HOURS REPORT END
+
+/////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT
+
+if($id==69)
+{
+$colhtext[1]="#";
+$colhtext[2]=$_lang['stIPADDRESS'];
+$colhtext[3]=$_lang['stMEGABYTES'];
+$colhtext[4]=$_lang['stALIAS'];
+
+$colftext[1]="&nbsp;";
+$colftext[2]=$_lang['stTOTAL'];
+$colftext[3]="totalmb";
+$colftext[4]="&nbsp;";
+
+$colh[0]=3+$useIpaddressalias;
+$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
+$colh[2]="<th>".$colhtext[2]."</th>";
+$colh[3]="<th>".$colhtext[3]."</th>";
+$colh[4]="<th>".$colhtext[4]."</th>";
+$result=$ssq->query($queryTopIpWorkingHoursTraffic);
+
+$colr[0]=1;
+$colr[1]="numrow";
+$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0 (line3)',1,'')\">line0</a>";
+$colr[3]="line1";
+$colr[4]="line3";
+
+$colf[1]="<td>".$colftext[1]."</td>";
+$colf[2]="<td><b>".$colftext[2]."</b></td>";
+$colf[3]="<td><b>".$colftext[3]."</b></td>";
+$colf[4]="<td>".$colftext[4]."</td>";
+}
+
+/////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT END
 
 /////universal table
 
