@@ -12,7 +12,7 @@ $_lang['stONELOGINTOPSITESTRAFFIC']="Top sites one login";
 $_lang['stONELOGINTRAFFICBYHOURS']="Tr&aacute;fico de sesiones por hora";
 $_lang['stONEIPADRESSTRAFFIC']="Tr&aacute;fico de direcciones IP ";
 $_lang['stONEIPADDRESSTOPSITESTRAFFIC']="Mayores Sitio por una IP";
-$_lang['stONEIPADDRESSTRAFFICBYHOURS']="Dirección IP de tráfico por hora";
+$_lang['stONEIPADDRESSTRAFFICBYHOURS']="Direcciï¿½n IP de trï¿½fico por hora";
 $_lang['stLOGINSTRAFFICWIDE']="Ancho de tr&aacute;fico por sesi&oacute;n";
 $_lang['stIPADDRESSTRAFFICWIDE']="Ancho de tr&aacute;fico de direcciones IP";
 $_lang['stIPADDRESSTRAFFICWITHRESOLVE']="Tr&aacute;fico de direcciones IP con resoluci&oacute;n";
@@ -65,10 +65,10 @@ $_lang['stFROMCACHEPERCENT']="Desde cache(%)";
 $_lang['stDIRECTPERCENT']="Directo(%)";
 $_lang['stHOSTNAMERESOLVE']="Resolver";
 $_lang['stREQUESTS']="Solicitudes";
-$_lang['stWHO']="¿Qui&eacute;n?";
+$_lang['stWHO']="ï¿½Qui&eacute;n?";
 $_lang['stFROMWEBSITE']="De donde(sitio-web)";
-$_lang['stMONTHYEAR']="Mes.Año";
-$_lang['stDAYMONTHYEAR']="D&iacute;a.Mes.Año";
+$_lang['stMONTHYEAR']="Mes.Aï¿½o";
+$_lang['stDAYMONTHYEAR']="D&iacute;a.Mes.Aï¿½o";
 $_lang['stDAYNAME']="D&iacute;a";
 $_lang['stDATEANDTIME']="Fecha y hora";
 $_lang['stWEBSITE']="Sitio-Web";
@@ -98,7 +98,7 @@ $_lang['stTYPE']="Tipo";
 $_lang['stVALUE']="Valor";
 $_lang['stADDALIAS']="Adicionar alias";
 $_lang['stFORMADDALIAS']="Formulario adicionar alias";
-$_lang['stTYPECHECK']="Tipo (Sesi&oacute;n(sin marcar)/Dirección IP (marcado))";
+$_lang['stTYPECHECK']="Tipo (Sesi&oacute;n(sin marcar)/Direcciï¿½n IP (marcado))";
 $_lang['stADD']="Adicionar";
 
 $_lang['stBACK']="Atr&aacute;s";
@@ -132,7 +132,7 @@ $_lang['stFRIDAY']="Vie";
 $_lang['stSATURDAY']="Sab";
 $_lang['stSUNDAY']="Dom";
 
-$_lang['stINCLUDE']="¿Incluir?";
+$_lang['stINCLUDE']="ï¿½Incluir?";
 $_lang['stQUANTITYALIASES']="Cantidad";
 
 $_lang['stWHOVISITSITES']="Quien visita sitios";
@@ -174,7 +174,7 @@ $_lang['stINSPECT']="Monitorear";
 $_lang['stUSERS']="Usuarios";
 
 $_lang['stACTIVEAUTH']="Activar gabinete de usuario";
-$_lang['stUSERLOGIN']="Inicio de sesión de usuarios";
+$_lang['stUSERLOGIN']="Inicio de sesiï¿½n de usuarios";
 $_lang['stUSERPASSWORD']="Contrase&ntilde;a de Usuario";
 
 
@@ -230,4 +230,8 @@ $_lang['stADDREMOVE']="Add / Remove";
 $_lang['stDBNAME']="Database name";
 $_lang['stCONFIGFILE']="Config file name";
 $_lang['stACTION']="Action";
+
+//1.19
+$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']="Top logins working hours";
+$_lang['stTOPIPWORKINGHOURSTRAFFIC']="Top ip address working hours";
 ?>

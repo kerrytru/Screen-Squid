@@ -232,4 +232,8 @@ $_lang['stADDREMOVE']="Добавить / Удалить";
 $_lang['stDBNAME']="Имя БД";
 $_lang['stCONFIGFILE']="Имя конфигурационного файла";
 $_lang['stACTION']="Действие";
+
+//1.19
+$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']="Топ пользователей по трафику в рабочие часы";
+$_lang['stTOPIPWORKINGHOURSTRAFFIC']="Топ IP адресов по трафику в рабочие часы";
 ?>

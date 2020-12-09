@@ -6042,6 +6042,12 @@ $repheader= "<h2>".$_lang['stLOGINBIGFILES']." <b>".$currentlogin."</b> ".$_lang
 if($id==67)
 $repheader= "<h2>".$_lang['stIPADDRESSBIGFILES']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
+if($id==68)
+$repheader= "<h2>".$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
+if($id==69)
+$repheader= "<h2>".$_lang['stTOPIPWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+
 
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])){
 echo "<table width='100%'>";

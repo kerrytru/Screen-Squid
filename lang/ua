@@ -233,4 +233,8 @@ $_lang['stADDREMOVE']="Add / Remove";
 $_lang['stDBNAME']="Database name";
 $_lang['stCONFIGFILE']="Config file name";
 $_lang['stACTION']="Action";
+
+//1.19
+$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']="Top logins working hours";
+$_lang['stTOPIPWORKINGHOURSTRAFFIC']="Top ip address working hours";
 ?>
