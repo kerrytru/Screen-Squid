@@ -140,8 +140,8 @@ $enableUseDecode="0";
 $tableStyle=0;
 
 #set working hours. 
-#For example, set two periods From 8 to 12 and from 13 to 17
-$workingHours="8:12:13:17";
+#For example, set two periods From 8:00 to 12:30 and from 13 to 17
+$workingHours="8-00:12-30:13-00:17-00";
 
 $vers="1.18b";
 ?>

@@ -463,6 +463,11 @@ else {
 
 #split working hours
 list($workStart1, $workEnd1, $workStart2, $workEnd2) = explode(":", $workingHours);
+list($workStartHour1, $workStartMin1) = explode("-", $workStart1);
+list($workEndHour1, $workEndMin1) = explode("-", $workEnd1);
+list($workStartHour2, $workStartMin2) = explode("-", $workStart2);
+list($workEndHour2, $workEndMin2) = explode("-", $workEnd2);
+
 
 if($showZeroTrafficInReports==1)
   $msgNoZeroTraffic="";
@@ -1098,14 +1103,21 @@ nofriends.id
 FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) as 's' 
-	FROM scsq_quicktraffic 
+	FROM scsq_traffic 
 	WHERE  date>".$datestart."
    AND date<".$dateend." 
    AND site NOT IN (".$goodSitesList.")
-   AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
-   OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
-   AND par=1
-GROUP BY CRC32(login) 
+   AND (
+	(		
+		(FROM_UNIXTIME(date,'%k')>=".$workStartHour1." AND FROM_UNIXTIME(date,'%k')<".$workEndHour1.")
+	 AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin1." AND FROM_UNIXTIME(date,'%i')<".$workEndMin1.")
+  	)
+	OR 	(
+		(FROM_UNIXTIME(date,'%k')>=".$workStartHour2." AND FROM_UNIXTIME(date,'%k')<".$workEndHour2.")
+	 AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin2." AND FROM_UNIXTIME(date,'%i')<".$workEndMin2.")
+  		)
+ 	)
+ GROUP BY CRC32(login) 
 ORDER BY null) 
 AS tmp 
 
@@ -1180,14 +1192,22 @@ nofriends.id
 FROM (SELECT 
   ipaddress,
   SUM(sizeinbytes) AS s 
-FROM scsq_quicktraffic 
+FROM scsq_traffic 
 WHERE date>".$datestart." 
   AND date<".$dateend." 
   AND site NOT IN (".$goodSitesList.")
-  AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
-  OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
+  AND (
+	  	(		
+		  	(FROM_UNIXTIME(date,'%k')>=".$workStartHour1." AND FROM_UNIXTIME(date,'%k')<".$workEndHour1.")
+		   AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin1." AND FROM_UNIXTIME(date,'%i')<".$workEndMin1.")
+		)
+  OR 	(
+	  		(FROM_UNIXTIME(date,'%k')>=".$workStartHour2." AND FROM_UNIXTIME(date,'%k')<".$workEndHour2.")
+		   AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin2." AND FROM_UNIXTIME(date,'%i')<".$workEndMin2.")
+		)
+	   )
 	
-  AND par=1
+
 GROUP BY CRC32(ipaddress) 
 ORDER BY null) 
 AS tmp 
