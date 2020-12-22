@@ -430,6 +430,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
           echo "<h2>".$_lang['stFORMADDALIAS']."</h2>";
           echo '
             <form action="right.php?srv='.$srv.'&id=2&actid=2" method="post">
+            
             <table class=datatable >
            <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name"></td></tr>
            <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid"></td></tr>
@@ -437,7 +438,8 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 		   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin"></td></tr>
 		   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
 		   </table>
-		   <br />
+       <br />
+          <input type="submit" value="'.$_lang['stADD'].'">
            <p>'.$_lang['stVALUE'].':</p>
            <br />
            ';
