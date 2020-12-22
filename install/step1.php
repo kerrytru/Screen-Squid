@@ -207,6 +207,34 @@
 		<tr >
 			<td>
 	
+					Checking for JSON support
+					<br />You have 
+					<?php $output = shell_exec('php -i |grep "json support"'); 
+						preg_match('@enabled@', $output, $version); 
+						if($version[0] !="") {
+						  $passjs=1;
+						  echo "JSON ".$version[0];
+					  }
+					  else
+					  {
+							  echo "no json library. Please install php-json";
+						} 
+					?>
+					</td>
+			<td >
+			<?php 
+				if($passjs==1)
+					echo '<img src="images/true.gif" alt="Success" title="Success" />';
+				else
+					echo '<img src="images/false.gif" alt="Failed" title="Failed" />';
+					
+				?>
+			</td>
+		</tr>
+
+		<tr >
+			<td>
+	
 					Checking for GD library
 					<br />You have 
 					<?php $output = shell_exec('php -i |grep "GD"'); 
