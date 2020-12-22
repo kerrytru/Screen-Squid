@@ -94,11 +94,13 @@ $start=microtime(true);
 					
 		}
 
-#try to undertand root path of your screen squid
-$referer='http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+if ($_SERVER['SERVER_PORT'] == '80') {
+	$referer = 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+} 
+else {
+	$referer = 'http://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI'];
+}
 preg_match('/(.*)\install/',$referer,$link);
-
-
 
 ?>
 
