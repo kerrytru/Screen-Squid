@@ -635,7 +635,7 @@ $queryIpaddressTraffic="
     nofriends.id 
     ".$echoIpaddressAliasColumn."
    ;";
-   
+
   #postgre version
 if($dbtype==1)
   $queryIpaddressTraffic="
@@ -1108,14 +1108,16 @@ FROM (SELECT
    AND date<".$dateend." 
    AND site NOT IN (".$goodSitesList.")
    AND (
-	(		
-		(FROM_UNIXTIME(date,'%k')>=".$workStartHour1." AND FROM_UNIXTIME(date,'%k')<".$workEndHour1.")
-	 AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin1." AND FROM_UNIXTIME(date,'%i')<".$workEndMin1.")
+	(	
+		(FROM_UNIXTIME(date,'%k:%i')>=str_to_date('".$workStartHour1.":".$workStartMin1."','%k:%i'))     
+	 AND(FROM_UNIXTIME(date,'%k:%i') < str_to_date('".$workEndHour1.":".$workEndMin1."','%k:%i'))
   	)
-	OR 	(
-		(FROM_UNIXTIME(date,'%k')>=".$workStartHour2." AND FROM_UNIXTIME(date,'%k')<".$workEndHour2.")
-	 AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin2." AND FROM_UNIXTIME(date,'%i')<".$workEndMin2.")
-  		)
+   OR
+   (	
+	(FROM_UNIXTIME(date,'%k:%i')>=str_to_date('".$workStartHour2.":".$workStartMin2."','%k:%i'))     
+	AND(FROM_UNIXTIME(date,'%k:%i') < str_to_date('".$workEndHour2.":".$workEndMin2."','%k:%i'))
+   )
+
  	)
  GROUP BY CRC32(login) 
 ORDER BY null) 
@@ -1139,6 +1141,7 @@ WHERE (1=1)
 ".$msgNoZeroTraffic."
 
 GROUP BY nofriends.name;";
+
 
 #postgresql version не тестировалось
 if($dbtype==1)
@@ -1197,14 +1200,15 @@ WHERE date>".$datestart."
   AND date<".$dateend." 
   AND site NOT IN (".$goodSitesList.")
   AND (
-	  	(		
-		  	(FROM_UNIXTIME(date,'%k')>=".$workStartHour1." AND FROM_UNIXTIME(date,'%k')<".$workEndHour1.")
-		   AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin1." AND FROM_UNIXTIME(date,'%i')<".$workEndMin1.")
-		)
-  OR 	(
-	  		(FROM_UNIXTIME(date,'%k')>=".$workStartHour2." AND FROM_UNIXTIME(date,'%k')<".$workEndHour2.")
-		   AND (FROM_UNIXTIME(date,'%i')>=".$workStartMin2." AND FROM_UNIXTIME(date,'%i')<".$workEndMin2.")
-		)
+	(	
+		(FROM_UNIXTIME(date,'%k:%i')>=str_to_date('".$workStartHour1.":".$workStartMin1."','%k:%i'))     
+	 AND(FROM_UNIXTIME(date,'%k:%i') < str_to_date('".$workEndHour1.":".$workEndMin1."','%k:%i'))
+  	)
+   OR
+   (	
+	(FROM_UNIXTIME(date,'%k:%i')>=str_to_date('".$workStartHour2.":".$workStartMin2."','%k:%i'))     
+	AND(FROM_UNIXTIME(date,'%k:%i') < str_to_date('".$workEndHour2.":".$workEndMin2."','%k:%i'))
+   )
 	   )
 	
 
