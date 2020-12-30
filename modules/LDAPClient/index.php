@@ -101,7 +101,7 @@ $start=microtime(true);
 ///SQL querys
 
 
-        $queryAllLogins="select id,name from scsq_logins  where name NOT IN (''".$goodLoginsList.") order by name asc;";
+        $queryAllLogins="select id,name from scsq_logins  where name NOT IN ('".$goodLoginsList."') order by name asc;";
  
 
 
@@ -112,6 +112,7 @@ $start=microtime(true);
 
 echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHRONIZETOLDAP']."</a><br />";
 			}
+		
 		if(isset($_GET['actid']))
           if($_GET['actid']==1) {
 
@@ -119,7 +120,8 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
           $numrow=0;
 
           while($line = $ssq->fetch_array($result)) {
-			  
+			
+			
 			  $aliasname="";
 			  #запросим у LDAP есть ли такой логин. И если есть то возьмём его имя
 			  $aliasname=$ldap_client->GetUsernameByLogin($line[1]);
