@@ -1,7 +1,11 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:45:18 PM
-#Build revision 1.3
+/*
+<!#CR>
+*                         File Mod     > <!#FT> 2021/01/05 22:37:54.661 </#FT>                                         *
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+</#CR>
+*/
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -71,12 +75,16 @@ $ldap_client = new LDAPClient($variableSet);
 
 
     #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0)
+		if($dbtype==0){
 		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($dbtype==1)
+		$ssq1 = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+		}
+
+
+		if($dbtype==1){
 		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
+		$ssq1 = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+		}
 if($enableNofriends==1) {
   $friends=implode("','",explode(" ", $goodLogins));
   $friendsTmp="where name in  ('".$friends."')";
@@ -118,7 +126,7 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 
          $result=$ssq->query($queryAllLogins);
           $numrow=0;
-
+		  
           while($line = $ssq->fetch_array($result)) {
 			
 			
@@ -130,9 +138,9 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 				  {
 			
 					         $sql="select id from scsq_alias where userlogin='$line[1]'";
-					         $resquery = $ssq->query($sql);
+					         $resquery = $ssq1->query($sql);
 					         
-					         $idAlias = $ssq->fetch_array($resquery);
+					         $idAlias = $ssq1->fetch_array($resquery);
 					         
 					         #если алиас существует, то обновим его. иначе создадим
 					         if($idAlias[0]>0)
@@ -141,9 +149,9 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 							 else 
 								$sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$aliasname', '0','$line[0]','$line[1]','','0')";
       
-							$ssq->free_result($resquery);
+							$ssq1->free_result($resquery);
 					   
-							  if (!$ssq->query($sql)) {
+							  if (!$ssq1->query($sql)) {
 								die('Error: Can`t insert alias into table!');
 							  }
 					$numrow++;
