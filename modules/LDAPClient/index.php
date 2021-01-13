@@ -126,35 +126,48 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 
          $result=$ssq->query($queryAllLogins);
           $numrow=0;
-		  
+			# попробуем полностью протестировать код.
+			echo "Начинаем синхронизацию с LDAP <br>";
           while($line = $ssq->fetch_array($result)) {
-			
-			
+			echo "Цикл итерация ".$numrow."<br>";
+
+			echo "Ищем значение алиаса для логина ".$line[1]."<br>";
 			  $aliasname="";
 			  #запросим у LDAP есть ли такой логин. И если есть то возьмём его имя
 			  $aliasname=$ldap_client->GetUsernameByLogin($line[1]);
+
+			  echo "Функция вернула алиас = '".$aliasname."' для логина '".$line[1]."'<br>";
 		
 			  if($aliasname !="")
 				  {
-			
-					         $sql="select id from scsq_alias where userlogin='$line[1]'";
+					echo "Начинаем запись.<br>";
+					echo "Узнаем, есть ли уже алиас для логина = '".$line[1]."'.<br>";
+					
+					         $sql="select id from scsq_alias where tableid=$line[0] and typeid=0";
 					         $resquery = $ssq1->query($sql);
 					         
 					         $idAlias = $ssq1->fetch_array($resquery);
+							 echo "Поиск вернул id алиаса = '".$idAlias[0]."'.<br>";
 					         
 					         #если алиас существует, то обновим его. иначе создадим
 					         if($idAlias[0]>0)
-								$sql="UPDATE scsq_alias SET name='$aliasname' WHERE id='$idAlias[0]'";
-							
+							{
+							 $sql="UPDATE scsq_alias SET name='$aliasname' WHERE id='$idAlias[0]'";
+							 echo "Обновили наименование алиаса для id алиаса = '".$idAlias[0]."'. Теперь имя алиаса = '".$aliasname."'.<br>";
+							}
 							 else 
+								{
 								$sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$aliasname', '0','$line[0]','$line[1]','','0')";
-      
+								echo "Создали новый алиас = '".$aliasname."' для логина = '".$line[1]."'.<br>";
+								}
 							$ssq1->free_result($resquery);
 					   
 							  if (!$ssq1->query($sql)) {
 								die('Error: Can`t insert alias into table!');
 							  }
-					$numrow++;
+					 echo "Цикл прошёл<br><br>";
+					
+					 $numrow++;
 				  }
    
             
