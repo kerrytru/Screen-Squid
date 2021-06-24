@@ -1,11 +1,31 @@
 #!/usr/bin/perl
 
-#Build date Thursday 4th of June 2020 17:32:05 PM
-#Build revision 1.2
+=cut
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> fetch.pl </#FN>                                                        
+*                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/06/24 20:07:02.557 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+=cut
+
 
 use DBI; # DBI  Perl!!!
 
 #=======================CONFIGURATION BEGIN============================
+#Enable silent mode ( $silent_mode=1 means enabled ). This means, that you set script in production. No echoes you need
+$silent_mode = 0;
 
 $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
 
@@ -17,7 +37,7 @@ $host = "localhost"; # host s DB
 $port = "3306"; # port DB
 $user = "mysql-user"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test"; # name DB
+$db = "test1"; # name DB
 }
 #postgresql default config
 if($dbtype==1){
@@ -59,7 +79,6 @@ my $minbytestoparse=-1; #bytes, default -1
 
 #=======================CONFIGURATION END==============================
 
-
 my $count=0;
 my $lastdate=0;
 my $sqltext="";
@@ -69,6 +88,7 @@ my $sql_getlastdate="";
 #open log file for writing
 open(OUT, ">>$filetolog");
 
+if($silent_mode == 0) {
 #datetime when parse started
 print $now=localtime;
 $startnow=time;
@@ -78,6 +98,7 @@ break;
 print OUT $now;
 
 $line_count = `wc -l < $filetoparse`;
+}
 
 #make conection to DB
 if($dbtype==0){ #mysql
@@ -146,12 +167,17 @@ open(IN, "<$filetoparse");
 $countlines=0; 
 $countadded=0;
 
+if($silent_mode == 0) {
 print "\n";
+
+}
 
 #loop for get strings from file one by one.
 while (my $line=<IN>) {
 #count how much lines in file are parsed
 $countlines=$countlines+1;
+
+if($silent_mode == 0) {
 $completed=int(($countlines/$line_count)*100);
 
 if(time > $seconds+1)
@@ -163,7 +189,7 @@ $countinsert=0;
 $countinsert=$countinsert+1;
 
 print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/sec \r";
-
+}
 
 #split string into items.
   
@@ -286,9 +312,12 @@ close(IN);
 #$sth = $dbh->prepare($sqltext);
 #$sth->execute;
 
+if($silent_mode==0) {
+
 print "\nStarting update scsq_quicktraffic\r";
 break;
 print "\n";
+}
 
 #update scsq_quicktraffic
 
@@ -446,8 +475,10 @@ $sth->execute;
 
 
 #print datetime when import ended
+if($silent_mode==0) {
 print "\n";
 print $now=localtime;
+}
 $endnow=time;
 
 #print datetime when parsing ended
