@@ -1,0 +1,10 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Cache module";
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
+?>

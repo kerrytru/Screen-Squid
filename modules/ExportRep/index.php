@@ -9,6 +9,9 @@ date_default_timezone_set(date_default_timezone_get());
 
 include("config.php");
 include("../../config.php");
+
+$language=$globalSS['language'];
+
 include("module.php");
 include_once("../../lang/$language");
 
@@ -39,7 +42,8 @@ $header='<html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../../themes/'.$globaltheme.'/global.css"/>
+<link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>
+
 
 
 </head>
@@ -65,24 +69,11 @@ $variableSet['language']=$language;
 
 
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
-
-if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
-
 // Include the main TCPDF library (search for installation path).
 include("../../lib/tcpdf/tcpdf.php");
 
 
-    #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0)
-		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($dbtype==1)
-		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
+
 
 ///CALENDAR
 
@@ -153,7 +144,7 @@ else
   $querydate2=date("d-m-Y");
 
 
-$exportrep_ex = new ExportRep($variableSet);
+$exportrep_ex = new ExportRep($globalSS);
 
 
 

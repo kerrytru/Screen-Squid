@@ -3,11 +3,17 @@
 #Build date Monday 3rd of August 2020 16:14:38 PM
 #Build revision 1.0
 
+
+    // Пример #1. Простое подключение
+   
+
 ?>
 
 <!doctype html public "-//W3C//DTD HTML 3.2 Final//EN">
 <?php 
 	// Check to see if the configuration file exists, if not, explain
+
+
 	if (file_exists('config.php')) {
 
 		include("config.php"); 

@@ -12,9 +12,14 @@ if(isset($_GET['srv']))
 else
   $srv=0;
 
+
+
 include("../../config.php");
+
+$language=$globalSS['language'];
+
 include("module.php");
-include_once("../../lang/$language");
+include_once($globalSS['root_dir']."/lang/$language");
 	if (file_exists("langs/".$language))
 		include("langs/".$language);  #подтянем файл языка если это возможно
 	else	

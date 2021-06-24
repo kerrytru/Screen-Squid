@@ -18,6 +18,9 @@ else
 
 include("../../config.php");
 
+$language=$globalSS['language'];
+
+
 include("config.php");
 include("module.php");
 include("../../lang/$language");
@@ -65,26 +68,11 @@ $variableSet['ldaptree']=$ldaptree;
 $variableSet['language']=$language;
 
 #в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
 
-if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
-
-$ldap_client = new LDAPClient($variableSet);
+$ldap_client = new LDAPClient($globalSS);
 
 
-    #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0){
-		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-		$ssq1 = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-		}
 
-
-		if($dbtype==1){
-		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-		$ssq1 = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-		}
 if($enableNofriends==1) {
   $friends=implode("','",explode(" ", $goodLogins));
   $friendsTmp="where name in  ('".$friends."')";

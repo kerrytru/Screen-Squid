@@ -9,13 +9,8 @@ class dbDaemon
 function __construct($variables){ // 
     $this->vars = $variables;
     	
-	    #в зависимости от типа БД, подключаем разные модули
-		if($this->vars['dbtype']==0)
-		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($this->vars['dbtype']==1)
-		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
+
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
 	else	
@@ -42,7 +37,7 @@ function __construct($variables){ //
 
 # Table structure for table `scsq_mod_dbDaemon`
 
-		if($this->vars['dbtype']==0) #mysql version
+		if($this->vars['connectionParams']['dbtype']==0) #mysql version
 		$CreateTable = "
 		CREATE TABLE IF NOT EXISTS scsq_mod_dbDaemon (
 			  id bigint NOT NULL AUTO_INCREMENT,
@@ -53,7 +48,7 @@ function __construct($variables){ //
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 		";
 		
-				if($this->vars['dbtype']==1) #postgre version
+				if($this->vars['connectionParams']['dbtype']==1) #postgre version
 		$CreateTable = "
 		CREATE TABLE IF NOT EXISTS scsq_mod_dbDaemon (
 			  id serial NOT NULL,
@@ -73,14 +68,8 @@ function __construct($variables){ //
 
 		
 
-		$result=$this->ssq->query($CreateTable) or die ("Can`t install module!");
-
-		$this->ssq->free_result($result);
-		
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
-		
+		doQuery($this->vars, $CreateTable) or die ("Can`t install module!");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
 	 }
@@ -95,13 +84,10 @@ function __construct($variables){ //
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'dbDaemon';";
 
-		$result=$this->ssq->query($query) or die ("Can`t uninstall module!");
+		doQuery($this->vars, $query) or die ("Can`t uninstall module!");
 
-		$this->ssq->free_result($result);
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 

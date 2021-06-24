@@ -19,7 +19,7 @@ else
 include("../config.php");
 
 //<!-- The themes file -->
-echo '<link rel="stylesheet" type="text/css" href="../themes/'.$globaltheme.'/global.css"/>';
+echo '<link rel="stylesheet" type="text/css" href="../themes/'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>';
 
 
 $addr=$address[$srv];
@@ -29,12 +29,13 @@ $dbase=$db[$srv];
 $dbtype=$srvdbtype[$srv];
 
 $variableSet = array();
+$variableSet['srv']=$srv;
 $variableSet['addr']=$addr;
 $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 
-
+$globalSS['connectionParams']=$variableSet;
 
 $squidhost=$cfgsquidhost[$srv];
 $squidport=$cfgsquidport[$srv];
@@ -46,25 +47,11 @@ $pass=$pass[$srv];
 $db=$db[$srv];
 
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-{
-include("../lib/dbDriver/mysqlmodule.php");
-$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
+include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
+include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
-if($dbtype==1)
-{
-include("../lib/dbDriver/pgmodule.php");
-$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
-
- // Standard pChart inclusions
-# include("../lib/pChart/pChart/pData.class");
-# include("../lib/pChart/pChart/pChart.class");
-
-
-include("../modules/Chart/module.php");
+include("".$globalSS['root_dir']."/modules/Chart/module.php");
 
 $grap = new Chart($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
@@ -94,7 +81,7 @@ $norefresh=0;
 
 if($norefresh==0){
 if($id==1||$id==2)
-echo '<META HTTP-EQUIV="REFRESH" CONTENT="'.$refreshPeriod.'">'; ///обновление страницы в секундах
+echo '<META HTTP-EQUIV="REFRESH" CONTENT="'.$globalSS['refreshPeriod'].'">'; ///обновление страницы в секундах
 }
 
 echo "
@@ -169,11 +156,11 @@ $friendsLogin="0";
 $friendsIpaddress="0";
 
 #create list of friends
-if($enableNofriends==1) {
+if($globalSS['enableNofriends']==1) {
 if($goodLogins!="")
-  $friendsLogin=implode("','",explode(" ", $goodLogins));
+  $friendsLogin=implode("','",explode(" ", $globalSS['goodLogins']));
 if($goodIpaddress!="")
-  $friendsIpaddress=implode("','",explode(" ", $goodIpaddress));
+  $friendsIpaddress=implode("','",explode(" ", $globalsSS['goodIpaddress']));
 }
 
 
@@ -222,7 +209,7 @@ from
 
 if($dbtype==1)
 $queryActiveUsers="
- select table1.ipaddr,sum(table1.sums/1024/table1.seconds) as s, table1.username, table1.id,table1.aliasname 
+ select table1.ipaddr,sum(table1.sums/1024/(table1.seconds+1)) as s, table1.username, table1.id,table1.aliasname 
  from 
  (select DISTINCT split_part(ipaddress,':',1) as ipaddr,sizeinbytes as sums, seconds, username, ipaddresstbl.id,aliastbl.name as aliasname from scsq_sqper_activerequests 
  LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,split_part(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON split_part(ipaddress,':',1)=ipaddresstbl.name 
@@ -277,15 +264,15 @@ echo "<h2>".$_lang['stACTIVEIPADDRESS']."</h2>";
 
 #если тренды не открывали более 5 минут, таблица очищается
 $sqltext="select max(date) from scsq_sqper_trend10";
-$result=$ssq->query($sqltext);
-$linedate = $ssq->fetch_array($result);
+$linedate=doFetchOneQuery($globalSS, $sqltext);
+
 $resdate=$nowtimestamp - $linedate[0];
-$ssq->free_result($result);
+
 if($resdate>=60)
 {
 $sqltext="truncate scsq_sqper_trend10";
-$result=$ssq->query($sqltext);
-$ssq->free_result($result);
+$result=doQuery($globalSS, $sqltext);
+
 }
 
 
@@ -296,18 +283,16 @@ if($id==1)
 {
  
 $sqltext="truncate scsq_sqper_activerequests;";
-$result=$ssq->query($sqltext);
-$ssq->free_result($result);
+doQuery($globalSS, $sqltext);
 
 if($dbtype==0)
 $sqltext="ALTER TABLE scsq_sqper_activerequests AUTO_INCREMENT = 1 ;";
 
 if($dbtype==1)
-$sqltext="ALTER SEQUENCE scsq_mod_categorylist_id_seq RESTART WITH 1;";
+$sqltext="ALTER SEQUENCE scsq_sqper_activerequests_id_seq RESTART WITH 1;";
 
 
-$result=$ssq->query($sqltext);
-$ssq->free_result($result);
+doQuery($globalSS, $sqltext);
 
 $cmd = "GET cache_object://".$squidhost."/active_requests HTTP/1.0\r\n";
 //$cmd = "GET cache_object://".$squidhost."/active_requests";
@@ -361,7 +346,7 @@ $seconds=round($matchsec[1][$i],0);
 
 	$sqltext="INSERT INTO scsq_sqper_activerequests (date,ipaddress,username,site,sizeinbytes,seconds) VALUES";
 	$sqltext=$sqltext."($nowtimestamp,'$ipaddress','$username','$site','$size','$seconds')";
-	$result=$ssq->query($sqltext);
+	doQuery($globalSS,$sqltext);
 
 
 	$sqltext="";
@@ -397,22 +382,21 @@ $showInspectTable=0;
 echo "<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=1>".$_lang['stSTOP']."</a>";
 
 if($dbtype==0)#mysql version
-$result=$ssq->query("select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests");
+$result=doFetchOneQuery($globalSS, "select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests");
 
 if($dbtype==1)#postgre version
-$result=$ssq->query("select to_char(to_timestamp(date),'DD.MM.YYYY HH24:MI:SS') as d from scsq_sqper_activerequests");
+$result=doFetchOneQuery($globalSS,"select to_char(to_timestamp(date),'DD.MM.YYYY HH24:MI:SS') as d from scsq_sqper_activerequests");
 
 
-$lastUpdateDate = $ssq->fetch_array($result);
-$ssq->free_result($result);
+$lastUpdateDate = $result[0];
 
-$result=$ssq->query($queryActiveUsers);
+$result=doFetchQuery($globalSS,$queryActiveUsers);
 $numrow=1;
 $totalspeed=0;
 $insptotalspeed=0; //total speed for inspected table
 
-while ($line = $ssq->fetch_array($result)) {
-if($enableUseiconv==1)
+foreach ($result as $line) {
+if($globalSS['enableUseiconv']==1)
 $line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 if($line[0]=='')
 $line[0]="::1";
@@ -420,7 +404,6 @@ $line[0]="::1";
 @$rows[$numrow]=implode(";;",$line);
 $numrow++;
 }
-$ssq->free_result($result);
 
 echo "<p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />";
 
@@ -540,7 +523,7 @@ echo "</table>";
 
 #trend totalspeed
    $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$totalspeed,1)";
-$ssq->query($sqltext);
+doQuery($globalSS, $sqltext);
 
 
 foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
@@ -551,17 +534,16 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
 
 
    $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
-$result=$ssq->query($sqltext);
+doQuery($globalSS, $sqltext);
 
    $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=1 order by date desc limit 30) as tmp order by date asc";
-$result=$ssq->query($sqltext);
+$result=doFetchQuery($globalSS, $sqltext);
 
 $countValues=0;
-while ($line = $ssq->fetch_array($result)) {
+foreach ($result as $line) {
 $arrValues[$countValues]=$line[0];
 $countValues++;
 }
-$ssq->free_result($result);
 //pChart Graph 
 
 #соберем данные для графика
@@ -617,18 +599,18 @@ $errCheck=0;
 $tmp=fgets($fp,2048);
 ///echo $tmp;
 
-if(preg_match("/HTTP/1.0 200 OK/",$tmp)){
+if(preg_match("/HTTP\/1.0 200 OK/",$tmp)){
 echo "Error: No connection to Squid";
 $errCheck=1;
 break;
 }
 preg_match("/UP Time:(.+) /",$tmp,$match);
-if(($match[1] != "")&&($uptime=="")){
+if(isset($match[1]) && ($match[1] != "")&&($uptime=="")){
 $uptime=$match[1];
 }
 
 preg_match("/CPU Usage:(.+)%/",$tmp,$match);
-if(($match[1] != "")&&($cpuusage == "")){
+if(isset($match[1]) && ($match[1] != "")&&($cpuusage == "")){
 $cpuusage=$match[1];
 }
 
@@ -659,12 +641,12 @@ $tmp=fgets($fp,2048);
 ///echo $tmp;
 
 preg_match("/queue length:(.+)/",$tmp,$match);
-if(($match[1] != "")&&($basicqlength=="")){
+if(isset($match[1]) && ($match[1] != "")&&($basicqlength=="")){
 $basicqlength=$match[1];
 }
 
 preg_match("/avg service time:(.+)/",$tmp,$match);
-if(($match[1] != "")&&($basicavgsvc == "")){
+if(isset($match[1]) && ($match[1] != "")&&($basicavgsvc == "")){
 $basicavgsvc=$match[1];
 }
 
@@ -697,12 +679,12 @@ $tmp=fgets($fp,2048);
 ///echo $tmp;
 
 preg_match("/queue length:(.+)/",$tmp,$match);
-if(($match[1] != "")&&($digestqlength=="")){
+if(isset($match[1]) && ($match[1] != "")&&($digestqlength=="")){
 $digestqlength=$match[1];
 }
 
 preg_match("/avg service time:(.+)/",$tmp,$match);
-if(($match[1] != "")&&($digestavgsvc == "")){
+if(isset($match[1]) && ($match[1] != "")&&($digestavgsvc == "")){
 $digestavgsvc=$match[1];
 }
 
@@ -735,12 +717,12 @@ $tmp=fgets($fp,2048);
 ///echo $tmp;
 
 preg_match("/queue length:(.+)/",$tmp,$match);
-if(($match[1] != "")&&($negqlength=="")){
+if(isset($match[1]) && ($match[1] != "")&&($negqlength=="")){
 $negqlength=$match[1];
 }
 
 preg_match("/avg service time:(.+)/",$tmp,$match);
-if(($match[1] != "")&&($negavgsvc == "")){
+if(isset($match[1]) && ($match[1] != "")&&($negavgsvc == "")){
 $negavgsvc=$match[1];
 }
 
@@ -837,64 +819,11 @@ echo "	<tr>
 
 echo "</table>";
 #trend cpuusage
-$cpuusage=$cpuusage*100;
-   $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$cpuusage,2)";
-$sql->query($connection,$sqltext);
+#$cpuusage=$cpuusage*100;
+#   $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$cpuusage,2)";
+#doQuery($globalSS,$sqltext);
 
 
-foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
-   unlink($filename);
-}
-
-
-
-
-   $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
-$result=mysqli_query($connection,$sqltext);
-
-   $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=2 order by date desc limit 30) as tmp order by date asc";
-$result=mysqli_query($connection,$sqltext,MYSQLI_USE_RESULT);
-
-$countValues=0;
-while ($line = mysqli_fetch_array($result,MYSQLI_NUM)) {
-$arrValues[$countValues]=$line[0]/100;
-$countValues++;
-}
-mysqli_free_result($result);
-
-//pChart Graph 
- // Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrValues,"Serie1");
-
-$DataSet->AddAllSeries();
-$DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("CPU Usage","Serie1");
-
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->setFixedScale(0,100);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(50,30,585,200);
- $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
- $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
- $Test->drawGraphArea(255,255,255,TRUE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2);
-
- // Draw the 0 line
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",6);
- $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-
- // Draw the cubic curve graph
- $Test->drawCubicCurve($DataSet->GetData(),$DataSet->GetDataDescription());
-
- // Finish the graph
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(600,30,$DataSet->GetDataDescription(),255,255,255);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",10);
- $Test->Render("../lib/pChart/pictures/trend".$start.".png");
-
-echo "<img src='../lib/pChart/pictures/trend".$start.".png' alt='Image'>";
 
 ///pChart Graph END
 } ///if no error. errCheck=0

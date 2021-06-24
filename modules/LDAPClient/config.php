@@ -8,8 +8,8 @@
 
 $ldapserver = 'localhost';
 $ldapuser      = 'cn=Manager,dc=my-domain,dc=com'; 
-$ldappass     = 'pass';
-$ldaptree    = "OU=Users,DC=my-domain,DC=com";
+$ldappass     = '12345678';
+$ldaptree    = "DC=my-domain,DC=com";
 
 
 ?>

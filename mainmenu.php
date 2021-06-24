@@ -10,6 +10,10 @@
 
 <?php include("config.php");
 
+
+
+
+
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
@@ -17,7 +21,7 @@ else
  ?>
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="themes/<?php echo $globaltheme; ?>/global.css"/>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalSS['root_http']; ?>/themes/<?php echo $globalSS['globaltheme']; ?>/global.css"/>
 
 <!-- The xtree script file -->
 <script src="javascript/xtree.js"></script>
@@ -251,7 +255,8 @@ else
 echo "
 
 //Second Level	
-    rootproxy.add(new WebFXTreeItem('none'));
+//Если проблемы с подключением разместим тестовую страницу.
+    rootproxy.add(new WebFXTreeItem('none','javascript:GoRightReport(".$srv.",999)'));
 	rootproxy.icon = 'img/themes/default/DisconnectedDatabase.png';
 	rootproxy.openIcon = 'img/themes/default/DisconnectedDatabase.png';
 	

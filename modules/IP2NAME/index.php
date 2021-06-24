@@ -13,6 +13,9 @@ else
 
 include("../../config.php");
 
+$language=$globalSS['language'];
+
+
 include("config.php");
 include("module.php");
 include("../../lang/$language");
@@ -57,22 +60,10 @@ $variableSet['ip2name_separator']=$ip2name_separator;
 
 $variableSet['language']=$language;
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
 
-if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
+$ip2name_ex = new IP2NAME($globalSS);
 
-$ip2name_ex = new IP2NAME($variableSet);
 
-    #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0)
-		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($dbtype==1)
-		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
 if($enableNofriends==1) {
   $friends=implode("','",explode(" ", $goodLogins));
   $friendsTmp="where name in  ('".$friends."')";

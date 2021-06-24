@@ -16,7 +16,7 @@ function __construct($variables){ //
      include("pChart/pChart/pData.class");
 	 include("pChart/pChart/pChart.class");	
 	 
-	 include("config.php"); //module config	
+	 include(__DIR__."/config.php"); //module config	
 
 	#set main dir
 	$this->maindir=__DIR__;
@@ -42,6 +42,16 @@ function __construct($variables){ //
 	foreach (glob($this->maindir."/pictures/*.png") as $filename) {
 		unlink($filename);
 	}
+
+	if (file_exists("langs/".$this->vars['language']))
+		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
+	else	
+		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский.  	
+	
+	$this->lang = $_lang;
+
+
+
 }
 
   function GetDesc()

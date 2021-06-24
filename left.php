@@ -16,7 +16,7 @@ else
 
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="themes/<?php echo $globaltheme;?>/global.css"/>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalSS['root_http']; ?>/themes/<?php echo $globalSS['globaltheme']; ?>/global.css"/>
 
 <!-- The xtree script file -->
 <script src="javascript/xtree.js"></script>
@@ -37,6 +37,20 @@ if((id==21) || (id==39) || (id==40) ) {
 parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value
 +'&dom=month&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
 +'&typeid='+parent.right.window.document.fastdateswitch_form.typeid_field_hidden.value
++'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
+}
+else if ((id==1) || (id==5) || (id==14) || (id==50) || (id==64) || (id==68) ) ///если отчеты по логинам, то сразу typeid=0 установим
+{
+parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value
++'&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
++'&typeid=0'
++'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
+}
+else if ((id==2) || (id==6) || (id==15) || (id==51) || (id==65) || (id==69) ) ///если отчеты по IP адресам, то сразу typeid=1 установим
+{
+parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value
++'&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
++'&typeid=1'
 +'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
 }
 else

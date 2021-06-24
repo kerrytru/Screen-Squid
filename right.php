@@ -6,9 +6,6 @@
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
 
-#вводим новую переменную - количество байт в мегабайте. Но не все обновят конфиг, поэтому для таких случаев сделаем переход безударным.
-if(!isset($oneMegabyte))
-$oneMegabyte=1000000;
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -16,6 +13,10 @@ else
   $srv=0;
   
   include("config.php");
+  include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
+  include(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
+  include(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+  include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
 
 ?>
 
@@ -24,7 +25,7 @@ else
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="themes/<?php echo $globaltheme; ?>/global.css"/>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalSS['root_http']; ?>/themes/<?php echo $globalSS['globaltheme']; ?>/global.css"/>
 
 </head>
 <body>
@@ -74,50 +75,29 @@ $dbase=$db[$srv];
 $dbtype=$srvdbtype[$srv];
 
 $variableSet = array();
+$variableSet['srv']=$srv;
 $variableSet['addr']=$addr;
 $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 $variableSet['dbtype']=$dbtype;
-$variableSet['language']=$language;
+$variableSet['language']=$globalSS['language'];
 
+$globalSS['connectionParams'] = $variableSet;
+$globalSS['lang']=$_lang;
 
+  #если есть дружеские логины, IP адреса или сайты. Соберём их.
+  $globalSS['goodLoginsList']=doCreateFriendList($globalSS,'logins');
+  $globalSS['goodIpaddressList']=doCreateFriendList($globalSS,'ipaddress');
+  $globalSS['goodSitesList'] = doCreateSitesList($globalSS);
 
-#в зависимости от типа БД, подключаем разные модули
-
-	
-if($dbtype==0)
-{
-include("lib/dbDriver/mysqlmodule.php");
-$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
-
-if($dbtype==1)
-{
-include("lib/dbDriver/pgmodule.php");
-$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
-
-
-
-if(!isset($_GET['id']))
+if(!isset($_GET['id'])) {
 echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
+
+}
 
 $start=microtime(true);
 
-
-if($enableNofriends==1) {
-  $friendsTmp=implode("','",explode(" ", $goodLogins));
-  $friendsTmp=",'".$friendsTmp."'";
-  $goodLoginsList=$friendsTmp;
-  $friendsTmp=implode("','",explode(" ", $goodIpaddress));
-  $friendsTmp=",'".$friendsTmp."'";
-  $goodIpaddressList=$friendsTmp;
-  }
-    else {
-      $goodLoginsList="";
-      $goodIpaddressList="";
-      }
 
 
        if(isset($_POST['userlogin'])) // логин для авторизации в кабинете
@@ -140,10 +120,10 @@ if($enableNofriends==1) {
         else
           $changepassword=0;
 
-if(!isset($_GET['id'])) echo "OK"; //удалить надо
+if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
 			//echo $_lang['stALLISOK'];
 
-  if($ssq->db_object==null) { 
+  if(1==null) { 
   //  echo $_lang['stDONTFORGET']; //и это тоже удалить
 	echo ""; 
   }
@@ -155,120 +135,10 @@ if(!isset($_GET['id'])) echo "OK"; //удалить надо
 	if(isset($_GET['id'])) {
 
     if($_GET['id']==1) { //краткая статистика
-		
-		
-			  $queryCountRowsTraffic="select count(*) from scsq_traffic";
-			  $queryCountRowsLogin="select count(*) from scsq_logins";
-			  $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
-			  $queryMinMaxDateTraffic="select from_unixtime(t.mindate,'%d-%m-%Y %H:%i:%s'),from_unixtime(t.maxdate,'%d-%m-%Y %H:%i:%s') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
-			  
-			  if($dbtype==1) #postgres 
-			  $queryMinMaxDateTraffic="select to_char(to_timestamp(t.mindate),'DD-MM-YYYY HH24:MI:SS'),to_char(to_timestamp(t.maxdate),'DD-MM-YYYY HH24:MI:SS') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
-			  
-			  
-			  $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic where par=1";
-			  $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
-			  $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
-			  $queryCountObjectsTraffic3="select count(id) from scsq_traffic where sizeinbytes>5000 and sizeinbytes<=10000";
-			  $queryCountObjectsTraffic4="select count(id) from scsq_traffic where sizeinbytes>10000";
+      doGetStatistics($globalSS);
+    }
 
-			#  $result=mysqli_query($connection,$queryCountRowsTraffic, MYSQLI_USE_RESULT);
-
-			$result = $ssq->query($queryCountRowsTraffic) ;
-			$CountRowsTraffic=$ssq->fetch_array($result);
-			$ssq->free_result($result);
-
-			$result = $ssq->query($queryCountRowsLogin) ;
-			$CountRowsLogin=$ssq->fetch_array($result);
-			$ssq->free_result($result);
-
-			$result = $ssq->query($queryCountRowsIpaddress) ;
-			$CountRowsIpaddress=$ssq->fetch_array($result);
-			$ssq->free_result($result);
-
-			$result = $ssq->query($queryMinMaxDateTraffic) ;
-			$MinMaxDateTraffic=$ssq->fetch_array($result);
-			$ssq->free_result($result);
-
-			$result = $ssq->query($querySumSizeTraffic) ;
-			$SumSizeTraffic=$ssq->fetch_array($result);
-			$ssq->free_result($result);
-
-				if($enableTrafficObjectsInStat==1)
-				{
-				  $result=$ssq->query($queryCountObjectsTraffic1);
-				  $CountObjects1=$ssq->fetch_array($result);
-				  $result=$ssq->query($queryCountObjectsTraffic2);
-				  $CountObjects2=$ssq->fetch_array($result);
-				  $result=$ssq->query($queryCountObjectsTraffic3);
-				  $CountObjects3=$ssq->fetch_array($result);
-				  $result=$ssq->query($queryCountObjectsTraffic4);
-				  $CountObjects4=$ssq->fetch_array($result);
-				}
-
-  
-		
-		
-		
-		
-		
-      echo "
-      <h2>".$_lang['stSTATS'].":</h2>
-      <table class=\"datatable\">
-      <tr>
-         <td>".$_lang['stQUANTITYRECORDS']."</td>
-         <td>".$CountRowsTraffic[0]."</td>
-      </tr>
-      <tr>
-         <td>".$_lang['stQUANTITYLOGINS']."</td>
-         <td>".$CountRowsLogin[0]."</td>
-      </tr>
-      <tr>
-         <td>".$_lang['stQUANTITYIPADDRESSES']."</td>
-         <td>".$CountRowsIpaddress[0]."</td>
-      </tr>
-      <tr>
-         <td>".$_lang['stMINDATE']."</td>
-         <td>".$MinMaxDateTraffic[0]."</td>
-      </tr>
-      <tr>
-         <td>".$_lang['stMAXDATE']."</td>
-         <td>".$MinMaxDateTraffic[1]."</td>
-      </tr>
-      <tr>
-         <td>".$_lang['stTRAFFICSUM']."</td>
-         <td>".($SumSizeTraffic[0])/$oneMegabyte."</td>
-      </tr>
-";
-
-	if($enableTrafficObjectsInStat==1)
-	{
-	echo "
-	      <tr>
-	         <td colspan=2 align=center><b>".$_lang['stTRAFFICOBJECTS']."</b></td>
-	      </tr>
-	      <tr>
-	         <td> < 1 kB</td>
-	         <td>".$CountObjects1[0]."</td>
-	      </tr>
-	      <tr>
-	         <td> > 1 kB & < 5 kB </td>
-	         <td>".$CountObjects2[0]."</td>
-	      </tr>
-	      <tr>
-	         <td> > 5 kB & < 10 kB </td>
-	         <td>".$CountObjects3[0]."</td>
-	      </tr>
-	      <tr>
-	         <td> > 10 kB </td>
-	         <td>".$CountObjects4[0]."</td>
-	      </tr>
-      ";
-	}
-
-echo "</table>";
-
-}  //end GET[id]=1
+  //end GET[id]=1
 //    else
 
       if($_GET['id']==2) {  //aliases
@@ -301,348 +171,34 @@ echo "</table>";
 
  
 
-///SQL querys
-
-        $queryAllLoginsToAdd="select id,name from scsq_logins  where name NOT IN (''".$goodLoginsList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=0) order by name asc;";
-
-        $queryAllIpaddressToAdd="select id,name from scsq_ipaddress where name NOT IN (''".$goodIpaddressList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=1) order by name asc;";
-
-if($dbtype==0)
-$str = "group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
-	group_concat(scsq_groups.id order by scsq_groups.name asc)";
-
-if($dbtype==1)
-$str = "string_agg(scsq_groups.name, ',' order by scsq_groups.name asc) as gconcat,
-	string_agg(CAST(scsq_groups.id as text), ',' order by scsq_groups.name asc)";
-
-
-
-        $queryAllLogins="select id,name from scsq_logins  where name NOT IN (''".$goodLoginsList.") order by name asc;";
-        $queryAllIpaddress="select id,name from scsq_ipaddress where name NOT IN (''".$goodIpaddressList.") order by name asc;";
-        $queryAllAliases="
-	   SELECT 
-	     tmp.alname,
-	     tmp.altypeid,
-	     tmp.altableid,
-	     tmp.alid,
-	     tmp.tablename,
-	     ".$str."
-	  FROM ((SELECT 
-		scsq_alias.name as alname,
-		scsq_alias.typeid as altypeid,
-		scsq_alias.tableid as altableid,
-		scsq_alias.id as alid,
-		scsq_logins.name as tablename 
-	       FROM scsq_alias 
-	       LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
-	       WHERE scsq_alias.typeid=0) 
-
-	       UNION 
-			
-	        (SELECT 
-		   scsq_alias.name as alname,
-		   scsq_alias.typeid as altypeid,
-		   scsq_alias.tableid as altableid,
-		   scsq_alias.id as alid,
-		   scsq_ipaddress.name as tablename 
-		 FROM scsq_alias 
-		 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
-		 WHERE scsq_alias.typeid=1)) as tmp
-	  
-	  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
-	  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
-	  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
-	  ORDER BY alname asc";
-
-        $queryOneAlias="select name,typeid,tableid,id,userlogin,password,active from scsq_alias where id='".$aliasid."';";
-if($changepassword==1)        
-$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$aliasid."'";
-else
-$queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',userlogin='".$userlogin."',active='".$activeauth."' where id='".$aliasid."'";
-
-
-        $queryDeleteOneAlias="delete from scsq_alias where id='".$aliasid."'";
-        $queryDeleteOneAliasFromGroup="delete from scsq_aliasingroups where aliasid='".$aliasid."'";
-
-
-
-///SQL querys end
-
-//mysqli_connect($address,$user,$pass);
-//mysqli_select_db($db);
 
 ///надо добавить обработку ошибки подключения к БД
 
         if(!isset($_GET['actid'])) {
-          $result=$ssq->query($queryAllAliases);
-          $numrow=1;
-		echo 	"<h2>".$_lang['stALIASES'].":</h2>";
-          echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
-          echo "<br /><br />";
+          doPrintAllAliases($globalSS);
 
-          echo "<table class=\"datatable\">
-       		   <tr>
-       		     <th ><b>#</b></th>
-      		      <th><b>".$_lang['stALIASNAME']."&nbsp;</b></th>
-        		    <th ><b>".$_lang['stTYPE']."</b></th>
-         	      <th><b>".$_lang['stVALUE']."</b></th>
-         	      <th><b>".$_lang['stGROUP']."</b></th>
-         	  </tr>
-          ";
-
-         while($line = $ssq->fetch_array($result)) {
-           if($line[1]=="1")
-             $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
-           else
-             $line[1]="<b><font color=red>".$_lang['stLOGIN']."</font></b>";
-           echo "
-           <tr>
-             <td>".$numrow."</td>
-
-             <td align=center><a href=right.php?srv=".$srv."&id=2&actid=3&aliasid=".$line[3].">".$line[0]."&nbsp;</a></td>
-             <td align=center>".$line[1]."</td>
-             <td>".$line[4]."&nbsp;</td>
-             <td>";
-	   $i=0;
-	   $splitgroupsname=explode(',',$line[5]);
-	   $splitgroupsid=explode(',',$line[6]);
-	   foreach($splitgroupsname as $val) {
-	     echo "<a href=right.php?srv=".$srv."&id=3&actid=3&groupid=".$splitgroupsid[$i].">".$val."</a>&nbsp";
-	     $i++;
-	  
-	 }
-
-	   echo "</td>
-           </tr>
-           ";
-           $numrow++;
-          }  //end while
-	$ssq->free_result($result);         
-	echo "</table>";
-         echo "<br />";
-         echo "<a href=right.php?srv=".$srv."&id=2&actid=1>".$_lang['stADDALIAS']."</a>";
-         echo "<br />";
         } // end if(!isset...
     
 
         if($actid==1) {
-
-          echo "<h2>".$_lang['stFORMADDALIAS']."</h2>";
-          echo '
-            <form action="right.php?srv='.$srv.'&id=2&actid=2" method="post">
-            
-            <table class=datatable >
-           <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name"></td></tr>
-           <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid"></td></tr>
-           <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" name="activeauth"></td></tr>
-		   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin"></td></tr>
-		   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
-		   </table>
-       <br />
-          <input type="submit" value="'.$_lang['stADD'].'">
-           <p>'.$_lang['stVALUE'].':</p>
-           <br />
-           ';
-
-          $result=$ssq->query($queryAllLoginsToAdd);
-          $numrow=1;
-
-          echo "<table id='loginsTable' class=\"datatable\" style='display:table;'>";
-	  echo "<tr>";
-	  echo "    <th >#</th>
-		    <th >".$_lang['stLOGIN']."</th>
-		    <th >".$_lang['stINCLUDE']."</th>
-		</tr>";
-          while($line = $ssq->fetch_array($result)) {
-            echo "
-            <tr>
-              <td >".$numrow."</td>
-              <td >".$line[1]."</td>
-              <td><input type='radio' name='tableid' value='".$line[0]."';</td>
-            </tr>
-            ";
-            $numrow++;
-          }
-          echo "</table>";
-	  $ssq->free_result($result);
-
-          $result=$ssq->query($queryAllIpaddressToAdd);
-          $numrow=1;
-
-          echo "<table id='ipaddressTable' class=\"datatable\" style='display:none;'>";
-	  echo "<tr>";
-	  echo "    <th class=unsortable>#</th>
-		    <th>".$_lang['stIPADDRESS']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
-		</tr>";
-
-          while($line = $ssq->fetch_array($result)) {
-            echo "
-              <tr>
-                <td >".$numrow."</td>
-                <td >".$line[1]."</td>
-                <td><input type='radio' name='tableid' value='".$line[0]."';</td>
-              </tr>
-            ";
-            $numrow++;
-          }
-
-	  $ssq->free_result($result);
-                
-	  echo "</table>";
-          echo '
-            <input type="submit" value="'.$_lang['stADD'].'"><br />
-            </form>
-            <br />
-          ';
+          doPrintFormAddAlias($globalSS);
         }  //end if($actid==1..
 
         if($actid==2) {  //добавление алиаса
-          $name=$_POST['name'];
-
-          if(!isset($_POST['typeid']))
-            $typeid=0;
-          else
-            $typeid=1;
-
-	  if(!isset($_POST['activeauth']))
-            $activeauth=0;
-          else
-            $activeauth=1;
-
-
-
-          $tableid=$_POST['tableid'];
-
-	
-
-          $sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
-
-          if (!$ssq->query($sql)) {
-            die('Error: Can`t insert alias into table!');
-          }
-          echo "".$_lang['stALIASADDED']."<br /><br />";
-          echo "<a href=right.php?srv=".$srv."&id=2 target=right>".$_lang['stBACK']."</a>";
+          doAliasAdd($globalSS);
         }
 
         if($actid==3) { ///Редактирование алиаса
-	  
-	  $result=$ssq->query($queryOneAlias);
-          $line=$ssq->fetch_array($result);
-	  $ssq->free_result($result);
-          
-	  $typeid=$line[1]; #сохраняем тип алиаса.
-	  if($line[1]==1)
-            $isChecked="checked";
-          else
-            $isChecked="";
+          doAliasEdit($globalSS);
 
-          $tableid=$line[2];
-          $aliasid=$line[3];
-
-          if($line[6]==1)
-            $activeIsChecked="checked";
-          else
-            $activeIsChecked="";
-		
-
-		  echo "<h2>".$_lang['stFORMEDITALIAS']."</h2>";
-          echo '
-            <form action="right.php?srv='.$srv.'&id=2&actid=4&aliasid='.$aliasid.'" method="post">
-            <table class=datatable>
-           <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name" value="'.$line[0].'"></td></tr>
-           <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" '.$activeIsChecked.' name="activeauth"></td></tr>
-		   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin" value="'.$line[4].'"></td></tr>
-		   <tr><td>'.$_lang['stCHANGEPASSWORD'].':</td> <td> <input type="checkbox" name="changepassword"></td></tr>
-		   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
-		   </table>
-		   <br />
-           <p>'.$_lang['stVALUE'].':</p>
-           <br />
-                ';
-
-          $result=$ssq->query($queryAllLogins);
-          $numrow=1;
-
-          if($isChecked=="checked")
-            echo "<table id='loginsTable' class=datatable style='display:none;'>";
-          else
-            echo "<table id='loginsTable' class=datatable style='display:table;'>";
-	  echo "<tr>";
-	  echo "    <th class=unsortable>#</th>
-		    <th>".$_lang['stLOGIN']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
-	        </tr>";
-
-          while($line = $ssq->fetch_array($result)) {
-            echo "<tr>";
-            echo "<td >".$numrow."</td>";
-            echo "<td >".$line[1]."</td>";
-            if(($tableid==$line[0])&&($ischecked==""))
-              echo "<td><input type='radio' name='tableid' checked value='".$line[0]."'></td>";
-            else
-              echo "<td><input type='radio' name='tableid' value='".$line[0]."'></td>";
-	    echo   "</tr>";
-            $numrow++;
-          }
-          echo "</table>";
-          $ssq->free_result($result);
-          $result=$ssq->query($queryAllIpaddress);
-          $numrow=1;
-
-          if($isChecked=="checked")
-            echo "<table id='ipaddressTable' class=datatable style='display:table;'>";
-          else
-            echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
-	  echo "<tr>";
-	  echo "    <th class=unsortable>#</th>
-		    <th>".$_lang['stIPADDRESS']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
-	        </tr>";
-          while($line = $ssq->fetch_array($result)) {
-            echo "<tr>";
-	    echo "<td >".$numrow."</td>";
-	    echo "<td >".$line[1]."</td>";
-            if(($tableid==$line[0])&&($isChecked=="checked"))
-              echo "<td><input type='radio' name='tableid' checked value='".$line[0]."'></td>";
-            else
-              echo "<td><input type='radio' name='tableid' value='".$line[0]."'></td>";
-	    echo "</tr>";
-            $numrow++;
-          }
-	  $ssq->free_result($result);
-          echo "</table>";
-	  if($typeid == 1)
-	  echo '<input type="hidden" name=typeid value="'.$typeid.'">';
-          
-	  echo '
-	    <input type="submit" value="'.$_lang['stSAVE'].'"><br />
-            </form>
-            <form action="right.php?srv='.$srv.'&id=2&actid=5&aliasid='.$aliasid.'" method="post">
-            <input type="submit" value="'.$_lang['stDELETE'].'"><br />
-            </form>
-            <br />';
         }
         if($actid==4) { //сохранение изменений UPDATE
+          doAliasSave($globalSS);
  
-          if (!$ssq->query($queryUpdateOneAlias)) {
-            die('Error: Can`t update 1 alias');
-          }
-          echo "".$_lang['stALIASUPDATED']."<br /><br />";
-          echo "<a href=right.php?srv=".$srv."&id=2 target=right>".$_lang['stBACK']."</a>";
         }
 
         if($actid==5) { //удаление DELETE
-        
-          if (!$ssq->query($queryDeleteOneAlias)) {
-            die('Error: Can`t delete 1 alias');
-          }
-          if (!$ssq->query($queryDeleteOneAliasFromGroup)) {
-            die('Error1: Cant delete 1 alias from group');
-          }
-          
-	  echo "".$_lang['stALIASDELETED']."<br /><br />";
-          echo "<a href=right.php?srv=".$srv."&id=2 target=right>".$_lang['stBACK']."</a>";
+          doAliasDelete($globalSS);
 
         } //удаление
       } ///end if($_GET['id']==2
@@ -679,375 +235,47 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
 ///SQL querys
 
-            $queryAllLogins="select id,name from scsq_alias where typeid=0 order by name asc;";
-            $queryAllIpaddress="select id,name from scsq_alias where typeid=1 order by name asc;";
 
-            $queryAllGroups="SELECT 
-				scsq_groups.name,
-				scsq_groups.typeid,
-				scsq_groups.id,
-				scsq_groups.comment,
-				count(scsq_aliasingroups.aliasid)
-			     FROM scsq_aliasingroups 
-			     RIGHT OUTER JOIN scsq_groups ON scsq_groups.id=scsq_aliasingroups.groupid
-			     GROUP BY scsq_aliasingroups.groupid
-			     ORDER BY name asc;";
-
-           $queryAllGroups="SELECT 
-				scsq_groups.name,
-				scsq_groups.typeid,
-				scsq_groups.id,
-				scsq_groups.comment,
-				count(scsq_aliasingroups.aliasid)
-			     FROM scsq_aliasingroups 
-			     RIGHT OUTER JOIN scsq_groups ON scsq_groups.id=scsq_aliasingroups.groupid
-			     GROUP BY scsq_aliasingroups.groupid, scsq_groups.name, scsq_groups.id, scsq_groups.typeid, scsq_groups.comment
-			     ORDER BY name asc;";
-
+          
+        
             $queryGroupMembers="select aliasid from scsq_aliasingroups where groupid='".$groupid."'";
-            $queryOneGroup="select name,typeid,id,comment,userlogin,active from scsq_groups where id='".$groupid."';";
-            $queryOneGroupList="SELECT
-				   scsq_groups.name, 
-				   scsq_alias.name
-				FROM scsq_aliasingroups 
-				RIGHT JOIN scsq_alias ON scsq_alias.id=scsq_aliasingroups.aliasid
-				RIGHT JOIN scsq_groups ON scsq_groups.id=scsq_aliasingroups.groupid
-				WHERE groupid='".$groupid."'
-				ORDER BY scsq_alias.name asc;";
-	if($changepassword==1) 
-            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='".$typeid."',comment='".$comment."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$groupid."'";
-	else
-            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='".$typeid."',comment='".$comment."',userlogin='".$userlogin."',active='".$activeauth."' where id='".$groupid."'";
 
 
-            $queryDeleteOneGroup="delete from scsq_groups where id='".$groupid."'";
+
+            
 
             if(!isset($_GET['actid'])) {
-              $result=$ssq->query($queryAllGroups);
-              $numrow=1;
-              echo 	"<h2>".$_lang['stGROUPS'].":</h2>";
-              echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
-              echo "<br /><br />";
-              echo "<table id=report_table_id_group class=datatable>
-              <tr>
-                <th class=unsortable><b>#</b></th>
-                <th><b>".$_lang['stGROUPNAME']."</b></th>
-                <th class=unsortable><b>".$_lang['stTYPE']."</b></th>
-                <th class=unsortable><b>".$_lang['stCOMMENT']."</b></th>
-		<th><b>".$_lang['stQUANTITYALIASES']."</b></th>
-
-              </tr>";
-
-              while($line = $ssq->fetch_array($result)) {
-                if($line[1]=="1")
-                  $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
-                else
-                  $line[1]="<b><font color=red>".$_lang['stLOGIN']."</font></b>";
-
-                echo "
-                  <tr>
-                    <td>".$numrow."</td>
-                    <td align=center><a href=right.php?srv=".$srv."&id=3&actid=3&groupid=".$line[2].">".$line[0]."&nbsp;</a></td>
-                    <td align=center>".$line[1]."</td>
-                    <td align=center>".$line[3]."&nbsp;</td>
-                    <td align=center>".$line[4]."&nbsp;<a href=right.php?srv=".$srv."&id=3&actid=6&groupid=".$line[2].">".$_lang['stWHO']."</a></td>
-                 </tr>";
-                $numrow++;
-              }
-              echo "</table>";
-              echo "<br />";
-              echo "<a href=right.php?srv=".$srv."&id=3&actid=1>".$_lang['stADDGROUP']."</a>";
-              echo "<br />";
-		$ssq->free_result($result);
+              doPrintAllGroups($globalSS);
             }
 
             if($actid==1) {
-              echo "<h2>".$_lang['stFORMADDGROUP']."</h2>";
-              echo '
-					<form action="right.php?srv='.$srv.'&id=3&actid=2" method="post">
-					<table class=datatable>
-					   <tr><td>'.$_lang['stGROUPNAME'].':</td> <td><input type="text" name="name"></td></tr>
-					   <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid"></td></tr>
-					   <tr><td>'.$_lang['stCOMMENT'].':</td> <td> <input type="text" name="comment"></td></tr>
-					   <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" name="activeauth"></td></tr>
-					   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin"></td></tr>
-					   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
-					</table>
-				   <br />
-				   <br />
-                '.$_lang['stVALUE'].':<br />';
-
-                $result=$ssq->query($queryAllLogins);
-                $numrow=1;
-
-              echo "<table id='loginsTable' class=datatable style='display:table;'>";
-              echo "<tr>
-		    <th >#</th>
-		    <th>".$_lang['stALIAS']."</th>
-		    <th >".$_lang['stINCLUDE']."</th>
-		    </tr>";
-
-              while($line = $ssq->fetch_array($result)) {
-                echo "
-                  <tr>
-                    <td >".$numrow."</td>
-                    <td >".$line[1]."</td>
-                    <td><input type='checkbox' name='tableidl[]' value='".$line[0]."';</td>
-                  </tr>";
-                $numrow++;
-              }
-	      $ssq->free_result($result);
-              echo "</table>";
-
-              $result=$ssq->query($queryAllIpaddress);
-              $numrow=1;
-
-              echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
-              echo "<tr>
-		    <th class=unsortable>#</th>
-		    <th>".$_lang['stALIAS']."</th>
-		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
-		    </tr>";
-              while($line = $ssq->fetch_array($result)) {
-                echo "
-                  <tr>
-                    <td >".$numrow."</td>
-                    <td >".$line[1]."</td>
-                    <td><input type='checkbox' name='tableidip[]' value='".$line[0]."';</td>
-                  </tr>";
-                $numrow++;
-              }
-              $ssq->free_result($result);
-	      echo "</table>";
-
-              echo '
-                <input type="submit" value="'.$_lang['stADD'].'"><br />
-                </form>
-                <br />';
+              doPrintFormAddGroup($globalSS);
             }
 
             if($actid==2) { ///добавление группы
-
-              $name=$_POST['name'];
-
-              if(!isset($_POST['typeid']))
-                $typeid=0;
-              else
-                $typeid=1;
-
-              if(!isset($_POST['comment']))
-                $comment="";
-              else
-                $comment=$_POST['comment'];
-
-
-              $sql="INSERT INTO scsq_groups (name, typeid,comment,userlogin, password,active) VALUES ('$name', '$typeid','$comment','$userlogin','$userpassword','$activeauth')";
-
-              if (!$ssq->query($sql)) {
-                die('Error: Can`t insert new group');
-              }
-
-              $sql="select id from scsq_groups where name='".$name."';";
-              $result=$ssq->query($sql);
-              $newid=$ssq->fetch_array($result);
-	      $ssq->free_result($result);
-              $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
-
-              if($typeid==0) {
-                foreach($_POST['tableidl'] as $key=>$value)
-                  $sql = $sql." ('".$newid[0]."','". $value."'),";
-            
-                $sql=substr($sql,0,strlen($sql)-1);
-                $sql=$sql.";";
-              }
-              if($typeid==1) {
-                foreach($_POST['tableidip'] as $key=>$value)
-                  $sql = $sql." ('".$newid[0]."','". $value."'),";
-                $sql=substr($sql,0,strlen($sql)-1);
-                $sql=$sql.";";
-              }
-
-              $ssq->query($sql);
-
-              echo "".$_lang['stGROUPADDED']."<br /><br />";
-              echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a>";
+              doGroupAdd($globalSS);
             }
 
             if($actid==3) { ///Редактирование группы
-              $result=$ssq->query($queryOneGroup);
-              $line=$ssq->fetch_array($result);
-	      $ssq->free_result($result);
-              if($line[1]==1)
-                $isChecked="checked";
-              else
-                $isChecked="";
-
-		 if($line[5]==1)
-		    $activeIsChecked="checked";
-		  else
-		    $activeIsChecked="";
-
+              doGroupEdit($globalSS);
  
-			  echo "<h2>".$_lang['stFORMEDITGROUP']."</h2>";
-			  echo '
-			<form action="right.php?srv='.$srv.'&id=3&actid=4&groupid='.$groupid.'" method="post">
-					<table class=datatable>
-					   <tr><td>'.$_lang['stGROUPNAME'].':</td> <td><input type="text" name="name" value="'.$line[0].'"></td></tr>
-					   <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid" '.$isChecked.' ></td></tr>
-					   <tr><td>'.$_lang['stCOMMENT'].':</td> <td> <input type="text" name="comment" value="'.$line[3].'"></td></tr>
-					   <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" '.$activeIsChecked.' name="activeauth"></td></tr>
-					   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin" value="'.$line[4].'"></td></tr>
-					   <tr><td>'.$_lang['stCHANGEPASSWORD'].':</td> <td> <input type="checkbox" name="changepassword"></td></tr>
-					   <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
-					</table>
-				   <br />			  
-				   <br />
-               '.$_lang['stVALUE'].':<br />';
-
-               $result=$ssq->query($queryAllLogins);
-               $result1=$ssq->query($queryGroupMembers);
-
-               $numrow=1;
-
-               if($isChecked=="checked")
-                 echo "<table id='loginsTable' class=datatable style='display:none;'>";
-               else
-                 echo "<table id='loginsTable' class=datatable style='display:table;'>";
-               echo "<tr>
-		    <th >#</th>
-		    <th>".$_lang['stALIAS']."</th>
-		    <th >".$_lang['stINCLUDE']."</th>
-		    </tr>";
-               $groupmembers=array();
-               while($line = $ssq->fetch_array($result1))
-                 $groupmembers[]= $line[0];
-	       $ssq->free_result($result1);
-               while($line = $ssq->fetch_array($result)) {
-                 echo "<tr>";
-		 echo "<td >".$numrow."</td>";
-		 echo "<td >".$line[1]."</td>";
-                 if((in_array($line[0],$groupmembers))&&($ischecked==""))
-                   echo "<td><input type='checkbox' name='tableidl[]' checked value='".$line[0]."'></td>";
-                 else
-                   echo "<td><input type='checkbox' name='tableidl[]' value='".$line[0]."'></td>";
-		 echo "</tr>";
-                   ;
-                 $numrow++;
-               }
-	       $ssq->free_result($result);
-               echo "</table>";
-	       $ssq->free_result($result);
-               $result=$ssq->query($queryAllIpaddress);
-               $numrow=1;
-
-               if($isChecked=="checked")
-                 echo "<table id='ipaddressTable' class=datatable style='display:table;'>";
-               else
-                 echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
-               echo "<tr>
-		    <th >#</th>
-		    <th>".$_lang['stALIAS']."</th>
-		    <th >".$_lang['stINCLUDE']."</th>
-		    </tr>";
-               while($line = $ssq->fetch_array($result)) {
-
-                 echo "<tr>";
-		 echo "<td >".$numrow."</td>";
-		 echo "<td >".$line[1]."</td>";
-                 if((in_array($line[0],$groupmembers))&&($isChecked=="checked"))
-                   echo "<td><input type='checkbox' name='tableidip[]' checked value='".$line[0]."'></td>";
-                 else
-                   echo "<td><input type='checkbox' name='tableidip[]' value='".$line[0]."'></td>";
-                 echo "</tr>";
-
-                 $numrow++;
-               }
-               $ssq->free_result($result);
-	       echo "</table>";
-
-               echo '
-                 <input type="submit" value="'.$_lang['stSAVE'].'"><br />
-                 </form>
-                 <form action="right.php?srv='.$srv.'&id=3&actid=5&groupid='.$groupid.'" method="post">
-                 <input type="submit" value="'.$_lang['stDELETE'].'"><br />
-                 </form>
-                 <br />';
             } // end actid=3
 
             if($actid==4) { //сохранение изменений UPDATE
+              doGroupSave($globalSS);
 
-              if (!$ssq->query($queryUpdateOneGroup)) {
-                die('Error: Cant update one group');
-              }
 
-              $sql="delete from scsq_aliasingroups where groupid='".$groupid."';";
-
-              $ssq->query($sql) or die();
-
-              $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
-
-              if($typeid==0) {
-                foreach($_POST['tableidl'] as $key=>$value)
-                  $sql = $sql." ('".$groupid."','". $value."'),";
-
-                $sql=substr($sql,0,strlen($sql)-1);
-                $sql=$sql.";";
-              }
-
-              if($typeid==1) {
-                foreach($_POST['tableidip'] as $key=>$value)
-                  $sql = $sql." ('".$groupid."','". $value."'),";
-
-                $sql=substr($sql,0,strlen($sql)-1);
-                $sql=$sql.";";
-              }
-
-              $ssq->query($sql);
-
-              echo "".$_lang['stGROUPUPDATED']."<br /><br />";
-              echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a>";
             } //end actid=4
 
             if($actid==5) {//удаление DELETE
 
-              if (!$ssq->query($queryDeleteOneGroup)) {
-                die('Error: Cant delete one group');
-              }
-              $sql="delete from scsq_aliasingroups where groupid='".$groupid."';";
-
-              $ssq->query($sql) or die();
-
-              echo "".$_lang['stGROUPDELETED']."<br /><br />";
-              echo "<a href=right.php?srv=".$srv."&id=3 target=right>".$_lang['stBACK']."</a><br />";
+              doGroupDelete($globalSS);
 
             } //end actid=5
 
             if($actid==6) { ///Просмотр группы
-
-              $result=$ssq->query($queryOneGroupList);
-
-	      $numrow=1;
-
-               while($line = $ssq->fetch_array($result)) {
-		 if($numrow==1) {
-		   echo "".$_lang['stGROUPNAME']." : <b>".$line[0]."</b><br /><br />";
-                   echo "<table id='OneGroupList' class=datatable >";
-                   echo "<tr>
-		      <th >#</th>
-		      <th>".$_lang['stALIAS']."</th>
-		      </tr>";
-		 }
-                 echo "<tr>";
-		 echo "<td >".$numrow."</td>";
-		 echo "<td >".$line[1]."</td>";
-		 echo "</tr>";
-                 $numrow++;
-               }
-	       $ssq->free_result($result);
-               echo "</table>";
-	       echo "<br />";
-               echo "<a href=right.php?srv=".$srv."&id=3>".$_lang['stBACKTOGROUPLIST']."</a>";
-                 
+              doGroupList($globalSS);
+        
             } // end actid=6
 
           } ///end GET[id]=3
@@ -1075,10 +303,10 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 ///SQL querys
 
               if($typeid==0)
-                $queryForFindstr="select name,id from (select name,id from scsq_logins where name like '%".$findstr."%') as tmp where tmp.name NOT IN (''".$goodLoginsList.") order by name asc;";
+                $queryForFindstr="select name,id from (select name,id from scsq_logins where name like '%".$findstr."%') as tmp where tmp.id NOT IN (".$globalSS['goodLoginsList'].") order by name asc;";
               
               if($typeid==1)
-                $queryForFindstr="select name,id from (select name,id from scsq_ipaddress where name like '%".$findstr."%') as tmp where tmp.name NOT IN (''".$goodIpaddressList.") order by name asc;";
+                $queryForFindstr="select name,id from (select name,id from scsq_ipaddress where name like '%".$findstr."%') as tmp where tmp.id NOT IN (".$globalSS['goodIpaddressList'].") order by name asc;";
 
 
               if(!isset($_GET['actid'])) {
@@ -1124,17 +352,17 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                       </th>
                     </tr>";
 
-                  $result=$ssq->query($queryForFindstr) or die ('Error find str');
+                  $result=doFetchQuery($globalSS, $queryForFindstr) or die ('Error find str');
                   $numrow=1;
 
-                  while ($line = $ssq->fetch_array($result)) {
+                  foreach ($result as $line) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td><a href=javascript:PartlyReportsLogin(8,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
-		  $ssq->free_result($result);
+		           
                   echo "</table>";
                 }
 
@@ -1154,17 +382,17 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                       </th>
                     </tr>";
 
-                  $result=$ssq->query($queryForFindstr) or die ('Cant find str');
+                  $result=doFetchQuery($globalSS, $queryForFindstr) or die ('Cant find str');
                   $numrow=1;
 
-                  while ($line = $ssq->fetch_array($result)) {
+                  foreach ($result as $line) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td><a href=javascript:PartlyReportsIpaddress(11,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
-		  $ssq->free_result($result);
+		  
                   echo "</table>";
 
                 }
@@ -1205,10 +433,10 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
 
 
 
-                  $result=$ssq->query($queryLogTable) or die ('Cant get log table');
+                  $result=doFetchQuery($globalSS,$queryLogTable);
                   $numrow=1;
 
-                  while ($line = $ssq->fetch_array($result)) {
+                  foreach ($result as $line) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
                     echo "<td>".$line[0]."</td>";
@@ -1217,7 +445,7 @@ $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."
                     echo "</tr>";
                     $numrow++;
                   }
-		  $ssq->free_result($result);
+		 
                   echo "</table>";
 
     }  //end GET[id]=5
@@ -1250,7 +478,7 @@ $num=1;
 foreach($files as $file)
 {
 	include("modules/".$file."/module.php");
-	$module = new $file($variableSet);
+	$module = new $file($globalSS);
 
 echo "
       <tr>
@@ -1296,7 +524,88 @@ echo "	</table>
     }  //end GET[id]=7
 
 
+    if($_GET['id']==999) {
+   	//тестовая страница
+     echo "Test page<br /><br />";
 
+ 
+     $squidhost=$cfgsquidhost[$srv];
+     $squidport=$cfgsquidport[$srv];
+     $cachemgr_passwd=$cfgcachemgr_passwd[$srv];
+     
+     
+     #в зависимости от типа БД, подключаем разные модули
+     if($dbtype==0)
+     include_once("lib/dbDriver/mysqlmodule.php");
+     
+     if($dbtype==1)
+     include_once("lib/dbDriver/pgmodule.php");
+     
+     
+     //вывод на экран диагностической информации
+     
+     echo "<b>Check configuration settings, server ".$srvname[$srv]."</b><br /><br />";
+     
+     if($dbtype==0)
+       echo "Type DB MySQL<br />";	
+     if($dbtype==1)
+       echo "Type DB PostGRESQL<br />";	
+     
+     echo "Step1. Trying connect to DB.<br /><br />";
+     
+     echo "Connection parameters:<br /><br />";
+     echo "Host: ".$globalSS['connectionParams']['addr']."<br />";
+     echo "Database name: ".$globalSS['connectionParams']['dbase']."<br />";
+     echo "Username: ".$globalSS['connectionParams']['usr']."<br />";
+     echo "Password: ".$globalSS['connectionParams']['psw']."<br /><br />";
+
+     
+     
+
+     if(doConnectToDatabase($globalSS['connectionParams'])!="ErrorConnection")
+     echo "Result: <b>Ok!</b>";
+     else {
+     echo "Result: <b>Error!</b>";
+     echo "<br><br>";
+     echo "
+     Some solutions:<br>
+     1. Check that DB server is ONLINE.<br>
+     2. Check for connection settings (login, pass,db, host).<br>
+     3. Check that you can connect from your system to database server on default DB port (3306 to MySQL or 5432 to PostGRESQL).<br>
+     4. Check that user <b>".$usr."</b> have rights to connect to DB.<br>
+     5. If you have no idea about problem, join our telegram group <a href=http://t.me/screensquid>here</a>. We try to help you.
+     ";
+     }
+     
+     echo "<br /><br />";
+     
+     echo "Trying connect to Cachemgr...";
+     
+     $fp = fsockopen($squidhost,$squidport, $errno, $errstr, 10); 
+     
+     if($fp)
+       {
+       echo "Ok!";
+       fclose($fp);
+       }
+     else
+       {
+       echo "Error! ";
+       echo "<br>";
+       echo "
+       1. Check for connection settings.<br>
+       2. Disable SElinux (if you have it). <br>
+       2. Check this solution https://sourceforge.net/p/screen-squid/tickets/21/<br>
+       3. If you have no idea about problem, join our telegram group <a href=http://t.me/screensquid>here</a>. We try to help you.
+       ";
+       }
+     echo "<br /><br />";
+      
+          
+                        
+                        
+      
+          }  //end GET[id]=999
 
 
 ///            else
@@ -1497,7 +806,9 @@ if(isset($_GET['actid']))
                   ';
 			
 				if(isset($_POST['submit'])){
-				$config['enabled']=$_POST['enabled'];
+        
+        if(isset($_POST['enabled']))	$config['enabled']=1; else $config['enabled']=0;
+
 				$config['srvname']=$_POST['srvname'];
 				$config['db']=$_POST['db'];
 				$config['user']=$_POST['user'];
@@ -1520,7 +831,12 @@ if(isset($_GET['actid']))
 			{
 				
 				$config = include("conf/".$_GET['filename']);
-				
+        
+        $dbEngine = array();
+        $dbEngine[0] = "MySQL (MariaDB)";
+        $dbEngine[1] = "PostgreSQL 9";
+        
+
 			   echo "<h2>Edit DB Screen Squid:</h2>";
 			   echo '
                   <form action="right.php?srv='.$srv.'&id=8&actid=3&filename='.$_GET['filename'].'" method="post">
@@ -1528,10 +844,17 @@ if(isset($_GET['actid']))
                  		<tr>
 						<td>Database Type:</td>
 						<td>
-							<select name="srvdbtype">
-								<option value="0" />MySQL (MariaDB)</option>
-								<option value="1" />PostgreSQL 9</option>
-							</select>
+              <select name="srvdbtype">
+              ';
+            $numEngine =0;
+            foreach($dbEngine as $engine) {
+ 
+              if($numEngine == $config['srvdbtype']) $selected = "selected"; else $selected="";
+ 
+              echo  '<option value="'.$numEngine.'" '.$selected.'/>'.$engine.'</option>';
+            $numEngine++;
+            }
+						echo '</select>
 						</td>
 						</tr>
 					   <tr><td>Proxy name:</td> <td><input type="text" name="srvname" value="'.$config['srvname'].'"></td></tr>

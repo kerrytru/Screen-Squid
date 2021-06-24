@@ -12,6 +12,11 @@ else
   $srv=0;
 
 include("../../config.php");
+
+$language=$globalSS['language'];
+
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
 include("module.php");
 include_once("../../lang/$language");
 	
@@ -26,7 +31,7 @@ include_once("../../lang/$language");
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme;?>/global.css"/>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalSS['root_http']; ?>/themes/<?php echo $globalSS['globaltheme']; ?>/global.css"/>
 
 </head>
 <body>
@@ -71,22 +76,10 @@ $variableSet['dbtype']=$dbtype;
 
 $variableSet['language']=$language;
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
-
-if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
-
-$usermanagerex = new Usermanager($variableSet);
+$globalSS['connectionParams']=$variableSet;
 
 
-    #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0)
-		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($dbtype==1)
-		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+$usermanagerex = new Usermanager($globalSS);
 	
 
 if(!isset($_GET['id']))
@@ -200,24 +193,20 @@ $datestart=strtotime($querydate);
 
         $queryNeedRefresh="select count(1) from scsq_alias sa where sa.id not in (select aliasid from scsq_mod_usermanager);";
 			
-		$result=$ssq->query($queryNeedRefresh);
-		$needLine = $ssq->fetch_array($result);
-		$ssq->free_result($result);
-		
+		$needLine=doFetchOneQuery($globalSS, $queryNeedRefresh);
+				
 		$needRefresh = $needLine[0];
         
         $queryNeedRefresh="select count(1) from scsq_mod_usermanager sm where sm.aliasid not in (select id from scsq_alias);";
 			
-		$result=$ssq->query($queryNeedRefresh);
-		$needLine = $ssq->fetch_array($result);
-		$ssq->free_result($result);
-
+		$needLine=doFetchOneQuery($globalSS, $queryNeedRefresh);
+		
 		$needRefresh += $needLine[0];
  
 
             if(!isset($_GET['actid'])) {
 
-              $result=$ssq->query($queryAllUsers);
+              $result=doFetchQuery($globalSS, $queryAllUsers);
               $numrow=1;
               //обновим список пользователей, если вдруг созданы алиасы
 	      echo "<a href=index.php?srv=".$srv."&actid=10>".$_lang['stREFRESH']."</a>";
@@ -236,7 +225,7 @@ $datestart=strtotime($querydate);
 
               </tr>";
 
-              while($line = $ssq->fetch_array($result)) {
+              foreach($result as $line) {
 		
 
                echo "<tr>
@@ -250,14 +239,14 @@ $datestart=strtotime($querydate);
               }
               echo "</table>";
               echo "<br />";
-		$ssq->free_result($result);
+		
             }
 
 
             if($actid==3) { ///Редактирование 
-              $result=$ssq->query($queryOneUser) or die ('Error: Cant select one user from scsq_mod_usermanager');
-              $line=$ssq->fetch_array($result);
-	      $ssq->free_result($result);
+              $result=doFetchOneQuery($globalSS, $queryOneUser) or die ('Error: Cant select one user from scsq_mod_usermanager');
+             
+	    
               if($line[1]==1)
                 $isChecked="checked";
               else
@@ -285,7 +274,7 @@ $datestart=strtotime($querydate);
 
             if($actid==4) { //сохранение изменений UPDATE
 
-              if (!$ssq->query($queryUpdateOneUser)) {
+              if (!doQuery($globalSS, $queryUpdateOneUser)) {
                 die('Error: Can`t update one user');
               }
 
@@ -297,11 +286,11 @@ $datestart=strtotime($querydate);
 
                 if($actid==10) {//обновление списка
 
-              if (!$ssq->query($queryCopyAliases)) {
+              if (!doQuery($globalSS, $queryCopyAliases)) {
                 die('Error: Cant copy aliases to scsq_mod_usermanager ');
               }
  
-              if (!$ssq->query($queryDeleteAliases)) {
+              if (!doQuery($globalSS, $queryDeleteAliases)) {
                 die('Error: Cant delete aliases from scsq_mod_usermanager ');
               }
  

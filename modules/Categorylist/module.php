@@ -8,14 +8,10 @@ class Categorylist
 
 function __construct($variables){ // 
     $this->vars = $variables;
-    
-	    #в зависимости от типа БД, подключаем разные модули
-		if($this->vars['dbtype']==0)
-		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($this->vars['dbtype']==1)
-		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
+
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
+
+
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
 	else	
@@ -38,7 +34,7 @@ function __construct($variables){ //
 
 # Table structure for table `scsq_mod_categorylist`
 
-		if($this->vars['dbtype']==0 ) {
+		if($this->vars['connectionParams']['dbtype']==0 ) {
 
 		$CreateTable = "
 			CREATE TABLE IF NOT EXISTS scsq_mod_categorylist (
@@ -55,7 +51,7 @@ function __construct($variables){ //
 		";
 		}
 
-		if($this->vars['dbtype']==1){
+		if($this->vars['connectionParams']['dbtype']==1){
 
 
 
@@ -82,17 +78,14 @@ function __construct($variables){ //
 		INSERT INTO scsq_modules (name,link) VALUES ('Categorylist','modules/Categorylist/index.php');";
 
 
-		$result=$this->ssq->query($CreateTable) or die ("Can`t create table for Categories");
+		doQuery($this->vars, $CreateTable) or die ("Can`t create table for Categories");
 
-		$this->ssq->free_result($result);
 
-		$result=$this->ssq->query($queryAddColumn) or die ("Can`t add column Category");
+		doQuery($this->vars, $queryAddColumn) or die ("Can`t add column Category");
 
-		$this->ssq->free_result($result);
 		
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update modules table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update modules table");
 
-		$this->ssq->free_result($result);
 		
 
 
@@ -115,17 +108,12 @@ function __construct($variables){ //
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'Categorylist';";
 
-		$result=$this->ssq->query($query) or die ("Can`t drop table for Categories");
+		doQuery($this->vars, $query) or die ("Can`t drop table for Categories");
 
-		$this->ssq->free_result($result);
+		doQuery($this->vars, $queryDropColumn) or die ("Can`t drop column Category");
 
-		$result=$this->ssq->query($queryDropColumn) or die ("Can`t drop column Category");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update modules");
 
-		$this->ssq->free_result($result);
-
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update modules");
-
-		$this->ssq->free_result($result);
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 		

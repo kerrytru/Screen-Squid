@@ -10,12 +10,7 @@ function __construct($variables){ //
     $this->vars = $variables;
     	
   
-	    #в зависимости от типа БД, подключаем разные модули
-		if($this->vars['dbtype']==0)
-		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($this->vars['dbtype']==1)
-		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
 	
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
@@ -47,10 +42,7 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$result=$this->ssq->query($queryAlias) or die ("Can`t get alias traffic");
-
-	$row=$this->ssq->fetch_array($result);
-		$this->ssq->free_result($result);
+	$row=doFetchOneQuery($queryAlias) or die ("Can`t get alias traffic");
 
 if($row[1] == 0)
 $columnname = "login";
@@ -74,11 +66,9 @@ $queryOneAliasTraffic="
 		   GROUP BY ".$columnname."
 	;";
 
-	$result=$this->ssq->query($queryOneAliasTraffic) or die ("Can`t get one alias traffic");
+	$SumSizeTraffic=doFetchOneQuery($this->vars, $queryOneAliasTraffic) or die ("Can`t get one alias traffic");
 
-	$SumSizeTraffic=$this->ssq->fetch_array($result);
-		$this->ssq->free_result($result);
-
+#Задействовать другую функцию!
     return $SumSizeTraffic[0]/1000/1000;
 
     
@@ -96,10 +86,7 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$result=$this->ssq->query($queryAlias) or die ("Can`t get alias");
-
-	$row=$this->ssq->fetch_array($result);
-		$this->ssq->free_result($result);
+	$row=doFetchOneQuery($this->vars, $queryAlias) or die ("Can`t get alias");
 
 if($row[1] == 0)
 $tablename = "logins";
@@ -114,9 +101,8 @@ $queryOneAliasValue="
 		   WHERE id =".$row[0]." 
 	 ;";
 
-	$result=$this->ssq->query($queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
-	$row=$this->ssq->fetch_array($result);
-	$this->ssq->free_result($result);
+	$row=doFetchOneQuery($this->vars, $queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
+
 
     return $row[0];
 
@@ -135,14 +121,8 @@ $queryAlias = "
 		   WHERE aliasid=".$aliasid."
 	;";
 
-	$result=$this->ssq->query($queryAlias) or die ("Can`t get quota status by alias");
+	$row=doFetchOneQuery($this->vars, $queryAlias) or die ("Can`t get quota status by alias");
 	
-	$row=$this->ssq->fetch_array($result);
-	
-
-	$this->ssq->free_result($result);
-
-
     return $row[0];
 
     
@@ -162,10 +142,7 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$result=$this->ssq->query($queryAlias) or die ("Can`t query alias table");
-
-	$row=$this->ssq->fetch_array($result,MYSQLI_NUM);
-		$this->ssq->free_result($result);
+	$row=doFetchOneQuery($queryAlias) or die ("Can`t query alias table");
 
 if($row[1] == 0)
 $columnname = "login";
@@ -192,10 +169,7 @@ $queryOneAliasTraffic="
 		   GROUP BY ".$columnname."
 	;";
 
-	$result=$this->ssq->query($queryOneAliasTraffic) or die ("Can`t get one alias traffic");
-
-	$SumSizeTraffic=$this->ssq->fetch_array($result);
-		$this->ssq->free_result($result);
+	$SumSizeTraffic=doFetchQuery($this->vars, $queryOneAliasTraffic) or die ("Can`t get one alias traffic");
 
     return $SumSizeTraffic[0]/1000/1000;
 
@@ -209,7 +183,7 @@ $queryOneAliasTraffic="
 
 # Table structure for table `scsq_mod_quotas`
 
-		if($this->vars['dbtype']==0) #mysql version
+		if($this->vars['connectionParams']['dbtype']==0) #mysql version
 		$CreateTable = "
 		CREATE TABLE IF NOT EXISTS scsq_mod_quotas (
 			  id int(11) NOT NULL AUTO_INCREMENT,
@@ -226,7 +200,7 @@ $queryOneAliasTraffic="
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 		";
 		
-		if($this->vars['dbtype']==1) #postgre version
+		if($this->vars['connectionParams']['dbtype']==1) #postgre version
 		$CreateTable = "
 		CREATE TABLE IF NOT EXISTS scsq_mod_quotas (
 			  id serial NOT NULL,
@@ -250,15 +224,9 @@ $queryOneAliasTraffic="
 		INSERT INTO scsq_modules (name,link) VALUES ('Quotas','modules/Quotas/index.php');";
 
 
-		$result=$this->ssq->query($CreateTable) or die ("Can`t install module!");
-
-		$this->ssq->free_result($result);
+		doQuery($this-vars, $CreateTable) or die ("Can`t install module!");
 		
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
-		
-
+		doQuery($this-vars, $UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
 	 }
@@ -273,13 +241,9 @@ $queryOneAliasTraffic="
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'Quotas';";
 
-		$result=$this->ssq->query($query) or die ("Can`t uninstall module!");
+		doQuery($this-vars, $query) or die ("Can`t uninstall module!");
 
-		$this->ssq->free_result($result);
-
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
+		doQuery($this-vars, $UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 

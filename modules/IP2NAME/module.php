@@ -11,13 +11,8 @@ function __construct($variables){ //
 	
     $this->vars = $variables;
 
-	    #в зависимости от типа БД, подключаем разные модули
-		if($this->vars['dbtype']==0)
-		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($this->vars['dbtype']==1)
-		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
+
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
 	else	
@@ -41,13 +36,9 @@ function __construct($variables){ //
 		SELECT id FROM scsq_ipaddress t where t.name = '$ipaddress';";
 
 
-		$result=$this->ssq->query($sqlGetId) or die ("Can`t get ID from scsq_ipaddress table");
+		$result=doFetchOneQuery($sqlGetId) or die ("Can`t get ID from scsq_ipaddress table");
 
-		$row=$this->ssq->fetch_array($result);
-
-		$this->ssq->free_result($result);
-
-return $row[0];
+return $result[0];
 
 
 }

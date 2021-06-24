@@ -11,12 +11,7 @@ function __construct($variables){ //
     $this->vars = $variables;
     	
   
-	    #в зависимости от типа БД, подключаем разные модули
-		if($this->vars['dbtype']==0)
-		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($this->vars['dbtype']==1)
-		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
 	
 	// create new PDF document
 
@@ -81,7 +76,7 @@ $queryOneLoginTraffic="
 
 
 #postgre version
-if($this->vars['dbtype']==1)
+if($this->vars['connectionParams']['dbtype']==1)
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
@@ -122,7 +117,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=$this->ssq->query($queryOneLoginTraffic);
+$result=doFetchQuery($this->vars, $queryOneLoginTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -142,7 +137,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 $totalmb=0;
 
 //PARSE SQL
-while ($line = $this->ssq->fetch_array($result)) {
+foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / $oneMegabyte;
@@ -292,7 +287,7 @@ $queryOneIpaddressTraffic="
 
 
 #postgre version
-if($this->vars['dbtype']==1)
+if($this->vars['connectionParams']['dbtype']==1)
 $queryOneIpaddressTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
@@ -332,7 +327,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=$this->ssq->query($queryOneIpaddressTraffic);
+$result=doFetchQuery($this>vars, $queryOneIpaddressTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -352,7 +347,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 $totalmb=0;
 
 //PARSE SQL
-while ($line = $this->ssq->fetch_array($result)) {
+foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / $oneMegabyte;
@@ -501,7 +496,7 @@ $queryOneLoginTraffic="
 
 
 #postgre version
-if($this->vars['dbtype']==1)
+if($this->vars['connectionParams']['dbtype']==1)
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
@@ -542,7 +537,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=$this->ssq->query($queryOneLoginTraffic);
+$result=doFetchQuery($this->vars, $queryOneLoginTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -562,7 +557,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 $totalmb=0;
 
 //PARSE SQL
-while ($line = $this->ssq->fetch_array($result)) {
+foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / $oneMegabyte;
@@ -714,7 +709,7 @@ $queryOneIpaddressTraffic="
 
 
 #postgre version
-if($this->vars['dbtype']==1)
+if($this->vars['connectionParams']['dbtype']==1)
 $queryOneIpaddressTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
@@ -754,7 +749,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=$this->ssq->query($queryOneIpaddressTraffic);
+$result=doFetchQuery($this->vars, $queryOneIpaddressTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -773,7 +768,7 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 $totalmb=0;
 
 //PARSE SQL
-while ($line = $this->ssq->fetch_array($result)) {
+foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
 $line[1]=$line[1] / $oneMegabyte;
@@ -895,12 +890,8 @@ fclose($output) or die("Can't close file");
 		INSERT INTO scsq_modules (name,link) VALUES ('ExportRep','modules/ExportRep/index.php');";
 
 		
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		$this->ssq->free_result($result);
-		
-
-		$this->ssq->free_result($result);
 
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
@@ -912,9 +903,7 @@ fclose($output) or die("Can't close file");
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'ExportRep';";
 
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 

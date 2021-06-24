@@ -14,11 +14,13 @@ else
 
 include("../../config.php");
 include("module.php");
-include_once("../../lang/$language");
-	if (file_exists("langs/".$language))
-		include("langs/".$language);  #подтянем файл языка если это возможно
+include_once($globalSS['root_dir']."/lang/".$globalSS['language']);
+	if (file_exists("langs/".$globalSS['language']))
+		include(__DIR__."/langs/".$globalSS['language']);  #подтянем файл языка если это возможно
 	else	
-		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+  include(__DIR__."/langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
+
+  include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 ?>
 
@@ -30,7 +32,7 @@ include_once("../../lang/$language");
 <link rel="stylesheet" type="text/css" href="css/example.css"/>
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme;?>/global.css"/>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalSS['root_http']; ?>/themes/<?php echo $globalSS['globaltheme']; ?>/global.css"/>
 
 </head>
 <body>
@@ -76,24 +78,14 @@ $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 $variableSet['dbtype']=$dbtype;
 
-$variableSet['language']=$language;
+$variableSet['language']=$globalSS['language'];
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
-
-if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
-
-$quotaex = new Quotas($variableSet);
+$globalSS['connectionParams']=$variableSet;
 
 
-    #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0)
-		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($dbtype==1)
-		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+$quotaex = new Quotas($globalSS);
+
+
 	
 
 if(!isset($_GET['id']))
@@ -282,7 +274,7 @@ $datestart=strtotime($querydate);
 
             if(!isset($_GET['actid'])) {
 
-              $result=$ssq->query($queryAllQuotas);
+              $result=doFetchQuery($globalSS, $queryAllQuotas);
               $numrow=1;
 	      echo "<a href=index.php?srv=".$srv.">".$_lang['stREFRESH']."</a>";
               echo "<br /><br />";
@@ -302,7 +294,7 @@ $datestart=strtotime($querydate);
 				<th><b>Action</b></th>
               </tr>";
 
-              while($line = $ssq->fetch_array($result)) {
+              foreach($result as $line) {
 		
 		#раскрасим строки в зависимости от статуса по квотам
 		if($line[8] == 0)
@@ -335,7 +327,7 @@ $datestart=strtotime($querydate);
               echo "<br />";
               echo "<a href=index.php?srv=".$srv."&actid=1>".$_lang['stQUOTASADDQUOTA']."</a>";
               echo "<br />";
-		$ssq->free_result($result);
+	
             }
 
           if($actid==1) {
@@ -349,7 +341,7 @@ $datestart=strtotime($querydate);
                 '.$_lang['stVALUE'].':<br />';
   
 
-                $result=$ssq->query($queryAllAliases) or die ('Error: Cant select aliases from scsq_alias table');
+                $result=doFetchQuery($queryAllAliases) or die ('Error: Cant select aliases from scsq_alias table');
          $numrow=1;
 
               echo "<table id='loginsTable' class=datatable style='display:table;'>";
@@ -359,7 +351,7 @@ $datestart=strtotime($querydate);
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = $ssq->fetch_array($result)) {
+              foreach($result as $line) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -371,7 +363,7 @@ $datestart=strtotime($querydate);
 	      $ssq->free_result($result);
               echo "</table>";
 
-	$result=$ssq->query($queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
+	$result=doFetchQuery($globalSS, $queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
          $numrow=1;
 
               echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
@@ -381,7 +373,7 @@ $datestart=strtotime($querydate);
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = $ssq->fetch_array($result)) {
+              foreach($result as $line) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -390,7 +382,7 @@ $datestart=strtotime($querydate);
                   </tr>";
                 $numrow++;
               }
-	      $ssq->free_result($result);
+	      
               echo "</table>";
 
 
@@ -415,7 +407,7 @@ $datestart=strtotime($querydate);
 
               $sql="INSERT INTO scsq_mod_quotas (aliasid, quota, quotaday, quotamonth,active) VALUES ($aliasid, $quotaday,$quotaday,$quotamonth,$active)";
 
-              if (!$ssq->query($sql)) {
+              if (!doQuery($globalSS, $sql)) {
                 die('Error: Cant insert into scsq_mod_quotas table' );
               }
 
@@ -426,9 +418,9 @@ $datestart=strtotime($querydate);
             }
 
             if($actid==3) { ///Редактирование 
-              $result=$ssq->query($queryOneQuota) or die ('Error: Cant select one quota from scsq_mod_quotas');
-              $line=$ssq->fetch_array($result);
-	      $ssq->free_result($result);
+              $line=doFetchOneQuery($queryOneQuota) or die ('Error: Cant select one quota from scsq_mod_quotas');
+             
+
               if($line[4]==1)
                 $isChecked="checked";
               else
@@ -450,7 +442,7 @@ $datestart=strtotime($querydate);
 
 		$checkedAliasid = $line[0];
 
-                $result=$ssq->query($queryAllAliases) or die('Error: Cant select all aliases from scsq_alias');
+                $result=doFetchQuery($globalSS, $queryAllAliases) or die('Error: Cant select all aliases from scsq_alias');
                 $numrow=1;
 
               echo "<table id='loginsTable' class=datatable style='display:table;'>";
@@ -460,7 +452,7 @@ $datestart=strtotime($querydate);
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = $ssq->fetch_array($result)) {
+              foreach($result as $line) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -472,10 +464,10 @@ else
         echo         "</tr>";
                 $numrow++;
               }
-	      $ssq->free_result($result);
+	     
               echo "</table>";
 
-		$result=$ssq->query($queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
+		$result=doFetchQuery($globalSS, $queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
          $numrow=1;
 
               echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
@@ -485,7 +477,7 @@ else
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
 		    </tr>";
 
-              while($line = $ssq->fetch_array($result)) {
+              foreach($result as $line) {
                 echo "
                   <tr>
                     <td >".$numrow."</td>
@@ -494,7 +486,7 @@ else
                   </tr>";
                 $numrow++;
               }
-	      $ssq->free_result($result);
+	    
               echo "</table>";
 
                echo '
@@ -508,7 +500,7 @@ else
 
             if($actid==4) { //сохранение изменений UPDATE
 
-              if (!$ssq->query($queryUpdateOneQuota)) {
+              if (!doQuery($globalSS, $queryUpdateOneQuota)) {
                 die('Error: Can`t update one quota');
               }
 
@@ -519,7 +511,7 @@ else
 
             if($actid==5) {//удаление DELETE
 
-              if (!$ssq->query($queryDeleteOneQuota)) {
+              if (doQuery($globalSS, $queryDeleteOneQuota)) {
                 die('Error: Cant DELETE one quota from scsq_mod_quotas ');
               }
        

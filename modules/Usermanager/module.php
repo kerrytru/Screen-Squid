@@ -10,13 +10,8 @@ class Usermanager
 function __construct($variables){ // 
     $this->vars = $variables;
     	
-	    #в зависимости от типа БД, подключаем разные модули
-		if($this->vars['dbtype']==0)
-		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($this->vars['dbtype']==1)
-		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
+
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
 	else	
@@ -45,10 +40,8 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$result=$this->ssq->query($queryAlias) or die ("Can`t get alias");
+	$row=doFetchOneQuery($this->vars, $queryAlias) or die ("Can`t get alias");
 
-	$row=$this->ssq->fetch_array($result);
-		$this->ssq->free_result($result);
 
 if($row[1] == 0)
 $tablename = "logins";
@@ -63,9 +56,8 @@ $queryOneAliasValue="
 		   WHERE id =".$row[0]." 
 	 ;";
 
-	$result=$this->ssq->query($queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
-	$row=$this->ssq->fetch_array($result);
-	$this->ssq->free_result($result);
+	$row=doFetchOneQuery($this->vars, $queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
+
 
     return $row[0];
 
@@ -79,7 +71,7 @@ $queryOneAliasValue="
 
 # Table structure for table `scsq_mod_usermanager`
 
-		if($this->vars['dbtype']==0) #mysql version
+		if($this->vars['connectionParams']['dbtype']==0) #mysql version
 		$CreateTable = "
 		CREATE TABLE IF NOT EXISTS scsq_mod_usermanager (
 			  id int(11) NOT NULL AUTO_INCREMENT,
@@ -90,7 +82,7 @@ $queryOneAliasValue="
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 		";
 		
-		if($this->vars['dbtype']==1) #postgre version
+		if($this->vars['connectionParams']['dbtype']==1) #postgre version
 		$CreateTable = "
 		CREATE TABLE IF NOT EXISTS scsq_mod_usermanager (
 			  id serial NOT NULL,
@@ -110,23 +102,16 @@ $queryOneAliasValue="
 
 		
 
-		$result=$this->ssq->query($CreateTable) or die ("Can`t install module!");
+		doQuery($this->vars, $CreateTable) or die ("Can`t install module!");
 
-		$this->ssq->free_result($result);
-		
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		$this->ssq->free_result($result);
-		
 
 		#copy all created alias to usermanager (only when first install)
 		$CopyAlias = "
 		INSERT INTO scsq_mod_usermanager (aliasid) select id from scsq_alias;";
 
-		$result=$this->ssq->query($CopyAlias) or die ("Can`t copy aliases to module table");
-
-		$this->ssq->free_result($result);
-
+		doQuery($this->vars, $CopyAlias) or die ("Can`t copy aliases to module table");
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
 	 }
@@ -141,14 +126,10 @@ $queryOneAliasValue="
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'Usermanager';";
 
-		$result=$this->ssq->query($query) or die ("Can`t uninstall module!");
+		doQuery($this->vars,$query) or die ("Can`t uninstall module!");
+		doQuery($this->vars,$UpdateModules) or die ("Can`t update module table");
 
-		$this->ssq->free_result($result);
-
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
-
+	
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 
   }

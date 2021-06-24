@@ -3,14 +3,21 @@
 #Build date Tuesday 4th of August 2020 17:12:42 PM
 #Build revision 1.5
 
-#set main dir
-$maindir=__DIR__;
+include_once("lib/functions/function.mainmisc.php");
+
+
+
+ $globalSS['root_dir']=__DIR__;
+ $globalSS['root_http']=pathUrl();	
+
+	
 
 $i=0;
 
 #try to get conf
-$path    = $maindir.'/conf/';
+$path    = $globalSS['root_dir'].'/conf/';
 $files = array_diff(scandir($path), array('.', '..','.gitignore'));
+
 
 foreach($files as $file) {
  $config= include 'conf/'.$file;
@@ -26,6 +33,7 @@ foreach($files as $file) {
 	$cfgsquidport[$i]=$config['cfgsquidport'];
 	$cfgcachemgr_passwd[$i]=$config['cfgcachemgr_passwd'];
 	$srvdbtype[$i]=$config['srvdbtype'];
+	$globalSS['config'][$i]=$config;
 	$i++;
 	
  }
@@ -34,27 +42,27 @@ foreach($files as $file) {
 
 #language ru = russian, en = english, ua = ukrainian, pt-br = portuguese-brazil
 
-$language="en";
+$globalSS['language']="en";
 
-include_once("$maindir/lang/$language");
+include_once("".$globalSS['root_dir']."/lang/".$globalSS['language']."");
 
 #Show aliases logins/ipaddresses in reports enable=1, disable=0.
 #Pokazivat aliasi - logini i/ili IP adresa. Vkl=1, Vikl=0
 #Показывать алиасы логины и/или IP адреса. Вкл=1, выкл=0.
-$useLoginalias=0;
-$useIpaddressalias=1;
+$globalSS['useLoginalias']=0;
+$globalSS['useIpaddressalias']=1;
 
 #Hide friends in reports. enable= 1, disable.=0
 #Vkluchit regim ne pokazivat druzei. Vkl =1, Vikl=0
 #Включить режим НЕ показывать друзей. Вкл.= 1, выкл.=0
-$enableNofriends=0;
+$globalSS['enableNofriends']=0;
 
 #Friends list, separate with blank. For example, $goodLogins="Vasya Sergey Petr"; Same with IP addresses.
 #Spisok druzei. Cherez odin probel. Naprimer, $goodLogins="Vasya Sergey Petr"; S IP adresami takzhe, cherez odin probel
 #Список друзей. Через ОДИН ПРОБЕЛ. Например, $goodLogins="Vasya Sergey Petr"; С IP адресами также, через ОДИН ПРОБЕЛ.
 
-$goodLogins="";
-$goodIpaddress="";
+$globalSS['goodLogins']="";
+$globalSS['goodIpaddress']="";
 
 #use iconv to convert CP1251 in UTF-8 if it is needed.
 #By default, disabled.
@@ -62,63 +70,63 @@ $goodIpaddress="";
 #ili ustanovit iconv. Po umolchaniu, viklucheno.
 #использовать iconv для перекодировки CP1251 в UTF-8. Если ругается, то видно iconv нету. Можно выключить эту опцию.
 #или установить iconv. По умолчанию, выключено.
-$enableUseiconv=0;
+$globalSS['enableUseiconv']=0;
 
 
 #Show login/ipaddress if it have no traffic in partly reports. 1 - enable, 0 - disable
-$showZeroTrafficInReports=0;
+$globalSS['showZeroTrafficInReports']=0;
 
 #show day name in reports
 #Pokazivat dni nedeli v otchetah.
 #Показывать дни недели в отчетах
-$enableShowDayNameInReports=1;
+$globalSS['enableShowDayNameInReports']=1;
 
 
 #enable filter good sites. If enable, $goodSites were not shown in statistic.
 #Vkluchit regim ne pokazivat saiti opredelennie v $goodSites. Vkl=1, Vikl=0
 #Включить режим НЕ показывать сайты определенные в $goodSites. Вкл.= 1, выкл.=0
-$enableNoSites=0;
+$globalSS['enableNoSites']=0;
 
 #List good sites $goodSites="vk.me facebook.com ipp".
 #Spisok saitov iskluchennih iz statistiki. Cherez odin probel. Naprimer $goodSites="vk.me facebook.com ipp".
 #Список сайтов исключенных из статистики. Через ОДИН ПРОБЕЛ. Например, $goodSites="vk.me facebook.com ipp".
-$goodSites="";
+$globalSS['goodSites']="";
 
 #Show in statistic traffic objects
 #Pokazivat v kratkoy statistike, statistiku po objectam. Na bolshih viborkah, tormozit otobrazhenie
-$enableTrafficObjectsInStat=0;
+$globalSS['enableTrafficObjectsInStat']=0;
 
 #refresh period in Active Reports (secs)
 #Через сколько секунд обновлять страницу онлайна
-$refreshPeriod=5;
+$globalSS['refreshPeriod']=5;
 
 #bandwidth for online report graph in Mbits 
 #ширина канала для онлайна в мегабитах. 
-$bandwidth=10;
+$globalSS['bandwidth']=10;
 
 #type graph for traffic by hours. 0 - line, 1 - histogram. 
 #тип графика. 0 - линия, 1 - гистограмма. Согласно каждого графика. 
-$graphtype['trafficbyhours']=0;
+$globalSS['graphtype_trafficbyhours']=0;
 
 #round digits traffic. If -1 = no round. For example, 19.354 MBytes. If setting 2, 19.35 displayed. If 1, 19.3 displayed etc.
 #округление трафика. Количество знаков округления. -1, без округления.
-$roundTrafficDigit=-1;
+$globalSS['roundTrafficDigit']=-1;
 
 #==============================
 
 
 //========= queries config
-$countTopSitesLimit=10;
-$countTopLoginLimit=10;
-$countTopIpLimit=10;
-$countPopularSitesLimit=10;
-$countWhoDownloadBigFilesLimit=10;
+$globalSS['countTopSitesLimit']=10;
+$globalSS['countTopLoginLimit']=10;
+$globalSS['countTopIpLimit']=10;
+$globalSS['countPopularSitesLimit']=10;
+$globalSS['countWhoDownloadBigFilesLimit']=10;
 
 //======== queries config end
 
-$debug=0; //режим отладки
+$globalSS['debug']=0; //режим отладки
 
-if($debug==1)
+if($globalSS['debug']==1)
 {
 set_time_limit(30);
 error_reporting(E_ALL);
@@ -127,21 +135,23 @@ ini_set('display_errors',1);
 }
 
 #how many bytes in megabyte. by default 1000000, but its not true. 1024*1024 = 1048576
-$oneMegabyte=1000000; 
+$globalSS['oneMegabyte']=1000000; 
 
 #theme
-$globaltheme="default";
+$globalSS['globaltheme']="default";
 
 #use urldecode to decode % characters in request
 #использовать urldecode to decode % символы в строке запроса.
-$enableUseDecode="0";
+$globalSS['enableUseDecode']="0";
 
 #style for tables. 0 - <table>, 1 - <div>
-$tableStyle=0;
+$globalSS['tableStyle']=0;
 
 #set working hours. 
 #For example, set two periods From 8:00 to 12:30 and from 13 to 17
-$workingHours="8-00:12-30:13-00:17-00";
+$globalSS['workingHours']="8-00:12-30:13-00:17-00";
 
-$vers="1.18b";
+
+
+$vers="2.0b";
 ?>

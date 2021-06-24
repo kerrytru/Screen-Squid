@@ -3,25 +3,20 @@
 #Build date Wednesday 30th of September 2020 16:58:37 PM
 #Build revision 1.12
 
- 
-
-
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
 
-#вводим новую переменную - количество байт в мегабайте. Но не все обновят конфиг, поэтому для таких случаев сделаем переход безударным.
-if(!isset($oneMegabyte))
-$oneMegabyte=1000000;
-
 include("../config.php");
+
+
 
 $header='<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../themes/'.$globaltheme.'/global.css"/>
+<link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>
 
 </head>
 <body>
@@ -31,6 +26,13 @@ if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
   $srv=0;
+
+//reports id
+
+if (isset($_GET['id']))
+$id=$_GET['id'];
+else
+$id=0;
 
 if(isset($_GET['date']))
   $querydate=$_GET['date'];
@@ -49,37 +51,158 @@ if(isset($_GET['dom']))
 else
   $dayormonth="day";
 
+  if(isset($_GET['loginname']))
+  {
+	$currentlogin=$_GET['loginname'];
+	$currentmime=$_GET['loginname'];
+  }
+  else
+  {
+	$currentlogin="";
+	$currentmime="";
+  }
+  
+  if(isset($_GET['login']))
+	$currentloginid=$_GET['login'];
+  else
+	$currentloginid="";
+  
+  
+  if(isset($_GET['ipname']))
+	$currentipaddress=$_GET['ipname'];
+  else
+	$currentipaddress="";
+  
+  if(isset($_GET['ip']))
+	$currentipaddressid=$_GET['ip'];
+  else
+	$currentipaddressid="";
+  
+  if(isset($_GET['site']))
+  {
+	$currentsite=$_GET['site'];
+  if($currentlogin=="")
+	$currentlogin=$_GET['site'];
+  if($currentipaddress=="")
+	$currentipaddress=$_GET['site'];
+  
+  //костыль для отчетов 41 и 42 и 43 и 44
+  $currenthour=$_GET['site'];
+  }
+  else
+  {
+	$currentsite="";
+	
+	$currenthour="";
+  }
+  
+  if(isset($_GET['group']))
+	$currentgroupid=$_GET['group'];
+  else
+	$currentgroupid="";
+  
+  if(isset($_GET['typeid']))
+	$typeid=$_GET['typeid'];
+  else
+	$typeid="";
+  
+  
+  if(isset($_GET['groupname']))
+	$currentgroup=$_GET['groupname'];
+  else
+	$currentgroup="";
+  
+  if(isset($_GET['httpname']))
+	$currenthttpname=$_GET['httpname'];
+  else
+	$currenthttpname="";
+  
+  if(isset($_GET['httpstatus']))
+	$currenthttpstatusid=$_GET['httpstatus'];
+  else
+	$currenthttpstatusid="";
+  
+  if(isset($_GET['loiid']))
+	$currentloiid=$_GET['loiid'];
+  else
+	$currentloiid="";
+  
+  if(isset($_GET['loiname']))
+	$currentloiname=$_GET['loiname'];
+  else
+	$currentloiname="";
+
+  $addr=$address[$srv];
+  $usr=$user[$srv];
+  $psw=$pass[$srv];
+  $dbase=$db[$srv];
+  $dbtype=$srvdbtype[$srv];
+  
+  $variableSet = array();
+  $variableSet['addr']=$addr;
+  $variableSet['usr']=$usr;
+  $variableSet['psw']=$psw;
+  $variableSet['dbase']=$dbase;
+  $variableSet['dbtype']=$dbtype;
 
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-{
-include("../lib/dbDriver/mysqlmodule.php");
-$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
-
-if($dbtype==1)
-{
-include("../lib/dbDriver/pgmodule.php");
-$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
+#подключим главный файл который теперь отвечает за генерацию данных
+include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
+include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
+include(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
 
 
-include("../modules/Chart/module.php");
+/// end
 
-$grap = new Chart($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+///с этим что-то надо будет сделать. Убрать лишнюю дублирующуюся информацию
+$params = array();
+$params['dbase']=$dbase;
+$params['idReport']=$id;
+$params['date']=$querydate;
+$params['period']=$dayormonth;
+$params['idLogin']=$currentloginid;   
+$params['idIpaddress']=$currentipaddress; 
+
+$globalSS['dayormonth']=$dayormonth;
+$globalSS['currenthttpname']=$currenthttpname;
+$globalSS['currenthttpstatusid']=$currenthttpstatusid;
+$globalSS['currentipaddressid']=$currentipaddressid;
+$globalSS['currentloginid']=$currentloginid;
+$globalSS['currentipaddress']=$currentipaddress;
+$globalSS['currentlogin']=$currentlogin;
+
+
+
+	$globalSS['lang']=$_lang;
+	$globalSS['params']=$params;
+	$globalSS['connectionParams']=$variableSet;
+
+
+
+#Большой и временный костыль. Пока думаю как лучше уйти
+$enableShowDayNameInReports = $globalSS['enableShowDayNameInReports'];
+$enableNofriends = $globalSS['enableNofriends'];
+$enableNoSites = $globalSS['enableNoSites'];
+$showZeroTrafficInReports = $globalSS['showZeroTrafficInReports'];
+$useLoginalias = $globalSS['useLoginalias'];
+$useIpaddressalias = $globalSS['useIpaddressalias'];
+
+
+#Большой костыль end
+
+$countTopSitesLimit=$globalSS['countTopSitesLimit'];
+$countTopLoginLimit=$globalSS['countTopLoginLimit'];
+$countTopIpLimit=$globalSS['countTopIpLimit'];
+$countPopularSitesLimit=$globalSS['countPopularSitesLimit'];
+$countWhoDownloadBigFilesLimit=$globalSS['countWhoDownloadBigFilesLimit'];
+
+
+
+include("".$globalSS['root_dir']."/modules/Chart/module.php");
+
+#include("../modules/Chart/module.php");
+
+$grap = new Chart($globalSS); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
 
  // Standard pChart inclusions
@@ -87,38 +210,48 @@ $grap = new Chart($variableSet); #получим экземпляр класса
  #include("../lib/pChart/pChart/pChart.class");
 
 // Include the main TCPDF library (search for installation path).
-include("../lib/tcpdf/tcpdf.php");
+include("".$globalSS['root_dir']."/lib/tcpdf/tcpdf.php");
 
 
 //если есть команда pdf, то не выводим заголовки
+$globalSS['makepdf']=0;
 if(isset($_GET['pdf']))
 {
 $makepdf=1;
+$globalSS['makepdf']=1;
 }
 
+$globalSS['makecsv']=0;
 //если есть команда csv, то не выводим заголовки
 if(isset($_GET['csv']))
 {
 $makecsv=1;
+$globalSS['makecsv']=1;
 }
+
+//если есть команда очистить кэш, то затираем файл отчёта на диске
+
+if(isset($_GET['clearcache']))
+{
+	unlink("".$globalSS['root_dir']."/modules/Cache/data/".doGenerateUniqueNameReport($globalSS['params']));
+}
+
 
 //если не генерируем файл на выход, то выводим заголовки
-if(!isset($_GET['pdf'])&& !isset($_GET['csv']))
+if(!isset($_GET['pdf']) && !isset($_GET['csv']))
 {
 echo $header;
-$makepdf=0;
-$makecsv=0;
+
 }
 
 
-$start=microtime(true);
+$start=(true);
 
 
 
 // Javascripts
 
-if(!isset($_GET['pdf'])&& !isset($_GET['csv']))
-{
+if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 ?>
 
 
@@ -220,6 +353,7 @@ function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 		+'&dom='+dom
 		+'&login='+id
 		+'&loginname='+idname
+		+'&typeid=0'
 		+'&site='+par1;
 	}
 	if(idsign==1)
@@ -229,6 +363,7 @@ function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 		+'&dom='+dom
 		+'&ip='+id
 		+'&ipname='+idname
+		+'&typeid=1'
 		+'&site='+par1;
 	}
 	if(idsign==3)
@@ -265,7 +400,7 @@ function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 
 function UpdateLeftMenu(id)
 {
-  parent.left.location.href='../left.php?srv=<?php echo $srv ?>&id='+id
+  parent.left.location.href='<?php echo $globalSS['root_http']?>/left.php?srv=<?php echo $srv ?>&id='+id
   +'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
   +'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
   +'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value;
@@ -273,7 +408,7 @@ function UpdateLeftMenu(id)
 
 </script>
 
-<script type="text/javascript" src="../javascript/sortable.js"></script>
+<script type="text/javascript" src="<?php echo $globalSS['root_dir']?>/javascript/sortable.js"></script>
 
 
 <?php
@@ -340,129 +475,15 @@ if($dayormonth=="month")
 $dayname="";
 
 
-if(isset($_GET['loginname']))
-{
-  $currentlogin=$_GET['loginname'];
-  $currentmime=$_GET['loginname'];
-}
-else
-{
-  $currentlogin="";
-  $currentmime="";
-}
-
-if(isset($_GET['login']))
-  $currentloginid=$_GET['login'];
-else
-  $currentloginid="";
 
 
-if(isset($_GET['ipname']))
-  $currentipaddress=$_GET['ipname'];
-else
-  $currentipaddress="";
-
-if(isset($_GET['ip']))
-  $currentipaddressid=$_GET['ip'];
-else
-  $currentipaddressid="";
-
-if(isset($_GET['site']))
-{
-  $currentsite=$_GET['site'];
-if($currentlogin=="")
-  $currentlogin=$_GET['site'];
-if($currentipaddress=="")
-  $currentipaddress=$_GET['site'];
-
-//костыль для отчетов 41 и 42 и 43 и 44
-$currenthour=$_GET['site'];
-}
-else
-{
-  $currentsite="";
-  
-  $currenthour="";
-}
-
-if(isset($_GET['group']))
-  $currentgroupid=$_GET['group'];
-else
-  $currentgroupid="";
-
-if(isset($_GET['typeid']))
-  $typeid=$_GET['typeid'];
-else
-  $typeid="";
-
-
-if(isset($_GET['groupname']))
-  $currentgroup=$_GET['groupname'];
-else
-  $currentgroup="";
-
-if(isset($_GET['httpname']))
-  $currenthttpname=$_GET['httpname'];
-else
-  $currenthttpname="";
-
-if(isset($_GET['httpstatus']))
-  $currenthttpstatusid=$_GET['httpstatus'];
-else
-  $currenthttpstatusid="";
-
-if(isset($_GET['loiid']))
-  $currentloiid=$_GET['loiid'];
-else
-  $currentloiid="";
-
-if(isset($_GET['loiname']))
-  $currentloiname=$_GET['loiname'];
-else
-  $currentloiname="";
-
-  $goodLoginsList="0";
-  $goodIpaddressList="0";
-
-#create list of friends
-if($enableNofriends==1) {
-  $friends=implode("','",explode(" ", $goodLogins));
-  $friendsTmp="where name in  ('".$friends."')";
-  $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
-  $result=$ssq->query($sqlGetFriendsId);
-  while ($fline = $ssq->fetch_array($result)) {
-    $goodLoginsList=$goodLoginsList.",".$fline[0];
-  }
- $ssq->free_result($result);
- $friends=""; 
- $friends=implode("','",explode(" ", $goodIpaddress));
- $friendsTmp="where name in ('".$friends."')";
-  $sqlGetFriendsId="select id from scsq_ipaddress ".$friendsTmp."";
-  $result=$ssq->query($sqlGetFriendsId);
-  while ($fline = $ssq->fetch_array($result)) {
-    $goodIpaddressList=$goodIpaddressList.",".$fline[0];
-  }
- $ssq->free_result($result);
- 
-}
-else {
-  $goodLoginsList="0";
-  $goodIpaddressList="0";
-}
-
-#create list of good sites
-if($enableNoSites==1) {
-  $sitesTmp=implode("','",explode(" ", $goodSites));
-  $sitesTmp="'".$sitesTmp."'";
-  $goodSitesList=$sitesTmp;
-
-}
-else {
-  $goodSitesList="''";
-}
+  #если есть дружеские логины, IP адреса или сайты. Соберём их.
+$goodLoginsList=doCreateFriendList($globalSS,'logins');
+$goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
+$goodSitesList = doCreateSitesList($globalSS);
 
 #split working hours
-list($workStart1, $workEnd1, $workStart2, $workEnd2) = explode(":", $workingHours);
+list($workStart1, $workEnd1, $workStart2, $workEnd2) = explode(":", $globalSS['workingHours']);
 list($workStartHour1, $workStartMin1) = explode("-", $workStart1);
 list($workEndHour1, $workEndMin1) = explode("-", $workEnd1);
 list($workStartHour2, $workStartMin2) = explode("-", $workStart2);
@@ -475,21 +496,12 @@ else
   $msgNoZeroTraffic=" and tmp.s!=0 ";
 
 //проверим, есть ли модуль категорий. Если есть показываем столбец с категориями
+$globalSS['category'] = doQueryExistsModuleCategory($globalSS);
 
-$queryExistModuleCategory = "select count(1) from scsq_modules where name = 'CATEGORYLIST';";
-$result=$ssq->query($queryExistModuleCategory);
-$line = $ssq->fetch_array($result);
-$ssq->free_result($result);
-
-if($line[0] == 0)
-$category="''";
-else
-$category="category";
-
-
+$category = $globalSS['category'];
 //querys for reports
 
-if($useLoginalias==0)
+//if($useLoginalias==0)
 $echoLoginAliasColumn="";
 if($useLoginalias==1)
 $echoLoginAliasColumn=",aliastbl.name";
@@ -599,10 +611,10 @@ $echoIpaddressAliasColumn=",aliastbl.name";
 #mysql version
 $queryIpaddressTraffic="
   SELECT 
-    nofriends.name,
-    tmp.s,
-    nofriends.id 
-    ".$echoIpaddressAliasColumn."
+    nofriends.name as 'v_name',
+    tmp.s as 'v_traffic',
+    nofriends.id as 'v_name_id' 
+    ".$echoIpaddressAliasColumn." 
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s 
@@ -633,7 +645,8 @@ $queryIpaddressTraffic="
   GROUP BY nofriends.name,
     tmp.s,
     nofriends.id 
-    ".$echoIpaddressAliasColumn."
+	".$echoIpaddressAliasColumn."
+	ORDER BY nofriends.name asc
    ;";
 
   #postgre version
@@ -674,7 +687,8 @@ WHERE (1=1)
   GROUP BY nofriends.name,
     tmp.s,
     nofriends.id 
-    ".$echoIpaddressAliasColumn."
+	".$echoIpaddressAliasColumn."
+  ORDER BY nofriends.name asc
    ;";
 
 
@@ -689,13 +703,13 @@ $querySitesTraffic="
 			then 2
 			else 1
 		end, 
-	 '',
-	 tmp2.cat
+	 ''
+	 ".$category."
   
   FROM (SELECT 
 		 sum(sizeinbytes) as s,
-		 site,
-		 ".$category." as cat
+		 site
+		 ".$category."
 	       FROM scsq_quicktraffic
 	       LEFT  JOIN (SELECT 
 			     id 
@@ -715,7 +729,7 @@ $querySitesTraffic="
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
 	 	 AND site NOT IN (".$goodSitesList.")
-	       GROUP BY CRC32(site),site
+	       GROUP BY CRC32(site),site ".$category."
 	       ORDER BY null
 	      ) as tmp2
 
@@ -731,13 +745,13 @@ $querySitesTraffic="
 	 case 
 		when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]') then 1 else 2 
 	 end,	
-	 '',
-	 tmp2.cat
+	 ''
+	 ".$category."
   
   FROM (SELECT 
 		 sum(sizeinbytes) as s,
-		 site,
-		 ".$category." as cat
+		 site
+		 ".$category."
 	       FROM scsq_quicktraffic
 	       LEFT  JOIN (SELECT 
 			     id 
@@ -757,13 +771,10 @@ $querySitesTraffic="
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
 	 	 AND site NOT IN (".$goodSitesList.")
-	      
-	       GROUP BY site
+	     
+	       GROUP BY site ".$category."
 	       
 	      ) as tmp2
- 	  
-	 
- 
 
   ORDER BY site asc
 ;";
@@ -896,7 +907,7 @@ $queryTopLoginsTraffic="
   WHERE tmp.s !=0
 
   ORDER BY s desc 
-  LIMIT ".$countTopLoginLimit.";";
+  LIMIT ".$globalSS['countTopLoginLimit'].";";
 
 #postgresql version
 if($dbtype==1)
@@ -1020,9 +1031,14 @@ $queryTopIpTraffic="
 
 #mysql version
 $queryTrafficByHours="
+SELECT
+hrs.hr_txt,
+tmp2.sum_bytes,
+hrs.hr 
+from (
   SELECT 
     FROM_UNIXTIME(tmp.date,'%H') AS d,
-    SUM(tmp.s) 
+    SUM(tmp.s) sum_bytes 
   FROM (SELECT 
 	  date,
 	  SUM(sizeinbytes) AS s
@@ -1052,7 +1068,62 @@ $queryTrafficByHours="
 	AS tmp 
 
   GROUP BY d
-  ORDER BY d asc
+  ) tmp2
+
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=tmp2.d
+				 
+				 order by hrs.hr asc
+
   ;";
   
   #postgresql version
@@ -1276,15 +1347,30 @@ GROUP BY nofriends.name
   ORDER BY tmp.s desc;";
 
 $queryLoginsTrafficWide="
+SELECT 
+	tmp2.name,
+	sum(tmp2.sum_in_cache),
+	sum(tmp2.sum_out_cache),
+	sum(tmp2.sum_bytes),
+	sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
+	sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
+	tmp2.login
+	FROM (
   SELECT 
     nofriends.name,
-    tmp.s,
-    tmp.login,
+    tmp.sum_in_cache,
+    tmp.sum_out_cache,
+    tmp.sum_bytes,
+
+	tmp.login,
     tmp.n 
   FROM ((SELECT 
 	   login,
 	   '2' AS n,
-	   SUM(sizeinbytes) AS s 
+	   
+	   SUM(sizeinbytes) AS sum_in_cache,
+	   0 AS sum_out_cache,
+	   0 as sum_bytes
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
@@ -1305,7 +1391,9 @@ $queryLoginsTrafficWide="
 	(SELECT 
 	   login,
 	   '3' AS n,
-	   SUM(sizeinbytes) AS s 
+	   0 as sum_in_cache,
+	   SUM(sizeinbytes) as sum_out_cache,
+	   0 as sum_bytes
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
@@ -1326,7 +1414,9 @@ $queryLoginsTrafficWide="
 	(SELECT 
 	   login,
 	   '1' AS n,
-	   SUM(sizeinbytes) AS s 
+	   0 as sum_in_cache,
+	   0 as sum_out_cache,
+	   SUM(sizeinbytes) AS sum_bytes 
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
@@ -1342,8 +1432,11 @@ $queryLoginsTrafficWide="
 		     FROM scsq_logins 
 		     WHERE id NOT IN (".$goodLoginsList.")) AS nofriends 
 	 ON tmp.login=nofriends.id 
-
-  ORDER BY nofriends.name asc,tmp.n asc;";
+		) tmp2
+  WHERE tmp2.login is not NULL
+  GROUP BY tmp2.login,tmp2.name
+  ORDER BY tmp2.name asc
+  ;";
   
   
 #postgre version
@@ -1421,36 +1514,55 @@ $queryLoginsTrafficWide="
 
 
 $queryIpaddressTrafficWide="
+SELECT 
+	tmp2.name,
+	sum(tmp2.sum_in_cache),
+	sum(tmp2.sum_out_cache),
+	sum(tmp2.sum_bytes),
+	sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
+	sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
+	tmp2.ipaddress
+	FROM (
   SELECT 
     nofriends.name,
-    tmp.s,
-    tmp.ipaddress,
+    tmp.sum_in_cache,
+    tmp.sum_out_cache,
+    tmp.sum_bytes,
+
+	tmp.ipaddress,
     tmp.n 
   FROM ((SELECT 
-	   ipaddress,
+	  ipaddress,
 	   '2' AS n,
-	   sum(sizeinbytes) AS s 
+	   
+	   SUM(sizeinbytes) AS sum_in_cache,
+	   0 AS sum_out_cache,
+	   0 as sum_bytes
 	 FROM scsq_quicktraffic, scsq_httpstatus 
+
 	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
-	    OR  scsq_httpstatus.name like '%TCP_IMS_HIT%' 
-	    OR  scsq_httpstatus.name like '%TCP_MEM_HIT%' 
-	    OR  scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
-	    OR  scsq_httpstatus.name like '%UDP_HIT%') 
-	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	   AND  date>".$datestart." 
-	   AND  date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
- 	   AND par=1
+	     OR scsq_httpstatus.name like '%TCP_IMS_HIT%' 
+	     OR scsq_httpstatus.name like '%TCP_MEM_HIT%' 
+	     OR scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
+	     OR scsq_httpstatus.name like '%UDP_HIT%') 
+	    AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	    AND date>".$datestart." 
+	    AND date<".$dateend." 
+	    AND site NOT IN (".$goodSitesList.")
+ 	    AND par=1
 	 GROUP BY CRC32(ipaddress) ,ipaddress
 	 ORDER BY null) 
 
-  UNION
+  UNION 
 
 	(SELECT 
-	   ipaddress,
+		ipaddress,
 	   '3' AS n,
-	   SUM(sizeinbytes) AS s 
+	   0 as sum_in_cache,
+	   SUM(sizeinbytes) as sum_out_cache,
+	   0 as sum_bytes
 	 FROM scsq_quicktraffic, scsq_httpstatus 
+
 	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
 	   AND  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
 	   AND  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
@@ -1460,22 +1572,24 @@ $queryIpaddressTrafficWide="
 	   AND  date>".$datestart." 
 	   AND  date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
- 	   AND par=1
+	   AND par=1	  
 	 GROUP BY CRC32(ipaddress) ,ipaddress
 	 ORDER BY null) 
 
   UNION 
 
 	(SELECT 
-	   ipaddress,
+	ipaddress,
 	   '1' AS n,
-	   SUM(sizeinbytes) AS s 
+	   0 as sum_in_cache,
+	   0 as sum_out_cache,
+	   SUM(sizeinbytes) AS sum_bytes 
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
- 	   AND par=1
-	 GROUP BY CRC32(ipaddress) ,ipaddress
+ 	   AND par=1	   
+	 GROUP BY crc32(ipaddress) ,ipaddress
 	 ORDER BY null)) 
 	 AS tmp
 
@@ -1486,8 +1600,9 @@ $queryIpaddressTrafficWide="
 		     WHERE id NOT IN (".$goodIpaddressList.")) 
 		     AS nofriends 
 	 ON tmp.ipaddress=nofriends.id 
-
-  ORDER BY nofriends.name asc,tmp.n asc;";
+		) tmp2
+  GROUP BY tmp2.ipaddress,tmp2.name
+  ORDER BY tmp2.name asc";
   
 #postgre version
 if($dbtype==1)  
@@ -1859,7 +1974,9 @@ $queryTrafficByPeriod="
 $queryTrafficByPeriodDay="
   	SELECT
 	  FROM_UNIXTIME(scsq_quicktraffic.date,'%d.%m.%Y') AS d1,
-	  SUM(scsq_quicktraffic.sizeinbytes)
+	  SUM(scsq_quicktraffic.sizeinbytes),
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%d-%m-%Y') AS d2,
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d') AS d3
 
 	FROM scsq_quicktraffic
 
@@ -1884,8 +2001,8 @@ $queryTrafficByPeriodDay="
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
-	GROUP BY crc32(FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d')),d1
-	ORDER BY FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d') asc;
+	GROUP BY d1, d2, d3
+	ORDER BY d3 asc;
 ;";
 
 #postgre version
@@ -1893,7 +2010,9 @@ if($dbtype==1)
 $queryTrafficByPeriodDay="
   	SELECT
 	  to_char(to_timestamp(scsq_quicktraffic.date),'DD.MM.YYYY') AS d1,
-	  SUM(scsq_quicktraffic.sizeinbytes) 
+	  SUM(scsq_quicktraffic.sizeinbytes),
+	  to_char(to_timestamp(scsq_quicktraffic.date),'DD-MM-YYYY') AS d2,
+	  to_char(to_timestamp(scsq_quicktraffic.date),'YYYY-MM-DD') AS d3
 	  
 	FROM scsq_quicktraffic
 
@@ -1918,17 +2037,22 @@ $queryTrafficByPeriodDay="
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
-	GROUP BY d1
-	ORDER BY d1 asc
+	GROUP BY d1, d2, d3
+	ORDER BY d3 asc
 	
 ;";
 
 //echo $queryTrafficByPeriodDay;
 
 $queryTrafficByPeriodDayname="
+SELECT days.day_txt,
+		tmp2.sum_bytes
+		
+		FROM
+		(
   	SELECT
 	  FROM_UNIXTIME(scsq_quicktraffic.date,'%w') AS d1,
-	  SUM(scsq_quicktraffic.sizeinbytes)
+	  SUM(scsq_quicktraffic.sizeinbytes) as sum_bytes
 	  
 	FROM scsq_quicktraffic
 
@@ -1954,7 +2078,31 @@ $queryTrafficByPeriodDayname="
 	  AND date<".$dateend." 
 	  AND par=1
 	GROUP BY crc32(d1),d1
+
+	) tmp2
+  
+	RIGHT JOIN (
+	  select 0 as day_num, 'stSUNDAY' as day_txt, 7 as day_rus_num
+	  UNION all 
+	  select 1 as day_num, 'stMONDAY' as day_txt, 1 as day_rus_num
+	  UNION all 
+	  select 2 as day_num, 'stTUESDAY' as day_txt, 2 as day_rus_num 
+	  UNION all 
+	  select 3 as day_num, 'stWEDNESDAY' as day_txt, 3 as day_rus_num 
+	  UNION all 
+	  select 4 as day_num, 'stTHURSDAY' as day_txt, 4 as day_rus_num 
+	  UNION all 
+	  select 5 as day_num, 'stFRIDAY' as day_txt, 5 as day_rus_num 
+	  UNION all 
+	  select 6 as day_num, 'stSATURDAY' as day_txt, 6 as day_rus_num 
+
+	  
+				   
+				   ) days on days.day_num=tmp2.d1
+				   
+				   order by days.day_rus_num asc
 	
+
 ;";
 
 #postgre version
@@ -2383,11 +2531,68 @@ $queryDomainZonesTraffic="
 ";
 
 
-
 $queryTrafficByHoursLogins="
+SELECT tmp3.name,
+	   tmp3.login, 
+	   IFNULL(sum(tmp3.hr0),0) hr0_value, 
+	   IFNULL(sum(tmp3.hr1),0) hr1_value,
+	   IFNULL(sum(tmp3.hr2),0) hr2_value, 
+	   IFNULL(sum(tmp3.hr3),0) hr3_value, 
+	   IFNULL(sum(tmp3.hr4),0) hr4_value, 
+	   IFNULL(sum(tmp3.hr5),0) hr5_value, 
+	   IFNULL(sum(tmp3.hr6),0) hr6_value, 
+	   IFNULL(sum(tmp3.hr7),0) hr7_value, 
+	   IFNULL(sum(tmp3.hr8),0) hr8_value, 
+	   IFNULL(sum(tmp3.hr9),0) hr9_value, 
+	   IFNULL(sum(tmp3.hr10),0) hr10_value, 
+	   IFNULL(sum(tmp3.hr11),0) hr11_value, 
+	   IFNULL(sum(tmp3.hr12),0) hr12_value, 
+	   IFNULL(sum(tmp3.hr13),0) hr13_value, 
+	   IFNULL(sum(tmp3.hr14),0) hr14_value, 
+	   IFNULL(sum(tmp3.hr15),0) hr15_value, 
+	   IFNULL(sum(tmp3.hr16),0) hr16_value, 
+	   IFNULL(sum(tmp3.hr17),0) hr17_value, 
+	   IFNULL(sum(tmp3.hr18),0) hr18_value, 
+	   IFNULL(sum(tmp3.hr19),0) hr19_value, 
+	   IFNULL(sum(tmp3.hr20),0) hr20_value, 
+	   IFNULL(sum(tmp3.hr21),0) hr21_value, 
+	   IFNULL(sum(tmp3.hr22),0) hr22_value, 
+	   IFNULL(sum(tmp3.hr23),0) hr23_value 
+
+	   FROM (
+SELECT 
+	tmp2.login,
+	tmp2.name,
+	case when hrs.hr = 0 then  IFNULL(tmp2.sum_bytes,0) end hr0,
+	case when hrs.hr = 1 then  IFNULL(tmp2.sum_bytes,0) end hr1,
+	case when hrs.hr = 2 then  IFNULL(tmp2.sum_bytes,0) end hr2,
+	case when hrs.hr = 3 then  IFNULL(tmp2.sum_bytes,0) end hr3,
+	case when hrs.hr = 4 then  IFNULL(tmp2.sum_bytes,0) end hr4,
+	case when hrs.hr = 5 then  IFNULL(tmp2.sum_bytes,0) end hr5,
+	case when hrs.hr = 6 then  IFNULL(tmp2.sum_bytes,0) end hr6,
+	case when hrs.hr = 7 then  IFNULL(tmp2.sum_bytes,0) end hr7,
+	case when hrs.hr = 8 then  IFNULL(tmp2.sum_bytes,0) end hr8,
+	case when hrs.hr = 9 then  IFNULL(tmp2.sum_bytes,0) end hr9,
+	case when hrs.hr = 10 then  IFNULL(tmp2.sum_bytes,0) end hr10,
+	case when hrs.hr = 11 then  IFNULL(tmp2.sum_bytes,0) end hr11,
+	case when hrs.hr = 12 then  IFNULL(tmp2.sum_bytes,0) end hr12,
+	case when hrs.hr = 13 then  IFNULL(tmp2.sum_bytes,0) end hr13,
+	case when hrs.hr = 14 then  IFNULL(tmp2.sum_bytes,0) end hr14,
+	case when hrs.hr = 15 then  IFNULL(tmp2.sum_bytes,0) end hr15,
+	case when hrs.hr = 16 then  IFNULL(tmp2.sum_bytes,0) end hr16,
+	case when hrs.hr = 17 then  IFNULL(tmp2.sum_bytes,0) end hr17,
+	case when hrs.hr = 18 then  IFNULL(tmp2.sum_bytes,0) end hr18,
+	case when hrs.hr = 19 then  IFNULL(tmp2.sum_bytes,0) end hr19,
+	case when hrs.hr = 20 then  IFNULL(tmp2.sum_bytes,0) end hr20,
+	case when hrs.hr = 21 then  IFNULL(tmp2.sum_bytes,0) end hr21,
+	case when hrs.hr = 22 then  IFNULL(tmp2.sum_bytes,0) end hr22,
+	case when hrs.hr = 23 then  IFNULL(tmp2.sum_bytes,0) end hr23
+
+FROM (
+
 SELECT  login,
 nofriends.name,
-sum(sizeinbytes),
+sum(sizeinbytes) as sum_bytes,
 FROM_UNIXTIME(date,'%k') d
 
 FROM scsq_quicktraffic
@@ -2418,13 +2623,73 @@ FROM scsq_quicktraffic
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
 GROUP BY login, d, nofriends.name
-ORDER BY nofriends.name
+
+) tmp2
+
+RIGHT JOIN (
+  select 0 as hr, '0:00-1:00' as hr_txt 
+  UNION all 
+  select 1 as hr, '1:00-2:00' as hr_txt 
+  UNION all 
+  select 2 as hr, '2:00-3:00' as hr_txt 
+  UNION all 
+  select 3 as hr, '3:00-4:00' as hr_txt 
+  UNION all 
+  select 4 as hr, '4:00-5:00' as hr_txt 
+  UNION all 
+  select 5 as hr, '5:00-6:00' as hr_txt 
+  UNION all 
+  select 6 as hr, '6:00-7:00' as hr_txt 
+  UNION all 
+  select 7 as hr, '7:00-8:00' as hr_txt 
+  UNION all 
+  select 8 as hr, '8:00-9:00' as hr_txt 
+  UNION all 
+  select 9 as hr, '9:00-10:00' as hr_txt 
+  UNION all 
+  select 10 as hr, '10:00-11:00' as hr_txt 
+  UNION all 
+  select 11 as hr, '11:00-12:00' as hr_txt 
+  UNION all 
+  select 12 as hr, '12:00-13:00' as hr_txt 
+  UNION all 
+  select 13 as hr, '13:00-14:00' as hr_txt 
+  UNION all 
+  select 14 as hr, '14:00-15:00' as hr_txt 
+  UNION all 
+  select 15 as hr, '15:00-16:00' as hr_txt 
+  UNION all 
+  select 16 as hr, '16:00-17:00' as hr_txt 
+  UNION all 
+  select 17 as hr, '17:00-18:00' as hr_txt 
+  UNION all 
+  select 18 as hr, '18:00-19:00' as hr_txt 
+  UNION all 
+  select 19 as hr, '19:00-20:00' as hr_txt 
+  UNION all 
+  select 20 as hr, '20:00-21:00' as hr_txt 
+  UNION all 
+  select 21 as hr, '21:00-22:00' as hr_txt 
+  UNION all 
+  select 22 as hr, '22:00-23:00' as hr_txt 
+  UNION all 
+  select 23 as hr, '23:00-24:00' as hr_txt 
+  
+			   
+			   ) hrs on hrs.hr=tmp2.d
+			   
+			   order by hrs.hr asc
+) tmp3
+WHERE tmp3.login is not null
+GROUP BY tmp3.login, tmp3.name
+ORDER BY tmp3.name asc
 ;
 ";
 
 #postgre version
 if($dbtype==1)
 $queryTrafficByHoursLogins="
+
 SELECT  login,
 nofriends.name,
 sum(sizeinbytes),
@@ -2463,9 +2728,66 @@ ORDER BY nofriends.name
 
 
 $queryTrafficByHoursIpaddress="
+SELECT tmp3.name,
+	   tmp3.ipaddress, 
+	   IFNULL(sum(tmp3.hr0),0) hr0_value, 
+	   IFNULL(sum(tmp3.hr1),0) hr1_value,
+	   IFNULL(sum(tmp3.hr2),0) hr2_value, 
+	   IFNULL(sum(tmp3.hr3),0) hr3_value, 
+	   IFNULL(sum(tmp3.hr4),0) hr4_value, 
+	   IFNULL(sum(tmp3.hr5),0) hr5_value, 
+	   IFNULL(sum(tmp3.hr6),0) hr6_value, 
+	   IFNULL(sum(tmp3.hr7),0) hr7_value, 
+	   IFNULL(sum(tmp3.hr8),0) hr8_value, 
+	   IFNULL(sum(tmp3.hr9),0) hr9_value, 
+	   IFNULL(sum(tmp3.hr10),0) hr10_value, 
+	   IFNULL(sum(tmp3.hr11),0) hr11_value, 
+	   IFNULL(sum(tmp3.hr12),0) hr12_value, 
+	   IFNULL(sum(tmp3.hr13),0) hr13_value, 
+	   IFNULL(sum(tmp3.hr14),0) hr14_value, 
+	   IFNULL(sum(tmp3.hr15),0) hr15_value, 
+	   IFNULL(sum(tmp3.hr16),0) hr16_value, 
+	   IFNULL(sum(tmp3.hr17),0) hr17_value, 
+	   IFNULL(sum(tmp3.hr18),0) hr18_value, 
+	   IFNULL(sum(tmp3.hr19),0) hr19_value, 
+	   IFNULL(sum(tmp3.hr20),0) hr20_value, 
+	   IFNULL(sum(tmp3.hr21),0) hr21_value, 
+	   IFNULL(sum(tmp3.hr22),0) hr22_value, 
+	   IFNULL(sum(tmp3.hr23),0) hr23_value 
+
+	   FROM (
+SELECT 
+	tmp2.ipaddress,
+	tmp2.name,
+	case when hrs.hr = 0 then  IFNULL(tmp2.sum_bytes,0) end hr0,
+	case when hrs.hr = 1 then  IFNULL(tmp2.sum_bytes,0) end hr1,
+	case when hrs.hr = 2 then  IFNULL(tmp2.sum_bytes,0) end hr2,
+	case when hrs.hr = 3 then  IFNULL(tmp2.sum_bytes,0) end hr3,
+	case when hrs.hr = 4 then  IFNULL(tmp2.sum_bytes,0) end hr4,
+	case when hrs.hr = 5 then  IFNULL(tmp2.sum_bytes,0) end hr5,
+	case when hrs.hr = 6 then  IFNULL(tmp2.sum_bytes,0) end hr6,
+	case when hrs.hr = 7 then  IFNULL(tmp2.sum_bytes,0) end hr7,
+	case when hrs.hr = 8 then  IFNULL(tmp2.sum_bytes,0) end hr8,
+	case when hrs.hr = 9 then  IFNULL(tmp2.sum_bytes,0) end hr9,
+	case when hrs.hr = 10 then  IFNULL(tmp2.sum_bytes,0) end hr10,
+	case when hrs.hr = 11 then  IFNULL(tmp2.sum_bytes,0) end hr11,
+	case when hrs.hr = 12 then  IFNULL(tmp2.sum_bytes,0) end hr12,
+	case when hrs.hr = 13 then  IFNULL(tmp2.sum_bytes,0) end hr13,
+	case when hrs.hr = 14 then  IFNULL(tmp2.sum_bytes,0) end hr14,
+	case when hrs.hr = 15 then  IFNULL(tmp2.sum_bytes,0) end hr15,
+	case when hrs.hr = 16 then  IFNULL(tmp2.sum_bytes,0) end hr16,
+	case when hrs.hr = 17 then  IFNULL(tmp2.sum_bytes,0) end hr17,
+	case when hrs.hr = 18 then  IFNULL(tmp2.sum_bytes,0) end hr18,
+	case when hrs.hr = 19 then  IFNULL(tmp2.sum_bytes,0) end hr19,
+	case when hrs.hr = 20 then  IFNULL(tmp2.sum_bytes,0) end hr20,
+	case when hrs.hr = 21 then  IFNULL(tmp2.sum_bytes,0) end hr21,
+	case when hrs.hr = 22 then  IFNULL(tmp2.sum_bytes,0) end hr22,
+	case when hrs.hr = 23 then  IFNULL(tmp2.sum_bytes,0) end hr23
+
+FROM (
 SELECT  ipaddress,
 nofriends.name,
-sum(sizeinbytes),
+sum(sizeinbytes) sum_bytes,
 FROM_UNIXTIME(date,'%k') d
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
@@ -2495,7 +2817,67 @@ FROM scsq_quicktraffic
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
 GROUP BY ipaddress,d, nofriends.name
-ORDER BY nofriends.name
+
+) tmp2
+
+RIGHT JOIN (
+  select 0 as hr, '0:00-1:00' as hr_txt 
+  UNION all 
+  select 1 as hr, '1:00-2:00' as hr_txt 
+  UNION all 
+  select 2 as hr, '2:00-3:00' as hr_txt 
+  UNION all 
+  select 3 as hr, '3:00-4:00' as hr_txt 
+  UNION all 
+  select 4 as hr, '4:00-5:00' as hr_txt 
+  UNION all 
+  select 5 as hr, '5:00-6:00' as hr_txt 
+  UNION all 
+  select 6 as hr, '6:00-7:00' as hr_txt 
+  UNION all 
+  select 7 as hr, '7:00-8:00' as hr_txt 
+  UNION all 
+  select 8 as hr, '8:00-9:00' as hr_txt 
+  UNION all 
+  select 9 as hr, '9:00-10:00' as hr_txt 
+  UNION all 
+  select 10 as hr, '10:00-11:00' as hr_txt 
+  UNION all 
+  select 11 as hr, '11:00-12:00' as hr_txt 
+  UNION all 
+  select 12 as hr, '12:00-13:00' as hr_txt 
+  UNION all 
+  select 13 as hr, '13:00-14:00' as hr_txt 
+  UNION all 
+  select 14 as hr, '14:00-15:00' as hr_txt 
+  UNION all 
+  select 15 as hr, '15:00-16:00' as hr_txt 
+  UNION all 
+  select 16 as hr, '16:00-17:00' as hr_txt 
+  UNION all 
+  select 17 as hr, '17:00-18:00' as hr_txt 
+  UNION all 
+  select 18 as hr, '18:00-19:00' as hr_txt 
+  UNION all 
+  select 19 as hr, '19:00-20:00' as hr_txt 
+  UNION all 
+  select 20 as hr, '20:00-21:00' as hr_txt 
+  UNION all 
+  select 21 as hr, '21:00-22:00' as hr_txt 
+  UNION all 
+  select 22 as hr, '22:00-23:00' as hr_txt 
+  UNION all 
+  select 23 as hr, '23:00-24:00' as hr_txt 
+  
+			   
+			   ) hrs on hrs.hr=tmp2.d
+			   
+			   order by hrs.hr asc
+) tmp3
+WHERE tmp3.ipaddress is not null
+GROUP BY tmp3.ipaddress, tmp3.name
+ORDER BY tmp3.name asc
+
 ;
 ";
 
@@ -2541,9 +2923,66 @@ ORDER BY nofriends.name, d
 
 
 $queryTrafficByHoursLoginsOneSite="
+SELECT tmp3.name,
+	   tmp3.login, 
+	   IFNULL(sum(tmp3.hr0),0) hr0_value, 
+	   IFNULL(sum(tmp3.hr1),0) hr1_value,
+	   IFNULL(sum(tmp3.hr2),0) hr2_value, 
+	   IFNULL(sum(tmp3.hr3),0) hr3_value, 
+	   IFNULL(sum(tmp3.hr4),0) hr4_value, 
+	   IFNULL(sum(tmp3.hr5),0) hr5_value, 
+	   IFNULL(sum(tmp3.hr6),0) hr6_value, 
+	   IFNULL(sum(tmp3.hr7),0) hr7_value, 
+	   IFNULL(sum(tmp3.hr8),0) hr8_value, 
+	   IFNULL(sum(tmp3.hr9),0) hr9_value, 
+	   IFNULL(sum(tmp3.hr10),0) hr10_value, 
+	   IFNULL(sum(tmp3.hr11),0) hr11_value, 
+	   IFNULL(sum(tmp3.hr12),0) hr12_value, 
+	   IFNULL(sum(tmp3.hr13),0) hr13_value, 
+	   IFNULL(sum(tmp3.hr14),0) hr14_value, 
+	   IFNULL(sum(tmp3.hr15),0) hr15_value, 
+	   IFNULL(sum(tmp3.hr16),0) hr16_value, 
+	   IFNULL(sum(tmp3.hr17),0) hr17_value, 
+	   IFNULL(sum(tmp3.hr18),0) hr18_value, 
+	   IFNULL(sum(tmp3.hr19),0) hr19_value, 
+	   IFNULL(sum(tmp3.hr20),0) hr20_value, 
+	   IFNULL(sum(tmp3.hr21),0) hr21_value, 
+	   IFNULL(sum(tmp3.hr22),0) hr22_value, 
+	   IFNULL(sum(tmp3.hr23),0) hr23_value 
+
+	   FROM (
+SELECT 
+	tmp2.login,
+	tmp2.name,
+	case when hrs.hr = 0 then  IFNULL(tmp2.sum_bytes,0) end hr0,
+	case when hrs.hr = 1 then  IFNULL(tmp2.sum_bytes,0) end hr1,
+	case when hrs.hr = 2 then  IFNULL(tmp2.sum_bytes,0) end hr2,
+	case when hrs.hr = 3 then  IFNULL(tmp2.sum_bytes,0) end hr3,
+	case when hrs.hr = 4 then  IFNULL(tmp2.sum_bytes,0) end hr4,
+	case when hrs.hr = 5 then  IFNULL(tmp2.sum_bytes,0) end hr5,
+	case when hrs.hr = 6 then  IFNULL(tmp2.sum_bytes,0) end hr6,
+	case when hrs.hr = 7 then  IFNULL(tmp2.sum_bytes,0) end hr7,
+	case when hrs.hr = 8 then  IFNULL(tmp2.sum_bytes,0) end hr8,
+	case when hrs.hr = 9 then  IFNULL(tmp2.sum_bytes,0) end hr9,
+	case when hrs.hr = 10 then  IFNULL(tmp2.sum_bytes,0) end hr10,
+	case when hrs.hr = 11 then  IFNULL(tmp2.sum_bytes,0) end hr11,
+	case when hrs.hr = 12 then  IFNULL(tmp2.sum_bytes,0) end hr12,
+	case when hrs.hr = 13 then  IFNULL(tmp2.sum_bytes,0) end hr13,
+	case when hrs.hr = 14 then  IFNULL(tmp2.sum_bytes,0) end hr14,
+	case when hrs.hr = 15 then  IFNULL(tmp2.sum_bytes,0) end hr15,
+	case when hrs.hr = 16 then  IFNULL(tmp2.sum_bytes,0) end hr16,
+	case when hrs.hr = 17 then  IFNULL(tmp2.sum_bytes,0) end hr17,
+	case when hrs.hr = 18 then  IFNULL(tmp2.sum_bytes,0) end hr18,
+	case when hrs.hr = 19 then  IFNULL(tmp2.sum_bytes,0) end hr19,
+	case when hrs.hr = 20 then  IFNULL(tmp2.sum_bytes,0) end hr20,
+	case when hrs.hr = 21 then  IFNULL(tmp2.sum_bytes,0) end hr21,
+	case when hrs.hr = 22 then  IFNULL(tmp2.sum_bytes,0) end hr22,
+	case when hrs.hr = 23 then  IFNULL(tmp2.sum_bytes,0) end hr23
+
+FROM (
 SELECT  login,
 nofriends.name,
-sum(sizeinbytes),
+sum(sizeinbytes) sum_bytes,
 FROM_UNIXTIME(date,'%k') d
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
@@ -2574,16 +3013,132 @@ FROM scsq_quicktraffic
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
 GROUP BY login,d,nofriends.name
-ORDER BY nofriends.name
+) tmp2
+
+RIGHT JOIN (
+  select 0 as hr, '0:00-1:00' as hr_txt 
+  UNION all 
+  select 1 as hr, '1:00-2:00' as hr_txt 
+  UNION all 
+  select 2 as hr, '2:00-3:00' as hr_txt 
+  UNION all 
+  select 3 as hr, '3:00-4:00' as hr_txt 
+  UNION all 
+  select 4 as hr, '4:00-5:00' as hr_txt 
+  UNION all 
+  select 5 as hr, '5:00-6:00' as hr_txt 
+  UNION all 
+  select 6 as hr, '6:00-7:00' as hr_txt 
+  UNION all 
+  select 7 as hr, '7:00-8:00' as hr_txt 
+  UNION all 
+  select 8 as hr, '8:00-9:00' as hr_txt 
+  UNION all 
+  select 9 as hr, '9:00-10:00' as hr_txt 
+  UNION all 
+  select 10 as hr, '10:00-11:00' as hr_txt 
+  UNION all 
+  select 11 as hr, '11:00-12:00' as hr_txt 
+  UNION all 
+  select 12 as hr, '12:00-13:00' as hr_txt 
+  UNION all 
+  select 13 as hr, '13:00-14:00' as hr_txt 
+  UNION all 
+  select 14 as hr, '14:00-15:00' as hr_txt 
+  UNION all 
+  select 15 as hr, '15:00-16:00' as hr_txt 
+  UNION all 
+  select 16 as hr, '16:00-17:00' as hr_txt 
+  UNION all 
+  select 17 as hr, '17:00-18:00' as hr_txt 
+  UNION all 
+  select 18 as hr, '18:00-19:00' as hr_txt 
+  UNION all 
+  select 19 as hr, '19:00-20:00' as hr_txt 
+  UNION all 
+  select 20 as hr, '20:00-21:00' as hr_txt 
+  UNION all 
+  select 21 as hr, '21:00-22:00' as hr_txt 
+  UNION all 
+  select 22 as hr, '22:00-23:00' as hr_txt 
+  UNION all 
+  select 23 as hr, '23:00-24:00' as hr_txt 
+  
+			   
+			   ) hrs on hrs.hr=tmp2.d
+			   
+			   order by hrs.hr asc
+) tmp3
+WHERE tmp3.login is not null
+GROUP BY tmp3.login, tmp3.name
+ORDER BY tmp3.name asc
 ;
 ";
 
 $queryTrafficByHoursIpaddressOneSite="
-SELECT  ipaddress,
-nofriends.name,
-sum(sizeinbytes),
-FROM_UNIXTIME(date,'%k') d
-FROM scsq_quicktraffic
+SELECT tmp3.name,
+	   tmp3.ipaddress, 
+	   IFNULL(sum(tmp3.hr0),0) hr0_value, 
+	   IFNULL(sum(tmp3.hr1),0) hr1_value,
+	   IFNULL(sum(tmp3.hr2),0) hr2_value, 
+	   IFNULL(sum(tmp3.hr3),0) hr3_value, 
+	   IFNULL(sum(tmp3.hr4),0) hr4_value, 
+	   IFNULL(sum(tmp3.hr5),0) hr5_value, 
+	   IFNULL(sum(tmp3.hr6),0) hr6_value, 
+	   IFNULL(sum(tmp3.hr7),0) hr7_value, 
+	   IFNULL(sum(tmp3.hr8),0) hr8_value, 
+	   IFNULL(sum(tmp3.hr9),0) hr9_value, 
+	   IFNULL(sum(tmp3.hr10),0) hr10_value, 
+	   IFNULL(sum(tmp3.hr11),0) hr11_value, 
+	   IFNULL(sum(tmp3.hr12),0) hr12_value, 
+	   IFNULL(sum(tmp3.hr13),0) hr13_value, 
+	   IFNULL(sum(tmp3.hr14),0) hr14_value, 
+	   IFNULL(sum(tmp3.hr15),0) hr15_value, 
+	   IFNULL(sum(tmp3.hr16),0) hr16_value, 
+	   IFNULL(sum(tmp3.hr17),0) hr17_value, 
+	   IFNULL(sum(tmp3.hr18),0) hr18_value, 
+	   IFNULL(sum(tmp3.hr19),0) hr19_value, 
+	   IFNULL(sum(tmp3.hr20),0) hr20_value, 
+	   IFNULL(sum(tmp3.hr21),0) hr21_value, 
+	   IFNULL(sum(tmp3.hr22),0) hr22_value, 
+	   IFNULL(sum(tmp3.hr23),0) hr23_value 
+
+	   FROM (
+SELECT 
+	tmp2.ipaddress,
+	tmp2.name,
+	case when hrs.hr = 0 then  IFNULL(tmp2.sum_bytes,0) end hr0,
+	case when hrs.hr = 1 then  IFNULL(tmp2.sum_bytes,0) end hr1,
+	case when hrs.hr = 2 then  IFNULL(tmp2.sum_bytes,0) end hr2,
+	case when hrs.hr = 3 then  IFNULL(tmp2.sum_bytes,0) end hr3,
+	case when hrs.hr = 4 then  IFNULL(tmp2.sum_bytes,0) end hr4,
+	case when hrs.hr = 5 then  IFNULL(tmp2.sum_bytes,0) end hr5,
+	case when hrs.hr = 6 then  IFNULL(tmp2.sum_bytes,0) end hr6,
+	case when hrs.hr = 7 then  IFNULL(tmp2.sum_bytes,0) end hr7,
+	case when hrs.hr = 8 then  IFNULL(tmp2.sum_bytes,0) end hr8,
+	case when hrs.hr = 9 then  IFNULL(tmp2.sum_bytes,0) end hr9,
+	case when hrs.hr = 10 then  IFNULL(tmp2.sum_bytes,0) end hr10,
+	case when hrs.hr = 11 then  IFNULL(tmp2.sum_bytes,0) end hr11,
+	case when hrs.hr = 12 then  IFNULL(tmp2.sum_bytes,0) end hr12,
+	case when hrs.hr = 13 then  IFNULL(tmp2.sum_bytes,0) end hr13,
+	case when hrs.hr = 14 then  IFNULL(tmp2.sum_bytes,0) end hr14,
+	case when hrs.hr = 15 then  IFNULL(tmp2.sum_bytes,0) end hr15,
+	case when hrs.hr = 16 then  IFNULL(tmp2.sum_bytes,0) end hr16,
+	case when hrs.hr = 17 then  IFNULL(tmp2.sum_bytes,0) end hr17,
+	case when hrs.hr = 18 then  IFNULL(tmp2.sum_bytes,0) end hr18,
+	case when hrs.hr = 19 then  IFNULL(tmp2.sum_bytes,0) end hr19,
+	case when hrs.hr = 20 then  IFNULL(tmp2.sum_bytes,0) end hr20,
+	case when hrs.hr = 21 then  IFNULL(tmp2.sum_bytes,0) end hr21,
+	case when hrs.hr = 22 then  IFNULL(tmp2.sum_bytes,0) end hr22,
+	case when hrs.hr = 23 then  IFNULL(tmp2.sum_bytes,0) end hr23
+
+FROM (
+
+	SELECT  ipaddress,
+		nofriends.name,
+		sum(sizeinbytes) sum_bytes,
+		FROM_UNIXTIME(date,'%k') d
+	FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
 	id,
 	name 
@@ -2612,7 +3167,65 @@ FROM scsq_quicktraffic
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
 GROUP BY ipaddress,d,nofriends.name
-ORDER BY nofriends.name
+) tmp2
+
+RIGHT JOIN (
+  select 0 as hr, '0:00-1:00' as hr_txt 
+  UNION all 
+  select 1 as hr, '1:00-2:00' as hr_txt 
+  UNION all 
+  select 2 as hr, '2:00-3:00' as hr_txt 
+  UNION all 
+  select 3 as hr, '3:00-4:00' as hr_txt 
+  UNION all 
+  select 4 as hr, '4:00-5:00' as hr_txt 
+  UNION all 
+  select 5 as hr, '5:00-6:00' as hr_txt 
+  UNION all 
+  select 6 as hr, '6:00-7:00' as hr_txt 
+  UNION all 
+  select 7 as hr, '7:00-8:00' as hr_txt 
+  UNION all 
+  select 8 as hr, '8:00-9:00' as hr_txt 
+  UNION all 
+  select 9 as hr, '9:00-10:00' as hr_txt 
+  UNION all 
+  select 10 as hr, '10:00-11:00' as hr_txt 
+  UNION all 
+  select 11 as hr, '11:00-12:00' as hr_txt 
+  UNION all 
+  select 12 as hr, '12:00-13:00' as hr_txt 
+  UNION all 
+  select 13 as hr, '13:00-14:00' as hr_txt 
+  UNION all 
+  select 14 as hr, '14:00-15:00' as hr_txt 
+  UNION all 
+  select 15 as hr, '15:00-16:00' as hr_txt 
+  UNION all 
+  select 16 as hr, '16:00-17:00' as hr_txt 
+  UNION all 
+  select 17 as hr, '17:00-18:00' as hr_txt 
+  UNION all 
+  select 18 as hr, '18:00-19:00' as hr_txt 
+  UNION all 
+  select 19 as hr, '19:00-20:00' as hr_txt 
+  UNION all 
+  select 20 as hr, '20:00-21:00' as hr_txt 
+  UNION all 
+  select 21 as hr, '21:00-22:00' as hr_txt 
+  UNION all 
+  select 22 as hr, '22:00-23:00' as hr_txt 
+  UNION all 
+  select 23 as hr, '23:00-24:00' as hr_txt 
+  
+			   
+			   ) hrs on hrs.hr=tmp2.d
+			   
+			   order by hrs.hr asc
+) tmp3
+WHERE tmp3.ipaddress is not null
+GROUP BY tmp3.ipaddress, tmp3.name
+ORDER BY tmp3.name asc
 ;
 ";
 
@@ -2876,9 +3489,14 @@ $queryOneLoginTopSitesTraffic="
 ";
 
 $queryOneLoginTrafficByHours="
+SELECT
+hrs.hr_txt,
+tmp2.sum_bytes,
+hrs.hr 
+from (
   SELECT 
     FROM_UNIXTIME(tmp.date,'%H') AS d,
-    SUM(tmp.s) 
+    SUM(tmp.s) sum_bytes
   FROM (SELECT 
 	  date,
 	  SUM(sizeinbytes) AS s 
@@ -2894,14 +3512,78 @@ $queryOneLoginTrafficByHours="
 	AS tmp 
 
   GROUP BY d 
-  ORDER BY d asc;";
+  ) tmp2
+
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=tmp2.d
+				 
+				 order by hrs.hr asc 
+ 
+  ";
+
   
+
+
  #postgre version
   if($dbtype==1)
   $queryOneLoginTrafficByHours="
+  SELECT
+	hrs.hr_txt,
+	tmp2.sum_bytes,
+	hrs.hr 
+	from ( 
   SELECT 
     cast(to_char(to_timestamp(tmp.date),'HH24') as int) AS d,
-    SUM(tmp.s) 
+    SUM(tmp.s) as sum_bytes 
   FROM (SELECT 
 	  date,
 	  SUM(sizeinbytes) AS s 
@@ -2917,7 +3599,63 @@ $queryOneLoginTrafficByHours="
 	AS tmp 
 
   GROUP BY d 
-  ORDER BY d asc;";
+  ) tmp2
+
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=tmp2.d
+				 
+				 order by hrs.hr asc 
+ 
+  ";
 
 #костыль для правильного разбора сайтов (currentloginid 1 или 2)
 
@@ -3084,9 +3822,8 @@ $queryOneLoginPopularSites="
   $queryOneLoginPopularSites="
   SELECT 
 	  split_part(site,'/',1) AS st,
-	  count(*) AS c,
-	  sum(sizeinbytes) AS s
-	  
+	  sum(sizeinbytes) AS s,
+	  count(*) AS c
 	FROM scsq_traffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
@@ -3329,9 +4066,13 @@ $queryOneIpaddressTopSitesTraffic="
 	 LIMIT ".$countTopSitesLimit." ";
 
 $queryOneIpaddressTrafficByHours="
+SELECT hrs.hr_txt,
+		tmp2.sum_bytes,
+		hrs.hr 
+		FROM (
   SELECT 
     from_unixtime(tmp.date,'%H') as d,
-    sum(tmp.s) 
+    sum(tmp.s) sum_bytes
   from (SELECT 
 	  date,
 	  sum(sizeinbytes) as s 
@@ -3346,14 +4087,76 @@ $queryOneIpaddressTrafficByHours="
 	as tmp 
 
   group by d 
-  order by d asc;";
-  
+  ) tmp2
+
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=tmp2.d
+				 
+				 order by hrs.hr asc 
+ 
+  ";
+
+
   #postgre version
   if($dbtype==1)
   $queryOneIpaddressTrafficByHours="
   SELECT 
+	hrs.hr_txt,
+	tmp2.sum_bytes,
+	hrs.hr 
+  FROM ( 
+  SELECT 
     cast(to_char(to_timestamp(tmp.date),'HH24') as int) as d,
-    sum(tmp.s) 
+    sum(tmp.s) sum_bytes
   from (SELECT 
 			date,
 			sum(sizeinbytes) as s 
@@ -3368,7 +4171,63 @@ $queryOneIpaddressTrafficByHours="
 	as tmp 
 
   group by d 
-  order by d asc;";
+  ) tmp2
+
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=tmp2.d
+				 
+				 order by hrs.hr asc 
+ 
+  ";
 
 
 #костыль для правильного разбора сайтов (currentipaddressid 1 или 2)
@@ -3377,8 +4236,8 @@ $queryWhoVisitPopularSiteIpaddress="
   SELECT 
     nofriends.name, 
     tmp.s,
-    tmp2.name,
-    nofriends.id
+	nofriends.id,
+	tmp2.name
 
   FROM (SELECT 
 	  ipaddress,
@@ -3424,9 +4283,8 @@ $queryWhoVisitPopularSiteIpaddress="
   SELECT 
     nofriends.name, 
     tmp.s,
-    tmp2.name,
-    nofriends.id
-
+    nofriends.id,
+	tmp2.name
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s
@@ -4549,16 +5407,29 @@ $queryOneGroupTraffic="
 
 if($typeid==0)
 $queryOneGroupTrafficWide="
-  SELECT 
-    nofriends.name,
-    tmp.s,
-    tmp.login,
-    tmp.n, 
-    tmp.al
+SELECT 
+	tmp2.name,
+	sum(tmp2.sum_in_cache),
+	sum(tmp2.sum_out_cache),
+	sum(tmp2.sum_bytes),
+	sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
+	sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
+	tmp2.al
+FROM (
+	SELECT 
+		nofriends.name,
+		tmp.sum_in_cache,
+		tmp.sum_out_cache,
+		tmp.sum_bytes,
+		tmp.al,
+		tmp.login
+
   FROM ((SELECT 
 	   login,
 	   '2' as n,
-	   sum(sizeinbytes) as s,
+	   SUM(sizeinbytes) AS sum_in_cache,
+	   0 AS sum_out_cache,
+	   0 as sum_bytes,
 	   listaliases.name as al 
 	 FROM scsq_quicktraffic
 
@@ -4598,7 +5469,9 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   login,
 	   '3' as n,
-	   sum(sizeinbytes) as s,
+	   0 AS sum_in_cache,
+	   SUM(sizeinbytes) AS sum_out_cache,
+	   0 as sum_bytes,
 	   listaliases.name as al 
 	 FROM scsq_quicktraffic
 
@@ -4639,7 +5512,9 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   login,
 	   '1' as n,
-	   sum(sizeinbytes) as s,
+	   0 AS sum_in_cache,
+	   0 AS sum_out_cache,
+	   SUM(sizeinbytes) as sum_bytes,
 	   listaliases.name as al 
 	 from scsq_quicktraffic 
 
@@ -4676,23 +5551,39 @@ $queryOneGroupTrafficWide="
 		     AS nofriends 
 	 ON tmp.login=nofriends.id
 
-  ORDER BY nofriends.name asc,tmp.n asc;";
+	 ) tmp2
+	 WHERE tmp2.login is not null
+	 GROUP BY tmp2.login,tmp2.name
+	 ORDER BY tmp2.name asc;";
 
 
 
 if($typeid==1)
 $queryOneGroupTrafficWide="
-  SELECT 
-    nofriends.name,
-    tmp.s,
-    tmp.ipaddress,
-    tmp.n,
-    tmp.al 
+SELECT 
+	tmp2.name,
+	sum(tmp2.sum_in_cache),
+	sum(tmp2.sum_out_cache),
+	sum(tmp2.sum_bytes),
+	sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
+	sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
+	tmp2.al
+FROM (
+	SELECT 
+		nofriends.name,
+		tmp.sum_in_cache,
+		tmp.sum_out_cache,
+		tmp.sum_bytes,
+		tmp.al,
+		tmp.ipaddress
+
   
   FROM ((SELECT 
 	   ipaddress,
 	   '2' as n,
-	   sum(sizeinbytes) as s,
+	   SUM(sizeinbytes) AS sum_in_cache,
+	   0 AS sum_out_cache,
+	   0 as sum_bytes,
 	   listaliases.name as al  
 	 FROM scsq_quicktraffic
 
@@ -4729,7 +5620,9 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   ipaddress,
 	   '3' as n,
-	   sum(sizeinbytes) as s,
+	   0 AS sum_in_cache,
+	   SUM(sizeinbytes) AS sum_out_cache,
+	   0 as sum_bytes,
 	   listaliases.name as al 
 	 FROM scsq_quicktraffic
 
@@ -4766,7 +5659,9 @@ $queryOneGroupTrafficWide="
 	(SELECT 
 	   ipaddress,
 	   '1' as n,
-	   sum(sizeinbytes) as s,
+	   0 AS sum_in_cache,
+	   0 AS sum_out_cache,
+	   SUM(sizeinbytes) as sum_bytes,
 	   listaliases.name as al 
 	 FROM scsq_quicktraffic 
 
@@ -4799,7 +5694,10 @@ $queryOneGroupTrafficWide="
 		     AS nofriends 
 	 ON tmp.ipaddress=nofriends.id
 
-  ORDER BY nofriends.name asc,tmp.n asc;";
+	 ) tmp2
+	 WHERE tmp2.ipaddress is not null
+	 GROUP BY tmp2.ipaddress,tmp2.name
+	 ORDER BY tmp2.name asc;";
 
 
 #postgre version
@@ -5190,9 +6088,13 @@ $queryOneGroupTopSitesTraffic="
 
 if($typeid==0)
 $queryOneGroupTrafficByHours="
+SELECT hrs.hr_txt,
+		tmp2.sum_bytes,
+		hrs.hr 
+		FROM (
   SELECT 
     from_unixtime(tmp.date,'%H') as d,
-    sum(tmp.s) 
+    sum(tmp.s) as sum_bytes
   FROM (SELECT 
 	  date,
 	  sum(sizeinbytes) as s,
@@ -5226,13 +6128,72 @@ $queryOneGroupTrafficByHours="
 	ORDER BY null) 
 	AS tmp 
 
-  GROUP BY d;";
+	group by d 
+	) tmp2
+  
+	RIGHT JOIN (
+	  select 0 as hr, '0:00-1:00' as hr_txt 
+	  UNION all 
+	  select 1 as hr, '1:00-2:00' as hr_txt 
+	  UNION all 
+	  select 2 as hr, '2:00-3:00' as hr_txt 
+	  UNION all 
+	  select 3 as hr, '3:00-4:00' as hr_txt 
+	  UNION all 
+	  select 4 as hr, '4:00-5:00' as hr_txt 
+	  UNION all 
+	  select 5 as hr, '5:00-6:00' as hr_txt 
+	  UNION all 
+	  select 6 as hr, '6:00-7:00' as hr_txt 
+	  UNION all 
+	  select 7 as hr, '7:00-8:00' as hr_txt 
+	  UNION all 
+	  select 8 as hr, '8:00-9:00' as hr_txt 
+	  UNION all 
+	  select 9 as hr, '9:00-10:00' as hr_txt 
+	  UNION all 
+	  select 10 as hr, '10:00-11:00' as hr_txt 
+	  UNION all 
+	  select 11 as hr, '11:00-12:00' as hr_txt 
+	  UNION all 
+	  select 12 as hr, '12:00-13:00' as hr_txt 
+	  UNION all 
+	  select 13 as hr, '13:00-14:00' as hr_txt 
+	  UNION all 
+	  select 14 as hr, '14:00-15:00' as hr_txt 
+	  UNION all 
+	  select 15 as hr, '15:00-16:00' as hr_txt 
+	  UNION all 
+	  select 16 as hr, '16:00-17:00' as hr_txt 
+	  UNION all 
+	  select 17 as hr, '17:00-18:00' as hr_txt 
+	  UNION all 
+	  select 18 as hr, '18:00-19:00' as hr_txt 
+	  UNION all 
+	  select 19 as hr, '19:00-20:00' as hr_txt 
+	  UNION all 
+	  select 20 as hr, '20:00-21:00' as hr_txt 
+	  UNION all 
+	  select 21 as hr, '21:00-22:00' as hr_txt 
+	  UNION all 
+	  select 22 as hr, '22:00-23:00' as hr_txt 
+	  UNION all 
+	  select 23 as hr, '23:00-24:00' as hr_txt 
+	  
+				   
+				   ) hrs on hrs.hr=tmp2.d
+				   
+				   order by hrs.hr asc ";
 
 if($typeid==1)
 $queryOneGroupTrafficByHours="
+SELECT hrs.hr_txt,
+		tmp2.sum_bytes,
+		hrs.hr 
+		FROM (
   SELECT 
     from_unixtime(tmp.date,'%H') as d,
-    sum(tmp.s) 
+    sum(tmp.s) as sum_bytes
   FROM (SELECT 
 	  date,
 	  sum(sizeinbytes) as s,
@@ -5266,7 +6227,62 @@ $queryOneGroupTrafficByHours="
 	ORDER BY null) 
 	AS tmp 
 
-  GROUP BY d;";
+    group by d 
+  ) tmp2
+
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=tmp2.d
+				 
+				 order by hrs.hr asc ";
 
 
 #postgre version
@@ -5770,20 +6786,13 @@ $queryOneGroupPopularSites="
 
 //querys for reports end
 
-//reports id
 
-if (isset($_GET['id']))
-$id=$_GET['id'];
-else
-$id=0;
 
 
 
 
 ///CALENDAR
-
-if(!isset($_GET['pdf'])&& !isset($_GET['csv'])){
-
+if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 ?>
 
 <script type="text/javascript">
@@ -6073,10 +7082,12 @@ if($id==69)
 $repheader= "<h2>".$_lang['stTOPIPWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
 
 
-if(!isset($_GET['pdf'])&& !isset($_GET['csv'])){
+if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
+
 echo "<table width='100%'>";
 echo "<tr>";
 echo "<td valign=middle width='80%'>".$repheader."</td>";
+}
 
 #если переменных нет, то скажем что они пусты
 if(isset($_GET['date2'])) $v_date2 = "&date2=".$_GET['date2']; else $v_date2="";
@@ -6093,59 +7104,39 @@ if(isset($_GET['group'])) $v_group = "&group=".$_GET['group']; else $v_group="";
 if(isset($_GET['groupname'])) $v_groupname = "&groupname=".$_GET['groupname']; else $v_groupname="";
 if(isset($_GET['typeid'])) $v_typeid = "&typeid=".$_GET['typeid']; else $v_typeid="";
 
+$globalSS['repheader'] = $repheader;
+$globalSS['typeid'] = $typeid;
 
-if(($id>=1 and $id<=2)or($id>=4 and $id<=6)or($id>=8 and $id<=9)or($id>=11 and $id<=12)or($id>=17 and $id<=19)or($id>=21 and $id<=25)or($id==27)or($id>=30 and $id<=32)or($id>=31 and $id<=32)or($id>=35 and $id<=36)or($id>=41 and $id<=48))
-{
-echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt='Image'></a>
-								 <a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&csv=1><img src='../img/csvicon.png' width=32 height=32 alt='Image'></a>
-	  </td>";
-}
+
+if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt=Image title='Generate PDF'></a>
+								 <a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&csv=1><img src='../img/csvicon.png' width=32 height=32 alt=Image title='Generate CSV'></a>";
+#Если файл есть в кэше, то покажем иконку - кэшировано. Если нажать на неё, то удалится только один файл этого отчёта
+if(file_exists ("".$globalSS['root_dir']."/modules/Cache/data/".doGenerateUniqueNameReport($globalSS['params'])))
+echo "							 <a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&clearcache=1><img src='../img/cached.png' width=35 height=35 alt='Image' title='Clear cache'></a>";
+
+echo "</td>";
 
 echo "</tr>";
 echo "</table>";
+
 }
 ///REPORTS HEADERS END
+
+
+
+
+
+
 
 /////////// LOGINS TRAFFIC REPORT
 
 
 if($id==1)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-//$colh[2]="<th>".$colhtext[2]."</th>";
-//$colh[3]="<th>".$colhtext[3]."</th>";
-//$colh[4]="<th>".$colhtext[4]."</th>";
-
-$colh[2]="<th>".$colhtext[2]."<a href=?></a></th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-
-$result=$ssq->query($queryLoginsTraffic);
-
-$colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-#$row = $ssq->fetch_array($resultmax);
-#$collength[4]=$row[0];
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
+	$json_result=doGetReportData($globalSS,$queryLoginsTraffic,'template1.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -6158,34 +7149,9 @@ $colf[4]="<td>".$colftext[4]."</td>";
 
 if($id==2)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th aligh=right>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryIpaddressTraffic);
-
-$colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0 (line3)',1,'')\">line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
-
+	$json_result=doGetReportData($globalSS,$queryIpaddressTraffic,'template2.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// IPADDRESS TRAFFIC REPORT END
@@ -6194,61 +7160,8 @@ $colf[4]="<td>".$colftext[4]."</td>";
 
 if($id==3)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stWHO'];
-$colhtext[5]=$_lang['stBYDAYTIME'];
-$colhtext[6]=$_lang['stCATEGORY'];
-
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-$colftext[5]="&nbsp;";
-$colftext[6]="&nbsp;";
-
-//если есть модуль категорий то добавим столбец
-if($category=="category")
-$colh[0]=6;
-else
-$colh[0]=5;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-$colh[6]="<th>".$colhtext[6]."</th>";
-
-$result=$ssq->query($querySitesTraffic);
-
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-$colr[0]=1; 
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-$colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-$colr[6]="line4"; ///category
-
-
-
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
-$colf[5]="<td>".$colftext[5]."</td>";
-$colf[6]="<td>".$colftext[6]."</td>";
-
+	$json_result=doGetReportData($globalSS,$querySitesTraffic,'template3.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// SITES TRAFFIC REPORT END
@@ -6257,50 +7170,8 @@ $colf[6]="<td>".$colftext[6]."</td>";
 
 if($id==4)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stWHO'];
-$colhtext[5]=$_lang['stBYDAYTIME'];
-
-
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-$colftext[5]="&nbsp;";
-
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-
-$result=$ssq->query($queryTopSitesTraffic);
-//echo $queryTopSitesTraffic;
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-$colr[5]="<a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
-$colf[5]="<td>".$colftext[5]."</td>";
-
+	$json_result=doGetReportData($globalSS,$queryTopSitesTraffic,'template3.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// TOP SITES TRAFFIC REPORT END
@@ -6309,33 +7180,9 @@ $colf[5]="<td>".$colftext[5]."</td>";
 
 if($id==5)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryTopLoginsTraffic);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
+	$json_result=doGetReportData($globalSS,$queryTopLoginsTraffic,'template1.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -6345,33 +7192,9 @@ $colf[4]="<td>".$colftext[4]."</td>";
 
 if($id==6)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryTopIpTraffic);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0 (line3)',1,'')\">line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
+	$json_result=doGetReportData($globalSS,$queryTopIpTraffic,'template2.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// TOP IPADDRESS TRAFFIC REPORT END
@@ -6382,131 +7205,43 @@ $colf[4]="<td>".$colftext[4]."</td>";
 if($id==7)
 {
 
+
+
 //delete graph if exists
 
 foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
-   unlink($filename);
-}
-
-$result=$ssq->query($queryTrafficByHours);
-
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
-
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-$arrHourMb[$HourCounter]=0;
-}
-if($HourCounter==$line[0])
-break;
-
-$HourCounter++;
-}
-$line[1]=$line[1] / $oneMegabyte;
-$arrHourMb[$HourCounter]=$line[1];
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-$arrHourMb[$HourCounter]=0;
-$HourCounter++;
-}
-
-$ssq->free_result($result);
-
-#соберем данные для графика
-$userData['charttype']="line";
-$userData['chartname']="trafficbyhours";
-$userData['charttitle']="";
-$userData['arrSerie1']=$arrHourMb;
-$userData['arrSerie2']="";
-
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-///pChart Graph END
-
-echo "<br /><br />";
-echo "
-<table id=report_table_id_7 class=datatable>
-<tr>
-    <th class=unsortable>
-    ".$_lang['stHOURS']."
-    </th>
-    <th class=unsortable>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th class=unsortable>
-    ".$_lang['stWHO']."
-    </th>
-</tr>
-";
-
-$result=$ssq->query($queryTrafficByHours);
-
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
-
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
-echo "</tr>";
-$arrHourMb[$HourCounter]=0;
-}
-if($HourCounter==$line[0])
-break;
-
-$HourCounter++;
-}
-
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / $oneMegabyte;
-echo "<td>".$line[1]."</td>";
-echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
-echo "</tr>";
-$arrHourMb[$HourCounter]=$line[1];
-
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "<td><a href=javascript:GoPartlyReports(41,'".$dayormonth."','1','','0','".$HourCounter."')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(42,'".$dayormonth."','1','','1','".$HourCounter."')>".$_lang['stIPADDRESSES']."</a></td>";
-echo "</tr>";
-$arrHourMb[$HourCounter]=0;
-$HourCounter++;
-}
-
-$ssq->free_result($result);
-
-echo "<tr class=sortbottom>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td><b>&nbsp;</b></td>
-</tr>";
-
-echo "</table>";
-
+	unlink($filename);
+ }
+ 
+ 
+ $json_result=doGetReportData($globalSS,$queryTrafficByHours,'template7.php');
+ 
+ $arrHourMb = array();
+ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
+ 
+ #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
+ if($makecsv==0){
+	 #соберем данные для графика
+	 $userData['charttype']="line";
+	 $userData['chartname']="trafficbyhours";
+	 $userData['charttitle']="";
+	 $userData['arrSerie1']=$arrHourMb;
+	 $userData['arrSerie2']="";
+	 
+	 
+	 //create chart
+	 $pathtoimage = $grap->drawImage($userData);
+	 
+	 //display
+	 echo $pathtoimage;
+	 
+	 ///pChart Graph END
+	 }
+	 
+ 
+ doPrintTable($globalSS,$json_result);
+ #так как здесь рисуем график, то функция не только  рисует таблицу, но и возвращает
+ 
 
 
 }
@@ -6517,45 +7252,11 @@ echo "</table>";
 
 if($id==8)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stCATEGORY'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryOneLoginTraffic,'template4.php');
 
-///$tmpLine=explode(':',$line[0]);
+	doPrintTable($globalSS,$json_result);
 
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-//если есть модуль категорий то добавим столбец
-if($category=="category")
-$colh[0]=4;
-else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryOneLoginTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
@@ -6566,45 +7267,9 @@ echo "<script>UpdateLeftMenu(1);</script>";
 
 if($id==9)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stCATEGORY'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-///$tmpLine=explode(':',$line[0]);
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-//если есть модуль категорий то добавим столбец
-if($category=="category")
-$colh[0]=4;
-else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryOneLoginTopSitesTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
+	$json_result=doGetReportData($globalSS,$queryOneLoginTopSitesTraffic,'template4.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// TOP SITES FOR ONE LOGIN TRAFFIC REPORT END
@@ -6613,64 +7278,45 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==10)
 {
-echo "
-<table id=report_table_id_10 class=datatable>
-<tr>
-    <th class=unsortable>
-    ".$_lang['stHOURS']."
-    </th>
-    <th class=unsortable>
-    ".$_lang['stMEGABYTES']."
-    </th>
-</tr>
-";
 
-$result=$ssq->query($queryOneLoginTrafficByHours);
 
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
 
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "</tr>";
-}
-if($HourCounter==$line[0])
-break;
+//delete graph if exists
 
-$HourCounter++;
-}
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
+	unlink($filename);
+ }
+ 
+ 
+ $json_result=doGetReportData($globalSS,$queryOneLoginTrafficByHours,'template8.php');
+ 
+ $arrHourMb = array();
+ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
+ 
+ #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
+ if($makecsv==0){
+	 #соберем данные для графика
+	 $userData['charttype']="line";
+	 $userData['chartname']="trafficbyhours";
+	 $userData['charttitle']="";
+	 $userData['arrSerie1']=$arrHourMb;
+	 $userData['arrSerie2']="";
+	 
+	 
+	 //create chart
+	 $pathtoimage = $grap->drawImage($userData);
+	 
+	 //display
+	 echo $pathtoimage;
+	 
+	 ///pChart Graph END
+	 }
+	 
+ 
+ doPrintTable($globalSS,$json_result);
+ #так как здесь рисуем график, то функция не только  рисует таблицу, но и возвращает
+ 
 
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / $oneMegabyte;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "</tr>";
-$HourCounter++;
-}
-
-$ssq->free_result($result);
-
-echo "<tr class=sortbottom>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-</tr>";
-echo "</table>";
 
 }
 
@@ -6680,47 +7326,12 @@ echo "</table>";
 
 if($id==11)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stCATEGORY'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressTraffic,'template4.php');
 
-
-///$tmpLine=explode(':',$line[0]);
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-//если есть модуль категорий то добавим столбец
-if($category=="category")
-$colh[0]=4;
-else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryOneIpaddressTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-if($makepdf==0 && $makecsv==0)
-echo "<script>UpdateLeftMenu(2);</script>";
+	doPrintTable($globalSS,$json_result);
+	if($makepdf==0 && $makecsv==0)
+	echo "<script>UpdateLeftMenu(2);</script>";
 }
 
 /////////// ONE IPADDRESS TRAFFIC REPORT END
@@ -6729,45 +7340,8 @@ echo "<script>UpdateLeftMenu(2);</script>";
 
 if($id==12)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stCATEGORY'];
-
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-
-///$tmpLine=explode(':',$line[0]);
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-//если есть модуль категорий то добавим столбец
-if($category=="category")
-$colh[0]=4;
-else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryOneIpaddressTopSitesTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressTopSitesTraffic,'template4.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// TOP SITES FOR ONE IPADDRESS TRAFFIC REPORT END
@@ -6776,62 +7350,43 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==13)
 {
-echo "
-<table id=report_table_id_13 class=datatable>
-<tr>
-    <th class=unsortable>
-    ".$_lang['stHOURS']."
-    </th>
-    <th class=unsortable>
-    ".$_lang['stMEGABYTES']."
-    </th>
-</tr>
-";
 
-$result=$ssq->query($queryOneIpaddressTrafficByHours);
-$totalmb=0;
-$HourCounter=0;
+//delete graph if exists
 
-while ($line = $ssq->fetch_array($result)) {
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
+	unlink($filename);
+ }
+ 
+ 
+ $json_result=doGetReportData($globalSS,$queryOneIpaddressTrafficByHours,'template8.php');
+ 
+ $arrHourMb = array();
+ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
+ 
+ #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
+ if($makecsv==0){
+	 #соберем данные для графика
+	 $userData['charttype']="line";
+	 $userData['chartname']="trafficbyhours";
+	 $userData['charttitle']="";
+	 $userData['arrSerie1']=$arrHourMb;
+	 $userData['arrSerie2']="";
+	 
+	 
+	 //create chart
+	 $pathtoimage = $grap->drawImage($userData);
+	 
+	 //display
+	 echo $pathtoimage;
+	 
+	 ///pChart Graph END
+	 }
+	 
+ 
+ doPrintTable($globalSS,$json_result);
+ #так как здесь рисуем график, то функция не только  рисует таблицу, но и возвращает
+ 
 
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "</tr>";
-}
-if($HourCounter==$line[0])
-break;
-
-$HourCounter++;
-}
-
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / $oneMegabyte;
-echo "<td>".$line[1]."</td>";
-$totalmb=$totalmb+$line[1];
-echo "</tr>";
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "</tr>";
-$HourCounter++;
-}
-echo "<tr class=sortbottom>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-</tr>";
-
-echo "</table>";
 
 }
 
@@ -6841,129 +7396,9 @@ echo "</table>";
 
 if($id==14)
 {
-echo "
-<table id=report_table_id_14 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stFROMCACHEMB']."
-    </th>
-    <th>
-    ".$_lang['stDIRECTMB']."
-    </th>
-    <th>
-    ".$_lang['stFROMCACHEPERCENT']."
-    </th>
-    <th>
-    ".$_lang['stDIRECTPERCENT']."
-    </th>
-</tr>
-";
 
-$numrow=1;
-$incachemb=0;
-$outcachemb=0;
-$trafficmb=0;
-$havemarker=0;
-$incachepc=0;
-$outcachepc=0;
-$totaltrafficmb=0;
-$totalincachemb=0;
-$totaloutcachemb=0;
-$totalincachepc=0;
-$totaloutcachepc=0;
-
-
-$result=$ssq->query($queryLoginsTrafficWide);
-while ($line = $ssq->fetch_array($result)) {
-
-
-if(($line[3]==1)&&($havemarker>0))
-{
-if($havemarker==1)
-{
-$outcachemb=0;
-echo "<td>".$outcachemb."</td>";
-}
-$havemarker=0;
-$incachepc=round($incachemb/$trafficmb*100,2);
-$outcachepc=round($outcachemb/$trafficmb*100,2);
-echo "<td>".$incachepc."</td>";
-echo "<td>".$outcachepc."</td>";
-$totaltrafficmb=$totaltrafficmb+$trafficmb;
-$totalincachemb=$totalincachemb+$incachemb;
-$totaloutcachemb=$totaloutcachemb+$outcachemb;
-echo "</tr>";
-$numrow++;
-}
-
-$line[1]=$line[1] / $oneMegabyte;
-
-if($line[3]==1)
-{
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-
-echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</a></td>";
-$trafficmb=$line[1];
-echo "<td>".$trafficmb."</td>";
-}
-if($line[3]==2)
-{
-$incachemb=$line[1];
-echo "<td>".$incachemb."</td>";
-$havemarker=1;
-}
-
-
-if($line[3]==3)
-{
-$outcachemb=$line[1];
-if($havemarker==0)
-{
-$incachemb=0;
-echo "<td>".$incachemb."</td>";
-}
-echo "<td>".$outcachemb."</td>";
-
-$havemarker=2;
-}
-
-                }
-if($trafficmb>0){
-$incachepc=round($incachemb/$trafficmb*100,2);
-$outcachepc=round($outcachemb/$trafficmb*100,2);
-echo "<td>".$incachepc."</td>";
-echo "<td>".$outcachepc."</td>";
-$totaltrafficmb=$totaltrafficmb+$trafficmb;
-$totalincachemb=$totalincachemb+$incachemb;
-$totaloutcachemb=$totaloutcachemb+$outcachemb;
-echo "</tr>";
-}
-
-
-echo "<tr class=sortbottom>";
-echo "<td>&nbsp;</td>";
-echo "<td><b>".$_lang['stTOTAL']."</b></td>";
-echo "<td><b>".$totaltrafficmb."</b></td>";
-echo "<td><b>".$totalincachemb."</b></td>";
-echo "<td><b>".$totaloutcachemb."</b></td>";
-echo "<td><b>".(round($totalincachemb/$totaltrafficmb*100,2))."</b></td>";
-echo "<td><b>".(round($totaloutcachemb/$totaltrafficmb*100,2))."</b></td>";
-
-echo "</tr>";
-echo "</table>";
+	$json_result=doGetReportData($globalSS,$queryLoginsTrafficWide,'template12.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -6973,126 +7408,9 @@ echo "</table>";
 
 if($id==15)
 {
-echo "
-<table id=report_table_id_15 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stFROMCACHEMB']."
-    </th>
-    <th>
-    ".$_lang['stDIRECTMB']."
-    </th>
-    <th>
-    ".$_lang['stFROMCACHEPERCENT']."
-    </th>
-    <th>
-    ".$_lang['stDIRECTPERCENT']."
-    </th>
-</tr>
-";
+	$json_result=doGetReportData($globalSS,$queryIpaddressTrafficWide,'template13.php');
+	doPrintTable($globalSS,$json_result);
 
-$numrow=1;
-$incachemb=0;
-$outcachemb=0;
-$trafficmb=0;
-$havemarker=0;
-$incachepc=0;
-$outcachepc=0;
-$totaltrafficmb=0;
-$totalincachemb=0;
-$totaloutcachemb=0;
-$totalincachepc=0;
-$totaloutcachepc=0;
-
-
-$result=$ssq->query($queryIpaddressTrafficWide);
-while ($line = $ssq->fetch_array($result)) {
-
-
-if(($line[3]==1)&&($havemarker>0))
-{
-if($havemarker==1)
-{
-$outcachemb=0;
-echo "<td>".$outcachemb."</td>";
-}
-$havemarker=0;
-$incachepc=round($incachemb/$trafficmb*100,2);
-$outcachepc=round($outcachemb/$trafficmb*100,2);
-echo "<td>".$incachepc."</td>";
-echo "<td>".$outcachepc."</td>";
-$totaltrafficmb=$totaltrafficmb+$trafficmb;
-$totalincachemb=$totalincachemb+$incachemb;
-$totaloutcachemb=$totaloutcachemb+$outcachemb;
-echo "</tr>";
-$numrow++;
-}
-
-$line[1]=$line[1] / $oneMegabyte;
-
-if($line[3]==1)
-{
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
-$trafficmb=$line[1];
-echo "<td>".$trafficmb."</td>";
-}
-if($line[3]==2)
-{
-$incachemb=$line[1];
-echo "<td>".$incachemb."</td>";
-$havemarker=1;
-}
-
-
-if($line[3]==3)
-{
-$outcachemb=$line[1];
-if($havemarker==0)
-{
-$incachemb=0;
-echo "<td>".$incachemb."</td>";
-}
-echo "<td>".$outcachemb."</td>";
-
-$havemarker=2;
-}
-
-                }
-if($trafficmb>0){
-$incachepc=round($incachemb/$trafficmb*100,2);
-$outcachepc=round($outcachemb/$trafficmb*100,2);
-echo "<td>".$incachepc."</td>";
-echo "<td>".$outcachepc."</td>";
-$totaltrafficmb=$totaltrafficmb+$trafficmb;
-$totalincachemb=$totalincachemb+$incachemb;
-$totaloutcachemb=$totaloutcachemb+$outcachemb;
-echo "</tr>";
-}
-
-$ssq->free_result($result);
-
-echo "<tr class=sortbottom>";
-echo "<td>&nbsp;</td>";
-echo "<td><b>".$_lang['stTOTAL']."</b></td>";
-echo "<td><b>".$totaltrafficmb."</b></td>";
-echo "<td><b>".$totalincachemb."</b></td>";
-echo "<td><b>".$totaloutcachemb."</b></td>";
-echo "<td><b>".(round($totalincachemb/$totaltrafficmb*100,2))."</b></td>";
-echo "<td><b>".(round($totaloutcachemb/$totaltrafficmb*100,2))."</b></td>";
-
-echo "</tr>";
-echo "</table>";
 
 }
 
@@ -7103,50 +7421,10 @@ echo "</table>";
 if($id==16)
 {
 
-echo "
-<table id=report_table_id_16 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stHOSTNAMERESOLVE']."
-    </th>
+	$json_result=doGetReportData($globalSS,$queryIpaddressTrafficWithResolve,'template9.php');
+ 
+	doPrintTable($globalSS,$json_result);
 
-</tr>
-";
-
-$result=$ssq->query($queryIpaddressTrafficWithResolve);
-$numrow=1;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</td>";
-$line[1]=$line[1] / $oneMegabyte;
-echo "<td>".$line[1]."</td>";
-echo "<td>".gethostbyaddr($line[0])."</td>";
-echo "</tr>";
-$numrow++;
-$totalmb=$totalmb+$line[1];
-}
-
-$ssq->free_result($result);
-
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td>&nbsp;</td>
-</tr>";
-
-echo "</table>";
 }
 
 /////////////// IPADDRESS TRAFFIC REPORT WITH RESOLVE END
@@ -7155,50 +7433,9 @@ echo "</table>";
 
 if($id==17)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stREQUESTS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
-$colhtext[5]=$_lang['stWHO'];
 
-
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-$colftext[5]="&nbsp;";
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-
-///$tmpLine=explode(':',$line[0]);
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-$result=$ssq->query($queryPopularSites);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line2";
-$colr[4]="line1";
-$colr[5]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','1','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','1','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-$colf[5]="<td><b>".$colftext[5]."</b></td>";
-
+	$json_result=doGetReportData($globalSS,$queryPopularSites,'template5.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// POPULAR SITES REPORT END
@@ -7208,35 +7445,10 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==18)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
+	$json_result=doGetReportData($globalSS,$queryWhoVisitPopularSiteLogin,'template1.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-
-$result=$ssq->query($queryWhoVisitPopularSiteLogin);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line3','line0','0','')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// WHO VISIT POPULAR SITE LOGIN REPORT END
@@ -7245,34 +7457,8 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==19)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
-
-
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryWhoVisitPopularSiteIpaddress);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line3','line0 (line2)','1','')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
+	$json_result=doGetReportData($globalSS,$queryWhoVisitPopularSiteIpaddress,'template2.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// WHO VISIT POPULAR SITE IPADDRESS REPORT END
@@ -7281,40 +7467,9 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==20)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stIPADDRESS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
-$colhtext[5]=$_lang['stFROMWEBSITE'];
 
-
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-$colftext[5]="&nbsp;";
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-$result=$ssq->query($queryWhoDownloadBigFiles);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
-$colr[4]="line1";
-$colr[5]="line3";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-$colf[5]="<td><b>".$colftext[5]."</b></td>";
+	$json_result=doGetReportData($globalSS,$queryWhoDownloadBigFiles,'template6.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// WHO DOWNLOAD BIG FILES REPORT END
@@ -7323,36 +7478,10 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==21)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stMONTHYEAR'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stWHO'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryTrafficByPeriod,'template10.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=4;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryTrafficByPeriod);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-
-$colr[4]="<a href=javascript:LeftRightDateSwitch(1,'month','')>".$_lang['stLOGINS']."</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'month','')>".$_lang['stIPADDRESSES']."</a>";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// TRAFFIC BY PERIOD REPORT END
@@ -7361,28 +7490,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==22)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stDATEANDTIME'];
-$colhtext[3]=$_lang['stWEBSITE'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryVisitingWebsiteByTimeLogin,'template11.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryVisitingWebsiteByTimeLogin);
-
-$colr[1]="numrow";
-$colr[2]="line2";
-$colr[3]="line0";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// VISITING WEBSITE BY TIME REPORT LOGIN END
@@ -7391,28 +7502,10 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==23)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stDATEANDTIME'];
-$colhtext[3]=$_lang['stWEBSITE'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryVisitingWebsiteByTimeIpaddress,'template11.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryVisitingWebsiteByTimeIpaddress);
-
-$colr[1]="numrow";
-$colr[2]="line2";
-$colr[3]="line0";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// VISITING WEBSITE BY TIME REPORT IPADDRESS END
@@ -7421,29 +7514,9 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==24)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stGROUP'];
-$colhtext[3]=$_lang['stMEGABYTES'];
+	$json_result=doGetReportData($globalSS,$queryGroupsTraffic,'template14.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryGroupsTraffic);
-
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','line2','line0',3+line3,'')\">line0</a>";
-$colr[3]="line1";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////// GROUPS TRAFFIC REPORT END
@@ -7454,39 +7527,10 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==25)
 {
-$colhtext[1]="#";
-if($typeid==0)
-$colhtext[2]=$_lang['stLOGIN'];
-else
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
+	$globalSS['typeid'] = $typeid;
+	$json_result=doGetReportData($globalSS,$queryOneGroupTraffic,'template15.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-if($typeid==0)
-$colh[0]=3+$useLoginalias;
-else
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryOneGroupTraffic);
-
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(8+3*$typeid,'".$dayormonth."','line2','line0',0+$typeid,'')\">line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(4);</script>";
 }
@@ -7498,156 +7542,10 @@ echo "<script>UpdateLeftMenu(4);</script>";
 
 if($id==26)
 {
-echo "
-<table id=report_table_id_26 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>";
 
-if($typeid==0)
-echo $_lang['stLOGIN'];
-if($typeid==1)
-echo $_lang['stIPADDRESS'];
-echo "</th>";
+	$json_result=doGetReportData($globalSS,$queryOneGroupTrafficWide,'template16.php');
+	doPrintTable($globalSS,$json_result);
 
-if(($useLoginalias==1)&&($typeid==0))
-echo "<th>".$_lang['stALIAS']."</th>";
-
-if(($useIpaddressalias==1)&&($typeid==1))
-echo "<th>".$_lang['stALIAS']."</th>";
-echo "<th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stFROMCACHEMB']."
-    </th>
-    <th>
-    ".$_lang['stDIRECTMB']."
-    </th>
-    <th>
-    ".$_lang['stFROMCACHEPERCENT']."
-    </th>
-    <th>
-    ".$_lang['stDIRECTPERCENT']."
-    </th>
-</tr>
-";
-
-$numrow=1;
-$incachemb=0;
-$outcachemb=0;
-$trafficmb=0;
-$havemarker=0;
-$incachepc=0;
-$outcachepc=0;
-$totaltrafficmb=0;
-$totalincachemb=0;
-$totaloutcachemb=0;
-$totalincachepc=0;
-$totaloutcachepc=0;
-
-$result=$ssq->query($queryOneGroupTrafficWide);
-
-while ($line = $ssq->fetch_array($result)) {
-
-
-if(($line[3]==1)&&($havemarker>0))
-{
-if($havemarker==1)
-{
-$outcachemb=0;
-echo "<td>".$outcachemb."</td>";
-}
-$havemarker=0;
-$incachepc=round($incachemb/$trafficmb*100,2);
-$outcachepc=round($outcachemb/$trafficmb*100,2);
-echo "<td>".$incachepc."</td>";
-echo "<td>".$outcachepc."</td>";
-$totaltrafficmb=$totaltrafficmb+$trafficmb;
-$totalincachemb=$totalincachemb+$incachemb;
-$totaloutcachemb=$totaloutcachemb+$outcachemb;
-echo "</tr>";
-$numrow++;
-}
-
-$line[1]=$line[1] / $oneMegabyte;
-
-if($line[3]==1)
-{
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-
-if($typeid==0)
-echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[2]."','".$line[0]."','0','')>".$line[0]."</a></td>";
-if($typeid==1)
-echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[2]."','".$line[0]."','1','')>".$line[0]."</a></td>";
-
-if(($useLoginalias==1)&&($typeid==0))
-echo "<td>".$line[4]."</td>";
-
-if(($useIpaddressalias==1)&&($typeid==1))
-echo "<td>".$line[4]."</td>";
-
-$trafficmb=$line[1];
-echo "<td>".$trafficmb."</td>";
-}
-if($line[3]==2)
-{
-$incachemb=$line[1];
-echo "<td>".$incachemb."</td>";
-$havemarker=1;
-}
-
-
-if($line[3]==3)
-{
-$outcachemb=$line[1];
-if($havemarker==0)
-{
-$incachemb=0;
-echo "<td>".$incachemb."</td>";
-}
-echo "<td>".$outcachemb."</td>";
-
-$havemarker=2;
-}
-
-                }
-if($trafficmb>0){
-$incachepc=round($incachemb/$trafficmb*100,2);
-$outcachepc=round($outcachemb/$trafficmb*100,2);
-echo "<td>".$incachepc."</td>";
-echo "<td>".$outcachepc."</td>";
-$totaltrafficmb=$totaltrafficmb+$trafficmb;
-$totalincachemb=$totalincachemb+$incachemb;
-$totaloutcachemb=$totaloutcachemb+$outcachemb;
-echo "</tr>";
-}
-
-
-echo "<tr class=sortbottom>";
-echo "<td>&nbsp;</td>";
-echo "<td><b>".$_lang['stTOTAL']."</b></td>";
-
-if(($useLoginalias==1)&&($typeid==0))
-echo "<td>&nbsp;</td>";
-if(($useIpaddressalias==1)&&($typeid==1))
-echo "<td>&nbsp;</td>";
-
-echo "<td><b>".$totaltrafficmb."</b></td>";
-echo "<td><b>".$totalincachemb."</b></td>";
-echo "<td><b>".$totaloutcachemb."</b></td>";
-echo "<td><b>".(round($totalincachemb/$totaltrafficmb*100,2))."</b></td>";
-echo "<td><b>".(round($totaloutcachemb/$totaltrafficmb*100,2))."</b></td>";
-
-echo "</tr>";
-echo "</table>";
-$ssq->free_result($result);
 
 }
 
@@ -7658,33 +7556,10 @@ $ssq->free_result($result);
 
 if($id==27)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
+	$json_result=doGetReportData($globalSS,$queryOneGroupTopSitesTraffic,'template4.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-$result=$ssq->query($queryOneGroupTopSitesTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// ONE GROUP TOP SITES TRAFFIC REPORT END
@@ -7694,64 +7569,43 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==28)
 {
-echo "
-<table id=report_table_id_28 class=datatable>
-<tr>
-    <th class=unsortable>
-    ".$_lang['stHOURS']."
-    </th>
-    <th class=unsortable>
-    ".$_lang['stMEGABYTES']."
-    </th>
-</tr>
-";
 
-$result=$ssq->query($queryOneGroupTrafficByHours);
 
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
 
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "</tr>";
-}
-if($HourCounter==$line[0])
-break;
+//delete graph if exists
 
-$HourCounter++;
-}
-
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-$line[1]=$line[1] / $oneMegabyte;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-echo "<tr>";
-echo "<td>".$HourCounter.":00-".($HourCounter+1).":00</td>";
-echo "<td>0</td>";
-echo "</tr>";
-$HourCounter++;
-}
-echo "<tr class=sortbottom>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-</tr>";
-
-echo "</table>";
-
-$ssq->free_result($result);
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
+	unlink($filename);
+ }
+ 
+ 
+ $json_result=doGetReportData($globalSS,$queryOneGroupTrafficByHours,'template8.php');
+ 
+ $arrHourMb = array();
+ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
+ 
+ #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
+ if($makecsv==0){
+	 #соберем данные для графика
+	 $userData['charttype']="line";
+	 $userData['chartname']="trafficbyhours";
+	 $userData['charttitle']="";
+	 $userData['arrSerie1']=$arrHourMb;
+	 $userData['arrSerie2']="";
+	 
+	 
+	 //create chart
+	 $pathtoimage = $grap->drawImage($userData);
+	 
+	 //display
+	 echo $pathtoimage;
+	 
+	 ///pChart Graph END
+	 }
+	 
+ 
+ doPrintTable($globalSS,$json_result);
+ 
 
 }
 
@@ -7760,45 +7614,9 @@ $ssq->free_result($result);
 /////////////// ONE GROUP WHO DOWNLOAD BIG FILES REPORT
 
 if($id==29)
-{
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stIPADDRESS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
-$colhtext[5]=$_lang['stFROMWEBSITE'];
-
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-$colftext[5]="&nbsp;";
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-$result=$ssq->query($queryOneGroupWhoDownloadBigFiles);
-
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')\">line0</a>";
-$colr[3]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')\">line2</a>";
-$colr[4]="line1";
-$colr[5]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-$colf[5]="<td><b>".$colftext[5]."</b></td>";
+{	
+	$json_result=doGetReportData($globalSS,$queryOneGroupWhoDownloadBigFiles,'template17.php');
+	doPrintTable($globalSS,$json_result);
 }
 
 /////////////// ONE GROUP WHO DOWNLOAD BIG FILES REPORT END
@@ -7807,33 +7625,9 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==30)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stHTTPSTATUS'];
-$colhtext[3]=$_lang['stQUANTITY'];
-$colhtext[4]=$_lang['stWHO'];
+	$json_result=doGetReportData($globalSS,$queryHttpStatus,'template18.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
-$colftext[4]="&nbsp;";
-
-$colh[0]=4;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryHttpStatus);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line2";
-$colr[4]="<a href=javascript:GoPartlyReports(31,'".$dayormonth."','line3','line0','5','')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(32,'".$dayormonth."','line3','line0','5','')>".$_lang['stIPADDRESSES']."</a>";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////// HTTP STATUS REPORT END
@@ -7842,33 +7636,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==31)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stQUANTITY'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryLoginsHttpStatus,'template19.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryLoginsHttpStatus);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line3','line0')>line0</a>";
-$colr[3]="line2";
-$colr[4]="line4";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////// LOGINS HTTP STATUS REPORT END
@@ -7877,33 +7648,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==32)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stQUANTITY'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryIpaddressHttpStatus,'template20.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryIpaddressHttpStatus);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(34,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line3','line0')>line0</a>";
-$colr[3]="line2";
-$colr[4]="line4";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////// IPADDRESS HTTP STATUS REPORT END
@@ -7912,7 +7660,9 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==33) //неработает пока
 {
-echo "
+	echo "Отчёт не работает. Напомните мне, я возможно забыл.";
+/*
+	echo "
 <table id=report_table_id_33 class=datatable>
 <tr>
     <th class=unsortable>
@@ -7938,7 +7688,7 @@ echo "</tr>";
 $numrow++;
     }
 echo "</tbody></table>";
-$ssq->free_result($result);
+$ssq->free_result($result);*/
 }
 
 /////////// ONE LOGIN ONE HTTP STATUS REPORT END
@@ -7947,7 +7697,9 @@ $ssq->free_result($result);
 
 if($id==34) //не работает пока
 {
-echo "
+	echo "Отчёт не работает. Напомните мне, я возможно забыл.";
+
+/*	echo "
 <table id=report_table_id_34 class=datatable>
 <tr>
     <th class=unsortable>
@@ -7972,7 +7724,7 @@ echo "<td>".$line[1]."</td>";
 echo "</tr>";
 $numrow++;
     }
-echo "</tbody></table>";
+echo "</tbody></table>";*/
 }
 
 /////////// ONE IPADDRESS ONE HTTP STATUS REPORT END
@@ -7981,33 +7733,11 @@ echo "</tbody></table>";
 
 if($id==35)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryOneLoginIpTraffic,'template2.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
 
-$result=$ssq->query($queryOneLoginIpTraffic);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0','1','')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
@@ -8019,33 +7749,10 @@ echo "<script>UpdateLeftMenu(1);</script>";
 
 if($id==36)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressLoginsTraffic,'template1.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryOneIpaddressLoginsTraffic);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(2);</script>";
 }
@@ -8057,33 +7764,9 @@ echo "<script>UpdateLeftMenu(2);</script>";
 
 if($id==37)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stQUANTITYIPADDRESS'];
-$colhtext[4]=$_lang['stALIAS'];
+	$json_result=doGetReportData($globalSS,$queryCountIpaddressOnLogins,'template21.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryCountIpaddressOnLogins);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(35,'".$dayormonth."','line2','line0','0','')>line4</a>";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////// COUNT IPADDRESS ON LOGINS REPORT END
@@ -8092,33 +7775,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==38)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stQUANTITYIPADDRESS'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryCountLoginsOnIpaddress,'template22.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryCountLoginsOnIpaddress);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0','1','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(36,'".$dayormonth."','line2','line0','1','')>line4</a>";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////// COUNT LOGINS ON IPADDRESS REPORT END
@@ -8127,58 +7787,9 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==39)
 {
-echo "
-<table id=report_table_id_39 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stDAYMONTHYEAR']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-    <th>
-    ".$_lang['stWHO']."
-    </th>
-</tr>
-";
 
-$result=$ssq->query($queryTrafficByPeriodDay);
-
-$numrow=1;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
-
-
-echo "<tr>";
-echo "<td>".$numrow."</td>";
-echo "<td>".$line[0]."</td>";
-$line[1]=$line[1] / $oneMegabyte;
-echo "<td>".$line[1]."</td>";
-$explodeTmp=explode(".", $line[0]);
-$dateTmp=$explodeTmp[0]."-".$explodeTmp[1]."-".$explodeTmp[2];
-echo "<td><a href=javascript:LeftRightDateSwitch(1,'day','$dateTmp')>".$_lang['stLOGINS']."</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'day','$dateTmp')>".$_lang['stIPADDRESS']."</a></td>";
-
-
-echo "</tr>";
-
-$totalmb=$totalmb+$line[1];
-$numrow++;
-}
-$ssq->free_result($result);
-
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-<td><b>&nbsp;</b></td>
-
-</tr>";
-
-echo "</table>";
+	$json_result=doGetReportData($globalSS,$queryTrafficByPeriodDay,'template23.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -8188,118 +7799,10 @@ echo "</table>";
 
 if($id==40)
 {
-echo "
-<table id=report_table_id_40 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stDAYNAME']."
-    </th>
-    <th>
-    ".$_lang['stMEGABYTES']."
-    </th>
-</tr>
-";
 
-$result=$ssq->query($queryTrafficByPeriodDayname);
+	$json_result=doGetReportData($globalSS,$queryTrafficByPeriodDayname,'template24.php');
+	doPrintTable($globalSS,$json_result);
 
-$numrow=1;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
-if($line[0]=='0')
-$linevalue[7]=$line[1];
-if($line[0]=='1')
-$linevalue[1]=$line[1];
-if($line[0]=='2')
-$linevalue[2]=$line[1];
-if($line[0]=='3')
-$linevalue[3]=$line[1];
-if($line[0]=='4')
-$linevalue[4]=$line[1];
-if($line[0]=='5')
-$linevalue[5]=$line[1];
-if($line[0]=='6')
-$linevalue[6]=$line[1];
-
-$line[1]=$line[1] / $oneMegabyte;
-$totalmb=$totalmb+$line[1];
-}
-$ssq->free_result($result);
-echo "<tr>";
-echo "<td>1</td>";
-echo "<td>".$_lang['stMONDAY']."</td>";
-if(isset($linevalue[1]))
-$line[1]=$linevalue[1] / $oneMegabyte;
-else
-$line[1]=0;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-echo "<tr>";
-echo "<td>2</td>";
-echo "<td>".$_lang['stTUESDAY']."</td>";
-if(isset($linevalue[2]))
-$line[1]=$linevalue[2] / $oneMegabyte;
-else
-$line[1]=0;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-echo "<tr>";
-echo "<td>3</td>";
-echo "<td>".$_lang['stWEDNESDAY']."</td>";
-if(isset($linevalue[3]))
-$line[1]=$linevalue[3] / $oneMegabyte;
-else
-$line[1]=0;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-echo "<tr>";
-echo "<td>4</td>";
-echo "<td>".$_lang['stTHURSDAY']."</td>";
-if(isset($linevalue[4]))
-$line[1]=$linevalue[4] / $oneMegabyte;
-else
-$line[1]=0;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-echo "<tr>";
-echo "<td>5</td>";
-echo "<td>".$_lang['stFRIDAY']."</td>";
-if(isset($linevalue[5]))
-$line[1]=$linevalue[5] / $oneMegabyte;
-else
-$line[1]=0;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-echo "<tr>";
-echo "<td>6</td>";
-echo "<td>".$_lang['stSATURDAY']."</td>";
-if(isset($linevalue[6]))
-$line[1]=$linevalue[6] / $oneMegabyte;
-else
-$line[1]=0;
-echo "<td>".$line[1]."</td>";
-echo "</tr>";
-echo "<tr>";
-echo "<td>7</td>";
-echo "<td>".$_lang['stSUNDAY']."</td>";
-if(isset($linevalue[7]))
-$line[1]=$linevalue[7] / $oneMegabyte;
-else
-$line[1]=0;
-echo "<td>".$line[1]."</td>";
-
-echo "</tr>";
-
-
-echo "<tr class=sortbottom>
-<td>&nbsp;</td>
-<td><b>".$_lang['stTOTAL']."</b></td>
-<td><b>".$totalmb."</b></td>
-</tr>";
-
-echo "</table>";
 
 }
 
@@ -8309,33 +7812,10 @@ echo "</table>";
 
 if($id==41)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryWhoVisitSiteOneHourLogin,'template25.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryWhoVisitSiteOneHourLogin);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(43,'".$dayormonth."','line2','line0','0','".$currenthour."')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// WHO LOGIN VISIT SITE ONE HOUR REPORT END
@@ -8344,33 +7824,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==42)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryWhoVisitSiteOneHourIpaddress,'template26.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-$result=$ssq->query($queryWhoVisitSiteOneHourIpaddress);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(44,'".$dayormonth."','line2','line0','1','".$currenthour."')>line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 }
 
 /////////////// WHO IPADDRESS VISIT SITE ONE HOUR REPORT END
@@ -8379,35 +7836,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==43)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
+	$json_result=doGetReportData($globalSS,$queryOneLoginOneHourTraffic,'template4.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryOneLoginOneHourTraffic);
-
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 if($makepdf==0 && $makecsv==0)
 echo "<script>UpdateLeftMenu(1);</script>";
 }
@@ -8418,35 +7850,10 @@ echo "<script>UpdateLeftMenu(1);</script>";
 
 if($id==44)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressOneHourTraffic,'template4.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryOneIpaddressOneHourTraffic);
-
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 if($makepdf==0 and $makecsv==0)
 echo "<script>UpdateLeftMenu(2);</script>";
 }
@@ -8457,28 +7864,11 @@ echo "<script>UpdateLeftMenu(2);</script>";
 
 if($id==45)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stMIME'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
+	$json_result=doGetReportData($globalSS,$queryMimeTypesTraffic,'template27.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
 
-$result=$ssq->query($queryMimeTypesTraffic);
-
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(58,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
-$colr[3]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// MIME TYPES TRAFFIC REPORT END
@@ -8487,29 +7877,10 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==46)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stMIME'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
+	$json_result=doGetReportData($globalSS,$queryOneLoginMimeTypesTraffic,'template28.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryOneLoginMimeTypesTraffic);
-
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(59,'".$dayormonth."','".$currentloginid."','line0',0,'".$currentlogin."')\">line0</a>";
-//$colr[2]="line0";
-$colr[3]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// ONE LOGIN MIME TYPES TRAFFIC REPORT END
@@ -8519,29 +7890,10 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==47)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stMIME'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressMimeTypesTraffic,'template29.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryOneIpaddressMimeTypesTraffic);
-
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(60,'".$dayormonth."','".$currentipaddressid."','line0',0,'".$currentipaddress."')\">line0</a>";
-//$colr[2]="line0";
-$colr[3]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// ONE IPADDRESS MIME TYPES TRAFFIC REPORT END
@@ -8550,28 +7902,10 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==48)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stDOMAINZONE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
+	$json_result=doGetReportData($globalSS,$queryDomainZonesTraffic,'template30.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryDomainZonesTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// DOMAIN ZONES TRAFFIC REPORT END
@@ -8587,83 +7921,58 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
    unlink($filename);
 }
 
-$result=$ssq->query($queryTrafficByHours);
+#Чтобы корректно работать прям тут присвоим другие номера отчёту.
+#То есть DASHBOARD это в конечном счете те же самые отчеты. Только все разом. 
+#Так что если в Dashboard человек открыл уже по времени, то он быстро соберется. Ну и наоборот.
+$globalSS['params']['idReport']=7;
+$json_result=doGetReportData($globalSS,$queryTrafficByHours,'template7.php');
+ 
+$arrHourMb = array();
+$arrHourMb=doGetArrayData($globalSS,$json_result,1);
 
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
+#вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
 
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-$arrHourMb[$HourCounter]=0;
-}
-if($HourCounter==$line[0])
-break;
+	#соберем данные для графика
+	$userData['charttype']="line";
+	$userData['chartname']="trafficbyhours";
+	$userData['charttitle']="";
+	$userData['arrSerie1']=$arrHourMb;
+	$userData['arrSerie2']="";
+	
+	
+	//create chart
+	$pathtoimage = $grap->drawImage($userData);
+	
+	//display
+	echo $pathtoimage;
+	
+	///pChart Graph END
+	
 
-$HourCounter++;
-}
-$line[1]=$line[1] / $oneMegabyte;
-$arrHourMb[$HourCounter]=$line[1];
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
 
-while($HourCounter<24)
-{
-$arrHourMb[$HourCounter]=0;
-$HourCounter++;
-}
-
-$ssq->free_result($result);
-
-$userData['charttype']="line";
-$userData['chartname']="trafficbyhours";
-$userData['charttitle']="";
-$userData['arrSerie1']=$arrHourMb;
-$userData['arrSerie2']="";
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-///pChart Graph BY HOURS END
 
 ///top logins
 
 
+
+$globalSS['params']['idReport']=5;
+$json_result=doGetReportData($globalSS,$queryTopLoginsTraffic,'template1.php');
+
+$arrLine0 = array(); //logins
+$arrLine0=doGetArrayData($globalSS,$json_result,1);
+
+$arrLine1 = array(); //megabytes
+$arrLine1=doGetArrayData($globalSS,$json_result,2);
+
 $numrow=1;
 while ($numrow<$countTopLoginLimit)
 {
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
+	if ($arrLine0[$numrow-1]=="") {
+		$arrLine0[$numrow-1]="NO DATA";
+		$arrLine1[$numrow-1]=0;
+	}
 $numrow++;
 }
-
-$result=$ssq->query($queryTopLoginsTraffic);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
-
-$arrLine0[$numrow-1]=$line[0]." ";
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countTopLoginLimit)
-break;
-
-$numrow++;
-}
-
-$ssq->free_result($result);
 
 //top logins end
 
@@ -8687,35 +7996,26 @@ echo $pathtoimage;
 
 ///top ipaddress
 
+$globalSS['params']['idReport']=6;
+$json_result=doGetReportData($globalSS,$queryTopIpTraffic,'template2.php');
+
+$arrLine0 = array(); //ipaddress
+$arrLine0=doGetArrayData($globalSS,$json_result,1);
+
+$arrLine1 = array(); //megabytes
+$arrLine1=doGetArrayData($globalSS,$json_result,2);
+
 $numrow=1;
 while ($numrow<$countTopIpLimit)
 {
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
+	if ($arrLine0[$numrow-1]=="") {
+		$arrLine0[$numrow-1]="NO DATA";
+		$arrLine1[$numrow-1]=0;
+	}
 $numrow++;
 }
 
-$result=$ssq->query($queryTopIpTraffic);
-$numrow=1;
-$totalmb=0;
 
-while ($line = $ssq->fetch_array($result)) {
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countTopIpLimit)
-break;
-
-$numrow++;
-}
-
-$ssq->free_result($result);
 //top ip end
 
 /// pchart top ip
@@ -8735,40 +8035,25 @@ echo $pathtoimage;
 /// pchart top ip end
 
 ///top sites
+$globalSS['params']['idReport']=4;
+$json_result=doGetReportData($globalSS,$queryTopSitesTraffic,'template3.php');
+
+$arrLine0 = array(); //sites
+$arrLine0=doGetArrayData($globalSS,$json_result,1);
+
+$arrLine1 = array(); //megabytes
+$arrLine1=doGetArrayData($globalSS,$json_result,2);
 
 $numrow=1;
 while ($numrow<$countTopSitesLimit)
 {
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
+	if ($arrLine0[$numrow-1]=="") {
+		$arrLine0[$numrow-1]="NO DATA";
+		$arrLine1[$numrow-1]=0;
+	}
 $numrow++;
 }
 
-$result=$ssq->query($queryTopSitesTraffic);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if(isset($line[3]))
-if($line[3]=='2')
-$line[0]=$line[2];
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countTopSitesLimit)
-break;
-
-$numrow++;
-}
-
-$ssq->free_result($result);
 
 //top IP end
 
@@ -8790,35 +8075,25 @@ echo $pathtoimage;
 /// pchart top sites end
 
 ///top popular
+$globalSS['params']['idReport']=17;
+$json_result=doGetReportData($globalSS,$queryPopularSites,'template5.php');
+
+$arrLine0 = array(); //sites
+$arrLine0=doGetArrayData($globalSS,$json_result,1);
+
+$arrLine1 = array(); //megabytes
+$arrLine1=doGetArrayData($globalSS,$json_result,2);
 
 $numrow=1;
 while ($numrow<$countPopularSitesLimit)
 {
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
+	if ($arrLine0[$numrow-1]=="") {
+		$arrLine0[$numrow-1]="NO DATA";
+		$arrLine1[$numrow-1]=0;
+	}
 $numrow++;
 }
 
-$result=$ssq->query($queryPopularSites);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1];
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countPopularSitesLimit)
-break;
-
-$numrow++;
-}
-$ssq->free_result($result);
 
 //top popular end
 
@@ -8850,172 +8125,9 @@ echo $pathtoimage;
 
 if($id==50)
 {
-
-echo "
-<table id=report_table_id_50 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th class=unsortable>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th class=unsortable>
-    0
-    </th>
-    <th class=unsortable>
-    1
-    </th>
-    <th class=unsortable>
-    2
-    </th>
-    <th class=unsortable>
-    3
-    </th>
-    <th class=unsortable>
-    4
-    </th>
-    <th class=unsortable>
-    5
-    </th>
-    <th class=unsortable>
-    6
-    </th>
-    <th class=unsortable>
-    7
-    </th>
-    <th class=unsortable>
-    8
-    </th>
-    <th class=unsortable>
-    9
-    </th>
-    <th class=unsortable>
-    10
-    </th>
-    <th class=unsortable>
-    11
-    </th>
-    <th class=unsortable>
-    12
-    </th>
-    <th class=unsortable>
-    13
-    </th>
-    <th class=unsortable>
-    14
-    </th>
-    <th class=unsortable>
-    15
-    </th>
-    <th class=unsortable>
-    16
-    </th>
-    <th class=unsortable>
-    17
-    </th>
-    <th class=unsortable>
-    18
-    </th>
-    <th class=unsortable>
-    19
-    </th>
-    <th class=unsortable>
-    20
-    </th>
-    <th class=unsortable>
-    21
-    </th>
-    <th class=unsortable>
-    22
-    </th>
-    <th class=unsortable>
-    23
-    </th>
-    <th class=unsortable>
-    TOTAL
-    </th>
-</tr>
-";
-
-$result=$ssq->query($queryTrafficByHoursLogins);
-
-
-$HourCounter=0;
-$totalmb=0;
-$curLogin=0;
-$prevLogin=0;
-$prevLoginName="";
-$curHour=0;
-$prevHour=0;
-$numrow=1;
-$i=0;
-$totalmb=0;
-while($i<24)
-{
-$arrHourTraffic[$i]=0;
-$hourTotalmb[$i]=0;
-$i++;
-}
-
-
-$j=0;
-
-while($line = $ssq->fetch_array($result)){
-@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
-$j++;
-}
-$ssq->free_result($result);
-$k=0;
-
-while($k<$j)
-{
-	
-$line=explode(';',$arrayLine[$k]);
-$line1=explode(';',$arrayLine[$k+1]);
-
-if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-else
-{
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-			echo "<tr>";
-			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
-			$i=0;
-			$totalmb=0;
-			while($i<24) {
-				echo "<td>$arrHourTraffic[$i]</td>";
-				$totalmb=$totalmb+$arrHourTraffic[$i];
-				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-				$arrHourTraffic[$i]=0;
-				$i++;
-			}
-		echo "<td>$totalmb</td>";
-		echo "</tr>";
-$numrow++;
-
-}
-
-$k++;
-}
-
-$i=0;
-$totalmb=0;
-echo "<tr>";
-echo "<td colspan=2>TOTAL</td>";
-while($i<24)
-{
-echo "<td>$hourTotalmb[$i]</td>";
-$i++;
-$totalmb=$totalmb+$hourTotalmb[$i];
-}
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
-echo "</table>";
-
-
+	$globalSS['typeid']=0; #костыль
+	$json_result=doGetReportData($globalSS,$queryTrafficByHoursLogins,'template31.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -9026,176 +8138,16 @@ echo "</table>";
 
 if($id==51)
 {
-
-echo "
-<table id=report_table_id_51 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th class=unsortable>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th class=unsortable>
-    0
-    </th>
-    <th class=unsortable>
-    1
-    </th>
-    <th class=unsortable>
-    2
-    </th>
-    <th class=unsortable>
-    3
-    </th>
-    <th class=unsortable>
-    4
-    </th>
-    <th class=unsortable>
-    5
-    </th>
-    <th class=unsortable>
-    6
-    </th>
-    <th class=unsortable>
-    7
-    </th>
-    <th class=unsortable>
-    8
-    </th>
-    <th class=unsortable>
-    9
-    </th>
-    <th class=unsortable>
-    10
-    </th>
-    <th class=unsortable>
-    11
-    </th>
-    <th class=unsortable>
-    12
-    </th>
-    <th class=unsortable>
-    13
-    </th>
-    <th class=unsortable>
-    14
-    </th>
-    <th class=unsortable>
-    15
-    </th>
-    <th class=unsortable>
-    16
-    </th>
-    <th class=unsortable>
-    17
-    </th>
-    <th class=unsortable>
-    18
-    </th>
-    <th class=unsortable>
-    19
-    </th>
-    <th class=unsortable>
-    20
-    </th>
-    <th class=unsortable>
-    21
-    </th>
-    <th class=unsortable>
-    22
-    </th>
-    <th class=unsortable>
-    23
-    </th>
-    <th class=unsortable>
-    TOTAL
-    </th>
-</tr>
-";
-
-$result=$ssq->query($queryTrafficByHoursIpaddress);
-//echo $queryTrafficByHoursIpaddress;
-$HourCounter=0;
-$totalmb=0;
-$curLogin=0;
-$prevLogin=0;
-$prevLoginName="";
-$curHour=0;
-$prevHour=0;
-$numrow=1;
-$i=0;
-$totalmb=0;
-while($i<24)
-{
-$arrHourTraffic[$i]=0;
-$hourTotalmb[$i]=0;
-$i++;
-}
-
-
-$j=0;
-
-while($line = $ssq->fetch_array($result)){
-@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
-$j++;
-}
-
-$ssq->free_result($result);
-$k=0;
-
-while($k<$j)
-{
-$line=explode(';',$arrayLine[$k]);
-$line1=explode(';',$arrayLine[$k+1]);
-if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-else
-{
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-			echo "<tr>";
-			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
-			$i=0;
-			$totalmb=0;
-			while($i<24) {
-				echo "<td>$arrHourTraffic[$i]</td>";
-				$totalmb=$totalmb+$arrHourTraffic[$i];
-				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-				$arrHourTraffic[$i]=0;
-				$i++;
-			}
-		echo "<td>$totalmb</td>";
-		echo "</tr>";
-$numrow++;
-
-}
-
-$k++;
-}
-
-$i=0;
-$totalmb=0;
-echo "<tr>";
-echo "<td colspan=2>TOTAL</td>";
-while($i<24)
-{
-echo "<td>$hourTotalmb[$i]</td>";
-$i++;
-$totalmb=$totalmb+$hourTotalmb[$i];
-}
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
-echo "</table>";
-
+	$globalSS['typeid']=1; #костыль
+	$json_result=doGetReportData($globalSS,$queryTrafficByHoursIpaddress,'template31.php');
+	doPrintTable($globalSS,$json_result);
 
 
 }
 
 /////////////// TRAFFIC BY HOURS IPADDRESS REPORT END
 
-/////////////// TRAFFIC BY CATEGORY REPORT
+/////////////// TRAFFIC BY CATEGORY REPORT не работает!!!
 
 if($id==52)
 {
@@ -9247,175 +8199,15 @@ echo "</table>";
 
 }
 
-/////////////// DOMAIN ZONES TRAFFIC REPORT END
+/////////////// TRAFFIC BY CATEGORY REPORT END
 
 /////////////// TRAFFIC BY HOURS LOGINS ONE SITE REPORT
 
 if($id==53)
 {
 
-echo "
-<table id=report_table_id_50 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th class=unsortable>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th class=unsortable>
-    0
-    </th>
-    <th class=unsortable>
-    1
-    </th>
-    <th class=unsortable>
-    2
-    </th>
-    <th class=unsortable>
-    3
-    </th>
-    <th class=unsortable>
-    4
-    </th>
-    <th class=unsortable>
-    5
-    </th>
-    <th class=unsortable>
-    6
-    </th>
-    <th class=unsortable>
-    7
-    </th>
-    <th class=unsortable>
-    8
-    </th>
-    <th class=unsortable>
-    9
-    </th>
-    <th class=unsortable>
-    10
-    </th>
-    <th class=unsortable>
-    11
-    </th>
-    <th class=unsortable>
-    12
-    </th>
-    <th class=unsortable>
-    13
-    </th>
-    <th class=unsortable>
-    14
-    </th>
-    <th class=unsortable>
-    15
-    </th>
-    <th class=unsortable>
-    16
-    </th>
-    <th class=unsortable>
-    17
-    </th>
-    <th class=unsortable>
-    18
-    </th>
-    <th class=unsortable>
-    19
-    </th>
-    <th class=unsortable>
-    20
-    </th>
-    <th class=unsortable>
-    21
-    </th>
-    <th class=unsortable>
-    22
-    </th>
-    <th class=unsortable>
-    23
-    </th>
-    <th class=unsortable>
-    TOTAL
-    </th>
-</tr>
-";
-
-$result=$ssq->query($queryTrafficByHoursLoginsOneSite);
-
-$HourCounter=0;
-$totalmb=0;
-$curLogin=0;
-$prevLogin=0;
-$prevLoginName="";
-$curHour=0;
-$prevHour=0;
-$numrow=1;
-$i=0;
-$totalmb=0;
-while($i<24)
-{
-$arrHourTraffic[$i]=0;
-$hourTotalmb[$i]=0;
-$i++;
-}
-
-
-$j=0;
-
-while($line = $ssq->fetch_array($result)){
-@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
-$j++;
-}
-$ssq->free_result($result);
-$k=0;
-
-while($k<$j)
-{
-$line=explode(';',$arrayLine[$k]);
-$line1=explode(';',$arrayLine[$k+1]);
-if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-else
-{
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-			echo "<tr>";
-			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','".$line[0]."','".$line[1]."','0','')>".$line[1]."</td>";
-			$i=0;
-			$totalmb=0;
-			while($i<24) {
-				echo "<td>$arrHourTraffic[$i]</td>";
-				$totalmb=$totalmb+$arrHourTraffic[$i];
-				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-				$arrHourTraffic[$i]=0;
-				$i++;
-			}
-		echo "<td>$totalmb</td>";
-		echo "</tr>";
-$numrow++;
-
-}
-
-$k++;
-}
-
-$i=0;
-$totalmb=0;
-echo "<tr>";
-echo "<td colspan=2>TOTAL</td>";
-while($i<24)
-{
-echo "<td>$hourTotalmb[$i]</td>";
-$i++;
-$totalmb=$totalmb+$hourTotalmb[$i];
-}
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
-echo "</table>";
-
-
+	$json_result=doGetReportData($globalSS,$queryTrafficByHoursLoginsOneSite,'template31.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -9427,169 +8219,8 @@ echo "</table>";
 if($id==54)
 {
 
-echo "
-<table id=report_table_id_51 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th class=unsortable>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th class=unsortable>
-    0
-    </th>
-    <th class=unsortable>
-    1
-    </th>
-    <th class=unsortable>
-    2
-    </th>
-    <th class=unsortable>
-    3
-    </th>
-    <th class=unsortable>
-    4
-    </th>
-    <th class=unsortable>
-    5
-    </th>
-    <th class=unsortable>
-    6
-    </th>
-    <th class=unsortable>
-    7
-    </th>
-    <th class=unsortable>
-    8
-    </th>
-    <th class=unsortable>
-    9
-    </th>
-    <th class=unsortable>
-    10
-    </th>
-    <th class=unsortable>
-    11
-    </th>
-    <th class=unsortable>
-    12
-    </th>
-    <th class=unsortable>
-    13
-    </th>
-    <th class=unsortable>
-    14
-    </th>
-    <th class=unsortable>
-    15
-    </th>
-    <th class=unsortable>
-    16
-    </th>
-    <th class=unsortable>
-    17
-    </th>
-    <th class=unsortable>
-    18
-    </th>
-    <th class=unsortable>
-    19
-    </th>
-    <th class=unsortable>
-    20
-    </th>
-    <th class=unsortable>
-    21
-    </th>
-    <th class=unsortable>
-    22
-    </th>
-    <th class=unsortable>
-    23
-    </th>
-    <th class=unsortable>
-    TOTAL
-    </th>
-</tr>
-";
-
-$result=$ssq->query($queryTrafficByHoursIpaddressOneSite);
-
-$HourCounter=0;
-$totalmb=0;
-$curLogin=0;
-$prevLogin=0;
-$prevLoginName="";
-$curHour=0;
-$prevHour=0;
-$numrow=1;
-$i=0;
-$totalmb=0;
-while($i<24)
-{
-$arrHourTraffic[$i]=0;
-$hourTotalmb[$i]=0;
-$i++;
-}
-
-
-$j=0;
-
-while($line = $ssq->fetch_array($result)){
-@$arrayLine[$j]=$line[0].";".$line[1].";".$line[2].";".$line[3];
-$j++;
-}
-$ssq->free_result($result);
-$k=0;
-
-while($k<$j)
-{
-$line=explode(';',$arrayLine[$k]);
-$line1=explode(';',$arrayLine[$k+1]);
-if($line[1]==$line1[1])
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-else
-{
-$arrHourTraffic[$line[3]]=round($line[2]/$oneMegabyte,2);
-			echo "<tr>";
-			echo "<td>".$numrow."</td>";	
-			echo "<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','".$line[0]."','".$line[1]."','1','')>".$line[1]."</td>";
-			$i=0;
-			$totalmb=0;
-			while($i<24) {
-				echo "<td>$arrHourTraffic[$i]</td>";
-				$totalmb=$totalmb+$arrHourTraffic[$i];
-				$hourTotalmb[$i]=$hourTotalmb[$i]+$arrHourTraffic[$i];
-				$arrHourTraffic[$i]=0;
-				$i++;
-			}
-		echo "<td>$totalmb</td>";
-		echo "</tr>";
-$numrow++;
-
-}
-
-$k++;
-}
-
-
-$i=0;
-$totalmb=0;
-echo "<tr>";
-echo "<td colspan=2>TOTAL</td>";
-while($i<24)
-{
-echo "<td>$hourTotalmb[$i]</td>";
-$i++;
-$totalmb=$totalmb+$hourTotalmb[$i];
-}
-echo "<td>$totalmb</td>";
-echo "</tr>";
-
-echo "</table>";
-
-
+	$json_result=doGetReportData($globalSS,$queryTrafficByHoursIpaddressOneSite,'template31.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -9599,49 +8230,10 @@ echo "</table>";
 
 if($id==55)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stREQUESTS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
-$colhtext[5]=$_lang['stWHO'];
 
+	$json_result=doGetReportData($globalSS,$queryOneGroupPopularSites,'template5.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-$colftext[5]="&nbsp;";
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-
-///$tmpLine=explode(':',$line[0]);
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-$result=$ssq->query($queryOneGroupPopularSites);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line2";
-$colr[4]="line1";
-$colr[5]="<a href=javascript:GoPartlyReports(18,'".$dayormonth."','1','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','1','','1','line0')>".$_lang['stIPADDRESSES']."</a>";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-$colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 }
 
@@ -9651,44 +8243,10 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==56)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stREQUESTS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
 
+	$json_result=doGetReportData($globalSS,$queryOneLoginPopularSites,'template32.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-
-$colh[0]=4;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-
-///$tmpLine=explode(':',$line[0]);
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-$result=$ssq->query($queryOneLoginPopularSites);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line2";
-$colr[4]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 }
 
@@ -9698,44 +8256,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==57)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stSITE'];
-$colhtext[3]=$_lang['stREQUESTS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
 
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressPopularSites,'template32.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-
-$colh[0]=4;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-
-///$tmpLine=explode(':',$line[0]);
-
-///if($tmpLine[1]==443)
-///echo "<td><a href='https://".$line[0]."' target=blank>".$line[0]."</a></td>";
-///else
-///echo "<td><a href='http://".$line[0]."' target=blank>".$line[0]."</a></td>";
-
-
-$result=$ssq->query($queryOneIpaddressPopularSites);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line2";
-$colr[4]="line1";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 }
 
@@ -9745,40 +8269,10 @@ $colf[4]="<td><b>".$colftext[4]."</b></td>";
 
 if($id==58)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stIPADDRESS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
-$colhtext[5]=$_lang['stFROMWEBSITE'];
 
+	$json_result=doGetReportData($globalSS,$queryOneMime,'template17.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-$colftext[5]="&nbsp;";
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-$result=$ssq->query($queryOneMime);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
-$colr[4]="line1";
-$colr[5]="line3";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-$colf[5]="<td><b>".$colftext[5]."</b></td>";
 }
 
 /////////////// ONE MIME SITES REPORT END
@@ -9787,30 +8281,10 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==59)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stFROMWEBSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
+	$json_result=doGetReportData($globalSS,$queryOneMimeOneLogin,'template33.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryOneMimeOneLogin);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// ONE MIME LOGIN SITES REPORT END
@@ -9820,30 +8294,10 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 
 if($id==60)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stFROMWEBSITE'];
-$colhtext[3]=$_lang['stMEGABYTES'];
 
+	$json_result=doGetReportData($globalSS,$queryOneMimeOneIpaddress,'template33.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-
-$colh[0]=3;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-
-$result=$ssq->query($queryOneMimeOneIpaddress);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
 }
 
 /////////////// ONE MIME IPADDRESS SITES REPORT END
@@ -9853,196 +8307,123 @@ $colf[3]="<td><b>".$colftext[3]."</b></td>";
 if($id==61)
 {
 
+
 //delete graph if exists
 
 foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
-   unlink($filename);
-}
+	unlink($filename);
+ }
+ 
+ #Чтобы корректно работать прям тут присвоим другие номера отчёту.
+ #То есть DASHBOARD это в конечном счете те же самые отчеты. Только все разом. 
+ #Так что если в Dashboard человек открыл уже по времени, то он быстро соберется. Ну и наоборот.
+ $globalSS['params']['idReport']=10;
+ $json_result=doGetReportData($globalSS,$queryOneLoginTrafficByHours,'template7.php');
+  
+ $arrHourMb = array();
+ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
+ 
+ #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
+ 
+	 #соберем данные для графика
+	 $userData['charttype']="line";
+	 $userData['chartname']="trafficbyhours";
+	 $userData['charttitle']="";
+	 $userData['arrSerie1']=$arrHourMb;
+	 $userData['arrSerie2']="";
+	 
+	 
+	 //create chart
+	 $pathtoimage = $grap->drawImage($userData);
+	 
+	 //display
+	 echo $pathtoimage;
+	 
+	 ///pChart Graph END
+	 
+ 
+ 
 
-$result=$ssq->query($queryOneLoginTrafficByHours);
+ ///top sites
+ $globalSS['params']['idReport']=9;
+ $json_result=doGetReportData($globalSS,$queryOneLoginTopSitesTraffic,'template3.php');
+ 
+ $arrLine0 = array(); //sites
+ $arrLine0=doGetArrayData($globalSS,$json_result,1);
+ 
+ $arrLine1 = array(); //megabytes
+ $arrLine1=doGetArrayData($globalSS,$json_result,2);
+ 
+ $numrow=1;
+ while ($numrow<$countTopSitesLimit)
+ {
+	 if ($arrLine0[$numrow-1]=="") {
+		 $arrLine0[$numrow-1]="NO DATA";
+		 $arrLine1[$numrow-1]=0;
+	 }
+ $numrow++;
+ }
+ 
+ 
+ //top IP end
+ 
+ /// pchart top sites
+ 
+ 
+ $userData['charttype']="pie";
+ $userData['chartname']="topsites";
+ $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+ $userData['arrSerie1']=$arrLine1;
+ $userData['arrSerie2']=$arrLine0;
+ 
+ //create chart
+ $pathtoimage = $grap->drawImage($userData);
+ 
+ //display
+ echo $pathtoimage;
+ 
+ /// pchart top sites end
+ 
+ ///top popular
+ $globalSS['params']['idReport']=56;
+ $json_result=doGetReportData($globalSS,$queryOneLoginPopularSites,'template5.php');
+ 
+ $arrLine0 = array(); //sites
+ $arrLine0=doGetArrayData($globalSS,$json_result,1);
+ 
+ $arrLine1 = array(); //megabytes
+ $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
-
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-$arrHourMb[$HourCounter]=0;
-}
-if($HourCounter==$line[0])
-break;
-
-$HourCounter++;
-}
-$line[1]=$line[1] / $oneMegabyte;
-$arrHourMb[$HourCounter]=$line[1];
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-$arrHourMb[$HourCounter]=0;
-$HourCounter++;
-}
-
-$ssq->free_result($result);
-
-if($graphtype['trafficbyhours']==1)
-{
-// Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
-
- $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
- $DataSet->AddAllSeries();
- $DataSet->RemoveSerie("Serie3");
- $DataSet->SetAbsciseLabelSerie("Serie3");
- $DataSet->SetSerieName("Traffic","Serie1");
- $DataSet->SetYAxisName("Megabytes");
-
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(120,20,675,190);
- $Test->drawGraphArea(213,217,221,FALSE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
- $Test->drawGraphAreaGradient(163,203,167,50);
- $Test->drawGrid(4,TRUE,230,230,230,20);
-
- // Draw the bar chart
- $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
-
- // Draw the legend
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
-
- // Render the picture
- $Test->addBorder(2);
-}
-
-$userData['charttype']="line";
-$userData['chartname']="trafficbyhours";
-$userData['charttitle']=$_lang['stTRAFFICBYHOURS'];
-$userData['arrSerie1']=$arrHourMb;
-$userData['arrSerie2']="";
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-
-///pChart Graph BY HOURS END
-
-///top sites
-
-$numrow=1;
-while ($numrow<$countTopSitesLimit)
-{
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
-$numrow++;
-}
-
-$result=$ssq->query($queryOneLoginTopSitesTraffic);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if(isset($line[3]))
-if($line[3]=='2')
-$line[0]=$line[2];
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countTopSitesLimit)
-break;
-
-$numrow++;
-}
-$ssq->free_result($result);
-
-//top sites end
-
-
-/// pchart top sites
-
-$userData['charttype']="pie";
-$userData['chartname']="topsites";
-$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
-$userData['arrSerie1']=$arrLine1;
-$userData['arrSerie2']=$arrLine0;
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-/// pchart top sites end
-
-///top popular
-
-$numrow=1;
-while ($numrow<$countPopularSitesLimit)
-{
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
-$numrow++;
-}
-
-$result=$ssq->query($queryOneLoginPopularSites);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1];
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countPopularSitesLimit)
-break;
-
-$numrow++;
-}
-$ssq->free_result($result);
-
-//top popular end
-
-
-/// pchart top popular
-
-$userData['charttype']="pie";
-$userData['chartname']="toppop";
-$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
-$userData['arrSerie1']=$arrLine1;
-$userData['arrSerie2']=$arrLine0;
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-/// pchart top popular end
-
+ $numrow=1;
+ while ($numrow<$countPopularSitesLimit)
+ {
+	 if ($arrLine0[$numrow-1]=="") {
+		 $arrLine0[$numrow-1]="NO DATA";
+		 $arrLine1[$numrow-1]=0;
+	 }
+ $numrow++;
+ }
+ 
+ 
+ //top popular end
+ 
+ 
+ /// pchart top popular
+ 
+ 
+ $userData['charttype']="pie";
+ $userData['chartname']="toppop";
+ $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+ $userData['arrSerie1']=$arrLine1;
+ $userData['arrSerie2']=$arrLine0;
+ 
+ //create chart
+ $pathtoimage = $grap->drawImage($userData);
+ 
+ //display
+ echo $pathtoimage;
+ 
+ /// pchart top popular end
 
 }
 
@@ -10054,196 +8435,124 @@ echo $pathtoimage;
 if($id==62)
 {
 
+
 //delete graph if exists
 
 foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
-   unlink($filename);
-}
+	unlink($filename);
+ }
+ 
+ #Чтобы корректно работать прям тут присвоим другие номера отчёту.
+ #То есть DASHBOARD это в конечном счете те же самые отчеты. Только все разом. 
+ #Так что если в Dashboard человек открыл уже по времени, то он быстро соберется. Ну и наоборот.
+ $globalSS['params']['idReport']=13;
+ $json_result=doGetReportData($globalSS,$queryOneIpaddressTrafficByHours,'template7.php');
+  
+ $arrHourMb = array();
+ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
+ 
+ #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
+ 
+	 #соберем данные для графика
+	 $userData['charttype']="line";
+	 $userData['chartname']="trafficbyhours";
+	 $userData['charttitle']="";
+	 $userData['arrSerie1']=$arrHourMb;
+	 $userData['arrSerie2']="";
+	 
+	 
+	 //create chart
+	 $pathtoimage = $grap->drawImage($userData);
+	 
+	 //display
+	 echo $pathtoimage;
+	 
+	 ///pChart Graph END
+	 
+ 
+ 
 
-$result=$ssq->query($queryOneIpaddressTrafficByHours);
+ ///top sites
+ $globalSS['params']['idReport']=12;
+ $json_result=doGetReportData($globalSS,$queryOneIpaddressTopSitesTraffic,'template3.php');
+ 
+ $arrLine0 = array(); //sites
+ $arrLine0=doGetArrayData($globalSS,$json_result,1);
+ 
+ $arrLine1 = array(); //megabytes
+ $arrLine1=doGetArrayData($globalSS,$json_result,2);
+ 
+ $numrow=1;
+ while ($numrow<$countTopSitesLimit)
+ {
+	 if ($arrLine0[$numrow-1]=="") {
+		 $arrLine0[$numrow-1]="NO DATA";
+		 $arrLine1[$numrow-1]=0;
+	 }
+ $numrow++;
+ }
+ 
+ 
+ //top IP end
+ 
+ /// pchart top sites
+ 
+ 
+ $userData['charttype']="pie";
+ $userData['chartname']="topsites";
+ $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+ $userData['arrSerie1']=$arrLine1;
+ $userData['arrSerie2']=$arrLine0;
+ 
+ //create chart
+ $pathtoimage = $grap->drawImage($userData);
+ 
+ //display
+ echo $pathtoimage;
+ 
+ /// pchart top sites end
+ 
+ ///top popular
+ $globalSS['params']['idReport']=57;
+ $json_result=doGetReportData($globalSS,$queryOneIpaddressPopularSites,'template5.php');
+ 
+ $arrLine0 = array(); //sites
+ $arrLine0=doGetArrayData($globalSS,$json_result,1);
+ 
+ $arrLine1 = array(); //megabytes
+ $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
+ $numrow=1;
+ while ($numrow<$countPopularSitesLimit)
+ {
+	 if ($arrLine0[$numrow-1]=="") {
+		 $arrLine0[$numrow-1]="NO DATA";
+		 $arrLine1[$numrow-1]=0;
+	 }
+ $numrow++;
+ }
+ 
+ 
+ //top popular end
+ 
+ 
+ /// pchart top popular
+ 
+ 
+ $userData['charttype']="pie";
+ $userData['chartname']="toppop";
+ $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+ $userData['arrSerie1']=$arrLine1;
+ $userData['arrSerie2']=$arrLine0;
+ 
+ //create chart
+ $pathtoimage = $grap->drawImage($userData);
+ 
+ //display
+ echo $pathtoimage;
+ 
+ /// pchart top popular end
 
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-$arrHourMb[$HourCounter]=0;
-}
-if($HourCounter==$line[0])
-break;
-
-$HourCounter++;
-}
-$line[1]=$line[1] / $oneMegabyte;
-$arrHourMb[$HourCounter]=$line[1];
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-$arrHourMb[$HourCounter]=0;
-$HourCounter++;
-}
-$ssq->free_result($result);
-if($graphtype['trafficbyhours']==1)
-{
-// Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
-
- $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
- $DataSet->AddAllSeries();
- $DataSet->RemoveSerie("Serie3");
- $DataSet->SetAbsciseLabelSerie("Serie3");
- $DataSet->SetSerieName("Traffic","Serie1");
- $DataSet->SetYAxisName("Megabytes");
-
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(120,20,675,190);
- $Test->drawGraphArea(213,217,221,FALSE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
- $Test->drawGraphAreaGradient(163,203,167,50);
- $Test->drawGrid(4,TRUE,230,230,230,20);
-
- // Draw the bar chart
- $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
-
- // Draw the legend
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
-
- // Render the picture
- $Test->addBorder(2);
-}
-
-$userData['charttype']="line";
-$userData['chartname']="trafficbyhours";
-$userData['charttitle']=$_lang['stTRAFFICBYHOURS'];
-$userData['arrSerie1']=$arrHourMb;
-$userData['arrSerie2']="";
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-///pChart Graph BY HOURS END
-
-
-///top sites
-
-$numrow=1;
-while ($numrow<$countTopSitesLimit)
-{
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
-$numrow++;
-}
-
-$result=$ssq->query($queryOneIpaddressTopSitesTraffic);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if(isset($line[3]))
-if($line[3]=='2')
-$line[0]=$line[2];
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countTopSitesLimit)
-break;
-
-$numrow++;
-}
-$ssq->free_result($result);
-
-//top sites end
-
-
-/// pchart top sites
-
-
-$userData['charttype']="pie";
-$userData['chartname']="topsites";
-$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
-$userData['arrSerie1']=$arrLine1;
-$userData['arrSerie2']=$arrLine0;
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-
-/// pchart top sites end
-
-///top popular
-
-$numrow=1;
-while ($numrow<$countPopularSitesLimit)
-{
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
-$numrow++;
-}
-
-$result=$ssq->query($queryOneIpaddressPopularSites);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1];
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countPopularSitesLimit)
-break;
-
-$numrow++;
-}
-$ssq->free_result($result);
-
-//top popular end
-
-
-/// pchart top popular
-
-$userData['charttype']="pie";
-$userData['chartname']="toppop";
-$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
-$userData['arrSerie1']=$arrLine1;
-$userData['arrSerie2']=$arrLine0;
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-
-/// pchart top popular end
 
 
 }
@@ -10256,195 +8565,124 @@ echo $pathtoimage;
 if($id==63)
 {
 
+
 //delete graph if exists
 
+foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
+	unlink($filename);
+ }
+ 
+ #Чтобы корректно работать прям тут присвоим другие номера отчёту.
+ #То есть DASHBOARD это в конечном счете те же самые отчеты. Только все разом. 
+ #Так что если в Dashboard человек открыл уже по времени, то он быстро соберется. Ну и наоборот.
+ $globalSS['params']['idReport']=28;
+ $json_result=doGetReportData($globalSS,$queryOneGroupTrafficByHours,'template7.php');
+  
+ $arrHourMb = array();
+ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
+ 
+ #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
+ 
+	 #соберем данные для графика
+	 $userData['charttype']="line";
+	 $userData['chartname']="trafficbyhours";
+	 $userData['charttitle']="";
+	 $userData['arrSerie1']=$arrHourMb;
+	 $userData['arrSerie2']="";
+	 
+	 
+	 //create chart
+	 $pathtoimage = $grap->drawImage($userData);
+	 
+	 //display
+	 echo $pathtoimage;
+	 
+	 ///pChart Graph END
+	 
+ 
+ 
 
+ ///top sites
+ $globalSS['params']['idReport']=27;
+ $json_result=doGetReportData($globalSS,$queryOneGroupTopSitesTraffic,'template3.php');
+ 
+ $arrLine0 = array(); //sites
+ $arrLine0=doGetArrayData($globalSS,$json_result,1);
+ 
+ $arrLine1 = array(); //megabytes
+ $arrLine1=doGetArrayData($globalSS,$json_result,2);
+ 
+ $numrow=1;
+ while ($numrow<$countTopSitesLimit)
+ {
+	 if ($arrLine0[$numrow-1]=="") {
+		 $arrLine0[$numrow-1]="NO DATA";
+		 $arrLine1[$numrow-1]=0;
+	 }
+ $numrow++;
+ }
+ 
+ 
+ //top IP end
+ 
+ /// pchart top sites
+ 
+ 
+ $userData['charttype']="pie";
+ $userData['chartname']="topsites";
+ $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+ $userData['arrSerie1']=$arrLine1;
+ $userData['arrSerie2']=$arrLine0;
+ 
+ //create chart
+ $pathtoimage = $grap->drawImage($userData);
+ 
+ //display
+ echo $pathtoimage;
+ 
+ /// pchart top sites end
+ 
+ ///top popular
+ $globalSS['params']['idReport']=55;
+ $json_result=doGetReportData($globalSS,$queryOneGroupPopularSites,'template5.php');
+ 
+ $arrLine0 = array(); //sites
+ $arrLine0=doGetArrayData($globalSS,$json_result,1);
+ 
+ $arrLine1 = array(); //megabytes
+ $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
-$result=$ssq->query($queryOneGroupTrafficByHours);
+ $numrow=1;
+ while ($numrow<$countPopularSitesLimit)
+ {
+	 if ($arrLine0[$numrow-1]=="") {
+		 $arrLine0[$numrow-1]="NO DATA";
+		 $arrLine1[$numrow-1]=0;
+	 }
+ $numrow++;
+ }
+ 
+ 
+ //top popular end
+ 
+ 
+ /// pchart top popular
+ 
+ 
+ $userData['charttype']="pie";
+ $userData['chartname']="toppop";
+ $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+ $userData['arrSerie1']=$arrLine1;
+ $userData['arrSerie2']=$arrLine0;
+ 
+ //create chart
+ $pathtoimage = $grap->drawImage($userData);
+ 
+ //display
+ echo $pathtoimage;
+ 
+ /// pchart top popular end
 
-$HourCounter=0;
-$totalmb=0;
-while ($line = $ssq->fetch_array($result)) {
-
-while($HourCounter<24)
-{
-if($HourCounter<$line[0])
-{
-$arrHourMb[$HourCounter]=0;
-}
-if($HourCounter==$line[0])
-break;
-
-$HourCounter++;
-}
-$line[1]=$line[1] / $oneMegabyte;
-$arrHourMb[$HourCounter]=$line[1];
-$totalmb=$totalmb+$line[1];
-$HourCounter++;
-}
-
-while($HourCounter<24)
-{
-$arrHourMb[$HourCounter]=0;
-$HourCounter++;
-}
-$ssq->free_result($result);
-if($graphtype['trafficbyhours']==1)
-{
-// Dataset definition 
- $DataSet = new pData;
- $DataSet->AddPoint($arrHourMb,"Serie1");
-
- $DataSet->AddPoint(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23),"Serie3");
- $DataSet->AddAllSeries();
- $DataSet->RemoveSerie("Serie3");
- $DataSet->SetAbsciseLabelSerie("Serie3");
- $DataSet->SetSerieName("Traffic","Serie1");
- $DataSet->SetYAxisName("Megabytes");
-
- // Initialise the graph
- $Test = new pChart(700,230);
- $Test->drawGraphAreaGradient(132,173,131,50,TARGET_BACKGROUND);
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->setGraphArea(120,20,675,190);
- $Test->drawGraphArea(213,217,221,FALSE);
- $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALL,213,217,221,TRUE,0,2,TRUE);
- $Test->drawGraphAreaGradient(163,203,167,50);
- $Test->drawGrid(4,TRUE,230,230,230,20);
-
- // Draw the bar chart
- $Test->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),70);
-
- // Draw the legend
- $Test->setFontProperties("../lib/pChart/Fonts/tahoma.ttf",8);
- $Test->drawLegend(610,10,$DataSet->GetDataDescription(),236,238,240,52,58,82);
-
- // Render the picture
- $Test->addBorder(2);
-}
-
-$userData['charttype']="line";
-$userData['chartname']="trafficbyhours";
-$userData['charttitle']=$_lang['stTRAFFICBYHOURS'];
-$userData['arrSerie1']=$arrHourMb;
-$userData['arrSerie2']="";
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-///pChart Graph BY HOURS END
-
-///top sites
-
-$numrow=1;
-while ($numrow<$countTopSitesLimit)
-{
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
-$numrow++;
-}
-
-$result=$ssq->query($queryOneGroupTopSitesTraffic);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if($line[3]=='2')
-$line[0]=$line[2];
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countTopSitesLimit)
-break;
-
-$numrow++;
-}
-$ssq->free_result($result);
-
-//top sites end
-
-
-/// pchart top sites
-
-
-$userData['charttype']="pie";
-$userData['chartname']="topsites";
-$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
-$userData['arrSerie1']=$arrLine1;
-$userData['arrSerie2']=$arrLine0;
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-
-
-/// pchart top sites end
-
-///top popular
-
-$numrow=1;
-while ($numrow<$countPopularSitesLimit)
-{
-$arrLine0[$numrow-1]="NO DATA";
-$arrLine1[$numrow-1]=0;
-$numrow++;
-}
-
-$result=$ssq->query($queryOneGroupPopularSites);
-$numrow=1;
-$totalmb=0;
-
-while ($line = $ssq->fetch_array($result)) {
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1];
-
-$arrLine0[$numrow-1]=$line[0];
-$arrLine1[$numrow-1]=$line[1];
-
-
-if($numrow==$countPopularSitesLimit)
-break;
-
-$numrow++;
-}
-$ssq->free_result($result);
-
-//top popular end
-
-
-/// pchart top popular
-
-
-$userData['charttype']="pie";
-$userData['chartname']="toppop";
-$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
-$userData['arrSerie1']=$arrLine1;
-$userData['arrSerie2']=$arrLine0;
-
-//create chart
-$pathtoimage = $grap->drawImage($userData);
-
-//display
-echo $pathtoimage;
-
-
-
-/// pchart top popular end
 
 
 }
@@ -10457,41 +8695,10 @@ echo $pathtoimage;
 
 if($id==64)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stSECONDSMINUTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryLoginsTimeOnline,'template34.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-//$colh[2]="<th>".$colhtext[2]."</th>";
-//$colh[3]="<th>".$colhtext[3]."</th>";
-//$colh[4]="<th>".$colhtext[4]."</th>";
-
-$colh[2]="<th>".$colhtext[2]."<a href=?></a></th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-
-
-$result=$ssq->query($queryLoginsTimeOnline);
-
-$colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0',0,'')\">line0</a>";
-$colr[3]="line2";
-$colr[4]="line5";
-
-#$row = $ssq->fetch_array($resultmax);
-#$collength[4]=$row[0];
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
 
 }
 
@@ -10504,33 +8711,8 @@ $colf[4]="<td>".$colftext[4]."</td>";
 
 if($id==65)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stSECONDSMINUTES'];
-$colhtext[4]=$_lang['stALIAS'];
-
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]="&nbsp;";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryIpaddressTimeOnline);
-
-$colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line4','line0',1,'')\">line0</a>";
-$colr[3]="line2";
-$colr[4]="line5";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
+	$json_result=doGetReportData($globalSS,$queryIpaddressTimeOnline,'template35.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -10541,40 +8723,10 @@ $colf[4]="<td>".$colftext[4]."</td>";
 
 if($id==66)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stIPADDRESS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
-$colhtext[5]=$_lang['stFROMWEBSITE'];
 
+	$json_result=doGetReportData($globalSS,$queryLoginDownloadBigFiles,'template6.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-$colftext[5]="&nbsp;";
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-$result=$ssq->query($queryLoginDownloadBigFiles);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
-$colr[4]="line1";
-$colr[5]="line3";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-$colf[5]="<td><b>".$colftext[5]."</b></td>";
 }
 
 /////////////// LOGIN DOWNLOAD BIG FILES REPORT END
@@ -10583,40 +8735,10 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==67)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stIPADDRESS'];
-$colhtext[4]=$_lang['stMEGABYTES'];
-$colhtext[5]=$_lang['stFROMWEBSITE'];
 
+	$json_result=doGetReportData($globalSS,$queryIpaddressDownloadBigFiles,'template6.php');
+	doPrintTable($globalSS,$json_result);
 
-$colftext[1]="&nbsp;";
-$colftext[2]="&nbsp;";
-$colftext[3]=$_lang['stTOTAL'];
-$colftext[4]="totalmb";
-$colftext[5]="&nbsp;";
-
-$colh[0]=5;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$colh[5]="<th>".$colhtext[5]."</th>";
-
-$result=$ssq->query($queryIpaddressDownloadBigFiles);
-
-$colr[1]="numrow";
-$colr[2]="<a href=javascript:GoPartlyReports(8,'".$dayormonth."','line4','line0','0','')>line0</a>";
-$colr[3]="<a href=javascript:GoPartlyReports(11,'".$dayormonth."','line5','line2','1','')>line2</a>";
-$colr[4]="line1";
-$colr[5]="line3";
-
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-$colf[5]="<td><b>".$colftext[5]."</b></td>";
 }
 
 /////////////// IPADDRESS DOWNLOAD BIG FILES REPORT END
@@ -10625,33 +8747,9 @@ $colf[5]="<td><b>".$colftext[5]."</b></td>";
 
 if($id==68)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stLOGIN'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
-
-$colh[0]=3+$useLoginalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryTopLoginsWorkingHoursTraffic);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0',0,'')\">line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
+	$json_result=doGetReportData($globalSS,$queryTopLoginsWorkingHoursTraffic,'template1.php');
+	doPrintTable($globalSS,$json_result);
 
 }
 
@@ -10661,578 +8759,14 @@ $colf[4]="<td>".$colftext[4]."</td>";
 
 if($id==69)
 {
-$colhtext[1]="#";
-$colhtext[2]=$_lang['stIPADDRESS'];
-$colhtext[3]=$_lang['stMEGABYTES'];
-$colhtext[4]=$_lang['stALIAS'];
 
-$colftext[1]="&nbsp;";
-$colftext[2]=$_lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="&nbsp;";
+	$json_result=doGetReportData($globalSS,$queryTopIpWorkingHoursTraffic,'template2.php');
+	doPrintTable($globalSS,$json_result);
 
-$colh[0]=3+$useIpaddressalias;
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=$ssq->query($queryTopIpWorkingHoursTraffic);
-
-$colr[0]=1;
-$colr[1]="numrow";
-$colr[2]="<a href=\"javascript:GoPartlyReports(11,'".$dayormonth."','line2','line0 (line3)',1,'')\">line0</a>";
-$colr[3]="line1";
-$colr[4]="line3";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td>".$colftext[4]."</td>";
 }
 
 /////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT END
 
-/////universal table
-
-$numrow=1;
-$totalmb=0;
-
-//PARSE SQL
-while ($line = $ssq->fetch_array($result)) {
-
-if($enableUseDecode==1)
-$line[0]=urldecode($line[0]);
-
-if($enableUseiconv==1)
-$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-
-
-
-$line[1]=$line[1] / $oneMegabyte;
-
-
-
-$totalmb=$totalmb+$line[1];
-@$rows[$numrow]=implode(";;",$line);
-$numrow++;
-}
-
-
-
-if($tableStyle == 1)  //div
-if($makepdf==0 && $makecsv==0)
-{
-
-///TABLE HEADER
-echo '<div class="result_area">
-		<div class="line">
-		<div class="line1">
-		<div class="head">'
-		;
-
-
-if(isset($colh))
-for($i=1;$i<=$colh[0];$i++)
-
-	{
-		if($i==1)
-		echo 	'<div class="num">'.$colh[$i]."</div>";
-
-		if($i==2)
-		echo 	'<div class="col1">'.$colh[$i].'<a href="#" class="sortheader" onclick="res_sort(\'Col1\');return false;"><span class="sortarrow1" sortdir="nosort">&nbsp;&nbsp;<img src="../img/arrow-none.gif" alt="&darr;"/></span></a></div>';
-
-		if($i==3)
-		echo 	'<div class="col2">'.$colh[$i].'<a href="#" class="sortheader" onclick="res_sort(\'Col2\');return false;"><span class="sortarrow2" sortdir="nosort">&nbsp;&nbsp;<img src="../img/arrow-none.gif" alt="&darr;"/></span></a></div>';
-												
-		if($i==4)
-		echo 	'<div class="col3">'.$colh[$i].'<a href="#" class="sortheader" onclick="res_sort(\'Col3\');return false;"><span class="sortarrow3" sortdir="nosort">&nbsp;&nbsp;<img src="../img/arrow-none.gif" alt="&darr;"/></span></a></div>';
-												
-		if($i==5)
-		echo 	'<div class="col4">'.$colh[$i]."</div>";
-	}
-echo '</div>'; #head
-echo '</div>'; #line
-echo '</div>'; #line1
-
-
-
-//TABLE BODY
-
-echo '<div class="line">';
-	  
-
-
-for($i=1;$i<$numrow;$i++) {
-$line=explode(';;',$rows[$i]);
-$line[1]=sprintf("%f",$line[1]);  //disable scientific format, like 5E-10
-if($roundTrafficDigit>=0){
-$line[1]=round($line[1],$roundTrafficDigit);
-$totalmb=round($totalmb,$roundTrafficDigit);
-}
-echo '<div class="row" data-col1="'.$i.'" data-col2="'.$line[1].'" data-col3="'.$line[3].'"><div class="line1">'; #tr
-
-for($j=1;$j<=$colh[0];$j++){
-$resultcolr=$colr[$j];
-if(isset($line[0])) #убираем предупреждения если используются 2 или 3 элемента из массива line
-$resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
-if(isset($line[1]))
-$resultcolr=preg_replace("/line1/i", $line[1], $resultcolr);
-if(isset($line[2]))
-$resultcolr=preg_replace("/line2/i", $line[2], $resultcolr);
-if(isset($line[3]))
-$resultcolr=preg_replace("/line3/i", $line[3], $resultcolr);
-if(isset($line[4]))
-$resultcolr=preg_replace("/line4/i", $line[4], $resultcolr);
-if(isset($line[5]))
-$resultcolr=preg_replace("/line5/i", $line[5], $resultcolr);
-if(isset($i))
-$resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
-
-if($j==1)
-echo 	'<div class="num">'.$resultcolr."</div>";
-if($j==2)
-echo 	'<div class="col1">'.$resultcolr."</div>";
-if($j==3)
-echo 	'<div class="col2">'.$resultcolr."</div>";
-if($j==4)
-echo 	'<div class="col3">'.$resultcolr."</div>";
-if($j==5)
-echo 	'<div class="col4">'.$resultcolr."</div>";
-
-}
-
-
-
-echo "</div></div>"; #</tr>
-
-}
-echo "</div>"; #</line>
-///TABLE FOOTER
-
-
-
-echo '	<div class="line">
-		<div class="line1">
-		<div class="head">'
-		;
-if(isset($colh))
-for($i=1;$i<=$colh[0];$i++){
-
-if (preg_match("/totalmb/i", $colf[$i])) {
-$colf[$i] = preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=$totalmb;
-}
-
-	
-		if($i==1)
-		echo 	'<div class="num">'.$colf[$i]."</div>";
-		if($i==2)
-		echo 	'<div class="col1">'.$colf[$i]."</div>";
-		if($i==3)
-		echo 	'<div class="col2">'.$colf[$i]."</div>";
-		if($i==4)
-		echo 	'<div class="col3">'.$colf[$i]."</div>";
-		if($i==5)
-		echo 	'<div class="col4">'.$colf[$i]."</div>";
-	}
-
-
-
-echo '</div>'; #head
-echo '</div>'; #line
-echo '</div>'; #line1
-
-
-
-
-echo "</div>"; #</result_area>
-
-
-
-?>
-<script language=javascript>
-
-const orderFunctions = {
-	
-	//первый столбец (обычно по нему уже отсортировано)
-   ascendingByCol1: (a, b) =>  ('' + a.dataset.col1).localeCompare(b.dataset.col1),
-  descendingByCol1: (a, b) => ('' + b.dataset.col1).localeCompare(a.dataset.col1),
-	
-	//второй столбец (обычно цифра - мегабайты)
-   ascendingByCol2: (a, b) => a.dataset.col2 - b.dataset.col2,
-  descendingByCol2: (a, b) => b.dataset.col2 - a.dataset.col2,
-	//третий столбец (обычно строка, например алиасы)
-   ascendingByCol3: (a, b) => ('' + a.dataset.col3).localeCompare(b.dataset.col3),
-  descendingByCol3: (a, b) => ('' + b.dataset.col3).localeCompare(a.dataset.col3)
-
-
-}
-
-
-
-//const order = function() {
-function res_sort(sortOrder){
-
-var ordered;
-var el,el1,el2,el3;
-var ARROW;
-
-el1 = document.getElementsByClassName('sortarrow1')[0];
-el2 = document.getElementsByClassName('sortarrow2')[0];
-el3 = document.getElementsByClassName('sortarrow3')[0];
-
- if(sortOrder == 'Col1')
-	el=el1;
- if(sortOrder == 'Col2')
-	el=el2;
- if(sortOrder == 'Col3')
-	el=el3;
-	
-//unset arrows	
-	ARROW = '&nbsp;&nbsp;<img src=../img/arrow-none.gif alt="&uarr;"/>';
-	el1.innerHTML = ARROW;
-	el2.innerHTML = ARROW;
-	el3.innerHTML = ARROW;
-
-//set correct arrow
-	if (el.getAttribute('sortdir') == 'down') {
-			ARROW = '&nbsp;&nbsp;<img src=../img/arrow-up.gif alt="&uarr;"/>';
-			el.setAttribute('sortdir','up');
-	} else {
-			ARROW = '&nbsp;&nbsp;<img src=../img/arrow-down.gif alt="&darr;"/>';
-			el.setAttribute('sortdir','down');
-
-	} 
-//set arrow
-	el.innerHTML = ARROW;
-
-  if(sortOrder == 'Col1' && el.getAttribute('sortdir') == 'up')
-      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.ascendingByCol1)
-  
-  if(sortOrder == 'Col1' && el.getAttribute('sortdir') == 'down') 
-      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.descendingByCol1)
-
-  if(sortOrder == 'Col2' && el.getAttribute('sortdir') == 'up')
-      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.ascendingByCol2)
-  
-  if(sortOrder == 'Col2' && el.getAttribute('sortdir') == 'down')
-      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.descendingByCol2)
-
-
-  if(sortOrder == 'Col3' && el.getAttribute('sortdir') == 'up')
-      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.ascendingByCol3)
-  
-  if(sortOrder == 'Col3' && el.getAttribute('sortdir') == 'down') 
-      ordered = [...document.getElementsByClassName('row')].sort(orderFunctions.descendingByCol3)
-
-  
-  ordered.forEach((elem, index) => {
-    elem.style.order = index
-  })
-}
-
-</script>
-
-<?php
-
-$ssq->free_result($result);
-///universal table end
-}
-
-
-if($tableStyle == 0)  //table
-if($makepdf==0 && $makecsv==0)
-{
-
-
-///TABLE HEADER old style
-echo "<table id=report_table_id class=datatable>
-	<tr>";
-
-if(isset($colh))
-for($i=1;$i<=$colh[0];$i++)
-echo $colh[$i];
-echo "	</tr>";
-
-
-//TABLE BODY
-
-for($i=1;$i<$numrow;$i++) {
-$line=explode(';;',$rows[$i]);
-$line[1]=sprintf("%f",$line[1]);  //disable scientific format, like 5E-10
-if($roundTrafficDigit>=0){
-$line[1]=round($line[1],$roundTrafficDigit);
-$totalmb=round($totalmb,$roundTrafficDigit);
-}
-echo "<tr>";
-
-for($j=1;$j<=$colh[0];$j++){
-$resultcolr=$colr[$j];
-if(isset($line[0])) #убираем предупреждения если используются 2 или 3 элемента из массива line
-$resultcolr=preg_replace("/line0/i", $line[0], $resultcolr);
-if(isset($line[1]))
-$resultcolr=preg_replace("/line1/i", $line[1], $resultcolr);
-if(isset($line[2]))
-$resultcolr=preg_replace("/line2/i", $line[2], $resultcolr);
-if(isset($line[3]))
-$resultcolr=preg_replace("/line3/i", $line[3], $resultcolr);
-if(isset($line[4]))
-$resultcolr=preg_replace("/line4/i", $line[4], $resultcolr);
-if(isset($line[5]))
-$resultcolr=preg_replace("/line5/i", $line[5], $resultcolr);
-if(isset($i))
-$resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
-
-echo 	"<td>".$resultcolr."</td>";
-
-}
-
-
-
-echo "</tr>";
-}
-
-///TABLE FOOTER
-
-echo "<tr class=sortbottom>";
-
-if(isset($colh))
-for($i=1;$i<=$colh[0];$i++){
-if (preg_match("/totalmb/i", $colf[$i])) {
-echo preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=$totalmb;
-}
-else
-echo $colf[$i];
-}
-
-echo "	</tr>";
-
-echo "</table>";
-$ssq->free_result($result);
-///universal table end
-}
-
-///костыль
-if($_GET['id']==17)
-$colh[0]=4;
-
-if($_GET['id']==39)
-$colh[0]=3;
-///костыль end
-
-
-
-//// GENERATE PDF FILE
-
-if($makepdf==1)
-{
-//PDF
-
-$pdff="";
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-// set margins
-$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-$pdf->SetHeaderData('','', '', 'powered by TCPDF');
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', 8));
-
-// set font
-$pdf->SetFont('dejavusans', '', 10);
-
-$pdff.="<table border=\"1\" cellpadding=\"2\" width=\"100%\" >";
-
-if($colh[0]==4)
-{
-$pdff.="<tr><th width=\"5%\" align=\"center\">".$colhtext[1]."</th><th width=\"30%\" align=\"center\">".$colhtext[2]."</th><th width=\"20%\" align=\"center\">".$colhtext[3]."</th><th width=\"45%\" align=\"center\">".$colhtext[4]."</th></tr>";
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$pdff.="<tr><th width=\"5%\" align=\"center\">".$colhtext[1]."</th><th width=\"60%\" align=\"center\">".$colhtext[2]."</th><th width=\"30%\" align=\"center\">".$colhtext[3]."</th></tr>";
-}
-
-$i=1;
-
-while ($i<$numrow) {
-$line=explode(';;',$rows[$i]);
-
-
-for($j=2;$j<=$colh[0];$j++){
-$resultcolr[$j]=$colr[$j];
-$resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line1/i", round($line[1],2), $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
-if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
-$resultcolr[$j]=$matches[2];
-//HTML array in $matches[1]
-}
-
-
-
-if($colh[0]==4)
-{
-$pdff.="<tr><td>".$i."</td><td>".$resultcolr[2]."</td><td align=\"right\">".$resultcolr[3]."</td><td>".$resultcolr[4]."</td></tr>";
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$pdff.="<tr><td>".$i."</td><td>".$resultcolr[2]."</td><td align=\"right\">".$resultcolr[3]."</td></tr>";
-}
-
-for($j=1;$j<=$colh[0];$j++)
-$resultcolr[$j]="";
-
-$i++;
-}
-
-for($i=1;$i<=$colh[0];$i++){
-if (preg_match("/totalmb/i", $colf[$i])) {
-preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=round($totalmb,2);
-}
-}
-
-
-if($colh[0]==4)
-{
-$pdff.="<tr><td>".$colftext[1]."</td><td>".$colftext[2]."</td><td align=\"right\">".$colftext[3]."</td><td>".$colftext[4]."</td></tr>";
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$pdff.="<tr><td>".$colftext[1]."</td><td>".$colftext[2]."</td><td align=\"right\">".$colftext[3]."</td></tr>";
-}
-
-$pdff.="</table>";
-// add a page
-$pdf->AddPage();
-
-$pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
-$pdf->writeHTML($pdff, true, false, true, false, 'L');
-
-
-//Close and output PDF document
-
-$pdf->Output("../output/report.pdf", 'D');
-
-
-//PDF END
-
-}
-
-//echo $pdff;
-
-/// GENERATE PDF FILE END
-
-/// GENERATE CSV FILE
-
-if($makecsv==1) {
-
-header("Content-Type:application/csv"); 
-header("Content-Disposition:attachment;filename=report.csv"); 
-echo "\xEF\xBB\xBF"; // UTF-8 BOM
-
-if($colh[0]==4)
-{
-$csvfile[0][0] = $colhtext[1];
-$csvfile[0][1] = $colhtext[2];
-$csvfile[0][2] = $colhtext[3];
-$csvfile[0][3] = $colhtext[4];
-
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[0][0] = $colhtext[1];
-$csvfile[0][1] = $colhtext[2];
-$csvfile[0][2] = $colhtext[3];
-}
-
-$i=1;
-
-while ($i<$numrow) {
-$line=explode(';;',$rows[$i]);
-
-
-for($j=2;$j<=$colh[0];$j++){
-$resultcolr[$j]=$colr[$j];
-$resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line1/i", round($line[1],2), $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
-if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
-$resultcolr[$j]=$matches[2];
-
-
-}
-
-
-
-if($colh[0]==4)
-{
-$csvfile[$i][0] = $i;
-$csvfile[$i][1] = $resultcolr[2];
-$csvfile[$i][2] = $resultcolr[3];
-$csvfile[$i][3] = $resultcolr[4];
-	
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[$i][0] = $i;
-$csvfile[$i][1] = $resultcolr[2];
-$csvfile[$i][2] = $resultcolr[3];
-}
-
-for($j=1;$j<=$colh[0];$j++)
-$resultcolr[$j]="";
-
-$i++;
-}
-
-for($i=1;$i<=$colh[0];$i++){
-if (preg_match("/totalmb/i", $colf[$i])) {
-preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=round($totalmb,2);
-}
-}
-
-
-$i = count($csvfile);
-
-if($colh[0]==4)
-{
-$csvfile[$i][0] = $colftext[1];
-$csvfile[$i][1] = $colftext[2];
-$csvfile[$i][2] = $colftext[3];
-$csvfile[$i][3] = $colftext[4];
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[$i][0] = $colftext[1];
-$csvfile[$i][1] = $colftext[2];
-$csvfile[$i][2] = $colftext[3];
-}
-
-
-	
-$output = fopen("php://output",'w') or die("Can't open php://output");
-
-
-foreach($csvfile as $product) {
-    fputcsv($output, $product,';');
-}
-fclose($output) or die("Can't close php://output");
-
-;	
-	
-}
-
-/// GENERATE CSV FILE END
 
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])) {
 

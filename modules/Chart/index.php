@@ -12,6 +12,9 @@ else
   $srv=0;
 
 include("../../config.php");
+
+$language=$globalSS['language'];
+
 include("module.php");
 include_once("../../lang/$language");
 	if (file_exists("langs/".$language))

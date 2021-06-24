@@ -13,13 +13,8 @@ function __construct($variables){ //
 	
     $this->vars = $variables;
 
-	    #в зависимости от типа БД, подключаем разные модули
-		if($this->vars['dbtype']==0)
-		$this->ssq = new m_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($this->vars['dbtype']==1)
-		$this->ssq = new p_ScreenSquid($variables); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
+
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
 	else	
@@ -100,10 +95,7 @@ ldap_close($this->ldap_conn);
 		INSERT INTO scsq_modules (name,link) VALUES ('LDAPClient','modules/LDAPClient/index.php');";
 
 
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
-		
+		doQuery($UpdateModules) or die ("Can`t update module table");
 
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
@@ -115,9 +107,7 @@ ldap_close($this->ldap_conn);
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'LDAPClient';";
 
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
+		doQuery($UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 	
