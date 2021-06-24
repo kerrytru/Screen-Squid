@@ -236,4 +236,9 @@ $_lang['stACTION']="Action";
 //1.19
 $_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']="Top logins working hours";
 $_lang['stTOPIPWORKINGHOURSTRAFFIC']="Top ip address working hours";
+
+//2.0
+$_lang['stREPORTSLOGINS']="Report by logins";
+$_lang['stREPORTSIPADDRESS']="Report by ip address";
+$_lang['stREPORTSCOMMON']="Report common";
 ?>

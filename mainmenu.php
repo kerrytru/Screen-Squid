@@ -186,38 +186,53 @@ echo "
 	
 //Reports	
 	var reports = new WebFXTreeItem('".$_lang['stREPORTS']."');
-	
-	reports.add(new WebFXTreeItem('".$_lang['stLOGINSTRAFFIC']."','javascript:GoReport(".$srv.",1)'));
-	reports.add(new WebFXTreeItem('".$_lang['stIPADDRESSTRAFFIC']."','javascript:GoReport(".$srv.",2)'));
-	reports.add(new WebFXTreeItem('".$_lang['stSITESTRAFFIC']."','javascript:GoReport(".$srv.",3)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTOPSITESTRAFFIC']."','javascript:GoReport(".$srv.",4)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTOPLOGINSTRAFFIC']."','javascript:GoReport(".$srv.",5)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTOPIPTRAFFIC']."','javascript:GoReport(".$srv.",6)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURS']."','javascript:GoReport(".$srv.",7)'));
-	reports.add(new WebFXTreeItem('".$_lang['stLOGINSTRAFFICWIDE']."','javascript:GoReport(".$srv.",14)'));
-	reports.add(new WebFXTreeItem('".$_lang['stIPADDRESSTRAFFICWIDE']."','javascript:GoReport(".$srv.",15)'));
-	reports.add(new WebFXTreeItem('".$_lang['stIPADDRESSTRAFFICWITHRESOLVE']."','javascript:GoReport(".$srv.",16)'));
-	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoReport(".$srv.",17)'));
-	reports.add(new WebFXTreeItem('".$_lang['stWHODOWNLOADBIGFILES']."','javascript:GoReport(".$srv.",20)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAY']."','javascript:GoReport(".$srv.",39)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAYNAME']."','javascript:GoReport(".$srv.",40)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIOD']."','javascript:GoReport(".$srv.",21)'));
-	reports.add(new WebFXTreeItem('".$_lang['stHTTPSTATUSES']."','javascript:GoReport(".$srv.",30)'));
-	reports.add(new WebFXTreeItem('".$_lang['stLOGINSIPTRAFFIC']."','javascript:GoReport(".$srv.",37)'));
-	reports.add(new WebFXTreeItem('".$_lang['stIPADDRESSLOGINSTRAFFIC']."','javascript:GoReport(".$srv.",38)'));
-	reports.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoReport(".$srv.",45)'));
-	reports.add(new WebFXTreeItem('".$_lang['stDOMAINZONESTRAFFIC']."','javascript:GoReport(".$srv.",48)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURSLOGINS']."','javascript:GoReport(".$srv.",50)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURSIPADDRESS']."','javascript:GoReport(".$srv.",51)'));
-	reports.add(new WebFXTreeItem('".$_lang['stLOGINSTIMEONLINE']."','javascript:GoReport(".$srv.",64)'));
-	reports.add(new WebFXTreeItem('".$_lang['stIPADDRESSTIMEONLINE']."','javascript:GoReport(".$srv.",65)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']."','javascript:GoReport(".$srv.",68)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTOPIPWORKINGHOURSTRAFFIC']."','javascript:GoReport(".$srv.",69)'));
 
+	rootproxy.add(reports);
+
+	var reportslogins = new WebFXTreeItem('".$_lang['stREPORTSLOGINS']."');
+	reportslogins.add(new WebFXTreeItem('".$_lang['stLOGINSTRAFFIC']."','javascript:GoReport(".$srv.",1)'));
+	reportslogins.add(new WebFXTreeItem('".$_lang['stTOPLOGINSTRAFFIC']."','javascript:GoReport(".$srv.",5)'));
+	reportslogins.add(new WebFXTreeItem('".$_lang['stLOGINSTRAFFICWIDE']."','javascript:GoReport(".$srv.",14)'));
+	reportslogins.add(new WebFXTreeItem('".$_lang['stLOGINSIPTRAFFIC']."','javascript:GoReport(".$srv.",37)'));
+	reportslogins.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURSLOGINS']."','javascript:GoReport(".$srv.",50)'));
+	reportslogins.add(new WebFXTreeItem('".$_lang['stLOGINSTIMEONLINE']."','javascript:GoReport(".$srv.",64)'));
+	reportslogins.add(new WebFXTreeItem('".$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']."','javascript:GoReport(".$srv.",68)'));
+
+	reports.add(reportslogins);
+
+	var reportsipaddress = new WebFXTreeItem('".$_lang['stREPORTSIPADDRESS']."');
+
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stIPADDRESSTRAFFIC']."','javascript:GoReport(".$srv.",2)'));
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stTOPIPTRAFFIC']."','javascript:GoReport(".$srv.",6)'));
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stIPADDRESSTRAFFICWIDE']."','javascript:GoReport(".$srv.",15)'));
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stIPADDRESSTRAFFICWITHRESOLVE']."','javascript:GoReport(".$srv.",16)'));
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stIPADDRESSLOGINSTRAFFIC']."','javascript:GoReport(".$srv.",38)'));
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURSIPADDRESS']."','javascript:GoReport(".$srv.",51)'));
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stIPADDRESSTIMEONLINE']."','javascript:GoReport(".$srv.",65)'));
+	reportsipaddress.add(new WebFXTreeItem('".$_lang['stTOPIPWORKINGHOURSTRAFFIC']."','javascript:GoReport(".$srv.",69)'));
+
+	reports.add(reportsipaddress);
+
+	var reportscommon = new WebFXTreeItem('".$_lang['stREPORTSCOMMON']."');
+
+	reportscommon.add(new WebFXTreeItem('".$_lang['stSITESTRAFFIC']."','javascript:GoReport(".$srv.",3)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stTOPSITESTRAFFIC']."','javascript:GoReport(".$srv.",4)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURS']."','javascript:GoReport(".$srv.",7)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoReport(".$srv.",17)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stWHODOWNLOADBIGFILES']."','javascript:GoReport(".$srv.",20)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAY']."','javascript:GoReport(".$srv.",39)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAYNAME']."','javascript:GoReport(".$srv.",40)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIOD']."','javascript:GoReport(".$srv.",21)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stHTTPSTATUSES']."','javascript:GoReport(".$srv.",30)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoReport(".$srv.",45)'));
+	reportscommon.add(new WebFXTreeItem('".$_lang['stDOMAINZONESTRAFFIC']."','javascript:GoReport(".$srv.",48)'));
+
+	reports.add(reportscommon);
+	
 	reports.icon = 'img/themes/default/Reports.png';
 	reports.openIcon = 'img/themes/default/Reports.png';
 	
-	rootproxy.add(reports);
+	
 
 //Misc
 	rootproxy.add(new WebFXTreeItem('".$_lang['stBYGROUP']."','javascript:GoReport(".$srv.",24);','','img/themes/default/Reports.png','img/themes/default/Reports.png'));
@@ -256,7 +271,7 @@ echo "
 
 //Second Level	
 //Если проблемы с подключением разместим тестовую страницу.
-    rootproxy.add(new WebFXTreeItem('none','javascript:GoRightReport(".$srv.",999)'));
+	rootproxy.add(new WebFXTreeItem('Test connection page','javascript:GoRightReport(".$srv.",999)'));
 	rootproxy.icon = 'img/themes/default/DisconnectedDatabase.png';
 	rootproxy.openIcon = 'img/themes/default/DisconnectedDatabase.png';
 	

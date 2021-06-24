@@ -236,4 +236,11 @@ $_lang['stACTION']="Действие";
 //1.19
 $_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']="Топ пользователей по трафику в рабочие часы";
 $_lang['stTOPIPWORKINGHOURSTRAFFIC']="Топ IP адресов по трафику в рабочие часы";
+
+//2.0
+$_lang['stREPORTSLOGINS']="Отчеты по логинам";
+$_lang['stREPORTSIPADDRESS']="Отчеты по IP адресам";
+$_lang['stREPORTSCOMMON']="Отчеты общие";
+
+
 ?>

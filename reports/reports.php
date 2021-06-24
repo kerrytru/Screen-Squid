@@ -245,7 +245,7 @@ echo $header;
 }
 
 
-$start=(true);
+$start=microtime(true);
 
 
 
