@@ -40,20 +40,6 @@ CREATE TABLE IF NOT EXISTS `scsq_aliasingroups` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_categorylist`
---
-
-CREATE TABLE IF NOT EXISTS `scsq_categorylist` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `category` varchar(100) NOT NULL,
-  `site` varchar(300) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `site` (`site`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `scsq_groups`
 --
 
@@ -77,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `scsq_groups` (
 
 CREATE TABLE IF NOT EXISTS `scsq_httpstatus` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(30) NOT NULL,
+  `name` varchar(200) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -101,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `scsq_ipaddress` (
 
 CREATE TABLE IF NOT EXISTS `scsq_logins` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
+  `name` varchar(200) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -126,11 +112,11 @@ CREATE TABLE IF NOT EXISTS `scsq_logtable` (
 --
 
 CREATE TABLE IF NOT EXISTS `scsq_quicktraffic` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `date` int(11) NOT NULL,
   `login` int(11) DEFAULT NULL,
   `ipaddress` int(11) DEFAULT NULL,
-  `site` varchar(300) DEFAULT NULL,
+  `site` varchar(800) DEFAULT NULL,
   `sizeinbytes` bigint DEFAULT NULL,
   `httpstatus` int(11) DEFAULT NULL,
   `par` int(11) NOT NULL,
@@ -177,14 +163,14 @@ CREATE TABLE IF NOT EXISTS `scsq_sqper_trend10` (
 --
 
 CREATE TABLE IF NOT EXISTS `scsq_temptraffic` (
-  `id` int(12) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `date` varchar(20) DEFAULT NULL,
   `ipaddress` varchar(18) NOT NULL,
-  `login` varchar(100) NOT NULL,
-  `httpstatus` varchar(100) NOT NULL,
+  `login` varchar(200) NOT NULL,
+  `httpstatus` varchar(200) NOT NULL,
   `sizeinbytes` bigint DEFAULT NULL,
   `site` varchar(700) DEFAULT NULL,
-  `method` varchar(15) DEFAULT NULL,
+  `method` varchar(100) DEFAULT NULL,
   `mime` varchar(100) DEFAULT NULL,
   `numproxy` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -198,14 +184,14 @@ CREATE TABLE IF NOT EXISTS `scsq_temptraffic` (
 --
 
 CREATE TABLE IF NOT EXISTS `scsq_traffic` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `date` int(10) unsigned DEFAULT NULL,
+  `id` bigint  NOT NULL AUTO_INCREMENT,
+  `date` int(11) unsigned DEFAULT NULL,
   `ipaddress` smallint(5) unsigned DEFAULT NULL,
   `login` smallint(5) unsigned DEFAULT NULL,
   `httpstatus` smallint(5) unsigned DEFAULT NULL,
   `sizeinbytes` bigint DEFAULT NULL,
   `site` varchar(700) DEFAULT NULL,
-  `method` varchar(15) DEFAULT NULL,
+  `method` varchar(100) DEFAULT NULL,
   `mime` varchar(100) DEFAULT NULL,
   `numproxy` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
