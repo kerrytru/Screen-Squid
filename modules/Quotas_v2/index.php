@@ -83,7 +83,7 @@ $variableSet['language']=$globalSS['language'];
 $globalSS['connectionParams']=$variableSet;
 
 
-$quotaex = new Quotas($globalSS);
+$quotaex = new Quotas_v2($globalSS);
 
 
 	
