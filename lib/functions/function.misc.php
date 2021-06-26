@@ -179,12 +179,12 @@ function doPrintFormAddAlias($globalSS){
     $goodIpaddressList=$globalSS['goodIpaddressList'];
  
 
-    $queryAllLoginsToAdd="select id,name from scsq_logins  where name NOT IN (".$goodLoginsList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=0) order by name asc;";
+    $queryAllLoginsToAdd="select id,name from scsq_logins  where id NOT IN (".$goodLoginsList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=0) order by name asc;";
 
-    $queryAllIpaddressToAdd="select id,name from scsq_ipaddress where name NOT IN (".$goodIpaddressList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=1) order by name asc;";
+    $queryAllIpaddressToAdd="select id,name from scsq_ipaddress where id NOT IN (".$goodIpaddressList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=1) order by name asc;";
 
-    $queryAllLogins="select id,name from scsq_logins  where name NOT IN (".$goodLoginsList.") order by name asc;";
-    $queryAllIpaddress="select id,name from scsq_ipaddress where name NOT IN (".$goodIpaddressList.") order by name asc;";
+    $queryAllLogins="select id,name from scsq_logins  where id NOT IN (".$goodLoginsList.") order by name asc;";
+    $queryAllIpaddress="select id,name from scsq_ipaddress where id NOT IN (".$goodIpaddressList.") order by name asc;";
 
 
         echo "<h2>".$_lang['stFORMADDALIAS']."</h2>";
@@ -296,8 +296,8 @@ function doAliasAdd($globalSS){
     $goodLoginsList=$globalSS['goodLoginsList'];
     $goodIpaddressList=$globalSS['goodIpaddressList'];
  
-    $queryAllLogins="select id,name from scsq_logins  where name NOT IN (".$goodLoginsList.") order by name asc;";
-    $queryAllIpaddress="select id,name from scsq_ipaddress where name NOT IN (".$goodIpaddressList.") order by name asc;";
+    $queryAllLogins="select id,name from scsq_logins  where id NOT IN (".$goodLoginsList.") order by name asc;";
+    $queryAllIpaddress="select id,name from scsq_ipaddress where id NOT IN (".$goodIpaddressList.") order by name asc;";
 
 
     $queryOneAlias="select name,typeid,tableid,id,userlogin,password,active from scsq_alias where id='".$aliasid."';";
@@ -627,9 +627,9 @@ function doGroupAdd($globalSS){
   }
 
   $sql="select id from scsq_groups where name='".$name."';";
-  $result=doFetchOneQuery($globalSS, $sql);
-  $newid=$result[0];
-
+  $newid=doFetchOneQuery($globalSS, $sql);
+  
+  
   $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
 
   if($typeid==0) {

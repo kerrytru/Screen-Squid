@@ -534,14 +534,7 @@ echo "	</table>
      $cachemgr_passwd=$cfgcachemgr_passwd[$srv];
      
      
-     #в зависимости от типа БД, подключаем разные модули
-     if($dbtype==0)
-     include_once("lib/dbDriver/mysqlmodule.php");
-     
-     if($dbtype==1)
-     include_once("lib/dbDriver/pgmodule.php");
-     
-     
+      
      //вывод на экран диагностической информации
      
      echo "<b>Check configuration settings, server ".$srvname[$srv]."</b><br /><br />";
@@ -578,6 +571,9 @@ echo "	</table>
      }
      
      echo "<br /><br />";
+     
+
+     echo "Step2. ";
      
      echo "Trying connect to Cachemgr...";
      

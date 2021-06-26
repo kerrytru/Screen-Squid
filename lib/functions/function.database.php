@@ -21,15 +21,19 @@ function doConnectToDatabase($params) {
     return $dbs;
 }
 
-function doFetchQuery($globalSS,$query) {
 
+
+function doFetchQuery($globalSS,$query) {
+    #echo $query;
     $dbs = doConnectToDatabase($globalSS['connectionParams']);
     $stmt = $dbs->query($query);
-
+   
     #TODO: Здесь где-нибудь неплохо было бы писать лог операций. Удобно было бы для диагностики
     
     #получим данные    
-    $result = $stmt->fetchAll(PDO::FETCH_NUM);
+    
+       $result = $stmt->fetchAll(PDO::FETCH_NUM);
+
 
     return $result;
 }

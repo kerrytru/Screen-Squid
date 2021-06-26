@@ -3421,8 +3421,8 @@ WHERE (1=1)
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s,
-	   ".$category." as cat
+	   SUM(sizeinbytes) AS s
+	   ".$category."
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid." 
@@ -3430,7 +3430,7 @@ $queryOneLoginTraffic="
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
 	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) ,site
+	 GROUP BY CRC32(scsq_quicktraffic.site) ,site ".$category."
 	 ORDER BY site asc
 ;";
 
@@ -3439,8 +3439,8 @@ if($dbtype==1)
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s,
-	   ".$category." as cat
+	   SUM(sizeinbytes) AS s
+	   ".$category."
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid." 
@@ -3448,7 +3448,7 @@ $queryOneLoginTraffic="
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
 	AND par=1
-	 GROUP BY scsq_quicktraffic.site 
+	 GROUP BY scsq_quicktraffic.site ".$category."
 	 ORDER BY site asc
 ;";
 
@@ -3457,15 +3457,15 @@ $queryOneLoginTraffic="
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
 	   site, 
-	   SUM( sizeinbytes ) AS s,
-	   ".$category." as cat
+	   SUM( sizeinbytes ) AS s
+	   ".$category."
 	 FROM scsq_quicktraffic
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend."
 	   AND site NOT IN (".$goodSitesList.")
 	   AND par=1
-	 GROUP BY CRC32(site), site
+	 GROUP BY CRC32(site), site ".$category."
 	 ORDER BY s DESC
 	 LIMIT ".$countTopSitesLimit." 
 ";
@@ -3475,15 +3475,15 @@ if($dbtype==1)
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
 	   site, 
-	   SUM( sizeinbytes ) AS s,
-	   ".$category." as cat
+	   SUM( sizeinbytes ) AS s
+	   ".$category."
 	 FROM scsq_quicktraffic
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend."
 	   AND site NOT IN (".$goodSitesList.")
 	   AND par=1
-	 GROUP BY site
+	 GROUP BY site ".$category."
 	 ORDER BY s DESC
 	 LIMIT ".$countTopSitesLimit." 
 ";
@@ -4002,8 +4002,8 @@ $queryLoginDownloadBigFiles="
 $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
-	   sum(sizeinbytes) AS s,
-	   ".$category." as cat
+	   sum(sizeinbytes) AS s
+	   ".$category."
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
@@ -4011,7 +4011,7 @@ $queryOneIpaddressTraffic="
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
 	   
-	 GROUP BY CRC32(scsq_quicktraffic.site),site	 
+	 GROUP BY CRC32(scsq_quicktraffic.site),site ".$category."	 
 	 ORDER BY scsq_quicktraffic.site asc;";
 
 #postgre version
@@ -4019,8 +4019,8 @@ if($dbtype==1)
 $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
-	   sum(sizeinbytes) AS s,
-	   ".$category." as cat
+	   sum(sizeinbytes) AS s
+	   ".$category."
 	   
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
@@ -4029,22 +4029,22 @@ $queryOneIpaddressTraffic="
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
 	   
-	 GROUP BY scsq_quicktraffic.site 	 
+	 GROUP BY scsq_quicktraffic.site ".$category."	 
 	 ORDER BY scsq_quicktraffic.site asc;";
 
 
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
 	   site,
-	   SUM(sizeinbytes) as s,
-	   ".$category." as cat 
+	   SUM(sizeinbytes) as s
+	   ".$category."
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
 	   AND site NOT IN (".$goodSitesList.")	 
 	   AND par=1
-	 GROUP BY CRC32(site) ,site
+	 GROUP BY CRC32(site) ,site ".$category."
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
@@ -4053,15 +4053,15 @@ if($dbtype==1)
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
 	   site,
-	   SUM(sizeinbytes) as s,
-	   ".$category." as cat 
+	   SUM(sizeinbytes) as s
+	   ".$category."
 	 FROM scsq_quicktraffic 
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
 	   AND site NOT IN (".$goodSitesList.")	 
 	   AND par=1
-	 GROUP BY site 
+	 GROUP BY site ".$category."
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 

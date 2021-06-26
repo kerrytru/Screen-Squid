@@ -10,7 +10,7 @@
 
 <?php include("config.php");
 
-
+include(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 
 
@@ -139,23 +139,7 @@ $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 $variableSet['dbtype']=$dbtype;
 
-
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include_once("lib/dbDriver/mysqlmodule.php");
-
-if($dbtype==1)
-include_once("lib/dbDriver/pgmodule.php");
-
-if($dbtype==0)
-$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
-
-
-if($dbtype==1)
-$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закиыдвать запросы на исполнение
-
-
-
+$globalSS['connectionParams'] = $variableSet;
 
 
 echo "//First Level
@@ -165,7 +149,7 @@ echo "//First Level
 
 
 
-if($ssq->db_object!=null)
+if(doConnectToDatabase($globalSS['connectionParams'])!="ErrorConnection")
 {
 echo "	
 //Second Level
@@ -250,15 +234,14 @@ echo "
 
 $queryModules="select name from scsq_modules order by name asc;";
 
-$result=$ssq->query($queryModules);
+$result=doFetchQuery($globalSS, $queryModules);
 
 $golink="";
 
-while($line = $ssq->fetch_array($result)) {
+foreach($result as $line) {
 $golink="modules/".$line[0]."/index.php?srv=".$srv."";
 echo "modulemanager.add(new WebFXTreeItem('".$line[0]."','javascript:GoLink(\'".$golink."\',\'right\')','','img/themes/default/Node.png','img/themes/default/Node.png'));\n";
 }
-$ssq->free_result($result);
 
 echo "rootproxy.add(modulemanager);";
 
@@ -282,7 +265,7 @@ $srv++;
 continue;
 
 }  
-unset($ssq);
+
 }
 
 //Пункт для добавления удаления БД
