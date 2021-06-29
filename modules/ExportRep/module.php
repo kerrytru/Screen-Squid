@@ -12,7 +12,8 @@ function __construct($variables){ //
     	
   
 	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
-	
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.reportmisc.php');
+		
 	// create new PDF document
 
 	if (file_exists("langs/".$this->vars['language']))
@@ -44,7 +45,7 @@ $querydate2 = $repvars['querydate2'];
 $currentlogin = $repvars['currentlogin'];
 $currentloginid=$repvars['currentloginid'];
 $goodSitesList = $repvars['goodSitesList'];
-$oneMegabyte = $repvars['oneMegabyte'];
+
 $sortcolumn = $repvars['sortcolumn'];
 $sortorder = $repvars['sortorder'];
 
@@ -53,6 +54,9 @@ $datestart=strtotime($querydate);
 $dateend=strtotime($querydate2) + 86400;
 $querydate = $querydate." - ".$querydate2; 
 
+$category = $this->vars['category'];
+
+$numrow=0;
 
 $repheader= "<h2>".$this->lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$this->lang['stFOR']." ".$querydate."</h2>";
 
@@ -63,6 +67,7 @@ $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
 	   SUM(sizeinbytes) AS s
+	   ".$category."
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid."
@@ -70,7 +75,7 @@ $queryOneLoginTraffic="
 	   AND date<".$dateend."
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
 	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) 
+	 GROUP BY CRC32(scsq_quicktraffic.site) ,site ".$category."
 	 ORDER BY ".$sortcolumn." ".$sortorder."
 ;";
 
@@ -80,8 +85,8 @@ if($this->vars['connectionParams']['dbtype']==1)
 $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s,
-	   ".$category." as cat
+	   SUM(sizeinbytes) AS s
+	   ".$category."
 	 FROM scsq_quicktraffic
 	 
 	 WHERE login=".$currentloginid." 
@@ -89,7 +94,7 @@ $queryOneLoginTraffic="
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
 	AND par=1
-	 GROUP BY scsq_quicktraffic.site 
+	 GROUP BY scsq_quicktraffic.site ".$category."
 	 ORDER BY ".$sortcolumn." ".$sortorder."
 ;";
 
@@ -140,7 +145,7 @@ $totalmb=0;
 foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
+$line[1]=doConvertBytes($line[1],'mbytes');
 
 $totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);
@@ -256,7 +261,7 @@ $querydate2 = $repvars['querydate2'];
 $currentipaddress = $repvars['currentipaddress'];
 $currentipaddressid=$repvars['currentipaddressid'];
 $goodSitesList = $repvars['goodSitesList'];
-$oneMegabyte=$repvars['oneMegabyte'];
+
 $sortcolumn = $repvars['sortcolumn'];
 $sortorder = $repvars['sortorder'];
 
@@ -264,6 +269,7 @@ $datestart=strtotime($querydate);
 $dateend=strtotime($querydate2) + 86400;
 $querydate = $querydate." - ".$querydate2; 
 
+$numrow=0;
 
 $repheader= "<h2>".$this->lang['stONEIPADRESSTRAFFIC']." ".$currentipaddress." ".$this->lang['stFOR']." ".$querydate."</h2>";
 
@@ -327,7 +333,7 @@ $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 $colh[4]="<th>".$colhtext[4]."</th>";
-$result=doFetchQuery($this>vars, $queryOneIpaddressTraffic);
+$result=doFetchQuery($this->vars, $queryOneIpaddressTraffic);
 
 $colr[1]="numrow";
 $colr[2]="line0";
@@ -350,7 +356,7 @@ $totalmb=0;
 foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
+$line[1]=doConvertBytes($line[1], 'mbytes');
 
 $totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);
@@ -465,7 +471,7 @@ $querydate2 = $repvars['querydate2'];
 $currentlogin = $repvars['currentlogin'];
 $currentloginid=$repvars['currentloginid'];
 $goodSitesList = $repvars['goodSitesList'];
-$oneMegabyte = $repvars['oneMegabyte'];
+
 $sortcolumn = $repvars['sortcolumn'];
 $sortorder = $repvars['sortorder'];
 
@@ -473,46 +479,49 @@ $datestart=strtotime($querydate);
 $dateend=strtotime($querydate2) + 86400;
 $querydate = $querydate." - ".$querydate2; 
 
+$category = $this->vars['category'];
+
+$numrow=0;
 
 $repheader= "<h2>".$this->lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$this->lang['stFOR']." ".$querydate."</h2>";
 
 
 
  /////////// ONE LOGIN TRAFFIC REPORT
-$queryOneLoginTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
-	 FROM scsq_quicktraffic
-	 
-	 WHERE login=".$currentloginid."
-	   AND date>".$datestart." 
-	   AND date<".$dateend."
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
-	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) 
-	 ORDER BY ".$sortcolumn." ".$sortorder."
+ $queryOneLoginTraffic="
+ SELECT 
+	scsq_quicktraffic.site,
+	SUM(sizeinbytes) AS s
+	".$category."
+  FROM scsq_quicktraffic
+  
+  WHERE login=".$currentloginid."
+	AND date>".$datestart." 
+	AND date<".$dateend."
+	AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+ AND par=1
+  GROUP BY CRC32(scsq_quicktraffic.site) ,site ".$category."
+  ORDER BY ".$sortcolumn." ".$sortorder."
 ;";
 
 
 #postgre version
 if($this->vars['connectionParams']['dbtype']==1)
 $queryOneLoginTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s,
-	   ".$category." as cat
-	 FROM scsq_quicktraffic
-	 
-	 WHERE login=".$currentloginid." 
-	   AND date>".$datestart." 
-	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
-	AND par=1
-	 GROUP BY scsq_quicktraffic.site 
-	 ORDER BY ".$sortcolumn." ".$sortorder."
+ SELECT 
+	scsq_quicktraffic.site,
+	SUM(sizeinbytes) AS s
+	".$category."
+  FROM scsq_quicktraffic
+  
+  WHERE login=".$currentloginid." 
+	AND date>".$datestart." 
+	AND date<".$dateend." 
+	AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
+ AND par=1
+  GROUP BY scsq_quicktraffic.site ".$category."
+  ORDER BY ".$sortcolumn." ".$sortorder."
 ;";
-
 
 //if($id==8)
 ///{
@@ -560,7 +569,7 @@ $totalmb=0;
 foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
+$line[1]=doConvertBytes($line[1], 'mbytes');
 
 $totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);
@@ -678,7 +687,9 @@ $querydate2 = $repvars['querydate2'];
 $currentipaddress = $repvars['currentipaddress'];
 $currentipaddressid=$repvars['currentipaddressid'];
 $goodSitesList = $repvars['goodSitesList'];
-$oneMegabyte=$repvars['oneMegabyte'];
+
+$numrow=0;
+
 $sortcolumn = $repvars['sortcolumn'];
 $sortorder = $repvars['sortorder'];
 
@@ -771,7 +782,7 @@ $totalmb=0;
 foreach ($result as $line) {
 #if($enableUseiconv==1)
 #$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=$line[1] / $oneMegabyte;
+$line[1]=doConvertBytes($line[1],'mbytes');
 
 $totalmb=$totalmb+$line[1];
 @$rows[$numrow]=implode(";;",$line);

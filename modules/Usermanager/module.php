@@ -91,8 +91,7 @@ $queryOneAliasValue="
 			  datemodified integer DEFAULT NULL,
 			  CONSTRAINT scsq_mod_usermanager_pkey PRIMARY KEY (id)
 			);
-		ALTER TABLE scsq_mod_usermanager
-			OWNER TO postgres;
+
 		";
 
 

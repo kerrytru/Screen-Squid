@@ -192,7 +192,7 @@ $datestart=strtotime($querydate);
    	    $queryDeleteAliases="DELETE FROM scsq_mod_usermanager where aliasid not in (select id from scsq_alias);";
 
         $queryNeedRefresh="select count(1) from scsq_alias sa where sa.id not in (select aliasid from scsq_mod_usermanager);";
-			
+
 		$needLine=doFetchOneQuery($globalSS, $queryNeedRefresh);
 				
 		$needRefresh = $needLine[0];
@@ -244,7 +244,7 @@ $datestart=strtotime($querydate);
 
 
             if($actid==3) { ///Редактирование 
-              $result=doFetchOneQuery($globalSS, $queryOneUser) or die ('Error: Cant select one user from scsq_mod_usermanager');
+              $line=doFetchOneQuery($globalSS, $queryOneUser) or die ('Error: Cant select one user from scsq_mod_usermanager');
              
 	    
               if($line[1]==1)

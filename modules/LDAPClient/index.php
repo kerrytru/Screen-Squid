@@ -1,11 +1,5 @@
 <?php
 
-/*
-<!#CR>
-*                         File Mod     > <!#FT> 2021/01/05 22:37:54.661 </#FT>                                         *
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
-</#CR>
-*/
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -29,6 +23,10 @@ include("../../lang/$language");
 	else	
 		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
+
 ?>
 
 <html>
@@ -36,8 +34,8 @@ include("../../lang/$language");
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme;?>/global.css"/>
-
+<?php echo '<link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>';
+?>
 </head>
 <body>
 
@@ -67,23 +65,15 @@ $variableSet['ldaptree']=$ldaptree;
 
 $variableSet['language']=$language;
 
-#в зависимости от типа БД, подключаем разные модули
+$globalSS['connectionParams']=$variableSet;
 
 $ldap_client = new LDAPClient($globalSS);
 
+  #если есть дружеские логины, IP адреса или сайты. Соберём их.
+  $goodLoginsList=doCreateFriendList($globalSS,'logins');
+  $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
+  $goodSitesList = doCreateSitesList($globalSS);
 
-
-if($enableNofriends==1) {
-  $friends=implode("','",explode(" ", $goodLogins));
-  $friendsTmp="where name in  ('".$friends."')";
-  $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
-  $result=$ssq->query($sqlGetFriendsId);
-  while ($fline = $ssq->fetch_array($result)) {
-    $goodLoginsList=$goodLoginsList.",".$fline[0];
-  }
-}
-else
-$goodLoginsList=0;
 
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stMODULEDESC']."</h2><br />";
@@ -97,7 +87,7 @@ $start=microtime(true);
 ///SQL querys
 
 
-        $queryAllLogins="select id,name from scsq_logins  where name NOT IN ('".$goodLoginsList."') order by name asc;";
+        $queryAllLogins="select id,name from scsq_logins  where id NOT IN ('".$goodLoginsList."') order by name asc;";
  
 
 
@@ -112,11 +102,11 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 		if(isset($_GET['actid']))
           if($_GET['actid']==1) {
 
-         $result=$ssq->query($queryAllLogins);
+         $result=doFetchQuery($globalSS, $queryAllLogins);
           $numrow=0;
 			# попробуем полностью протестировать код.
 			echo "Начинаем синхронизацию с LDAP <br>";
-          while($line = $ssq->fetch_array($result)) {
+          foreach($result as $line) {
 			echo "Цикл итерация ".$numrow."<br>";
 
 			echo "Ищем значение алиаса для логина ".$line[1]."<br>";
@@ -132,9 +122,9 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 					echo "Узнаем, есть ли уже алиас для логина = '".$line[1]."'.<br>";
 					
 					         $sql="select id from scsq_alias where tableid=$line[0] and typeid=0";
-					         $resquery = $ssq1->query($sql);
+					         $idAlias = doFetchOneQuery($globalSS, $sql);
 					         
-					         $idAlias = $ssq1->fetch_array($resquery);
+					         
 							 echo "Поиск вернул id алиаса = '".$idAlias[0]."'.<br>";
 					         
 					         #если алиас существует, то обновим его. иначе создадим
@@ -148,9 +138,9 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 								$sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$aliasname', '0','$line[0]','$line[1]','','0')";
 								echo "Создали новый алиас = '".$aliasname."' для логина = '".$line[1]."'.<br>";
 								}
-							$ssq1->free_result($resquery);
+							
 					   
-							  if (!$ssq1->query($sql)) {
+							  if (!doQuery($globalSS, $sql)) {
 								die('Error: Can`t insert alias into table!');
 							  }
 					 echo "Цикл прошёл<br><br>";
@@ -160,7 +150,7 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
    
             
           }
-			$ssq->free_result($result);
+			
 
 echo $_lang['stLDAPCREATEDUPDATED']." ".$numrow." ".$_lang['stLDAPALIASES'];
 

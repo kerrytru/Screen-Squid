@@ -24,6 +24,8 @@ include("../../lang/$language");
 	else	
 		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
 
 ?>
 
@@ -32,8 +34,8 @@ include("../../lang/$language");
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme;?>/global.css"/>
-
+<?php echo '<link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>';
+?>
 </head>
 <body>
 
@@ -60,21 +62,14 @@ $variableSet['ip2name_separator']=$ip2name_separator;
 
 $variableSet['language']=$language;
 
+$globalSS['connectionParams']=$variableSet;
+
+
 
 $ip2name_ex = new IP2NAME($globalSS);
 
 
-if($enableNofriends==1) {
-  $friends=implode("','",explode(" ", $goodLogins));
-  $friendsTmp="where name in  ('".$friends."')";
-  $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
-  $result=$ssq->query($sqlGetFriendsId);
-  while ($fline = $ssq->fetch_array($result)) {
-    $goodLoginsList=$goodLoginsList.",".$fline[0];
-  }
-}
-else
-$goodLoginsList=0;
+$goodLoginsList=doCreateFriendList($globalSS,'logins');
 
 if(!isset($_GET['id']))
 echo "<h2>".$_lang['stMODULEDESC']."</h2><br />";
@@ -118,12 +113,9 @@ $start=microtime(true);
 				  {
 			
 					         $sql="select id from scsq_alias where tableid='$ipaddress_id' and typeid=1";
-					         $resquery = $ssq->query($sql);
+					         $idAlias = doFetchOneQuery($globalSS,$sql);
 					         
-					         $idAlias = $ssq->fetch_array($resquery);
-					         
-					         $ssq->free_result($resquery);
-					         
+					         					         
 					         #если алиас существует, то обновим его. иначе создадим
 					         if($idAlias[0]>0)
 								$sql="UPDATE scsq_alias SET name='$ipaddress_str[1]' WHERE id='$idAlias[0]'";
@@ -131,9 +123,8 @@ $start=microtime(true);
 							 else 
 								$sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$ipaddress_str[1]', '1','$ipaddress_id','','','0')";
       
-							 $ssq->free_result($resquery);
-					   
-							  if (!$ssq->query($sql)) {
+							 
+							  if (!doQuery($globalSS, $sql)) {
 								die('Error: Can`t insert alias into table!');
 							  }
 					$numrow++;

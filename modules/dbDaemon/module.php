@@ -57,8 +57,7 @@ function __construct($variables){ //
 			  numproxy integer DEFAULT 0,
 			  CONSTRAINT scsq_mod_dbDaemon_pkey PRIMARY KEY (id)
 			);
-		ALTER TABLE scsq_mod_dbDaemon
-			OWNER TO postgres;
+
 		";
 		
 		

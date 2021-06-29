@@ -270,7 +270,7 @@ $datestart=strtotime($querydate);
 
 
 
-            $queryDeleteOneQuota="delete from scsq_mod_quotas where id=".$quotaid."";
+            $queryDeleteOneQuota="delete from scsq_mod_quotas where id=".$quotaid.";";
 
             if(!isset($_GET['actid'])) {
 
@@ -334,8 +334,10 @@ $datestart=strtotime($querydate);
             echo $_lang['stQUOTASFORMADDQUOTA'];
               echo '
                 <form action="index.php?srv='.$srv.'&actid=2" method="post">
-                '.$_lang['stQUOTASDAY'].': <input type="text" name="quotaday" ><br />
-                '.$_lang['stQUOTASMONTH'].': <input type="text" name="quotamonth"><br />
+                '.$_lang['stQUOTASDAY'].': <input type="text" value="0" name="quotaday" ><br />
+                '.$_lang['stQUOTASMONTH'].': <input type="text" value="0" name="quotamonth"><br />
+                <input type="hidden" name=sumday value="0">
+                <input type="hidden" name=summonth value="0">
 		'.$_lang['stQUOTASACTIVE'].': <input type="checkbox" name="active"><br /> 
 		'.$_lang['stQUOTASEXCLUDE'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
                 '.$_lang['stVALUE'].':<br />';
@@ -511,7 +513,7 @@ else
 
             if($actid==5) {//удаление DELETE
 
-              if (doQuery($globalSS, $queryDeleteOneQuota)) {
+              if (!doQuery($globalSS, $queryDeleteOneQuota)) {
                 die('Error: Cant DELETE one quota from scsq_mod_quotas ');
               }
        

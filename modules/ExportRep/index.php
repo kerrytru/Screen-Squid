@@ -20,7 +20,9 @@ include_once("../../lang/$language");
 	else	
 		include("langs/en"); #если перевода на язык нет, то по умолчанию тянем английский. 
 
-
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+		
 
 #добавим себе время для исполнения скрипта. в секундах
 set_time_limit($timelimit);
@@ -67,13 +69,14 @@ $variableSet['dbtype']=$dbtype;
 
 $variableSet['language']=$language;
 
-
+$globalSS['connectionParams']=$variableSet;
 
 // Include the main TCPDF library (search for installation path).
 include("../../lib/tcpdf/tcpdf.php");
 
 
-
+//проверим, есть ли модуль категорий. Если есть показываем столбец с категориями
+$globalSS['category'] = doQueryExistsModuleCategory($globalSS);
 
 ///CALENDAR
 
@@ -154,43 +157,10 @@ echo "<h2>".$_lang['stEXPORTREPMODULE']."</h2><br />";
 $start=microtime(true);
 
 
-
-#create list of good sites
-if($enableNoSites==1) {
-  $sitesTmp=implode("','",explode(" ", $goodSites));
-  $sitesTmp="'".$sitesTmp."'";
-  $goodSitesList=$sitesTmp;
-
-}
-else {
-  $goodSitesList="''";
-}
-
-#create list of friends
-if($enableNofriends==1) {
-  $friends=implode("','",explode(" ", $goodLogins));
-  $friendsTmp="where name in  ('".$friends."')";
-  $sqlGetFriendsId="select id from scsq_logins ".$friendsTmp."";
-  $result=$ssq->query($sqlGetFriendsId);
-  while ($fline = $ssq->fetch_array($result)) {
-    $goodLoginsList=$goodLoginsList.",".$fline[0];
-  }
- $ssq->free_result($result);
- $friends=""; 
- $friends=implode("','",explode(" ", $goodIpaddress));
- $friendsTmp="where name in ('".$friends."')";
-  $sqlGetFriendsId="select id from scsq_ipaddress ".$friendsTmp."";
-  $result=$ssq->query($sqlGetFriendsId);
-  while ($fline = $ssq->fetch_array($result)) {
-    $goodIpaddressList=$goodIpaddressList.",".$fline[0];
-  }
- $ssq->free_result($result);
- 
-}
-else {
-  $goodLoginsList="0";
-  $goodIpaddressList="0";
-}
+  #если есть дружеские логины, IP адреса или сайты. Соберём их.
+  $goodLoginsList=doCreateFriendList($globalSS,'logins');
+  $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
+  $goodSitesList = doCreateSitesList($globalSS);
 
 
 //visual part
@@ -235,9 +205,11 @@ else {
 $repvars['querydate'] = $querydate;
 $repvars['querydate2'] = $querydate2; 
 $repvars['goodSitesList'] = $goodSitesList;
-$repvars['oneMegabyte'] = $oneMegabyte;
+
 $repvars['sortcolumn'] = $sortcolumn;
 $repvars['sortorder'] = $sortorder;
+
+
 
 
 if(isset($_GET['actid'])){
@@ -246,12 +218,13 @@ if(isset($_GET['actid'])){
 
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
-		  $result=$ssq->query($sqlGetId);
+		  $result=doFetchQuery($globalSS, $sqlGetId);
 		  
 		  echo "proccess started<br />";
-		  while ($line = $ssq->fetch_array($result)) {
+		  foreach ($result as $line) {
 			$repvars['currentloginid'] = $line[0];
 			$repvars['currentlogin'] = $line[1];
+			
 			$exportrep_ex->CreateLoginsPDF($repvars);
 			$numrow++;
 		  }
@@ -261,10 +234,10 @@ if(isset($_GET['actid'])){
 
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
-		  $result=$ssq->query($sqlGetId);
+		  $result=doFetchQuery($globalSS, $sqlGetId);
 		  
 		  echo "proccess started<br />";
-		  while ($line = $ssq->fetch_array($result)) {
+		  foreach ($result as $line) {
 			$repvars['currentipaddressid'] = $line[0];
 			$repvars['currentipaddress'] = $line[1];
 			$exportrep_ex->CreateIpaddressPDF($repvars);
@@ -276,10 +249,10 @@ if(isset($_GET['actid'])){
 
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
-		  $result=$ssq->query($sqlGetId);
+		  $result=doFetchQuery($globalSS, $sqlGetId);
 		  
 		  echo "proccess started<br />";
-		  while ($line = $ssq->fetch_array($result)) {
+		  foreach ($result as $line) {
 			$repvars['currentloginid'] = $line[0];
 			$repvars['currentlogin'] = $line[1];
 			$exportrep_ex->CreateLoginsCSV($repvars);
@@ -291,10 +264,10 @@ if(isset($_GET['actid'])){
 
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
-		  $result=$ssq->query($sqlGetId);
+		  $result=doFetchQuery($globalSS, $sqlGetId);
 		  
 		  echo "proccess started<br />";
-		  while ($line = $ssq->fetch_array($result)) {
+		  foreach ($result as $line) {
 			$repvars['currentipaddressid'] = $line[0];
 			$repvars['currentipaddress'] = $line[1];
 			$exportrep_ex->CreateIpaddressCSV($repvars);
@@ -303,8 +276,7 @@ if(isset($_GET['actid'])){
 		 } //actid=4
 		
 		
-		 $ssq->free_result($result);
-		
+		 
 		echo $numrow." files created (check output directory)";
 
 	} //isset actid

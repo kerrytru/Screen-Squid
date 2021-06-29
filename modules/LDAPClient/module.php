@@ -33,7 +33,7 @@ function __construct($variables){ //
   {
 
 
-  $this->ldap_conn = @ldap_connect($this->vars['ldapserver']) or die("Could not connect to LDAP server.");
+  $this->ldap_conn = @ldap_connect($this->vars['connectionParams']['ldapserver']) or die("Could not connect to LDAP server.");
   ldap_set_option($this->ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
 
  return true;
@@ -51,13 +51,13 @@ function __construct($variables){ //
 if( $this->ldap_conn ) {
 
     // binding to ldap server
-    $ldapbind = ldap_bind( $this->ldap_conn, $this->vars['ldapuser'], $this->vars['ldappass']) or die ("Error trying to bind: ".ldap_error($this->ldap_conn));
+    $ldapbind = ldap_bind( $this->ldap_conn, $this->vars['connectionParams']['ldapuser'], $this->vars['connectionParams']['ldappass']) or die ("Error trying to bind: ".ldap_error($this->ldap_conn));
 
     // verify binding
     if ($ldapbind) {
        // echo "LDAP bind successful...<br /><br />";
        
-        $result = ldap_search( $this->ldap_conn,$this->vars['ldaptree'], "(uid=".$loginname.")") or die ("Error in search query: ".ldap_error($this->ldap_conn));
+        $result = ldap_search( $this->ldap_conn,$this->vars['connectionParams']['ldaptree'], "(uid=".$loginname.")") or die ("Error in search query: ".ldap_error($this->ldap_conn));
         $data = ldap_get_entries( $this->ldap_conn, $result);
        
       
@@ -95,7 +95,7 @@ ldap_close($this->ldap_conn);
 		INSERT INTO scsq_modules (name,link) VALUES ('LDAPClient','modules/LDAPClient/index.php');";
 
 
-		doQuery($UpdateModules) or die ("Can`t update module table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
@@ -107,7 +107,7 @@ ldap_close($this->ldap_conn);
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'LDAPClient';";
 
-		doQuery($UpdateModules) or die ("Can`t update module table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 	

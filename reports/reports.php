@@ -1129,9 +1129,14 @@ from (
   #postgresql version
 if($dbtype==1)
   $queryTrafficByHours="
+  SELECT
+hrs.hr_txt,
+tmp2.sum_bytes,
+hrs.hr 
+from (
   SELECT 
     to_char(to_timestamp(tmp.date),'HH24') as d,
-    SUM(tmp.s) 
+    SUM(tmp.s) sum_bytes
   FROM (SELECT 
 	  date,
 	  SUM(sizeinbytes) AS s
@@ -1156,13 +1161,68 @@ if($dbtype==1)
 	  AND tmpipaddress.id is  NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-	GROUP BY date 
-	) 
-	AS tmp 
+	GROUP BY date)
+	AS tmp
+	GROUP BY d 
+  ) tmp2
 
-  GROUP BY d
-  ORDER BY d asc
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=CAST(tmp2.d as integer)
+				 
+				 order by hrs.hr asc
+
   ;";
+
+
 
 #mysql version
 $queryTopLoginsWorkingHoursTraffic="
@@ -7219,6 +7279,8 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $arrHourMb = array();
  $arrHourMb=doGetArrayData($globalSS,$json_result,1);
  
+if(count($arrHourMb)<=1) { $arrHourMb = array_fill(0,24, 0);}
+
  #вот этот кусок тоже надо убрать. Чтобы рисование график было в отдельной функции
  if($makecsv==0){
 	 #соберем данные для графика
@@ -7967,7 +8029,7 @@ $arrLine1=doGetArrayData($globalSS,$json_result,2);
 $numrow=1;
 while ($numrow<$countTopLoginLimit)
 {
-	if ($arrLine0[$numrow-1]=="") {
+	if (!isset($arrLine0[$numrow-1])) {
 		$arrLine0[$numrow-1]="NO DATA";
 		$arrLine1[$numrow-1]=0;
 	}

@@ -42,7 +42,7 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$row=doFetchOneQuery($queryAlias) or die ("Can`t get alias traffic");
+	$row=doFetchOneQuery($this->vars, $queryAlias) or die ("Can`t get alias traffic");
 
 if($row[1] == 0)
 $columnname = "login";
@@ -68,8 +68,8 @@ $queryOneAliasTraffic="
 
 	$SumSizeTraffic=doFetchOneQuery($this->vars, $queryOneAliasTraffic) or die ("Can`t get one alias traffic");
 
-#Задействовать другую функцию!
-    return $SumSizeTraffic[0]/1000/1000;
+
+    return doConvertBytes($SumSizeTraffic[0],'mbytes');
 
     
 }
@@ -142,7 +142,7 @@ $queryAlias = "
 		   WHERE id=".$aliasid."
 	;";
 
-	$row=doFetchOneQuery($queryAlias) or die ("Can`t query alias table");
+	$row=doFetchOneQuery($this->vars,$queryAlias) or die ("Can`t query alias table");
 
 if($row[1] == 0)
 $columnname = "login";
@@ -215,18 +215,17 @@ $queryOneAliasTraffic="
 			  datemodified integer DEFAULT NULL,
 			  CONSTRAINT scsq_mod_quotas_pkey PRIMARY KEY (id)
 			);
-		ALTER TABLE scsq_mod_quotas
-			OWNER TO postgres;
+
 		";
 
 
 		$UpdateModules = "
-		INSERT INTO scsq_modules (name,link) VALUES ('Quotas','modules/Quotas/index.php');";
+		INSERT INTO scsq_modules (name,link) VALUES ('Quotas_v2','modules/Quotas/index.php');";
 
 
-		doQuery($this-vars, $CreateTable) or die ("Can`t install module!");
+		doQuery($this->vars, $CreateTable) or die ("Can`t install module!");
 		
-		doQuery($this-vars, $UpdateModules) or die ("Can`t update module table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
 	 }
@@ -239,11 +238,11 @@ $queryOneAliasTraffic="
 		";
 
 		$UpdateModules = "
-		DELETE FROM scsq_modules where name = 'Quotas';";
+		DELETE FROM scsq_modules where name = 'Quotas_v2';";
 
-		doQuery($this-vars, $query) or die ("Can`t uninstall module!");
+		doQuery($this->vars, $query) or die ("Can`t uninstall module!");
 
-		doQuery($this-vars, $UpdateModules) or die ("Can`t update module table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 

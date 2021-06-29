@@ -36,7 +36,7 @@ function __construct($variables){ //
 		SELECT id FROM scsq_ipaddress t where t.name = '$ipaddress';";
 
 
-		$result=doFetchOneQuery($sqlGetId) or die ("Can`t get ID from scsq_ipaddress table");
+		$result=doFetchOneQuery($this->vars, $sqlGetId) or die ("Can`t get ID from scsq_ipaddress table");
 
 return $result[0];
 
@@ -47,16 +47,12 @@ return $result[0];
   function Install()
   {
 
-
-
 		$UpdateModules = "
 		INSERT INTO scsq_modules (name,link) VALUES ('IP2NAME','modules/IP2NAME/index.php');";
 
 
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
+		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		$this->ssq->free_result($result);
-		
 
 
 		echo "".$this->lang['stINSTALLED']."<br /><br />";
@@ -68,9 +64,7 @@ return $result[0];
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'IP2NAME';";
 
-		$result=$this->ssq->query($UpdateModules) or die ("Can`t update module table");
-
-		$this->ssq->free_result($result);
+		doQuery($this->vars,$UpdateModules) or die ("Can`t update module table");
 
 		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 	

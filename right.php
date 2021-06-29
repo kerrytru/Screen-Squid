@@ -502,7 +502,7 @@ echo "	</table>
 			if($_GET['actid'] == 10) ///установить
 			{
 			
-			$test = new $_GET['mod']($variableSet);
+			$test = new $_GET['mod']($globalSS);
 			echo $test->Install();
 				
 
@@ -511,7 +511,7 @@ echo "	</table>
 			if($_GET['actid'] == 11) ///удалить
 			{
 			
-			$test = new $_GET['mod']($variableSet);	
+			$test = new $_GET['mod']($globalSS);	
 			$test->Uninstall();
 				
 

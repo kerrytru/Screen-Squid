@@ -63,8 +63,7 @@ function __construct($variables){ //
 			  CONSTRAINT scsq_mod_categorylist_pkey PRIMARY KEY (id)
 			 
 			) ;
-			ALTER TABLE scsq_mod_categorylist
-			OWNER TO postgres;
+
 		";
 
 		$queryAddColumn = "
