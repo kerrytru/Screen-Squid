@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/06/24 20:07:02.557 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/07/20 22:24:56.526 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -88,14 +88,18 @@ my $sql_getlastdate="";
 #open log file for writing
 open(OUT, ">>$filetolog");
 
-if($silent_mode == 0) {
+
 #datetime when parse started
+if($silent_mode == 0) {
 print $now=localtime;
+}
+
 $startnow=time;
 
-break;
 #print datetime when parsing started
 print OUT $now;
+
+if($silent_mode == 0) {
 
 $line_count = `wc -l < $filetoparse`;
 }
