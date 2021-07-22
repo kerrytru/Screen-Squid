@@ -16,4 +16,8 @@ $_lang['stREFRESH']="Обновить";
 
 $_lang['stINSTALLED']="Установлено";
 $_lang['stUNINSTALLED']="Удалено";
+
+$_lang['stUSERMANAGERDELETED']="Удалено";
+$_lang['stUSERMANAGERDELETE']="Удалить";
+
 ?>

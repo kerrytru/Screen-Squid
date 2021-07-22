@@ -187,6 +187,9 @@ $datestart=strtotime($querydate);
 
    	    $queryUpdateOneUser="update scsq_mod_usermanager set active=".$active.", datemodified=".$datestart." where id=".$userid."";
 
+   	    $queryDeleteOneUser="delete from scsq_mod_usermanager where id=".$userid."";
+
+
    	    $queryCopyAliases="INSERT INTO scsq_mod_usermanager(aliasid) select id from scsq_alias t where t.id not in (SELECT aliasid from scsq_mod_usermanager)";
 
    	    $queryDeleteAliases="DELETE FROM scsq_mod_usermanager where aliasid not in (select id from scsq_alias);";
@@ -222,6 +225,7 @@ $datestart=strtotime($querydate);
                 <th><b>".$_lang['stALIAS']."</b></th>
 				<th><b>".$_lang['stVALUE']."</b></th>
 				<th><b>".$_lang['stUSERMANAGERACTIVE']."</b></th>
+				<th><b>".$_lang['stUSERMANAGERDELETE']."</b></th>
 
               </tr>";
 
@@ -233,7 +237,10 @@ $datestart=strtotime($querydate);
                     <td>".$numrow."</td>
                     <td align=center><a href=index.php?srv=".$srv."&actid=3&userid=".$line[0].">".$line[2]."&nbsp;</a></td>
 					<td>".$usermanagerex->GetAliasValue($line[1])."</td>
-					<td align=center>".$line[3]."</td>                 
+          <td align=center>".$line[3]."</td>
+          <td align=center ><a href=index.php?srv=".$srv."&actid=5&userid=".$line[0].">".$_lang['stUSERMANAGERDELETE']."</a></td>
+		    
+
 		</tr>";
                 $numrow++;
               }
@@ -282,6 +289,17 @@ $datestart=strtotime($querydate);
               echo "".$_lang['stUSERMANAGERUPDATED']."<br /><br />";
               echo "<a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a>";
             } //end actid=4
+
+            if($actid==5) {//удаление DELETE
+
+              if (!doQuery($globalSS, $queryDeleteOneUser)) {
+                die('Error: Cant DELETE one user from scsq_mod_usermanager ');
+              }
+       
+              echo "".$_lang['stUSERMANAGERDELETED']."<br /><br />";
+              echo "<a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
+
+            } //end actid=5
 
 
                 if($actid==10) {//обновление списка

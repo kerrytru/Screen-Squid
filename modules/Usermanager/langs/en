@@ -18,4 +18,8 @@ $_lang['stUSERMANAGERALIASCOPIED'] = "Aliases copied";
 $_lang['stINSTALLED']="Installed";
 $_lang['stUNINSTALLED']="Uninstalled";
 
+$_lang['stUSERMANAGERDELETED']="Deleted";
+$_lang['stUSERMANAGERDELETE']="Delete";
+
+
 ?>
