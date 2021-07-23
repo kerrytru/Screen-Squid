@@ -197,17 +197,10 @@ $countPopularSitesLimit=$globalSS['countPopularSitesLimit'];
 $countWhoDownloadBigFilesLimit=$globalSS['countWhoDownloadBigFilesLimit'];
 
 
-
 include("".$globalSS['root_dir']."/modules/Chart/module.php");
-
-#include("../modules/Chart/module.php");
 
 $grap = new Chart($globalSS); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
-
- // Standard pChart inclusions
- #include("../lib/pChart/pChart/pData.class");
- #include("../lib/pChart/pChart/pChart.class");
 
 // Include the main TCPDF library (search for installation path).
 include("".$globalSS['root_dir']."/lib/tcpdf/tcpdf.php");

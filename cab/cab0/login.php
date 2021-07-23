@@ -30,6 +30,15 @@ date_default_timezone_set(date_default_timezone_get());
 include("../../config.php");
 include("config.php");
 
+#подключим главный файл который теперь отвечает за генерацию данных
+include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
+include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
+include(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
+include(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
+//Определим номер базы, по имени указанной в конфиге. Так проще.
+$srv=array_search($cab_dbname, $db); 
+
 $addr=$address[$srv];
 $usr=$user[$srv];
 $psw=$pass[$srv];
@@ -42,18 +51,7 @@ $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-{
-include_once("../../lib/dbDriver/mysqlmodule.php");
-$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
-
-if($dbtype==1)
-{
-include_once("../../lib/dbDriver/pgmodule.php");
-$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-}
+$globalSS['connectionParams']=$variableSet;
 
 
 //блок авторизации
@@ -69,14 +67,12 @@ if($dbtype==1)
 	$query = "SELECT id, password,active,tableid,typeid,name FROM scsq_alias WHERE userlogin='".$_POST['userlogin']."' LIMIT 1";
 
 
-	$result=$ssq->query($query);
+	$row=doFetchOneQuery($globalSS, $query);
 
-	$row=$ssq->fetch_array($result);
 
 	
 	if(!isset($row[0]))
 		{		
-			$ssq->free_result($result);
 
 if($dbtype==0)
 			$query = "SELECT id, password,active,'',typeid,name FROM scsq_groups WHERE userlogin='".$_POST['userlogin']."' LIMIT 1";
@@ -86,8 +82,8 @@ if($dbtype==1)
 
 
 
-			$result=$ssq->query($query);
-			$row=$ssq->fetch_array($result);
+			$row=doFetchOneQuery($globalSS, $query);
+		
 			$groupquery=1; //признак что сработал групповой запрос
 
 		
@@ -99,13 +95,13 @@ if($dbtype==1)
 		    {
        			
 		        $hash = md5(generateCode(10));
-			$ssq->free_result($result);
+		
 			if($groupquery==1)
 				$query = "UPDATE scsq_groups SET hash='".$hash."' WHERE id=".$row[0].";";
 			else
 				$query = "UPDATE scsq_alias SET hash='".$hash."' WHERE id=".$row[0].";";
 
-			$result=$ssq->query($query);
+			$result=doQuery($globalSS, $query);
     
 
 			# set cookie
@@ -122,7 +118,7 @@ if($dbtype==1)
 			setcookie("typeid", $row[4], 0);
 			
 
-			$ssq->free_result($result);
+		
 
 			if($groupquery==1)
 			{

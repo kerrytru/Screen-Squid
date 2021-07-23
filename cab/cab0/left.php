@@ -12,8 +12,9 @@ $srv=$_COOKIE['srv'];
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+
 <!-- The themes file -->
-<link rel="stylesheet" type="text/css" href="../../themes/<?php echo $globaltheme; ?>/global.css"/>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalSS['root_http']; ?>/themes/<?php echo $globalSS['globaltheme']; ?>/global.css"/>
 
 <!-- The xtree script file -->
 <script src="../../javascript/xtree.js"></script>
