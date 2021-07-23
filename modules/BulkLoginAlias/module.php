@@ -46,6 +46,8 @@ function __construct($variables){ //
   function CreateUser($userdata) #создаем пользователя
   {
 
+	//договоримся, что пароль это пароль дважды md5. Но это костыль. Нужно стандартную функцию использовать работы с алиасами
+	$userdata['password']=md5(md5(trim($userdata['password'])));
 
 	$findUser = array();
 
@@ -59,12 +61,36 @@ function __construct($variables){ //
 	 
 	
 	//Если логин был найден, значит нам можно создать алиас. Иначе создадим логин и потому привяжем его к алиасу
-     if($findUser[0] > 0) {
-		 
+    if($findUser[0] > 0) {
+
+
 		$tableid[0] = $findUser[0];
-		$queryCreateAlias = "INSERT INTO scsq_alias (name, typeid,tableid) 		VALUES 
-												 ('".$userdata['aliasname']."', 0,'$tableid[0]');";
-												
+
+		//но сначала, посмотрим. Может алиас уже есть? 
+		$queryFindAlias = "SELECT id FROM scsq_alias t WHERE t.tableid='".$tableid[0]."';";
+
+		$findAlias=doFetchOneQuery($this->vars, $queryFindAlias);
+
+		//костыль если null
+		if(!isset($findAlias[0])) $findAlias[0]=0;
+
+		
+		if($findAlias[0] > 0) {
+		
+			$queryUpdateAlias = "UPDATE scsq_alias t SET  name='".$userdata['aliasname']."',
+														typeid=0,
+														tableid='$tableid[0]',
+														userlogin='".$userdata['user']."',
+														password='".$userdata['password']."',
+														active=".$userdata['useractive']." where t.id=$findAlias[0];";			
+
+			}
+		else
+			{
+			
+			$queryCreateAlias = "INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) 		VALUES 
+													 ('".$userdata['aliasname']."', 0,'$tableid[0]', '".$userdata['user']."','".$userdata['password']."','".$userdata['useractive']."');";
+			}									
 		}
 	 else
 		{
@@ -77,30 +103,60 @@ function __construct($variables){ //
 
 		
 		$queryCreateAlias = "INSERT INTO scsq_alias (name, typeid,tableid) 		VALUES 
-												 ('".$userdata['aliasname']."', 0,'$tableid[0]');";
+												 ('".$userdata['aliasname']."', 0,'$tableid[0]', '".$userdata['user']."','".$userdata['password']."','".$userdata['useractive']."');";
 		
 		}	
-	//create alias
+	//update or create alias
+	if($findAlias[0] > 0) 
+		$result=doQuery($this->vars, $queryUpdateAlias) or die ("Can`t update alias in scsq_alias");
+	else
 		$result=doQuery($this->vars, $queryCreateAlias) or die ("Can`t create alias in scsq_alias");
 
+
 	//create quota
-		$queryFindAlias = "SELECT id FROM scsq_alias t WHERE t.name='".$userdata['aliasname']."';";
+	//Создание квоты
+	$queryFindAlias = "SELECT id FROM scsq_alias t WHERE t.tableid='".$findUser[0]."';";
 
-		$aliasid=doFetchOneQuery($this->vars, $queryFindAlias);
+	$aliasid=doFetchOneQuery($this->vars, $queryFindAlias);
 
-		
-		
+		//но сначала, посмотрим. Может алиас уже есть? 
+		$queryFindQuota = "SELECT id FROM scsq_mod_quotas t WHERE t.aliasid='".$aliasid[0]."';";
+
+		$findQuota=doFetchOneQuery($this->vars, $queryFindQuota);
+
+		//костыль если null
+		if(!isset($findQuota[0])) $findQuota[0]=0;
+
+		//Если квота уже есть, то обновим
+		$queryUpdateQuota = "UPDATE scsq_mod_quotas t SET  quotaday='".$userdata['quotaday']."',
+															   quotamonth=".$userdata['quotamonth'].",
+															   active=".$userdata['quotaactive']." where t.aliasid=$aliasid[0];";			
+
 		$queryCreateQuota="INSERT INTO scsq_mod_quotas (aliasid, quotaday, quotamonth,active) VALUES ($aliasid[0], ".$userdata['quotaday'].", ".$userdata['quotamonth'].",".$userdata['quotaactive'].")";
 
-        if (!doQuery($this->vars, $queryCreateQuota)) {
-            die('Error: Cant insert into scsq_mod_quotas table' );
-          }
-	//create user
-	  $queryCreateUser="INSERT INTO scsq_mod_usermanager (aliasid, active) VALUES ($aliasid[0],".$userdata['useractive'].")";
+	//update or create quota
+	if($findQuota[0] > 0) 
+		doQuery($this->vars, $queryUpdateQuota) or die ("Can`t update quota in scsq_mod_quotas");
+	else
+		doQuery($this->vars, $queryCreateQuota) or die ("Can`t create quota in scsq_mod_quotas");
 
-	  if (!doQuery($this->vars, $queryCreateUser)) {
-		  die('Error: Cant insert into scsq_mod_usermanager table' );
-		}
+
+	//create user
+
+	//но сначала, посмотрим. Может user уже есть? 
+		$queryFindUser = "SELECT id FROM scsq_mod_usermanager t WHERE t.aliasid='".$aliasid[0]."';";
+
+		$findUser=doFetchOneQuery($this->vars, $queryFindUser);
+
+		$queryCreateUser="INSERT INTO scsq_mod_usermanager (aliasid, active) VALUES ($aliasid[0],".$userdata['useractive'].")";
+		$queryUpdateUser = "UPDATE scsq_mod_usermanager t SET  active='".$userdata['useractive']."' where t.aliasid=$aliasid[0];";			
+
+	//update or create user
+	if($findUser[0] > 0) 
+		doQuery($this->vars, $queryUpdateUser) or die ("Can`t update user in scsq_mod_usermanager");
+	else
+		doQuery($this->vars, $queryCreateUser) or die ("Can`t create user in scsq_mod_usermanager");
+
   
     
 }

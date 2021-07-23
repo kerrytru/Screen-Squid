@@ -272,7 +272,7 @@ function doAliasAdd($globalSS){
 
     $tableid=$_POST['tableid'];
     $userlogin=$_POST['userlogin'];
-    $userpassword=$_POST['userpassword'];
+    $userpassword=md5(md5(trim($_POST['userpassword'])));
 
     $sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
 
@@ -413,7 +413,7 @@ function doAliasAdd($globalSS){
 
     $tableid=$_POST['tableid'];
     $userlogin=$_POST['userlogin'];
-    $userpassword=$_POST['userpassword'];
+    $userpassword=md5(md5(trim($_POST['userpassword'])));
 
     if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
     $changepassword=1;
