@@ -171,7 +171,10 @@ function doMakeCSV($globalSS, $json_result) {
         #   
         foreach ($row as $row_item) {
             $row_line_arr[$j]=strip_tags($row_item);
-            if(is_numeric($row_line_arr[$j])) $row_line_arr[$j]=preg_replace('/\./', $globalSS['csv_decimalSymbol'], $row_line_arr[$j]);
+            if(is_numeric($row_line_arr[$j])) { 
+                $row_line_arr[$j]= str_replace('.',$globalSS['csv_decimalSymbol'],$row_line_arr[$j]);
+                $row_line_arr[$j]= str_replace(',',$globalSS['csv_decimalSymbol'],$row_line_arr[$j]); 
+            }
             $j++;
             
         }
