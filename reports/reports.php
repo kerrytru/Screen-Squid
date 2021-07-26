@@ -401,7 +401,7 @@ function UpdateLeftMenu(id)
 
 </script>
 
-<script type="text/javascript" src="<?php echo $globalSS['root_dir']?>/javascript/sortable.js"></script>
+<script type="text/javascript" src="<?php echo $globalSS['root_http']?>/javascript/sortable.js"></script>
 
 
 <?php
@@ -1243,7 +1243,7 @@ FROM (SELECT
    )
 
  	)
- GROUP BY CRC32(login) 
+ GROUP BY CRC32(login),login 
 ORDER BY null) 
 AS tmp 
 
@@ -1262,9 +1262,7 @@ ON tmp.login=nofriends.id
 	   AS aliastbl 
 ON nofriends.id=aliastbl.tableid 
 WHERE (1=1)
-".$msgNoZeroTraffic."
-
-GROUP BY nofriends.name;";
+".$msgNoZeroTraffic."";
 
 
 #postgresql version не тестировалось
@@ -1286,7 +1284,7 @@ FROM (SELECT
    OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
 	 
    AND par=1
-GROUP BY CRC32(login) 
+GROUP BY login
 ORDER BY null) 
 AS tmp 
 
@@ -1307,7 +1305,8 @@ ON nofriends.id=aliastbl.tableid
 WHERE (1=1)
 ".$msgNoZeroTraffic."
 
-GROUP BY nofriends.name;";
+GROUP BY nofriends.name, nofriends.id ".$echoLoginAliasColumn.";";
+
 
 #mysql version
 $queryTopIpWorkingHoursTraffic="
@@ -1336,7 +1335,7 @@ WHERE date>".$datestart."
 	   )
 	
 
-GROUP BY CRC32(ipaddress) 
+GROUP BY CRC32(ipaddress),ipaddress
 ORDER BY null) 
 AS tmp 
 RIGHT JOIN (SELECT 
@@ -1353,10 +1352,7 @@ LEFT JOIN (SELECT
 	   AS aliastbl 
 ON nofriends.id=aliastbl.tableid 
 WHERE (1=1)
-".$msgNoZeroTraffic."
-
-GROUP BY nofriends.name 
-  ORDER BY tmp.s desc;";
+".$msgNoZeroTraffic.";";
 
 #postgre version не проверялось
 if($dbtype==1)
@@ -1377,7 +1373,7 @@ WHERE date>".$datestart."
   OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
 	
   AND par=1
-GROUP BY CRC32(ipaddress) 
+GROUP BY ipaddress 
 ORDER BY null) 
 AS tmp 
 RIGHT JOIN (SELECT 
@@ -1396,8 +1392,7 @@ ON nofriends.id=aliastbl.tableid
 WHERE (1=1)
 ".$msgNoZeroTraffic."
 
-GROUP BY nofriends.name 
-  ORDER BY tmp.s desc;";
+GROUP BY nofriends.name, nofriends.id ".$echoLoginAliasColumn.";";
 
 $queryLoginsTrafficWide="
 SELECT 
