@@ -102,10 +102,12 @@ function __construct($variables){ //
 		$tableid=doFetchOneQuery($this->vars, $queryFindUser);
 
 		
-		$queryCreateAlias = "INSERT INTO scsq_alias (name, typeid,tableid) 		VALUES 
+		$queryCreateAlias = "INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) 		VALUES 
 												 ('".$userdata['aliasname']."', 0,'$tableid[0]', '".$userdata['user']."','".$userdata['password']."','".$userdata['useractive']."');";
 		
 		}	
+
+		
 	//update or create alias
 	if($findAlias[0] > 0) 
 		$result=doQuery($this->vars, $queryUpdateAlias) or die ("Can`t update alias in scsq_alias");
@@ -205,8 +207,6 @@ $result=doQuery($this->vars,$queryDeleteUser);
 
 		$result=doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-
-		$result=doQuery($this->vars, $DropTable) or die ("Can`t drop table");
 
 		
 
