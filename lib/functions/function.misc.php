@@ -387,7 +387,7 @@ function doAliasAdd($globalSS){
       echo "</table>";
 	  if($typeid == 1)
 	  echo '<input type="hidden" name=typeid value="'.$typeid.'">';
-          
+         
 	  echo '
 	    <input type="submit" value="'.$_lang['stSAVE'].'"><br />
             </form>

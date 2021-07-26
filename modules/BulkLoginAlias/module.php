@@ -137,7 +137,7 @@ function __construct($variables){ //
 		$queryCreateQuota="INSERT INTO scsq_mod_quotas (aliasid, quotaday, quotamonth,active) VALUES ($aliasid[0], ".$userdata['quotaday'].", ".$userdata['quotamonth'].",".$userdata['quotaactive'].")";
 
 		#дебаг
-		echo $queryCreateQuota;
+	//	echo $queryCreateQuota;
 	//update or create quota
 	if($findQuota[0] > 0) 
 		doQuery($this->vars, $queryUpdateQuota) or die ("Can`t update quota in scsq_mod_quotas");

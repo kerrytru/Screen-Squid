@@ -365,7 +365,7 @@ $datestart=strtotime($querydate);
 	     
               echo "</table>";
 
-	$result=doFetchQuery($globalSS, $queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
+	$result=doFetchQuery($globalSS, $queryAllAliasesHaveNotQuota);       
          $numrow=1;
 
               echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
@@ -469,7 +469,7 @@ else
 	     
               echo "</table>";
 
-		$result=doFetchQuery($globalSS, $queryAllAliasesHaveNotQuota) or die ('Error: Cant select aliases from scsq_alias table');       
+		$result=doFetchQuery($globalSS, $queryAllAliasesHaveNotQuota);       
          $numrow=1;
 
               echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
