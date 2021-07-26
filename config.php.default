@@ -150,6 +150,8 @@ ini_set('error_reporting', E_ALL);
 ini_set('display_errors',1);
 }
 
+
+
 #how many bytes in megabyte. by default 1000000, but its not true. 1024*1024 = 1048576
 $globalSS['oneMegabyte']=1000000; 
 
@@ -167,7 +169,9 @@ $globalSS['tableStyle']=0;
 #For example, set two periods From 8:00 to 12:30 and from 13 to 17
 $globalSS['workingHours']="8-00:12-30:13-00:17-00";
 
-
+//decimal symbol for CSV export
+//разделитель дробной части для вывода в CSV
+$globalSS['csv_decimalSymbol']='.'; 
 
 $vers="2.0b";
 

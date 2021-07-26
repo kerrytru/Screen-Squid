@@ -35,7 +35,7 @@ function doGetReportData($globalSS,$query,$template_name) {
     include_once('function.reportmisc.php');
     include_once(''.$globalSS['root_dir'].'/lib/templates/'.$template_name.'');
     
-    
+
     if($globalSS['debug']==1) echo $query;
 
 #Получим уникальное имя отчёта
@@ -171,6 +171,7 @@ function doMakeCSV($globalSS, $json_result) {
         #   
         foreach ($row as $row_item) {
             $row_line_arr[$j]=strip_tags($row_item);
+            if(is_numeric($row_line_arr[$j])) $row_line_arr[$j]=preg_replace('/\./', $globalSS['csv_decimalSymbol'], $row_line_arr[$j]);
             $j++;
             
         }
