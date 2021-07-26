@@ -35,7 +35,8 @@ function doGetReportData($globalSS,$query,$template_name) {
     include_once('function.reportmisc.php');
     include_once(''.$globalSS['root_dir'].'/lib/templates/'.$template_name.'');
     
-#echo $query;
+    
+    if($globalSS['debug']==1) echo $query;
 
 #Получим уникальное имя отчёта
 $report_file_name=doGenerateUniqueNameReport($globalSS['params']);
@@ -89,19 +90,23 @@ function doPrintTable($globalSS, $json_result) {
     ///TABLE HEADER old style
     //Так как данные уже готовы, то мы просто делаем заголовки, обозначаем, 
     //что сейчас будет строка и пишем как есть.
-
-    
+ 
+    //Так как последняя строчка не должна попадать в сортировку, сразу найдем последний элемент.
+    //И будем поглядывать на него.
+    $lastitem=end($json);
+  
     echo "<table id=report_table_id class=datatable>";
         foreach ($json as $row_item) {
-
             
-            echo "<tr>";
+            if ($row_item === $lastitem)
+                echo "<tr class=sortbottom>";
+            else
+                echo "<tr>";
 
             foreach ($row_item as $item) {
                 echo $item;
                 
                 }
-
             echo "	</tr>";
         }
     echo "</table>";
