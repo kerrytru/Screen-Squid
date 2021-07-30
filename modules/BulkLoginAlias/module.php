@@ -107,7 +107,7 @@ function __construct($variables){ //
 		
 		}	
 
-		
+
 	//update or create alias
 	if($findAlias[0] > 0) 
 		$result=doQuery($this->vars, $queryUpdateAlias);
@@ -118,7 +118,7 @@ function __construct($variables){ //
 
 	//create quota
 	//Создание квоты
-	$queryFindAlias = "SELECT id FROM scsq_alias t WHERE t.tableid='".$findUser[0]."';";
+	$queryFindAlias = "SELECT id FROM scsq_alias t WHERE t.tableid='".$tableid[0]."';";
 
 	$aliasid=doFetchOneQuery($this->vars, $queryFindAlias);
 
@@ -138,7 +138,7 @@ function __construct($variables){ //
 		$queryCreateQuota="INSERT INTO scsq_mod_quotas (aliasid, quotaday, quotamonth,active) VALUES ($aliasid[0], ".$userdata['quotaday'].", ".$userdata['quotamonth'].",".$userdata['quotaactive'].")";
 
 		#дебаг
-	//	echo $queryCreateQuota;
+
 	//update or create quota
 	if($findQuota[0] > 0) 
 		doQuery($this->vars, $queryUpdateQuota);
@@ -161,6 +161,7 @@ function __construct($variables){ //
 		doQuery($this->vars, $queryUpdateUser);
 	else
 		doQuery($this->vars, $queryCreateUser);
+	
 
   
     

@@ -270,6 +270,11 @@ function doAliasAdd($globalSS){
     if(!isset($_POST['typeid'])) $typeid=0;  else  $typeid=1;
     if(!isset($_POST['activeauth'])) $activeauth=0; else $activeauth=1;
 
+    #если не выбран ни один логин или IP адрес, вернём ошибку. 
+    #По хорошему, нужно напиать валидатор формы, чтобы JS не давал пройти дальше.
+   # echo "tableid=".$_POST['tableid'];
+    if($_POST['tableid']=="") die ('Error: No login or ipaddress choosed! Alias cant be added');
+
     $tableid=$_POST['tableid'];
     $userlogin=$_POST['userlogin'];
     $userpassword=md5(md5(trim($_POST['userpassword'])));
