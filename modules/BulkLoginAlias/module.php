@@ -97,7 +97,7 @@ function __construct($variables){ //
 		
 	
 		$queryCreateLogin = "INSERT INTO scsq_logins (name) VALUES ('".$userdata['user']."');"; 
-		$result=doQuery($this->vars, $queryCreateLogin) or die ("Can`t create login in scsq_login");
+		$result=doQuery($this->vars, $queryCreateLogin);
 
 		$tableid=doFetchOneQuery($this->vars, $queryFindUser);
 
@@ -110,10 +110,11 @@ function __construct($variables){ //
 		
 	//update or create alias
 	if($findAlias[0] > 0) 
-		$result=doQuery($this->vars, $queryUpdateAlias) or die ("Can`t update alias in scsq_alias");
+		$result=doQuery($this->vars, $queryUpdateAlias);
 	else
-		$result=doQuery($this->vars, $queryCreateAlias) or die ("Can`t create alias in scsq_alias");
+		$result=doQuery($this->vars, $queryCreateAlias);
 
+		
 
 	//create quota
 	//Создание квоты
@@ -140,9 +141,9 @@ function __construct($variables){ //
 	//	echo $queryCreateQuota;
 	//update or create quota
 	if($findQuota[0] > 0) 
-		doQuery($this->vars, $queryUpdateQuota) or die ("Can`t update quota in scsq_mod_quotas");
+		doQuery($this->vars, $queryUpdateQuota);
 	else
-		doQuery($this->vars, $queryCreateQuota) or die ("Can`t create quota in scsq_mod_quotas");
+		doQuery($this->vars, $queryCreateQuota);
 
 
 	//create user
@@ -157,9 +158,9 @@ function __construct($variables){ //
 
 	//update or create user
 	if($findUser[0] > 0) 
-		doQuery($this->vars, $queryUpdateUser) or die ("Can`t update user in scsq_mod_usermanager");
+		doQuery($this->vars, $queryUpdateUser);
 	else
-		doQuery($this->vars, $queryCreateUser) or die ("Can`t create user in scsq_mod_usermanager");
+		doQuery($this->vars, $queryCreateUser);
 
   
     
