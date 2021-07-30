@@ -357,7 +357,7 @@ where date>".$lastday." and numproxy=".$numproxy."
 
 ) as tmp2
 
-GROUP BY CRC32(tmp2.st),FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus
+GROUP BY CRC32(tmp2.st),tmp2.st,FROM_UNIXTIME(date,'%Y-%m-%d-%H'), date,login,ipaddress,httpstatus
 ORDER BY null;
 ";
 }
