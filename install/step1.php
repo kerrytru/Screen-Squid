@@ -458,12 +458,19 @@ else
 echo '
 <form method="post" action="step1.php">
 		<div class="continue">
-		<span><b>Not all tests are passed. Check it and try again.</b></span>
+		<span><b>Not all tests are passed. Check it and try again. <br />Or if you understand that all is ok, click "I know what I`m doing" button and go to the next step.</b></span>
 	</div>
-		<div class="continue">
+		
 		<input type="submit" value="Try again" />
 		<input type="hidden" name="default_lang" value="'.$_POST['default_lang'].'" />
-			</div>
+			
+</form>
+<br />
+<form method="post" action="step2.php">
+		
+		<input type="submit" value="I know what I`m doing" />
+		<input type="hidden" name="default_lang" value="'.$_POST['default_lang'].'" />
+			
 </form>
 ';
 ?>
