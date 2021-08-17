@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/07/20 22:24:56.526 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/08/17 23:25:17.602 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -51,7 +51,8 @@ $db = "test"; # name DB
 #Count lines for one insert. You can change it, if its needed.
 #Kolichestvo strok, vstavliaemoe za odin INSERT. Mozhno pokrutit bolshe/menshe dlia skorosti
 #Количество строк, вставляемое за один INSERT. Можно покрутить больше/меньше для скорости.
-my $count_lines_for_one_insert=1000; #how much INSERT for one 'transaction'
+my $count_lines_for_one_insert=10000; #how much INSERT for one 'transaction'
+my $n = 8; #how many workers will insert data. It depends on max connections your database!
 #==========================================================
 #Path to access.log. It could be full path, e.g. /var/log/squid/access.log
 #Put k access.log. Eto mozhet bit polnii put. Naprimer, /var/log/squid/access.log
@@ -176,8 +177,53 @@ print "\n";
 
 }
 
+my $k = 0;
+
+
+
+
+    while ($k < $n) {
+    $k++;   
+     $sqltext="";
+    #copy data to child proccess
+    $sqltext="DROP TABLE IF EXISTS scsq_temptraffic$k;";
+    $sth = $dbh->prepare($sqltext);
+    $sth->execute; #
+   
+  }
+
+my $k = 0;
+
+    while ($k < $n) {
+    $k++;  
+     $sqltext="";
+    #copy data to child proccess
+    if($dbtype==0){
+      $sqltext="CREATE TABLE scsq_temptraffic$k  (SELECT * FROM scsq_temptraffic);";
+    }
+
+    if($dbtype==1){
+      $sqltext="CREATE TABLE scsq_temptraffic$k as (SELECT * FROM scsq_temptraffic);";
+    }
+
+
+    $sth = $dbh->prepare($sqltext);
+    $sth->execute; #
+    
+  }
+
+$k=0;
+
+my @children_pids_p1;
+my @children_pids_p1_tmp;
+
+$k_table=1;
+
 #loop for get strings from file one by one.
 while (my $line=<IN>) {
+
+
+
 #count how much lines in file are parsed
 $countlines=$countlines+1;
 
@@ -236,64 +282,120 @@ print "Completed: ".$completed."% Line: ".$countlines." ".$insertspeed." lines/s
 
       #collect an sql insert statement with data. 
       if($count==0) {
-        $sqltext="INSERT INTO scsq_temptraffic (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES";
+        $k++;
+        $sqltext="INSERT INTO scsq_temptraffic$k_table (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES";
       }
   
       $count++;
       if(eof or $count>=$count_lines_for_one_insert) {
-        $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]',$numproxy)";
-        $count=0;
-        $sth = $dbh->prepare($sqltext);
-        $sth->execute;
-        $sqltext="";
 
-$sqltext="";
-#adding httpstatus if it`s absent in table scsq_httpstatus
-$sqltext="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
-$sth = $dbh->prepare($sqltext);
-$sth->execute; #
 
-$sqltext="";
-#adding ipaddress if it`s absent in table scsq_ipaddress
-$sqltext="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
+$k=scalar(@children_pids_p1);
 
-$sqltext="";
-#adding logins if it`s absent in table scsq_logins
-$sqltext="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
 
-#copy data from temptable to main table
 
-if($dbtype==0){
-$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
-LEFT JOIN (select id,name from scsq_ipaddress
-RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
-LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
-LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
-WHERE numproxy=".$numproxy."
-;";
+#if maximum child in progress, wait
+if($k >= $n){
+$j=0;
+
+@children_pids_p1_tmp =@children_pids_p1;
+#for($j=0;$j<$n/4;$j++){
+
+waitpid $children_pids_p1[$j], 0;
+shift(@children_pids_p1_tmp);
+#}
+
+  #$k=scalar;
+  @children_pids_p1=@children_pids_p1_tmp;
 }
 
-if($dbtype==1){
-$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
-LEFT JOIN (select id,name from scsq_ipaddress
-RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
-LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
-LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
-WHERE numproxy=".$numproxy."
-;";
+#
+#$k++;
+  $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]',$numproxy)";
+
+  my $pid = fork;
+  push @children_pids_p1,$pid;
+  if (not $pid) {
+#make conection to DB
+
+    if($dbtype==0){ #mysql
+    $dbh_child = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+    }
+
+ 
+      $sth = $dbh_child->prepare($sqltext);
+      $sth->execute;
+
+
+    #put here child work
+
+    $sqltext="";
+    #adding httpstatus if it`s absent in table scsq_httpstatus
+    $sqltext="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic$k_table) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
+    $sth = $dbh_child->prepare($sqltext);
+    $sth->execute; #
+
+    $sqltext="";
+    #adding ipaddress if it`s absent in table scsq_ipaddress
+    $sqltext="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic$k_table) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
+    $sth = $dbh_child->prepare($sqltext);
+    $sth->execute;
+
+    $sqltext="";
+    #adding logins if it`s absent in table scsq_logins
+    $sqltext="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic$k_table) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
+    $sth = $dbh_child->prepare($sqltext);
+    $sth->execute;
+
+    #copy data from temptable to main table
+
+    if($dbtype==0){
+    $sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
+    LEFT JOIN (select id,name from scsq_ipaddress
+    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
+    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
+    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
+    WHERE numproxy=".$numproxy."
+    ;";
+    }
+
+    if($dbtype==1){
+    $sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
+    LEFT JOIN (select id,name from scsq_ipaddress
+    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
+    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
+    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
+    WHERE numproxy=".$numproxy."
+    ;";
+    }
+
+    $sth = $dbh_child->prepare($sqltext);
+    $sth->execute;
+
+    #truncate data to 
+    $sqltext="TRUNCATE TABLE scsq_temptraffic$k_table;";
+    $sth = $dbh_child->prepare($sqltext);
+    $sth->execute; #
+
+
+    $sth->finish();
+    $dbh_child->disconnect();
+    exit;
+  }
+$k_table++;
+
+if($k_table>$n) {
+  $k_table=1;
 }
 
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
 
-#clear temptable.
-$sql_cleartemptable="delete from scsq_temptraffic where numproxy=".$numproxy."";
-$sth = $dbh->prepare($sql_cleartemptable);
-$sth->execute; #
+#go next
+$count=0;
+
 
 $sqltext="";
 
@@ -310,6 +412,44 @@ $sqltext="";
 #close log file
 close(IN);
 
+
+#when adding is done wait
+    for (1 .. $n) {
+    wait();
+  }
+
+my $k = 0;
+
+    if($dbtype==0){ #mysql
+    $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+    }
+
+
+    while ($k < $n) {
+    $k++;   
+     $sqltext="";
+    #copy data to child proccess
+    $sqltext="DROP TABLE scsq_temptraffic$k;";
+    $sth = $dbh->prepare($sqltext);
+    $sth->execute; #
+   
+  }
+
+    $dbh->disconnect();
+
+    if($dbtype==0){ #mysql
+    $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+    }
+
+
 #clear scsq_quicktraffic
 #$sqltext="";
 #$sqltext="truncate scsq_quicktraffic;";
@@ -323,13 +463,95 @@ break;
 print "\n";
 }
 
+$k=0;
+    while ($k < $n) {
+    $k++;   
+     $sqltext="";
+    #copy data to child proccess
+    $sqltext="DROP TABLE IF EXISTS scsq_quicktraffic$k ;";
+    $sth = $dbh->prepare($sqltext);
+    $sth->execute; #
+   
+  }
+
+$k=0;
+
+#create quicktraffic tables
+    while ($k < $n) {
+    $k++;  
+     $sqltext="";
+    if($dbtype==0){
+      $sqltext="CREATE TABLE scsq_quicktraffic$k  (SELECT * FROM scsq_quicktraffic);";
+    }
+    if($dbtype==1){
+      $sqltext="CREATE TABLE scsq_quicktraffic$k as (SELECT * FROM scsq_quicktraffic);";
+    }
+
+    $sth = $dbh->prepare($sqltext);
+    $sth->execute; #
+    
+  }
+
+#Get total rows to update
+$sqltext="SELECT count(1) FROM scsq_traffic
+where date>".$lastday." and numproxy=".$numproxy."";
+$sth = $dbh->prepare($sqltext);
+$sth->execute; #
+@row=$sth->fetchrow_array;
+
+#row line for offset
+$row_line=0;
+
+$k_table=1;
+
+
+my @children_pids;
+my @children_pids_tmp;
+
 #update scsq_quicktraffic
+while($row_line<=$row[0]){
+
+$k=scalar(@children_pids);
+
+
+
+#if maximum child in progress, wait
+if($k >= $n){
+$j=0;
+
+@children_pids_tmp =@children_pids;
+for($j=0;$j<$n/4;$j++){
+
+waitpid $children_pids[$j], 0;
+shift(@children_pids_tmp);
+}
+
+  #$k=scalar;
+  @children_pids=@children_pids_tmp;
+}
 
 $sqltext="";
+
+#$k++;
+#print "\n".scalar(@children_pids);
+
+  my $pid = fork;
+
+  push @children_pids,$pid;
+  if (not $pid) {
+#make conection to DB
+
+    if($dbtype==0){ #mysql
+    $dbh_child = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+    }
 
 if($dbtype==0){
 
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par, numproxy)
+$sqltext="insert into scsq_quicktraffic$k_table (date,login,ipaddress,sizeinbytes,site,httpstatus,par, numproxy)
 SELECT 
 date,
 tmp2.login,
@@ -354,11 +576,12 @@ ipaddress,
 httpstatus
 FROM scsq_traffic
 where date>".$lastday." and numproxy=".$numproxy."
-
+ORDER BY id asc 
+LIMIT ".$row_line.",".$count_lines_for_one_insert."
 ) as tmp2
 
 GROUP BY CRC32(tmp2.st),FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus,tmp2.st,date
-ORDER BY null;
+;
 ";
 }
 
@@ -366,7 +589,7 @@ ORDER BY null;
 
 if($dbtype==1){
 
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par,numproxy)
+$sqltext="insert into scsq_quicktraffic$k_table (date,login,ipaddress,sizeinbytes,site,httpstatus,par,numproxy)
 SELECT 
 date,
 tmp2.login,
@@ -392,90 +615,61 @@ ipaddress,
 httpstatus
 FROM scsq_traffic
 where date>".$lastday." and numproxy=".$numproxy."
-
+ORDER BY id asc
+LIMIT ".$count_lines_for_one_insert." OFFSET ".$row_line."
 ) as tmp2
 
 GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,httpstatus,tmp2.date
-";
-}
-
-#print $sqltext;
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
-
-
-#update2 scsq_quicktraffic
-$sqltext="";
-
-if($dbtype==0) {
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par, numproxy)
-SELECT 
-tmp2.date,
-'0',
-'0',
-tmp2.sums,
-tmp2.st,
-2,
-".$numproxy."
-
-FROM (SELECT 
-case
-
-	when (SUBSTRING_INDEX(site,'/',1) REGEXP '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?')  
-		then SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)
-		else SUBSTRING_INDEX(site,'/',1) 
-	end as st, 
-sum(sizeinbytes) as sums,
-date
-FROM scsq_traffic
-where date>".$lastday." and numproxy=".$numproxy."
-GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st),date,site
-
-) as tmp2
-
-
-ORDER BY null;
-";
-}
-
-if($dbtype==1){
-
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par,numproxy)
-SELECT 
-tmp2.date,
-'0',
-'0',
-tmp2.sums,
-tmp2.st,
-2,
-".$numproxy."
-
-FROM (SELECT 
-case
-
-	when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]')  
-		then split_part(site,'/',1) 
-		else reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) 
-		
-	end as st, 
-
-sum(sizeinbytes) as sums,
-date
-FROM scsq_traffic
-where date>".$lastday." and numproxy=".$numproxy."
-GROUP BY to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),st,date
-
-) as tmp2
 
 ";
 }
 
 #print $sqltext;
-$sth = $dbh->prepare($sqltext);
+$sth = $dbh_child->prepare($sqltext);
 $sth->execute;
 
+    $sth->finish();
+    $dbh_child->disconnect();
+    exit;
+  }
+$k_table++;
+$row_line = $row_line+$count_lines_for_one_insert;
+if($k_table>$n) {
+  $k_table=1;
+}
+}
 
+    if($dbtype==0){ #mysql
+    $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
 
+    if($dbtype==1){ #postgre
+    $dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+    }
+
+$k=0;
+
+#drop quicktraffic tables
+    while ($k < $n) {
+    $k++;  
+     $sqltext="";
+    #copy data to child proccess
+    $sqltext="INSERT INTO scsq_quicktraffic (date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy,category) (select date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy,category from scsq_quicktraffic$k)";
+    $sth = $dbh->prepare($sqltext);
+    $sth->execute; #
+
+     $sqltext="";
+    #copy data to child proccess
+    $sqltext="DROP TABLE scsq_quicktraffic$k";
+    $sth = $dbh->prepare($sqltext);
+    $sth->execute; #
+    
+  }
+
+#when adding is done wait
+    for (1 .. $n) {
+    wait();
+  }
 
 
 #print datetime when import ended
