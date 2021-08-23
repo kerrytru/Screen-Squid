@@ -80,6 +80,20 @@ my $minbytestoparse=-1; #bytes, default -1
 
 #=======================CONFIGURATION END==============================
 
+
+#check if script already launched (cause cron), then exit.
+#else create lock file
+if (-e "fetch.lock") {
+  exit;
+}
+else
+{
+  open(OUT, ">>fetch.lock");
+  close(OUT);
+}
+
+
+
 my $count=0;
 my $lastdate=0;
 my $sqltext="";
@@ -696,6 +710,9 @@ $sth->execute;
 
 #close log file
 close(OUT);
+
+#delete lock
+unlink("fetch.lock");
 
 #disconnecting from DB
 $rc = $dbh->disconnect;
