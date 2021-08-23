@@ -159,7 +159,8 @@
 				Checking for PostgreSQL database (if you want use PostgreSQL you should to install it) <br />
 					You have 
 					<?php $output = shell_exec('psql -V'); 
-						  preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $output, $version); 
+#						  preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $output, $version); 
+						  preg_match('@[0-9]+\.[0-9]+(\.[0-9]+)?@', $output, $version); 
 						  if($version[0] !="") $passdbps=1;
 							echo $output; 
 					?>		
