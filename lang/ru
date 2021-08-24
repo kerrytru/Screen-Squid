@@ -242,5 +242,8 @@ $_lang['stREPORTSLOGINS']="Отчеты по логинам";
 $_lang['stREPORTSIPADDRESS']="Отчеты по IP адресам";
 $_lang['stREPORTSCOMMON']="Отчеты общие";
 
+//2.1
+$_lang['stDENIEDMEGABYTES']="Заблокированный трафик";
+$_lang['stINCOMEMEGABYTES']="Принятый трафик";
 
 ?>

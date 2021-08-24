@@ -18,8 +18,94 @@ $header='<html>
 <!-- The themes file -->
 <link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>
 
+<style>
+body {
+  margin: 0;
+}
+
+.preloader {
+  /*фиксированное позиционирование*/
+  position: fixed;
+  /* координаты положения */
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* фоновый цвет элемента */
+  background: #e0e0e0;
+  /* размещаем блок над всеми элементами на странице (это значение должно быть больше, чем у любого другого позиционированного элемента на странице) */
+  z-index: 1001;
+}
+
+.preloader__row {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  margin-top: -35px;
+  margin-left: -35px;
+  text-align: center;
+  animation: preloader-rotate 2s infinite linear;
+}
+
+.preloader__item {
+  position: absolute;
+  display: inline-block;
+  top: 0;
+  background-color: #337ab7;
+  border-radius: 100%;
+  width: 35px;
+  height: 35px;
+  animation: preloader-bounce 2s infinite ease-in-out;
+}
+
+.preloader__item:last-child {
+  top: auto;
+  bottom: 0;
+  animation-delay: -1s;
+}
+
+@keyframes preloader-rotate {
+  100% {
+	transform: rotate(360deg);
+  }
+}
+
+@keyframes preloader-bounce {
+
+  0%,
+  100% {
+	transform: scale(0);
+  }
+
+  50% {
+	transform: scale(1);
+  }
+}
+
+.loaded_hiding .preloader {
+  transition: 0.3s opacity;
+  opacity: 0;
+}
+
+.loaded .preloader {
+  display: none;
+}
+</style>
+
+
 </head>
+
 <body>
+<!-- Прелоадер 
+<div class="preloader">
+  <div class="preloader__row">
+	<div class="preloader__item"></div>
+	<div class="preloader__item"></div>
+  </div>
+</div>
+-->
 ';
 
 if(isset($_GET['srv']))
@@ -475,6 +561,8 @@ $goodLoginsList=doCreateFriendList($globalSS,'logins');
 $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
 $goodSitesList = doCreateSitesList($globalSS);
 
+
+
 #split working hours
 list($workStart1, $workEnd1, $workStart2, $workEnd2) = explode(":", $globalSS['workingHours']);
 list($workStartHour1, $workStartMin1) = explode("-", $workStart1);
@@ -506,7 +594,7 @@ $echoLoginAliasColumn=",aliastbl.name";
     nofriends.name,
     tmp.s,
     nofriends.id
-    ".$echoLoginAliasColumn."
+	".$echoLoginAliasColumn."
   FROM (SELECT 
           login,
           SUM(sizeinbytes) as 's' 
@@ -1400,6 +1488,8 @@ SELECT
 	sum(tmp2.sum_in_cache),
 	sum(tmp2.sum_out_cache),
 	sum(tmp2.sum_bytes),
+	sum(tmp2.sum_denied),
+	sum(tmp2.sum_bytes) - sum(tmp2.sum_denied),
 	sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
 	sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
 	tmp2.login
@@ -1409,7 +1499,7 @@ SELECT
     tmp.sum_in_cache,
     tmp.sum_out_cache,
     tmp.sum_bytes,
-
+	tmp.sum_denied,
 	tmp.login,
     tmp.n 
   FROM ((SELECT 
@@ -1418,7 +1508,9 @@ SELECT
 	   
 	   SUM(sizeinbytes) AS sum_in_cache,
 	   0 AS sum_out_cache,
-	   0 as sum_bytes
+	   0 as sum_bytes,
+	   0 as sum_denied
+
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
@@ -1441,7 +1533,8 @@ SELECT
 	   '3' AS n,
 	   0 as sum_in_cache,
 	   SUM(sizeinbytes) as sum_out_cache,
-	   0 as sum_bytes
+	   0 as sum_bytes,
+	   0 as sum_denied
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
@@ -1464,14 +1557,36 @@ SELECT
 	   '1' AS n,
 	   0 as sum_in_cache,
 	   0 as sum_out_cache,
-	   SUM(sizeinbytes) AS sum_bytes 
+	   SUM(sizeinbytes) AS sum_bytes,
+	   0 as sum_denied 
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
  	   AND par=1	   
 	 GROUP BY crc32(login) ,login
-	 ORDER BY null)) 
+	 ORDER BY null)
+
+   UNION 
+
+	 (SELECT 
+		login,
+		'4' AS n,
+		0 as sum_in_cache,
+		0 as sum_out_cache,
+		0 AS sum_bytes,
+		SUM(sizeinbytes) as sum_denied 
+	  FROM scsq_quicktraffic,scsq_httpstatus 
+	  WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+	  AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1   
+	  GROUP BY crc32(login) ,login
+	  ORDER BY null)	 
+	 
+	 ) 
 	 AS tmp
 
 	 RIGHT JOIN (SELECT 
@@ -1490,15 +1605,34 @@ SELECT
 #postgre version
 if($dbtype==1)
 $queryLoginsTrafficWide="
+SELECT 
+	tmp2.name,
+	sum(tmp2.sum_in_cache),
+	sum(tmp2.sum_out_cache),
+	sum(tmp2.sum_bytes),
+	sum(tmp2.sum_denied),
+	sum(tmp2.sum_bytes) - sum(tmp2.sum_denied),
+	sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
+	sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
+	tmp2.login
+	FROM (
   SELECT 
     nofriends.name,
-    tmp.s,
-    tmp.login,
+    tmp.sum_in_cache,
+    tmp.sum_out_cache,
+    tmp.sum_bytes,
+	tmp.sum_denied,
+	tmp.login,
     tmp.n 
   FROM ((SELECT 
 	   login,
 	   '2' AS n,
-	   SUM(sizeinbytes) AS s 
+	   
+	   SUM(sizeinbytes) AS sum_in_cache,
+	   0 AS sum_out_cache,
+	   0 as sum_bytes,
+	   0 as sum_denied
+
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
@@ -1511,7 +1645,7 @@ $queryLoginsTrafficWide="
 	    AND date<".$dateend." 
 	    AND site NOT IN (".$goodSitesList.")
  	    AND par=1
-	 GROUP BY login 
+	 GROUP BY login
 	 ) 
 
   UNION 
@@ -1519,7 +1653,10 @@ $queryLoginsTrafficWide="
 	(SELECT 
 	   login,
 	   '3' AS n,
-	   SUM(sizeinbytes) AS s 
+	   0 as sum_in_cache,
+	   SUM(sizeinbytes) as sum_out_cache,
+	   0 as sum_bytes,
+	   0 as sum_denied
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
@@ -1532,7 +1669,7 @@ $queryLoginsTrafficWide="
 	   AND  date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
 	   AND par=1	  
-	 GROUP BY login 
+	 GROUP BY login
 	 ) 
 
   UNION 
@@ -1540,14 +1677,38 @@ $queryLoginsTrafficWide="
 	(SELECT 
 	   login,
 	   '1' AS n,
-	   SUM(sizeinbytes) AS s 
+	   0 as sum_in_cache,
+	   0 as sum_out_cache,
+	   SUM(sizeinbytes) AS sum_bytes,
+	   0 as sum_denied 
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
  	   AND par=1	   
-	 GROUP BY login 
-	 )) 
+	 GROUP BY login
+	 )
+
+   UNION 
+
+	 (SELECT 
+		login,
+		'4' AS n,
+		0 as sum_in_cache,
+		0 as sum_out_cache,
+		0 AS sum_bytes,
+		SUM(sizeinbytes) as sum_denied 
+	  FROM scsq_quicktraffic,scsq_httpstatus 
+	  WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+	  AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1   
+	  GROUP BY login
+	  )	 
+	 
+	 ) 
 	 AS tmp
 
 	 RIGHT JOIN (SELECT 
@@ -1556,8 +1717,12 @@ $queryLoginsTrafficWide="
 		     FROM scsq_logins 
 		     WHERE id NOT IN (".$goodLoginsList.")) AS nofriends 
 	 ON tmp.login=nofriends.id 
+		) tmp2
+  WHERE tmp2.login is not NULL
+  GROUP BY tmp2.login,tmp2.name
+  ORDER BY tmp2.name asc  
 
-  ORDER BY nofriends.name asc,tmp.n asc;";  
+;";  
   
 
 
@@ -1567,6 +1732,8 @@ SELECT
 	sum(tmp2.sum_in_cache),
 	sum(tmp2.sum_out_cache),
 	sum(tmp2.sum_bytes),
+	sum(tmp2.sum_denied),
+	sum(tmp2.sum_bytes) - sum(tmp2.sum_denied),
 	sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
 	sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
 	tmp2.ipaddress
@@ -1576,7 +1743,7 @@ SELECT
     tmp.sum_in_cache,
     tmp.sum_out_cache,
     tmp.sum_bytes,
-
+	tmp.sum_denied,
 	tmp.ipaddress,
     tmp.n 
   FROM ((SELECT 
@@ -1585,7 +1752,8 @@ SELECT
 	   
 	   SUM(sizeinbytes) AS sum_in_cache,
 	   0 AS sum_out_cache,
-	   0 as sum_bytes
+	   0 as sum_bytes,
+	   0 AS sum_denied
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
@@ -1608,7 +1776,8 @@ SELECT
 	   '3' AS n,
 	   0 as sum_in_cache,
 	   SUM(sizeinbytes) as sum_out_cache,
-	   0 as sum_bytes
+	   0 as sum_bytes,
+	   0 AS sum_denied
 	 FROM scsq_quicktraffic, scsq_httpstatus 
 
 	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
@@ -1631,14 +1800,36 @@ SELECT
 	   '1' AS n,
 	   0 as sum_in_cache,
 	   0 as sum_out_cache,
-	   SUM(sizeinbytes) AS sum_bytes 
+	   SUM(sizeinbytes) AS sum_bytes,
+	   0 AS sum_denied
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
 	   AND site NOT IN (".$goodSitesList.")
  	   AND par=1	   
 	 GROUP BY crc32(ipaddress) ,ipaddress
-	 ORDER BY null)) 
+	 ORDER BY null)
+	
+ UNION 
+
+	 (SELECT 
+	 ipaddress,
+		'4' AS n,
+		0 as sum_in_cache,
+		0 as sum_out_cache,
+		0 AS sum_bytes,
+		SUM(sizeinbytes) as sum_denied 
+	  FROM scsq_quicktraffic,scsq_httpstatus 
+	  WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+	  AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND site NOT IN (".$goodSitesList.")
+	  AND par=1   
+	  GROUP BY crc32(ipaddress) ,ipaddress
+	  ORDER BY null)	
+	 
+	 ) 
 	 AS tmp
 
 	 RIGHT JOIN (SELECT 
@@ -8816,8 +9007,13 @@ if($id==69)
 }
 
 /////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT END
-
-
+/*
+echo "<script>
+window.onload = function () {
+  document.body.classList.add('loaded');
+}
+</script>";
+*/
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])) {
 
 $end=microtime(true);
@@ -8833,6 +9029,7 @@ echo $_lang['stCREATORS'];
 
 
 echo "
+
 </body>
 </html>";
 

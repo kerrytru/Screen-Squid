@@ -242,4 +242,8 @@ $_lang['stTOPIPWORKINGHOURSTRAFFIC']="Top ip address working hours";
 $_lang['stREPORTSLOGINS']="Report by logins";
 $_lang['stREPORTSIPADDRESS']="Report by ip address";
 $_lang['stREPORTSCOMMON']="Report common";
+
+//2.1
+$_lang['stDENIEDMEGABYTES']="Blocked traffic";
+$_lang['stINCOMEMEGABYTES']="Accepted traffic";
 ?>
