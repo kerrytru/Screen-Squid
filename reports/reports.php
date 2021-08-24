@@ -98,14 +98,14 @@ body {
 </head>
 
 <body>
-<!-- Прелоадер 
+<!-- Прелоадер  -->
 <div class="preloader">
   <div class="preloader__row">
 	<div class="preloader__item"></div>
 	<div class="preloader__item"></div>
   </div>
 </div>
--->
+
 ';
 
 if(isset($_GET['srv']))
@@ -9007,13 +9007,13 @@ if($id==69)
 }
 
 /////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT END
-/*
+
 echo "<script>
 window.onload = function () {
   document.body.classList.add('loaded');
 }
 </script>";
-*/
+
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])) {
 
 $end=microtime(true);
