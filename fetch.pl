@@ -668,7 +668,7 @@ $k=0;
     $k++;  
      $sqltext="";
     #copy data to child proccess
-    $sqltext="INSERT INTO scsq_quicktraffic (date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy,category) (select date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy,category from scsq_quicktraffic$k)";
+    $sqltext="INSERT INTO scsq_quicktraffic (date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy) (select date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy from scsq_quicktraffic$k)";
     $sth = $dbh->prepare($sqltext);
     $sth->execute; #
 
