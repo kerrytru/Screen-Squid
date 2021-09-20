@@ -208,6 +208,24 @@ CREATE TABLE IF NOT EXISTS `scsq_modules` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+--
+-- Table structure for table `scsq_modules_param`
+--
+
+CREATE TABLE IF NOT EXISTS `scsq_modules_param` (
+  `id` int(11) NOT NULL,
+  `module` varchar(100) NOT NULL,
+  `param` varchar(100) NOT NULL,
+  `val` varchar(256) NOT NULL,
+  `comment` varchar(500) NOT NULL
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `scsq_modules_param`
+--
+
+INSERT INTO `scsq_modules_param` (`id`, `module`, `param`, `val`, `comment`) VALUES
+(1, 'Cache', 'enabled', '', 'Enable module');
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

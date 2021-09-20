@@ -899,4 +899,26 @@ echo "</tr>";
        echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3>".$_lang['stBACKTOGROUPLIST']."</a>";
       }
 
+#Функция получения значения параметра из scsq_modules_param
+function doGetParam($globalSS,$module,$param){
+
+        include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+    
+        $queryGetParam="select val from scsq_modules_param  where module='".$module."' and param='".$param."';";
+        $row=doFetchOneQuery($globalSS,$queryGetParam);
+
+        return $row[0];
+        }
+
+#Функция установки значения параметра в scsq_modules_param
+function doSetParam($globalSS,$module,$param,$val){
+
+  include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
+  $querySetParam="update scsq_modules_param set val='".$val."' where module='".$module."' and param='".$param."';";
+
+  doQuery($globalSS,$querySetParam);
+
+  }
+
 ?>

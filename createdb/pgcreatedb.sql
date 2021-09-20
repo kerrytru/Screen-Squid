@@ -292,3 +292,22 @@ WITH (
 );
 ALTER TABLE scsq_sqper_trend10
   OWNER TO postgres;
+
+--
+-- Table structure for table scsq_modules_param
+--
+
+CREATE TABLE IF NOT EXISTS scsq_modules_param (
+    id serial NOT NULL,
+    module text,
+    param text,
+    val text,
+    comment text,
+    CONSTRAINT scsq_modules_param_pkey PRIMARY KEY (id)
+);
+
+ALTER TABLE scsq_modules_param
+  OWNER TO postgres;
+
+INSERT INTO scsq_modules_param VALUES (1, 'Cache', 'enabled', '', 'Enabled module');
+

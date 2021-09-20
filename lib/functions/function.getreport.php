@@ -38,10 +38,12 @@ function doGetReportData($globalSS,$query,$template_name) {
 
     if($globalSS['debug']==1) echo $query;
 
+    
+
 #Получим уникальное имя отчёта
 $report_file_name=doGenerateUniqueNameReport($globalSS['params']);
 
-#Если нет данных в кэше, то только тогда лезем в базу. Иначе даже не коннектимся. 
+#Если нет данных в кэше (либо кэш модуль выключен), то только тогда лезем в базу. Иначе даже не коннектимся. 
 #Можно ведь и в оффлайне поработать с отчётами
 if(!file_exists ("".$globalSS['root_dir']."/modules/Cache/data/".$report_file_name))
 {
@@ -52,8 +54,9 @@ if(!file_exists ("".$globalSS['root_dir']."/modules/Cache/data/".$report_file_na
     #Преобразуем данные в таблицу
     $result_data_json=doPrepareTable($globalSS,$json_result,$colh,$colr,$colf);
     
-    #Запишем данные в файл.
-    doWriteJsonToFile($globalSS,$result_data_json,$report_file_name);
+    #Запишем данные в файл, если включен модуль кэширования.
+    if(doGetParam($globalSS,'Cache','enabled') == 'on')
+        doWriteJsonToFile($globalSS,$result_data_json,$report_file_name);
 }
 else
 {
