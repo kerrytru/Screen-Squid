@@ -427,12 +427,14 @@ echo "
     </th>
     <th>
     ".$_lang['stINSPECT']."
-    </th>
+	</th>";
+if($globalSS['useIpaddressalias'] == 1)
+echo "	
     <th>
     ".$_lang['stALIAS']."
-    </th>
-</tr>
-";
+	</th>";
+	
+echo "</tr>";
 
 for($i=1;$i<$numrow;$i++) {
 
@@ -447,7 +449,10 @@ echo "<td>".$line[2]."</td>"; //username
 $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&idel=".$line[0].">".$_lang['stDELETE']."</a></td>";
-echo "<td>".$line[4]."</td>"; //username
+
+if($globalSS['useIpaddressalias'] == 1)
+	echo "<td>".$line[4]."</td>"; //alias
+
 echo "</tr>";
 $insptotalspeed+=$line[1];
 }
@@ -457,10 +462,10 @@ echo "<tr>
 <td>&nbsp;</td>
 <td>".$_lang['stTOTAL']."</td>
 <td>".$insptotalspeed."</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-</tr>
-";
+<td>&nbsp;</td>";
+if($globalSS['useIpaddressalias'] == 1)
+echo "<td>&nbsp;</td>";
+echo "</tr>";
 
 echo "</table>";
 echo "<br />";
@@ -485,12 +490,12 @@ echo "
     </th>
     <th>
     ".$_lang['stINSPECT']."
-    </th>
-    <th>
+	</th>";
+if($globalSS['useIpaddressalias'] == 1)
+echo "<th>
     ".$_lang['stALIAS']."
-    </th>
-</tr>
-";
+	</th>";
+echo "</tr>";
 
 for($i=1;$i<$numrow;$i++) {
 
@@ -502,7 +507,8 @@ echo "<td>".$line[2]."</td>"; //username
 $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&iadd=".$line[0].">".$_lang['stADD']."</a></td>";
-echo "<td>".$line[4]."</td>"; //username
+if($globalSS['useIpaddressalias'] == 1)
+echo "<td>".$line[4]."</td>"; //alias
 echo "</tr>";
 $totalspeed+=$line[1];
     }
@@ -511,10 +517,10 @@ echo "<tr>
 <td>&nbsp;</td>
 <td>".$_lang['stTOTAL']."</td>
 <td>".$totalspeed."</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-</tr>
-";
+<td>&nbsp;</td>";
+if($globalSS['useIpaddressalias'] == 1)
+echo "<td>&nbsp;</td>";
+echo "</tr>";
 
 echo "</table>";
 
