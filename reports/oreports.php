@@ -19,7 +19,7 @@ else
 include("../config.php");
 
 //<!-- The themes file -->
-echo '<link rel="stylesheet" type="text/css" href="../themes/'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>';
+echo '<link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>';
 
 
 $addr=$address[$srv];
@@ -53,7 +53,7 @@ include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 include("".$globalSS['root_dir']."/modules/Chart/module.php");
 
-$grap = new Chart($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
+$grap = new Chart($globalSS); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
 
 $start=microtime(true);
@@ -196,7 +196,7 @@ from
 			aliastbl.name as aliasname 
 	from scsq_sqper_activerequests
 	LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,substring_index(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON substring_index(ipaddress,':',1)=ipaddresstbl.name 
-	LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid 
+	LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias where typeid=1 ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid 
 	) as table1
 
 	where 
@@ -213,7 +213,7 @@ $queryActiveUsers="
  from 
  (select DISTINCT split_part(ipaddress,':',1) as ipaddr,sizeinbytes as sums, seconds, username, ipaddresstbl.id,aliastbl.name as aliasname from scsq_sqper_activerequests 
  LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,split_part(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON split_part(ipaddress,':',1)=ipaddresstbl.name 
- LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid ) as table1 
+ LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias where typeid=1) as aliastbl ON ipaddresstbl.id=aliastbl.tableid ) as table1 
  where table1.ipaddr not IN ('".$friendsIpaddress."') AND trim(table1.username) not IN ('".$friendsLogin."') group by table1.ipaddr,table1.username,table1.id,table1.aliasname ; 
 
 ";
