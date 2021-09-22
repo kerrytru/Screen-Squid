@@ -155,6 +155,31 @@ $dateend=$datestart + 86400*$numdaysinmonth;
 $friendsLogin="0";
 $friendsIpaddress="0";
 
+#Функция получения имени алиаса по имени логина
+function doGetAliasNameByLogin($globalSS,$loginname){
+
+	include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
+	$queryGetAlias="select sa.name from scsq_alias sa, scsq_logins sl  where sl.id=sa.tableid and sa.typeid=0 and sl.name='".(trim($loginname))."';";
+	
+	$row=doFetchOneQuery($globalSS,$queryGetAlias);	
+	
+	return $row[0];
+	}
+
+#Функция получения имени алиаса по ip адресу
+function doGetAliasNameByIP($globalSS,$ipname){
+
+	include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
+	$queryGetAlias="select sa.name from scsq_alias sa, scsq_ipaddress si  where si.id=sa.tableid and sa.typeid=1 and si.name='".$ipname."';";
+	
+		$row=doFetchOneQuery($globalSS,$queryGetAlias);	
+		
+	return $row[0];
+	}
+	
+
 #create list of friends
 if($globalSS['enableNofriends']==1) {
 if($goodLogins!="")
@@ -185,7 +210,9 @@ if($dbtype==0) #mysql version
 $queryActiveUsers="select 
 	table1.ipaddr,
 	sum(table1.sums/1024/table1.seconds) as s, 
-	table1.username, table1.id,table1.aliasname 
+	table1.username, 
+	table1.id,
+	table1.aliasname 
 from 
 		(select 
 			DISTINCT substring_index(ipaddress,':',1) as ipaddr,
@@ -197,6 +224,7 @@ from
 	from scsq_sqper_activerequests
 	LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,substring_index(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON substring_index(ipaddress,':',1)=ipaddresstbl.name 
 	LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias where typeid=1 ) as aliastbl ON ipaddresstbl.id=aliastbl.tableid 
+
 	) as table1
 
 	where 
@@ -431,8 +459,12 @@ echo "
 if($globalSS['useIpaddressalias'] == 1)
 echo "	
     <th>
-    ".$_lang['stALIAS']."
+    ".$_lang['stALIAS']." (IP)
 	</th>";
+if($globalSS['useLoginalias'] == 1)
+	echo "<th>
+		".$_lang['stALIAS']." (LOGIN)
+		</th>";
 	
 echo "</tr>";
 
@@ -451,7 +483,9 @@ echo "<td>".$line[1]."</td>";
 echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&idel=".$line[0].">".$_lang['stDELETE']."</a></td>";
 
 if($globalSS['useIpaddressalias'] == 1)
-	echo "<td>".$line[4]."</td>"; //alias
+	echo "<td>".(doGetAliasNameByIP($globalSS,$line[0]))."</td>"; //alias
+if($globalSS['useLoginalias'] == 1)
+	echo "<td>".(doGetAliasNameByLogin($globalSS,$line[2]))."</td>"; //alias
 
 echo "</tr>";
 $insptotalspeed+=$line[1];
@@ -465,6 +499,9 @@ echo "<tr>
 <td>&nbsp;</td>";
 if($globalSS['useIpaddressalias'] == 1)
 echo "<td>&nbsp;</td>";
+if($globalSS['useLoginalias'] == 1)
+echo "<td>&nbsp;</td>";
+
 echo "</tr>";
 
 echo "</table>";
@@ -493,8 +530,12 @@ echo "
 	</th>";
 if($globalSS['useIpaddressalias'] == 1)
 echo "<th>
-    ".$_lang['stALIAS']."
+    ".$_lang['stALIAS']." (IP)
 	</th>";
+if($globalSS['useLoginalias'] == 1)
+	echo "<th>
+		".$_lang['stALIAS']." (LOGIN)
+		</th>";
 echo "</tr>";
 
 for($i=1;$i<$numrow;$i++) {
@@ -508,7 +549,9 @@ $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&iadd=".$line[0].">".$_lang['stADD']."</a></td>";
 if($globalSS['useIpaddressalias'] == 1)
-echo "<td>".$line[4]."</td>"; //alias
+	echo "<td>".(doGetAliasNameByIP($globalSS,$line[0]))."</td>"; //alias
+if($globalSS['useLoginalias'] == 1)
+	echo "<td>".(doGetAliasNameByLogin($globalSS,$line[2]))."</td>"; //alias
 echo "</tr>";
 $totalspeed+=$line[1];
     }
@@ -519,6 +562,8 @@ echo "<tr>
 <td>".$totalspeed."</td>
 <td>&nbsp;</td>";
 if($globalSS['useIpaddressalias'] == 1)
+echo "<td>&nbsp;</td>";
+if($globalSS['useLoginalias'] == 1)
 echo "<td>&nbsp;</td>";
 echo "</tr>";
 
