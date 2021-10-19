@@ -1,23 +1,33 @@
 <?php
 
-#Build date Wednesday 5th of August 2020 16:21:57 PM
-#Build revision 1.15
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> right.php </#FN>                                                       
+*                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/10/19 22:32:12.042 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
 
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
-
-
-if(isset($_GET['srv']))
-  $srv=$_GET['srv'];
-else
-  $srv=0;
   
   include("config.php");
-  include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
-  include(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
-  include(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
-  include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
+ 
 
+  #если есть дружеские логины, IP адреса или сайты. Соберём их.
+  $globalSS['goodLoginsList']=doCreateFriendList($globalSS,'logins');
+  $globalSS['goodIpaddressList']=doCreateFriendList($globalSS,'ipaddress');
+  $globalSS['goodSitesList'] = doCreateSitesList($globalSS);
 ?>
 
 <html>
@@ -67,29 +77,6 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idRe
 <?php
 
 
-
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['srv']=$srv;
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-$variableSet['language']=$globalSS['language'];
-
-$globalSS['connectionParams'] = $variableSet;
-$globalSS['lang']=$_lang;
-
-  #если есть дружеские логины, IP адреса или сайты. Соберём их.
-  $globalSS['goodLoginsList']=doCreateFriendList($globalSS,'logins');
-  $globalSS['goodIpaddressList']=doCreateFriendList($globalSS,'ipaddress');
-  $globalSS['goodSitesList'] = doCreateSitesList($globalSS);
 
 if(!isset($_GET['id'])) {
 echo "<h2>".$_lang['stWELCOME']."".$vers."</h2>";
@@ -616,44 +603,20 @@ echo "	</table>
 //if($connectionStatus!="error")
 
  if($_GET['id']==6) {
-   	
-	//определим файл который будем изменять. Это сделано для того, чтобы работая в админском интерфейсе, можно было конфигурить версию для директора:)
-	$configfile = "config.php";
+  
 
 if(isset($_GET['actid']))
 
 	if($_GET['actid'] == 3) ///сохранить настройки
 	{
-		$file=file($configfile); 
-
-		foreach($_POST as $key => $val) {
-		
-		$stkey = str_replace("<","[",$key);
-		$stkey = str_replace(">","]",$stkey);
-		
-		
-		for($i=0;$i<sizeof($file);$i++)
-		  {
-			$st = $file[$i];
-			#исключаем лишние строки. Чтоб не изменять лишнее.
-			if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i")
-			
-				if(strpos($file[$i],$stkey)){
-					$st = '$'.$stkey.'="'.$val.'";'.PHP_EOL;
-					$file[$i] = $st; 
-				}
-		  }
-	
-		}
-	
-		$fp=fopen($configfile,"w"); 
-		fputs($fp,implode("",$file)); 
-		fclose($fp);
+    $globalSS=doReadGlobalParamsTableToConfig($globalSS);
+    foreach ($globalSS['gParams'] as $key => $value)
+      doSetParam($globalSS,'Global',$key,$_POST[$key]);
 		
 
 	} //if($_GET['actid'] == 3) 
 	
-
+  $globalSS=doReadGlobalParamsTableToConfig($globalSS);
   
 
     echo "
@@ -666,49 +629,30 @@ if(isset($_GET['actid']))
          <th>".$_lang['stCOMMENT']."</th>
       </tr>
    ";
-	$file=file($configfile); 
-	
+		
 	$num = 1; //
 	
 	echo '<form name=configphp_form action="right.php?srv='.$srv.'&id=6&actid=3" method="post">';
-	
-	for($i=0;$i<sizeof($file);$i++){
-
-	
-	$st = $file[$i];
-	
-	#отделяем служебную часть от изменяемой
-	
-	if($i<34) continue;
-
-		#исключаем лишние строки. Также можно будет регулировать количество отображаемых параметров
-		if($st[0]<>"#" && $st[0]<>"\n" && $st[0]<>"/" && $st[0]<>"?" && $st[0]<>"<" && $st[0]<>"i" && strpos($st,"vers")==0 && strpos($st,"debug")==0)	{
-
-	  	$expString = explode("$",$file[$i]);
-	  	if(isset($expString[1]))
-	  	$expParamname = explode("=",$expString[1]);
-		$expParamname = str_replace("[","<",$expParamname);
-		$expParamname = str_replace("]",">",$expParamname);
-		if(isset($expParamname[1]))
-	  	$expParamvalue = explode(";",$expParamname[1]);		
-		#стираем лишние символы для пользователя		
-		$expParamvalue = str_replace("\"","",$expParamvalue);
-		
+  
+  foreach ($globalSS['gParams'] as $key => $param) {
+    $checked="";
 
 		echo '
 			<tr>
 				<td>'.$num.'</td>
-				<td>'.trim($expParamname[0]).'</td>
-				<td><input type="text" name="'.trim($expParamname[0]).'" value="'.trim($expParamvalue[0]).'"></td>
-				<td></td>
+        <td>'.$key.'</td>';
+      $checked = $param['value'] == 'on' ? 'checked' : '';
+      if(($param['value'] == 'on')||($param['value'] == 'off'))
+        echo	'<td><input class=toggle-button type=checkbox name="'.$key.'" '.$checked.'></td>';
+      else
+        echo	'<td><input type="text" name="'.$key.'" value="'.$param['value'].'"></td>';
+      echo '<td>'.$param['comment'].'</td>
 			</tr>
-		';
-		$num++;
-		}
+    ';
+    $num++;
+  } //endfor
+
 	
-	
-	
-	} //end for
 
 	
 	echo "</table>";

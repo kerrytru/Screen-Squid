@@ -213,19 +213,47 @@ CREATE TABLE IF NOT EXISTS `scsq_modules` (
 --
 
 CREATE TABLE IF NOT EXISTS `scsq_modules_param` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `module` varchar(100) NOT NULL,
   `param` varchar(100) NOT NULL,
   `val` varchar(256) NOT NULL,
-  `comment` varchar(500) NOT NULL
+  `switch` tinyint(4) NOT NULL DEFAULT 0,
+  `comment` varchar(500) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `scsq_modules_param`
 --
 
-INSERT INTO `scsq_modules_param` (`id`, `module`, `param`, `val`, `comment`) VALUES
-(1, 'Cache', 'enabled', '', 'Enable module');
+INSERT INTO `scsq_modules_param` (`id`, `module`, `param`, `val`, `switch`, `comment`) VALUES
+(1, 'Cache', 'enabled', '', 1, 'Enable module'),
+(2, 'Global', 'language', 'en', 0, 'Global language'),
+(3, 'Global', 'useLoginalias', '', 1, 'Use login alias'),
+(4, 'Global', 'useIpaddressalias', 'on', 1, 'Use ip address alias'),
+(5, 'Global', 'enableUseiconv', '', 1, 'Use iconv'),
+(6, 'Global', 'enableShowDayNameInReports', 'on', 1, 'Show day name in reports'),
+(7, 'Global', 'enableTrafficObjectsInStat', '', 1, 'Show traffic objects in stat'),
+(8, 'Global', 'refreshPeriod', '5', 0, 'Seconds to autorefresh online report'),
+(9, 'Global', 'bandwidth', '10', 0, 'Bandwidth for online reports in MBits'),
+(10, 'Global', 'graphtype_trafficbyhours', '0', 0, 'type graph for traffic by hours 0 -line, 1 - histogram'),
+(11, 'Global', 'roundTrafficDigit', '-1', 0, 'How many digits to round traffic. If -1 = no round'),
+(12, 'Global', 'countTopSitesLimit', '10', 0, 'Limit of top report Traffic Sites'),
+(13, 'Global', 'countTopLoginLimit', '10', 0, 'Limit of top report Traffic Logins'),
+(14, 'Global', 'countTopIpLimit', '10', 0, 'Limit of top report Traffic Ipaddress'),
+(15, 'Global', 'countPopularSitesLimit', '10', 0, 'Limit of top report Popular sites'),
+(16, 'Global', 'countWhoDownloadBigFilesLimit', '10', 0, 'Limit of top report WhoDownloadBigFiles'),
+(17, 'Global', 'enableNofriends', '', 1, 'Enable hide friends in reports'),
+(18, 'Global', 'goodLogins', '', 0, 'Friends list, separate with blank. For example, $goodLogins="Vasya Sergey Petr"'),
+(19, 'Global', 'goodIpaddress', '', 0, 'Friends list, separate with blank. For example, $goodIpaddress="172.16.1.1 172.16.5.16"'),
+(20, 'Global', 'enableNoSites', '', 1, 'Enable filter good sites. If enable, $goodSites were not shown in statistic.'),
+(21, 'Global', 'goodSites', '', 0, 'List good sites $goodSites="vk.me facebook.com ipp"'),
+(22, 'Global', 'csv_decimalSymbol', ',', 0, 'decimal symbol separator for CSV export'),
+(23, 'Global', 'globaltheme', 'default', 0, 'theme'),
+(24, 'Global', 'enableUseDecode', '', 1, 'use urldecode to decode % characters in request'),
+(25, 'Global', 'workingHours', '8-00:12-30:13-00:17-20', 0, 'Set working hours. For example, set two periods From 8:00 to 12:30 and from 13 to 17'),
+(26, 'Global', 'showZeroTrafficInReports', '0', 0, 'Show zero traffic in reports');
+
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

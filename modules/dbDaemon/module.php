@@ -25,15 +25,8 @@ function __construct($variables){ //
    
   }
 
- 
-
-  
-
-
   function Install()
   {
-
-
 
 # Table structure for table `scsq_mod_dbDaemon`
 

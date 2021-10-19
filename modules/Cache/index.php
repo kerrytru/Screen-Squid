@@ -22,15 +22,6 @@
 
 
 
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
-
-
-if(isset($_GET['srv']))
-  $srv=$_GET['srv'];
-else
-  $srv=0;
-
 
 
 include("../../config.php");
@@ -39,26 +30,6 @@ $language=$globalSS['language'];
 
 include("module.php");
 include_once($globalSS['root_dir']."/lang/$language");
-
-#подключим главный файл который теперь отвечает за генерацию данных
-include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
-
-
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['srv']=$srv;
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-
-$globalSS['connectionParams']=$variableSet;
 
 
 if (file_exists("langs/".$language))
@@ -80,67 +51,6 @@ if (file_exists("langs/".$language))
 <body>
 
 <script type="text/javascript" src="../../javascript/sortable.js"></script>
-<style>
-
-
-.text {
-  cursor: pointer;
-  font-size: 2rem;
-  margin-left: 10px;
-  font-family: 'Righteous', cursive;
-  color: #fff;
-  font-weight: 300;
-}
-
-.toggle-button {
-  position: relative;
-  
-  width: 50px;
-  height: 25px;
-  margin: 0;
-
-  vertical-align: top;
-
-  background: #ffffff;
-  border: 1px solid #bbc1e1;
-  border-radius: 30px;
-  outline: none;
-  cursor: pointer;
-
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-    
-  transition: all 0.3s cubic-bezier(0.2, 0.85, 0.32, 1.2);
-}
-
-.toggle-button::after {
-  content: "";
-  
-  position: absolute;
-  left: 3px;
-  top: 1.5px;
-  
-  width: 19px;
-  height: 19px;
-  background-color: blue;
-  border-radius: 50%;
-  
-  transform: translateX(0);
-  
-  transition: all 0.3s cubic-bezier(0.2, 0.85, 0.32, 1.2);
-}
-
-.toggle-button:checked::after {
-  transform: translateX(calc(100% + 3px));
-  background-color: #fff;  
-}
-
-.toggle-button:checked {
-  background-color: blue;
-}
-</style>
-
 
 
 <?php

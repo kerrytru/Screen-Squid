@@ -1,4 +1,27 @@
-<html>
+<?php
+
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> oreports.php </#FN>                                                    
+*                         File Birth   > <!#FB> 2021/10/18 23:03:28.656 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/10/19 22:38:28.725 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+?><html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
@@ -6,8 +29,7 @@
 
 <?php
 
-#Build date Tuesday 21st of July 2020 13:20:10 PM
-#Build revision 1.8
+
 
 
 
@@ -22,34 +44,10 @@ include("../config.php");
 echo '<link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>';
 
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['srv']=$srv;
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-
-$globalSS['connectionParams']=$variableSet;
-
 $squidhost=$cfgsquidhost[$srv];
 $squidport=$cfgsquidport[$srv];
 $cachemgr_passwd=$cfgcachemgr_passwd[$srv];
 
-$address=$address[$srv];
-$user=$user[$srv];
-$pass=$pass[$srv];
-$db=$db[$srv];
-
-
-include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
-include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 include("".$globalSS['root_dir']."/modules/Chart/module.php");
 

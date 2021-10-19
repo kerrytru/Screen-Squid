@@ -3,8 +3,6 @@
 #Build date Friday 24th of April 2020 12:57:48 PM
 #Build revision 1.2
 
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -13,7 +11,7 @@ else
 
 include("../../config.php");
 include("module.php");
-include_once("../../lang/$language");
+
 	if (file_exists("langs/".$language))
 		include("langs/".$language);  #подтянем файл языка если это возможно
 	else	
@@ -36,37 +34,6 @@ include_once("../../lang/$language");
 
 <?php
 
-
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-
-$variableSet['language']=$language;
-
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
-
-if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
-
-$dbDaemon_ex = new dbDaemon($variableSet);
-
-	    #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0)
-		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($dbtype==1)
-		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
 echo "<h2>".$_lang['stDBDAEMONMODULE']."</h2><br />";
 

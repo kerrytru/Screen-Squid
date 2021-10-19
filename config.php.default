@@ -11,22 +11,19 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> config.php.default </#FN>                                              
 *                         File Birth   > <!#FB> 2021/07/20 21:39:57.169 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/07/20 22:35:37.240 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/10/19 22:22:32.933 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
 
 
-
  $globalSS['root_dir']=__DIR__;
  $globalSS['root_http']=pathUrl();	
-
-	
 
 $i=0;
 
@@ -56,89 +53,7 @@ foreach($files as $file) {
  
 }
 
-#language ru = russian, en = english, ua = ukrainian, pt-br = portuguese-brazil
 
-$globalSS['language']="en";
-
-include_once("".$globalSS['root_dir']."/lang/".$globalSS['language']."");
-
-#Show aliases logins/ipaddresses in reports enable=1, disable=0.
-#Pokazivat aliasi - logini i/ili IP adresa. Vkl=1, Vikl=0
-#Показывать алиасы логины и/или IP адреса. Вкл=1, выкл=0.
-$globalSS['useLoginalias']=0;
-$globalSS['useIpaddressalias']=1;
-
-#Hide friends in reports. enable= 1, disable.=0
-#Vkluchit regim ne pokazivat druzei. Vkl =1, Vikl=0
-#Включить режим НЕ показывать друзей. Вкл.= 1, выкл.=0
-$globalSS['enableNofriends']=0;
-
-#Friends list, separate with blank. For example, $goodLogins="Vasya Sergey Petr"; Same with IP addresses.
-#Spisok druzei. Cherez odin probel. Naprimer, $goodLogins="Vasya Sergey Petr"; S IP adresami takzhe, cherez odin probel
-#Список друзей. Через ОДИН ПРОБЕЛ. Например, $goodLogins="Vasya Sergey Petr"; С IP адресами также, через ОДИН ПРОБЕЛ.
-
-$globalSS['goodLogins']="";
-$globalSS['goodIpaddress']="";
-
-#use iconv to convert CP1251 in UTF-8 if it is needed.
-#By default, disabled.
-#Ispolzovat iconv dliz perekodirovki CP1251 v UTF-8. Esli rugaetsa, to vidno iconv netu. Mozhno vikluchit etu opciu.
-#ili ustanovit iconv. Po umolchaniu, viklucheno.
-#использовать iconv для перекодировки CP1251 в UTF-8. Если ругается, то видно iconv нету. Можно выключить эту опцию.
-#или установить iconv. По умолчанию, выключено.
-$globalSS['enableUseiconv']=0;
-
-
-#Show login/ipaddress if it have no traffic in partly reports. 1 - enable, 0 - disable
-$globalSS['showZeroTrafficInReports']=0;
-
-#show day name in reports
-#Pokazivat dni nedeli v otchetah.
-#Показывать дни недели в отчетах
-$globalSS['enableShowDayNameInReports']=1;
-
-
-#enable filter good sites. If enable, $goodSites were not shown in statistic.
-#Vkluchit regim ne pokazivat saiti opredelennie v $goodSites. Vkl=1, Vikl=0
-#Включить режим НЕ показывать сайты определенные в $goodSites. Вкл.= 1, выкл.=0
-$globalSS['enableNoSites']=0;
-
-#List good sites $goodSites="vk.me facebook.com ipp".
-#Spisok saitov iskluchennih iz statistiki. Cherez odin probel. Naprimer $goodSites="vk.me facebook.com ipp".
-#Список сайтов исключенных из статистики. Через ОДИН ПРОБЕЛ. Например, $goodSites="vk.me facebook.com ipp".
-$globalSS['goodSites']="";
-
-#Show in statistic traffic objects
-#Pokazivat v kratkoy statistike, statistiku po objectam. Na bolshih viborkah, tormozit otobrazhenie
-$globalSS['enableTrafficObjectsInStat']=0;
-
-#refresh period in Active Reports (secs)
-#Через сколько секунд обновлять страницу онлайна
-$globalSS['refreshPeriod']=5;
-
-#bandwidth for online report graph in Mbits 
-#ширина канала для онлайна в мегабитах. 
-$globalSS['bandwidth']=10;
-
-#type graph for traffic by hours. 0 - line, 1 - histogram. 
-#тип графика. 0 - линия, 1 - гистограмма. Согласно каждого графика. 
-$globalSS['graphtype_trafficbyhours']=0;
-
-#round digits traffic. If -1 = no round. For example, 19.354 MBytes. If setting 2, 19.35 displayed. If 1, 19.3 displayed etc.
-#округление трафика. Количество знаков округления. -1, без округления.
-$globalSS['roundTrafficDigit']=-1;
-
-#==============================
-
-
-//========= queries config
-$globalSS['countTopSitesLimit']=10;
-$globalSS['countTopLoginLimit']=10;
-$globalSS['countTopIpLimit']=10;
-$globalSS['countPopularSitesLimit']=10;
-$globalSS['countWhoDownloadBigFilesLimit']=10;
-
-//======== queries config end
 
 $globalSS['debug']=0; //режим отладки
 
@@ -150,30 +65,35 @@ ini_set('error_reporting', E_ALL);
 ini_set('display_errors',1);
 }
 
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
+
+if(isset($_GET['srv']))
+  $srv=$_GET['srv'];
+else
+  $srv=0;
 
 
-#how many bytes in megabyte. by default 1000000, but its not true. 1024*1024 = 1048576
-$globalSS['oneMegabyte']=1000000; 
 
-#theme
-$globalSS['globaltheme']="default";
+$connectionParams = array();
+$connectionParams['srv']=$srv;
+$connectionParams['addr']=$address[$srv];
+$connectionParams['usr']=$user[$srv];
+$connectionParams['psw']=$pass[$srv];
+$connectionParams['dbase']=$db[$srv];
+$connectionParams['dbtype']=$srvdbtype[$srv];
 
-#use urldecode to decode % characters in request
-#использовать urldecode to decode % символы в строке запроса.
-$globalSS['enableUseDecode']="0";
+$globalSS['connectionParams'] = $connectionParams;
 
-#style for tables. 0 - <table>, 1 - <div>
-$globalSS['tableStyle']=0;
+$globalSS=doReadGlobalParamsTable($globalSS);
 
-#set working hours. 
-#For example, set two periods From 8:00 to 12:30 and from 13 to 17
-$globalSS['workingHours']="8-00:12-30:13-00:17-00";
+include_once("".$globalSS['root_dir']."/lang/".$globalSS['language']."");
 
-//decimal symbol for CSV export
-//разделитель дробной части для вывода в CSV
-$globalSS['csv_decimalSymbol']='.'; 
+$globalSS['lang']=$_lang;
 
-$vers="2.0b";
+$vers="2.1b";
 
 
 function pathUrl($dir = __DIR__){
@@ -199,4 +119,5 @@ function pathUrl($dir = __DIR__){
 
     return $root;
 }
+
 ?>

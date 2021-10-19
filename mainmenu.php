@@ -1,24 +1,35 @@
-<?php 
+<?php
 
-#Build date Tuesday 4th of August 2020 16:30:36 PM
-#Build revision 1.5
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
+*                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/10/18 22:59:19.604 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+ 
+
+include("config.php");
 
 ?>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<?php include("config.php");
-
-include(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
-
-
-
-if(isset($_GET['srv']))
-  $srv=$_GET['srv'];
-else
-  $srv=0
- ?>
 
 <!-- The themes file -->
 <link rel="stylesheet" type="text/css" href="<?php echo $globalSS['root_http']; ?>/themes/<?php echo $globalSS['globaltheme']; ?>/global.css"/>
@@ -242,7 +253,8 @@ foreach($result as $line) {
 $golink="modules/".$line[0]."/index.php?srv=".$srv."";
 echo "modulemanager.add(new WebFXTreeItem('".$line[0]."','javascript:GoLink(\'".$golink."\',\'right\')','','img/themes/default/Node.png','img/themes/default/Node.png'));\n";
 }
-
+echo "rootproxy.add(new WebFXTreeItem('".$_lang['stCONFIG']."','javascript:GoRightReport(".$srv.",6)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
+";
 echo "rootproxy.add(modulemanager);";
 
 $srv++;
@@ -272,7 +284,6 @@ continue;
 echo "
     tree.add(new WebFXTreeItem('".$_lang['stADDREMOVE']."','javascript:GoRightReport(0,8)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
 
-    tree.add(new WebFXTreeItem('".$_lang['stCONFIG']."','javascript:GoRightReport(0,6)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
 
 document.write(tree);
 }

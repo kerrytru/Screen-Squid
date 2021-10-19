@@ -921,4 +921,45 @@ function doSetParam($globalSS,$module,$param,$val){
 
   }
 
+#Функция чтения глобальных значенией параметров в scsq_modules_param
+function doReadGlobalParamsTable($globalSS){
+
+  include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
+  $queryReadParams="select param,val,switch from scsq_modules_param where module='Global';";
+
+  $result=doFetchQuery($globalSS,$queryReadParams);
+ 
+  foreach($result as $line ){
+   
+    #if param is switch, then convert On to 1, '' to  0
+    if($line[2] == '1')
+      $globalSS[$line[0]] = ($line[1] == 'on' ? '1' : '0');
+    else
+      $globalSS[$line[0]] = $line[1];
+  }
+    return $globalSS;
+  }
+
+  function doReadGlobalParamsTableToConfig($globalSS){
+
+    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+  
+    $queryReadParams="select param,val,switch,comment from scsq_modules_param where module='Global';";
+  
+    $result=doFetchQuery($globalSS,$queryReadParams);
+   
+    foreach($result as $line ){
+     
+      #if param is switch, then convert On to 1, '' to  0
+      if($line[2] == '1')
+        $globalSS['gParams'][$line[0]]['value'] = ($line[1] == 'on' ? 'on' : 'off');
+      else
+        $globalSS['gParams'][$line[0]]['value'] = $line[1];
+
+        $globalSS['gParams'][$line[0]]['comment'] = $line[3];
+      }
+      return $globalSS;
+    }
+
 ?>

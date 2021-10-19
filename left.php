@@ -1,14 +1,28 @@
 <?php
 
-#Build date Tuesday 2nd of June 2020 16:29:37 PM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> left.php </#FN>                                                        
+*                         File Birth   > <!#FB> 2021/09/11 17:04:26.557 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/10/19 22:33:34.231 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
 
 include("config.php");
 
-if(isset($_GET['srv']))
-  $srv=$_GET['srv'];
-else
-  $srv=0
 ?>
 <html>
 <head>
@@ -110,6 +124,7 @@ webFXTreeConfig.reloadText		= 'Click to reload';
 if (document.getElementById) {
 
 ";
+
 
 if(isset($_GET['id']))
   $idmenu=$_GET['id'];
@@ -222,7 +237,11 @@ document.write(reports);
 }
 </script>
 </div>";
+
+
+
 ?>
 
 </body>
+
 </html>

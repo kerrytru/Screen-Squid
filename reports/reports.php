@@ -1,11 +1,25 @@
 <?php
 
-#Build date Wednesday 30th of September 2020 16:58:37 PM
-#Build revision 1.12
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> reports.php </#FN>                                                     
+*                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/10/19 22:37:38.592 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
 
-
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
 
 include("../config.php");
 
@@ -17,83 +31,6 @@ $header='<html>
 
 <!-- The themes file -->
 <link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>
-
-<style>
-body {
-  margin: 0;
-}
-
-.preloader {
-  /*фиксированное позиционирование*/
-  position: fixed;
-  /* координаты положения */
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  /* фоновый цвет элемента */
-  background: #e0e0e0;
-  /* размещаем блок над всеми элементами на странице (это значение должно быть больше, чем у любого другого позиционированного элемента на странице) */
-  z-index: 1001;
-}
-
-.preloader__row {
-  position: relative;
-  top: 50%;
-  left: 50%;
-  width: 70px;
-  height: 70px;
-  margin-top: -35px;
-  margin-left: -35px;
-  text-align: center;
-  animation: preloader-rotate 2s infinite linear;
-}
-
-.preloader__item {
-  position: absolute;
-  display: inline-block;
-  top: 0;
-  background-color: #337ab7;
-  border-radius: 100%;
-  width: 35px;
-  height: 35px;
-  animation: preloader-bounce 2s infinite ease-in-out;
-}
-
-.preloader__item:last-child {
-  top: auto;
-  bottom: 0;
-  animation-delay: -1s;
-}
-
-@keyframes preloader-rotate {
-  100% {
-	transform: rotate(360deg);
-  }
-}
-
-@keyframes preloader-bounce {
-
-  0%,
-  100% {
-	transform: scale(0);
-  }
-
-  50% {
-	transform: scale(1);
-  }
-}
-
-.loaded_hiding .preloader {
-  transition: 0.3s opacity;
-  opacity: 0;
-}
-
-.loaded .preloader {
-  display: none;
-}
-</style>
-
 
 </head>
 
@@ -218,31 +155,10 @@ else
   else
 	$currentloiname="";
 
-  $addr=$address[$srv];
-  $usr=$user[$srv];
-  $psw=$pass[$srv];
-  $dbase=$db[$srv];
-  $dbtype=$srvdbtype[$srv];
-  
-  $variableSet = array();
-  $variableSet['addr']=$addr;
-  $variableSet['usr']=$usr;
-  $variableSet['psw']=$psw;
-  $variableSet['dbase']=$dbase;
-  $variableSet['dbtype']=$dbtype;
-
-
-#подключим главный файл который теперь отвечает за генерацию данных
-include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
-
-
-/// end
 
 ///с этим что-то надо будет сделать. Убрать лишнюю дублирующуюся информацию
 $params = array();
-$params['dbase']=$dbase;
+$params['dbase']=$db[$srv];
 $params['idReport']=$id;
 $params['date']=$querydate;
 $params['period']=$dayormonth;
@@ -257,12 +173,9 @@ $globalSS['currentloginid']=$currentloginid;
 $globalSS['currentipaddress']=$currentipaddress;
 $globalSS['currentlogin']=$currentlogin;
 
+$globalSS['params']=$params;
 
-
-	$globalSS['lang']=$_lang;
-	$globalSS['params']=$params;
-	$globalSS['connectionParams']=$variableSet;
-
+$dbtype = $globalSS['connectionParams']['dbtype'];
 
 
 #Большой и временный костыль. Пока думаю как лучше уйти
