@@ -28,6 +28,8 @@
   $globalSS['goodLoginsList']=doCreateFriendList($globalSS,'logins');
   $globalSS['goodIpaddressList']=doCreateFriendList($globalSS,'ipaddress');
   $globalSS['goodSitesList'] = doCreateSitesList($globalSS);
+
+  $dbtype = $globalSS['connectionParams']['dbtype'];
 ?>
 
 <html>
