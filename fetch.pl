@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/10/26 21:32:07.883 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/11/01 11:33:54.808 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.0.1 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -25,7 +25,7 @@ use DBI; # DBI  Perl!!!
 
 #=======================CONFIGURATION BEGIN============================
 #Enable silent mode ( $silent_mode=1 means enabled ). This means, that you set script in production. No echoes you need
-$silent_mode = 1;
+$silent_mode = 0;
 
 $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
 
