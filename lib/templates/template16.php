@@ -3,18 +3,7 @@
 
 $colhtext[1]="#";
 
-if($typeid==0)
-$colhtext[2]=$_lang['stLOGIN'];
-if($typeid==1)
-$colhtext[2]=$_lang['stIPADDRESS'];
-
-/*
-if(($useLoginalias==1)&&($typeid==0))
-$colhtext[3]=$_lang['stALIAS'];
-
-if(($useIpaddressalias==1)&&($typeid==1))
-$colhtext[3]=$_lang['stALIAS'];
-*/
+$colhtext[2]=$_lang['stALIAS'];
 
 $colhtext[3]=$_lang['stMEGABYTES'];
 $colhtext[4]=$_lang['stFROMCACHEMB'];
@@ -42,10 +31,7 @@ $colh[7]="<th>".$colhtext[7]."</th>";
 
 $colr[1]="<td>numrow</td>";
 
-if($typeid==0)
-$colr[2]="<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','line6','line0','0','')>line0</a></td>";
-if($typeid==1)
-$colr[2]="<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','line6','line0','0','')>line0</a></td>";
+$colr[2]="<td><a href=\"javascript:GoPartlyReports(8+3*line7,'".$dayormonth."','line6','line0',0+line7,'')\">line6</a></td>";
 
 
 $colr[3]="<td>line3</td>";

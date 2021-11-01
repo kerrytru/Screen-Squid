@@ -494,23 +494,17 @@ function doPrintAllGroups($globalSS){
         <tr>
           <th class=unsortable><b>#</b></th>
           <th><b>".$_lang['stGROUPNAME']."</b></th>
-          <th class=unsortable><b>".$_lang['stTYPE']."</b></th>
           <th class=unsortable><b>".$_lang['stCOMMENT']."</b></th>
-<th><b>".$_lang['stQUANTITYALIASES']."</b></th>
+          <th><b>".$_lang['stQUANTITYALIASES']."</b></th>
 
         </tr>";
 
         foreach($result as $line) {
-          if($line[1]=="1")
-            $line[1]="<b><font color=green>".$_lang['stIPADDRESS']."</font></b>";
-          else
-            $line[1]="<b><font color=red>".$_lang['stLOGIN']."</font></b>";
-
+ 
           echo "
             <tr>
               <td>".$numrow."</td>
               <td align=center><a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3&actid=3&groupid=".$line[2].">".$line[0]."&nbsp;</a></td>
-              <td align=center>".$line[1]."</td>
               <td align=center>".$line[3]."&nbsp;</td>
               <td align=center>".$line[4]."&nbsp;<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3&actid=6&groupid=".$line[2].">".$_lang['stWHO']."</a></td>
            </tr>";
@@ -532,8 +526,7 @@ function doPrintFormAddGroup($globalSS){
   $_lang = $globalSS['lang'];
 
 
-  $queryAllLogins="select id,name from scsq_alias where typeid=0 order by name asc;";
-  $queryAllIpaddress="select id,name from scsq_alias where typeid=1 order by name asc;";
+  $queryAllAlias="select id,name from scsq_alias order by name asc;";
 
 
   echo "<h2>".$_lang['stFORMADDGROUP']."</h2>";
@@ -541,7 +534,6 @@ function doPrintFormAddGroup($globalSS){
 <form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=3&actid=2" method="post">
 <table class=datatable>
  <tr><td>'.$_lang['stGROUPNAME'].':</td> <td><input type="text" name="name"></td></tr>
- <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid"></td></tr>
  <tr><td>'.$_lang['stCOMMENT'].':</td> <td> <input type="text" name="comment"></td></tr>
  <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" name="activeauth"></td></tr>
  <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin"></td></tr>
@@ -551,10 +543,10 @@ function doPrintFormAddGroup($globalSS){
 <br />
     '.$_lang['stVALUE'].':<br />';
 
-    $result=doFetchQuery($globalSS, $queryAllLogins);
+    $result=doFetchQuery($globalSS, $queryAllAlias);
     $numrow=1;
 
-  echo "<table id='loginsTable' class=datatable style='display:table;'>";
+  echo "<table id='aliasTable' class=datatable>";
   echo "<tr>
 <th >#</th>
 <th>".$_lang['stALIAS']."</th>
@@ -566,32 +558,12 @@ function doPrintFormAddGroup($globalSS){
       <tr>
         <td >".$numrow."</td>
         <td >".$line[1]."</td>
-        <td><input type='checkbox' name='tableidl[]' value='".$line[0]."';</td>
+        <td><input type='checkbox' name='aliasid[]' value='".$line[0]."';</td>
       </tr>";
     $numrow++;
   }
   echo "</table>";
 
-  $result=doFetchQuery($globalSS, $queryAllIpaddress);
-  $numrow=1;
-
-  echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
-  echo "<tr>
-<th class=unsortable>#</th>
-<th>".$_lang['stALIAS']."</th>
-<th class=unsortable>".$_lang['stINCLUDE']."</th>
-</tr>";
-  foreach($result as $line) {
-    echo "
-      <tr>
-        <td >".$numrow."</td>
-        <td >".$line[1]."</td>
-        <td><input type='checkbox' name='tableidip[]' value='".$line[0]."';</td>
-      </tr>";
-    $numrow++;
-  }
-
-echo "</table>";
 
   echo '
     <input type="submit" value="'.$_lang['stADD'].'"><br />
@@ -610,11 +582,6 @@ function doGroupAdd($globalSS){
 
   $name=$_POST['name'];
 
-  if(!isset($_POST['typeid']))
-    $typeid=0;
-  else
-    $typeid=1;
-
   if(!isset($_POST['comment']))
     $comment="";
   else
@@ -625,8 +592,9 @@ function doGroupAdd($globalSS){
     $userlogin=$_POST['userlogin'];
     $userpassword=$_POST['userpassword'];
 
-  $sql="INSERT INTO scsq_groups (name, typeid,comment,userlogin, password,active) VALUES ('$name', '$typeid','$comment','$userlogin','$userpassword','$activeauth')";
+  $sql="INSERT INTO scsq_groups (name, typeid, comment,userlogin, password,active) VALUES ('$name', '0', '$comment','$userlogin','$userpassword','$activeauth')";
 
+  echo $sql;
   if (!doQuery($globalSS, $sql)) {
     die('Error: Can`t insert new group');
   }
@@ -637,20 +605,12 @@ function doGroupAdd($globalSS){
   
   $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
 
-  if($typeid==0) {
-    foreach($_POST['tableidl'] as $key=>$value)
+    foreach($_POST['aliasid'] as $key=>$value)
       $sql = $sql." ('".$newid[0]."','". $value."'),";
 
     $sql=substr($sql,0,strlen($sql)-1);
     $sql=$sql.";";
-  }
-  if($typeid==1) {
-    foreach($_POST['tableidip'] as $key=>$value)
-      $sql = $sql." ('".$newid[0]."','". $value."'),";
-    $sql=substr($sql,0,strlen($sql)-1);
-    $sql=$sql.";";
-  }
-
+ 
   doQuery($globalSS, $sql);
 
   echo "".$_lang['stGROUPADDED']."<br /><br />";
@@ -672,8 +632,7 @@ function doGroupEdit($globalSS){
   $queryOneGroup="select name,typeid,id,comment,userlogin,active from scsq_groups where id='".$groupid."';";
   $queryGroupMembers="select aliasid from scsq_aliasingroups where groupid='".$groupid."'";
  
-  $queryAllLogins="select id,name from scsq_alias where typeid=0 order by name asc;";
-  $queryAllIpaddress="select id,name from scsq_alias where typeid=1 order by name asc;";
+  $queryAllAlias="select id,name from scsq_alias  order by name asc;";
 
 
   $line=doFetchOneQuery($globalSS,$queryOneGroup);
@@ -689,7 +648,6 @@ echo '
 <form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=3&actid=4&groupid='.$groupid.'" method="post">
 <table class=datatable>
  <tr><td>'.$_lang['stGROUPNAME'].':</td> <td><input type="text" name="name" value="'.$line[0].'"></td></tr>
- <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid" '.$isChecked.' ></td></tr>
  <tr><td>'.$_lang['stCOMMENT'].':</td> <td> <input type="text" name="comment" value="'.$line[3].'"></td></tr>
  <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" '.$activeIsChecked.' name="activeauth"></td></tr>
  <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin" value="'.$line[4].'"></td></tr>
@@ -700,7 +658,7 @@ echo '
 <br />
    '.$_lang['stVALUE'].':<br />';
 
-   $result=doFetchQuery($globalSS, $queryAllLogins);
+   $result=doFetchQuery($globalSS, $queryAllAlias);
    $result1=doFetchQuery($globalSS, $queryGroupMembers);
 
    $numrow=1;
@@ -723,42 +681,15 @@ echo '
 echo "<td >".$numrow."</td>";
 echo "<td >".$line[1]."</td>";
      if((in_array($line[0],$groupmembers))&&($isChecked==""))
-       echo "<td><input type='checkbox' name='tableidl[]' checked value='".$line[0]."'></td>";
+       echo "<td><input type='checkbox' name='aliasid[]' checked value='".$line[0]."'></td>";
      else
-       echo "<td><input type='checkbox' name='tableidl[]' value='".$line[0]."'></td>";
+       echo "<td><input type='checkbox' name='aliasid[]' value='".$line[0]."'></td>";
 echo "</tr>";
        ;
      $numrow++;
    }
    echo "</table>";
 
-   $result=doFetchQuery($globalSS, $queryAllIpaddress);
-   $numrow=1;
-
-   if($isChecked=="checked")
-     echo "<table id='ipaddressTable' class=datatable style='display:table;'>";
-   else
-     echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
-   echo "<tr>
-<th >#</th>
-<th>".$_lang['stALIAS']."</th>
-<th >".$_lang['stINCLUDE']."</th>
-</tr>";
-   foreach($result as $line) {
-
-     echo "<tr>";
-echo "<td >".$numrow."</td>";
-echo "<td >".$line[1]."</td>";
-     if((in_array($line[0],$groupmembers))&&($isChecked=="checked"))
-       echo "<td><input type='checkbox' name='tableidip[]' checked value='".$line[0]."'></td>";
-     else
-       echo "<td><input type='checkbox' name='tableidip[]' value='".$line[0]."'></td>";
-     echo "</tr>";
-
-     $numrow++;
-   }
-   
-echo "</table>";
 
    echo '
      <input type="submit" value="'.$_lang['stSAVE'].'"><br />
@@ -781,7 +712,6 @@ function doGroupSave($globalSS){
 
   $name=$_POST['name'];
 
-  if(!isset($_POST['typeid'])) $typeid=0;  else  $typeid=1;
   if(!isset($_POST['activeauth'])) $activeauth=0; else $activeauth=1;
 
   $comment=$_POST['comment'];
@@ -794,9 +724,9 @@ function doGroupSave($globalSS){
   $changepassword=0;
 
 	if($changepassword==1) 
-            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='".$typeid."',comment='".$comment."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$groupid."'";
+            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='0',comment='".$comment."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$groupid."'";
 	else
-            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='".$typeid."',comment='".$comment."',userlogin='".$userlogin."',active='".$activeauth."' where id='".$groupid."'";
+            $queryUpdateOneGroup="update scsq_groups set name='".$name."',typeid='0',comment='".$comment."',userlogin='".$userlogin."',active='".$activeauth."' where id='".$groupid."'";
 
 
   if (!doQuery($globalSS, $queryUpdateOneGroup)) {
@@ -809,21 +739,12 @@ function doGroupSave($globalSS){
 
   $sql="INSERT INTO scsq_aliasingroups (groupid, aliasid) VALUES  ";
 
-  if($typeid==0) {
-    foreach($_POST['tableidl'] as $key=>$value)
+    foreach($_POST['aliasid'] as $key=>$value)
       $sql = $sql." ('".$groupid."','". $value."'),";
 
     $sql=substr($sql,0,strlen($sql)-1);
     $sql=$sql.";";
-  }
-
-  if($typeid==1) {
-    foreach($_POST['tableidip'] as $key=>$value)
-      $sql = $sql." ('".$groupid."','". $value."'),";
-
-    $sql=substr($sql,0,strlen($sql)-1);
-    $sql=$sql.";";
-  }
+  
 
   doQuery($globalSS, $sql);
 

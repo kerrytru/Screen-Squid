@@ -35,10 +35,12 @@ function doFetchQuery($globalSS,$query) {
     #TODO: Здесь где-нибудь неплохо было бы писать лог операций. Удобно было бы для диагностики
     
     #получим данные    
-    
+    if ($stmt!==false) 
        $result = $stmt->fetchAll(PDO::FETCH_NUM);
-
-
+    else 
+    {
+        $result=0;
+    }
     return $result;
 }
 
