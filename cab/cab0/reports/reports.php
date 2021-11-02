@@ -1,7 +1,29 @@
 <?php
 
-#Build date Tuesday 4th of August 2020 17:58:20 PM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> reports.php </#FN>                                                     
+*                         File Birth   > <!#FB> 2021/09/11 17:04:26.556 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/11/02 23:09:47.716 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 
   $srv=$_COOKIE['srv'];
@@ -12,11 +34,6 @@ date_default_timezone_set(date_default_timezone_get());
 
 
 include("../../../config.php");
-#подключим главный файл который теперь отвечает за генерацию данных
-include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 
 $addr=$address[$srv];

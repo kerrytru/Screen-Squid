@@ -1,7 +1,29 @@
-<?php 
+<?php
 
-#Build date Saturday 16th of May 2020 18:27:30 PM
-#Build revision 1.0
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> login.php </#FN>                                                       
+*                         File Birth   > <!#FB> 2021/11/02 23:11:12.035 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/11/02 23:12:18.676 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+ 
+
+
 
 function generateCode($length=6) {
 
@@ -30,11 +52,6 @@ date_default_timezone_set(date_default_timezone_get());
 include("../../config.php");
 include("config.php");
 
-#подключим главный файл который теперь отвечает за генерацию данных
-include(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
-include(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 //Определим номер базы, по имени указанной в конфиге. Так проще.
 $srv=array_search($cab_dbname, $db); 
