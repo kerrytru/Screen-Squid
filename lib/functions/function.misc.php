@@ -590,7 +590,7 @@ function doGroupAdd($globalSS){
     if(!isset($_POST['activeauth'])) $activeauth=0; else $activeauth=1;
 
     $userlogin=$_POST['userlogin'];
-    $userpassword=$_POST['userpassword'];
+    $userpassword=md5(md5(trim($_POST['userpassword'])));
 
   $sql="INSERT INTO scsq_groups (name, typeid, comment,userlogin, password,active) VALUES ('$name', '0', '$comment','$userlogin','$userpassword','$activeauth')";
 
@@ -716,7 +716,7 @@ function doGroupSave($globalSS){
 
   $comment=$_POST['comment'];
   $userlogin=$_POST['userlogin'];
-  $userpassword=$_POST['userpassword'];
+  $userpassword=md5(md5(trim($_POST['userpassword'])));
 
   if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
   $changepassword=1;
