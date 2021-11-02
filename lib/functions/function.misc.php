@@ -594,7 +594,7 @@ function doGroupAdd($globalSS){
 
   $sql="INSERT INTO scsq_groups (name, typeid, comment,userlogin, password,active) VALUES ('$name', '0', '$comment','$userlogin','$userpassword','$activeauth')";
 
-  echo $sql;
+  
   if (!doQuery($globalSS, $sql)) {
     die('Error: Can`t insert new group');
   }
