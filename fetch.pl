@@ -519,7 +519,7 @@ doWriteToTerminal("Starting update scsq_quicktraffic");
 
 #нет смысла обновлять таблицу если не было добавлено ни одной записи
 if($countadded > 0) {
-doDeleteFutureDataQuickTraffic
+doDeleteFutureDataQuickTraffic;
 doCopyToQuickTraffic;
 }
 
