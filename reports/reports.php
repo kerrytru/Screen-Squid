@@ -2902,10 +2902,69 @@ ORDER BY tmp3.name asc
 if($dbtype==1)
 $queryTrafficByHoursLogins="
 
+SELECT tmp3.name,
+	   tmp3.login, 
+	   COALESCE(sum(tmp3.hr0),0) hr0_value, 
+	   COALESCE(sum(tmp3.hr1),0) hr1_value,
+	   COALESCE(sum(tmp3.hr2),0) hr2_value, 
+	   COALESCE(sum(tmp3.hr3),0) hr3_value, 
+	   COALESCE(sum(tmp3.hr4),0) hr4_value, 
+	   COALESCE(sum(tmp3.hr5),0) hr5_value, 
+	   COALESCE(sum(tmp3.hr6),0) hr6_value, 
+	   COALESCE(sum(tmp3.hr7),0) hr7_value, 
+	   COALESCE(sum(tmp3.hr8),0) hr8_value, 
+	   COALESCE(sum(tmp3.hr9),0) hr9_value, 
+	   COALESCE(sum(tmp3.hr10),0) hr10_value, 
+	   COALESCE(sum(tmp3.hr11),0) hr11_value, 
+	   COALESCE(sum(tmp3.hr12),0) hr12_value, 
+	   COALESCE(sum(tmp3.hr13),0) hr13_value, 
+	   COALESCE(sum(tmp3.hr14),0) hr14_value, 
+	   COALESCE(sum(tmp3.hr15),0) hr15_value, 
+	   COALESCE(sum(tmp3.hr16),0) hr16_value, 
+	   COALESCE(sum(tmp3.hr17),0) hr17_value, 
+	   COALESCE(sum(tmp3.hr18),0) hr18_value, 
+	   COALESCE(sum(tmp3.hr19),0) hr19_value, 
+	   COALESCE(sum(tmp3.hr20),0) hr20_value, 
+	   COALESCE(sum(tmp3.hr21),0) hr21_value, 
+	   COALESCE(sum(tmp3.hr22),0) hr22_value, 
+	   COALESCE(sum(tmp3.hr23),0) hr23_value 
+
+	   FROM (
+SELECT 
+	tmp2.login,
+	tmp2.name,
+	case when hrs.hr = 0 then  COALESCE(tmp2.sum_bytes,0) end hr0,
+	case when hrs.hr = 1 then  COALESCE(tmp2.sum_bytes,0) end hr1,
+	case when hrs.hr = 2 then  COALESCE(tmp2.sum_bytes,0) end hr2,
+	case when hrs.hr = 3 then  COALESCE(tmp2.sum_bytes,0) end hr3,
+	case when hrs.hr = 4 then  COALESCE(tmp2.sum_bytes,0) end hr4,
+	case when hrs.hr = 5 then  COALESCE(tmp2.sum_bytes,0) end hr5,
+	case when hrs.hr = 6 then  COALESCE(tmp2.sum_bytes,0) end hr6,
+	case when hrs.hr = 7 then  COALESCE(tmp2.sum_bytes,0) end hr7,
+	case when hrs.hr = 8 then  COALESCE(tmp2.sum_bytes,0) end hr8,
+	case when hrs.hr = 9 then  COALESCE(tmp2.sum_bytes,0) end hr9,
+	case when hrs.hr = 10 then  COALESCE(tmp2.sum_bytes,0) end hr10,
+	case when hrs.hr = 11 then  COALESCE(tmp2.sum_bytes,0) end hr11,
+	case when hrs.hr = 12 then  COALESCE(tmp2.sum_bytes,0) end hr12,
+	case when hrs.hr = 13 then  COALESCE(tmp2.sum_bytes,0) end hr13,
+	case when hrs.hr = 14 then  COALESCE(tmp2.sum_bytes,0) end hr14,
+	case when hrs.hr = 15 then  COALESCE(tmp2.sum_bytes,0) end hr15,
+	case when hrs.hr = 16 then  COALESCE(tmp2.sum_bytes,0) end hr16,
+	case when hrs.hr = 17 then  COALESCE(tmp2.sum_bytes,0) end hr17,
+	case when hrs.hr = 18 then  COALESCE(tmp2.sum_bytes,0) end hr18,
+	case when hrs.hr = 19 then  COALESCE(tmp2.sum_bytes,0) end hr19,
+	case when hrs.hr = 20 then  COALESCE(tmp2.sum_bytes,0) end hr20,
+	case when hrs.hr = 21 then  COALESCE(tmp2.sum_bytes,0) end hr21,
+	case when hrs.hr = 22 then  COALESCE(tmp2.sum_bytes,0) end hr22,
+	case when hrs.hr = 23 then  COALESCE(tmp2.sum_bytes,0) end hr23
+
+FROM (
+
 SELECT  login,
 nofriends.name,
-sum(sizeinbytes),
-CAST (to_char(to_timestamp(date),'HH24') as int) d
+sum(sizeinbytes) as sum_bytes,
+to_char(to_timestamp(date),'HH24') d
+
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
 	id,
@@ -2933,8 +2992,67 @@ FROM scsq_quicktraffic
 	  AND tmpipaddress.id is  NULL
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
-GROUP BY login,d, nofriends.name
-ORDER BY nofriends.name
+GROUP BY login, d, nofriends.name
+
+) tmp2
+
+RIGHT JOIN (
+  select 0 as hr, '0:00-1:00' as hr_txt 
+  UNION all 
+  select 1 as hr, '1:00-2:00' as hr_txt 
+  UNION all 
+  select 2 as hr, '2:00-3:00' as hr_txt 
+  UNION all 
+  select 3 as hr, '3:00-4:00' as hr_txt 
+  UNION all 
+  select 4 as hr, '4:00-5:00' as hr_txt 
+  UNION all 
+  select 5 as hr, '5:00-6:00' as hr_txt 
+  UNION all 
+  select 6 as hr, '6:00-7:00' as hr_txt 
+  UNION all 
+  select 7 as hr, '7:00-8:00' as hr_txt 
+  UNION all 
+  select 8 as hr, '8:00-9:00' as hr_txt 
+  UNION all 
+  select 9 as hr, '9:00-10:00' as hr_txt 
+  UNION all 
+  select 10 as hr, '10:00-11:00' as hr_txt 
+  UNION all 
+  select 11 as hr, '11:00-12:00' as hr_txt 
+  UNION all 
+  select 12 as hr, '12:00-13:00' as hr_txt 
+  UNION all 
+  select 13 as hr, '13:00-14:00' as hr_txt 
+  UNION all 
+  select 14 as hr, '14:00-15:00' as hr_txt 
+  UNION all 
+  select 15 as hr, '15:00-16:00' as hr_txt 
+  UNION all 
+  select 16 as hr, '16:00-17:00' as hr_txt 
+  UNION all 
+  select 17 as hr, '17:00-18:00' as hr_txt 
+  UNION all 
+  select 18 as hr, '18:00-19:00' as hr_txt 
+  UNION all 
+  select 19 as hr, '19:00-20:00' as hr_txt 
+  UNION all 
+  select 20 as hr, '20:00-21:00' as hr_txt 
+  UNION all 
+  select 21 as hr, '21:00-22:00' as hr_txt 
+  UNION all 
+  select 22 as hr, '22:00-23:00' as hr_txt 
+  UNION all 
+  select 23 as hr, '23:00-24:00' as hr_txt 
+  
+			   
+			   ) hrs on hrs.hr=CAST(tmp2.d as integer)
+			   
+			   order by hrs.hr asc
+) tmp3
+WHERE tmp3.login is not null
+GROUP BY tmp3.login, tmp3.name
+ORDER BY tmp3.name asc
 ;
 ";
 
@@ -3096,10 +3214,67 @@ ORDER BY tmp3.name asc
 #postgre version
 if($dbtype==1)
 $queryTrafficByHoursIpaddress="
+SELECT tmp3.name,
+	   tmp3.ipaddress, 
+	   COALESCE(sum(tmp3.hr0),0) hr0_value, 
+	   COALESCE(sum(tmp3.hr1),0) hr1_value,
+	   COALESCE(sum(tmp3.hr2),0) hr2_value, 
+	   COALESCE(sum(tmp3.hr3),0) hr3_value, 
+	   COALESCE(sum(tmp3.hr4),0) hr4_value, 
+	   COALESCE(sum(tmp3.hr5),0) hr5_value, 
+	   COALESCE(sum(tmp3.hr6),0) hr6_value, 
+	   COALESCE(sum(tmp3.hr7),0) hr7_value, 
+	   COALESCE(sum(tmp3.hr8),0) hr8_value, 
+	   COALESCE(sum(tmp3.hr9),0) hr9_value, 
+	   COALESCE(sum(tmp3.hr10),0) hr10_value, 
+	   COALESCE(sum(tmp3.hr11),0) hr11_value, 
+	   COALESCE(sum(tmp3.hr12),0) hr12_value, 
+	   COALESCE(sum(tmp3.hr13),0) hr13_value, 
+	   COALESCE(sum(tmp3.hr14),0) hr14_value, 
+	   COALESCE(sum(tmp3.hr15),0) hr15_value, 
+	   COALESCE(sum(tmp3.hr16),0) hr16_value, 
+	   COALESCE(sum(tmp3.hr17),0) hr17_value, 
+	   COALESCE(sum(tmp3.hr18),0) hr18_value, 
+	   COALESCE(sum(tmp3.hr19),0) hr19_value, 
+	   COALESCE(sum(tmp3.hr20),0) hr20_value, 
+	   COALESCE(sum(tmp3.hr21),0) hr21_value, 
+	   COALESCE(sum(tmp3.hr22),0) hr22_value, 
+	   COALESCE(sum(tmp3.hr23),0) hr23_value 
+
+	   FROM (
+SELECT 
+	tmp2.ipaddress,
+	tmp2.name,
+	case when hrs.hr = 0 then  COALESCE(tmp2.sum_bytes,0) end hr0,
+	case when hrs.hr = 1 then  COALESCE(tmp2.sum_bytes,0) end hr1,
+	case when hrs.hr = 2 then  COALESCE(tmp2.sum_bytes,0) end hr2,
+	case when hrs.hr = 3 then  COALESCE(tmp2.sum_bytes,0) end hr3,
+	case when hrs.hr = 4 then  COALESCE(tmp2.sum_bytes,0) end hr4,
+	case when hrs.hr = 5 then  COALESCE(tmp2.sum_bytes,0) end hr5,
+	case when hrs.hr = 6 then  COALESCE(tmp2.sum_bytes,0) end hr6,
+	case when hrs.hr = 7 then  COALESCE(tmp2.sum_bytes,0) end hr7,
+	case when hrs.hr = 8 then  COALESCE(tmp2.sum_bytes,0) end hr8,
+	case when hrs.hr = 9 then  COALESCE(tmp2.sum_bytes,0) end hr9,
+	case when hrs.hr = 10 then  COALESCE(tmp2.sum_bytes,0) end hr10,
+	case when hrs.hr = 11 then  COALESCE(tmp2.sum_bytes,0) end hr11,
+	case when hrs.hr = 12 then  COALESCE(tmp2.sum_bytes,0) end hr12,
+	case when hrs.hr = 13 then  COALESCE(tmp2.sum_bytes,0) end hr13,
+	case when hrs.hr = 14 then  COALESCE(tmp2.sum_bytes,0) end hr14,
+	case when hrs.hr = 15 then  COALESCE(tmp2.sum_bytes,0) end hr15,
+	case when hrs.hr = 16 then  COALESCE(tmp2.sum_bytes,0) end hr16,
+	case when hrs.hr = 17 then  COALESCE(tmp2.sum_bytes,0) end hr17,
+	case when hrs.hr = 18 then  COALESCE(tmp2.sum_bytes,0) end hr18,
+	case when hrs.hr = 19 then  COALESCE(tmp2.sum_bytes,0) end hr19,
+	case when hrs.hr = 20 then  COALESCE(tmp2.sum_bytes,0) end hr20,
+	case when hrs.hr = 21 then  COALESCE(tmp2.sum_bytes,0) end hr21,
+	case when hrs.hr = 22 then  COALESCE(tmp2.sum_bytes,0) end hr22,
+	case when hrs.hr = 23 then  COALESCE(tmp2.sum_bytes,0) end hr23
+
+FROM (
 SELECT  ipaddress,
 nofriends.name,
-sum(sizeinbytes),
-CAST(to_char(to_timestamp(date),'HH24') as int) d
+sum(sizeinbytes) sum_bytes,
+to_char(to_timestamp(date),'HH24') d
 FROM scsq_quicktraffic
 	LEFT JOIN (SELECT 
 	id,
@@ -3128,7 +3303,67 @@ FROM scsq_quicktraffic
 	  AND site NOT IN (".$goodSitesList.")
 	  AND par=1
 GROUP BY ipaddress,d, nofriends.name
-ORDER BY nofriends.name, d
+
+) tmp2
+
+RIGHT JOIN (
+  select 0 as hr, '0:00-1:00' as hr_txt 
+  UNION all 
+  select 1 as hr, '1:00-2:00' as hr_txt 
+  UNION all 
+  select 2 as hr, '2:00-3:00' as hr_txt 
+  UNION all 
+  select 3 as hr, '3:00-4:00' as hr_txt 
+  UNION all 
+  select 4 as hr, '4:00-5:00' as hr_txt 
+  UNION all 
+  select 5 as hr, '5:00-6:00' as hr_txt 
+  UNION all 
+  select 6 as hr, '6:00-7:00' as hr_txt 
+  UNION all 
+  select 7 as hr, '7:00-8:00' as hr_txt 
+  UNION all 
+  select 8 as hr, '8:00-9:00' as hr_txt 
+  UNION all 
+  select 9 as hr, '9:00-10:00' as hr_txt 
+  UNION all 
+  select 10 as hr, '10:00-11:00' as hr_txt 
+  UNION all 
+  select 11 as hr, '11:00-12:00' as hr_txt 
+  UNION all 
+  select 12 as hr, '12:00-13:00' as hr_txt 
+  UNION all 
+  select 13 as hr, '13:00-14:00' as hr_txt 
+  UNION all 
+  select 14 as hr, '14:00-15:00' as hr_txt 
+  UNION all 
+  select 15 as hr, '15:00-16:00' as hr_txt 
+  UNION all 
+  select 16 as hr, '16:00-17:00' as hr_txt 
+  UNION all 
+  select 17 as hr, '17:00-18:00' as hr_txt 
+  UNION all 
+  select 18 as hr, '18:00-19:00' as hr_txt 
+  UNION all 
+  select 19 as hr, '19:00-20:00' as hr_txt 
+  UNION all 
+  select 20 as hr, '20:00-21:00' as hr_txt 
+  UNION all 
+  select 21 as hr, '21:00-22:00' as hr_txt 
+  UNION all 
+  select 22 as hr, '22:00-23:00' as hr_txt 
+  UNION all 
+  select 23 as hr, '23:00-24:00' as hr_txt 
+  
+			   
+			   ) hrs on hrs.hr=CAST(tmp2.d as integer)
+			   
+			   order by hrs.hr asc
+) tmp3
+WHERE tmp3.ipaddress is not null
+GROUP BY tmp3.ipaddress, tmp3.name
+ORDER BY tmp3.name asc
+
 ;
 ";
 
