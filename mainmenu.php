@@ -79,6 +79,10 @@ function GoLink(dest_link,dest_target)
 parent.right.location.href=dest_link;
 }
 
+function GoInternetLink(dest_link)
+{
+	window.open(dest_link, '_blank');
+}
 
 function GoOnlineReport(srv,id)
 {
@@ -283,6 +287,8 @@ continue;
 //Пункт для добавления удаления БД
 echo "
     tree.add(new WebFXTreeItem('".$_lang['stADDREMOVE']."','javascript:GoRightReport(0,8)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
+    tree.add(new WebFXTreeItem('DONATE','javascript:GoInternetLink(\'https://sobe.ru/na/na_novuyu_versiyu_screen_squid\')','','',''));
+    tree.add(new WebFXTreeItem('Wiki','javascript:GoInternetLink(\'https://sourceforge.net/p/screen-squid/wiki/Home/\')','','',''));
 
 
 document.write(tree);
