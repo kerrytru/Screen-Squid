@@ -3,10 +3,7 @@
 
 
 $colhtext[1]="#";
-if($typeid==0)
-$colhtext[2]=$_lang['stLOGIN'];
-else
-$colhtext[2]=$_lang['stIPADDRESS'];
+$colhtext[2]=$_lang['stALIAS'];
 $colhtext[3]=$_lang['stMEGABYTES'];
 $colhtext[4]=$_lang['stALIAS'];
 
@@ -16,7 +13,7 @@ $colftext[3]="total_column_byte";
 $colftext[4]="&nbsp;";
 
 
-$colh[0]=4;
+$colh[0]=3;
 
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";

@@ -39,7 +39,7 @@ $colr[3]="<td>line3</td>";
 $colr[4]="<td>line4</td>";
 $colr[5]="<td>line5</td>";
 $colr[6]="<td>line1</td>";
-$colr[7]="<td>line5</td>";
+$colr[7]="<td>line2</td>";
 $colr[8]="<td>line6</td>";
 $colr[9]="<td>line7</td>";
 

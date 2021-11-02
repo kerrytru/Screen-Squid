@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/10/19 22:37:38.592 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/11/02 21:14:08.351 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -1276,17 +1276,25 @@ nofriends.id
 ".$echoLoginAliasColumn."
 FROM (SELECT 
 	  login,
-	  SUM(sizeinbytes) as 's' 
-	FROM scsq_quicktraffic 
+	  SUM(sizeinbytes) as s 
+	FROM scsq_traffic 
 	WHERE  date>".$datestart."
    AND date<".$dateend." 
    AND site NOT IN (".$goodSitesList.")
-   AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
-   OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
-	 
-   AND par=1
-GROUP BY login
-ORDER BY null) 
+   AND (
+	(	
+		(to_char(to_timestamp(date),'HH24:MI')>=to_char(interval '".$workStartHour1."h ".$workStartMin1."m','HH24:MI'))     
+	 AND(to_char(to_timestamp(date),'HH24:MI') < to_char(interval '".$workEndHour1."h ".$workEndMin1."m','HH24:MI'))
+  	)
+   OR
+   (	
+	(to_char(to_timestamp(date),'HH24:MI')>=to_char(interval '".$workStartHour2."h ".$workStartMin2."m','HH24:MI'))     
+	AND(to_char(to_timestamp(date),'HH24:MI') < to_char(interval '".$workEndHour2."h ".$workEndMin2."m','HH24:MI'))
+   )
+
+ 	)
+ GROUP BY login 
+) 
 AS tmp 
 
 RIGHT JOIN (SELECT 
@@ -1304,9 +1312,7 @@ ON tmp.login=nofriends.id
 	   AS aliastbl 
 ON nofriends.id=aliastbl.tableid 
 WHERE (1=1)
-".$msgNoZeroTraffic."
-
-GROUP BY nofriends.name, nofriends.id ".$echoLoginAliasColumn.";";
+".$msgNoZeroTraffic."";
 
 
 #mysql version
@@ -1366,16 +1372,24 @@ nofriends.id
 FROM (SELECT 
   ipaddress,
   SUM(sizeinbytes) AS s 
-FROM scsq_quicktraffic 
+FROM scsq_traffic 
 WHERE date>".$datestart." 
   AND date<".$dateend." 
   AND site NOT IN (".$goodSitesList.")
-  AND ((FROM_UNIXTIME(date,'%k')>=".$workStart1." AND FROM_UNIXTIME(date,'%k')<".$workEnd1.")
-  OR (FROM_UNIXTIME(date,'%k')>=".$workStart2." AND FROM_UNIXTIME(date,'%k')<".$workEnd2."))
-	
-  AND par=1
-GROUP BY ipaddress 
-ORDER BY null) 
+  AND (
+	(	
+		(to_char(to_timestamp(date),'HH24:MI')>=to_char(interval '".$workStartHour1."h ".$workStartMin1."m','HH24:MI'))     
+	 AND(to_char(to_timestamp(date),'HH24:MI') < to_char(interval '".$workEndHour1."h ".$workEndMin1."m','HH24:MI'))
+  	)
+   OR
+   (	
+	(to_char(to_timestamp(date),'HH24:MI')>=to_char(interval '".$workStartHour2."h ".$workStartMin2."m','HH24:MI'))     
+	AND(to_char(to_timestamp(date),'HH24:MI') < to_char(interval '".$workEndHour2."h ".$workEndMin2."m','HH24:MI'))
+   )
+	)
+
+GROUP BY ipaddress
+) 
 AS tmp 
 RIGHT JOIN (SELECT 
 		  id,
@@ -1391,9 +1405,7 @@ LEFT JOIN (SELECT
 	   AS aliastbl 
 ON nofriends.id=aliastbl.tableid 
 WHERE (1=1)
-".$msgNoZeroTraffic."
-
-GROUP BY nofriends.name, nofriends.id ".$echoLoginAliasColumn.";";
+".$msgNoZeroTraffic.";";
 
 $queryLoginsTrafficWide="
 SELECT 
@@ -1759,73 +1771,121 @@ SELECT
 #postgre version
 if($dbtype==1)  
 $queryIpaddressTrafficWide="
-  SELECT 
-    nofriends.name,
-    tmp.s,
-    tmp.ipaddress,
-    tmp.n 
-  FROM ((SELECT 
-	   ipaddress,
-	   '2' AS n,
-	   sum(sizeinbytes) AS s 
-	 FROM scsq_quicktraffic, scsq_httpstatus 
-	 WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
-	    OR  scsq_httpstatus.name like '%TCP_IMS_HIT%' 
-	    OR  scsq_httpstatus.name like '%TCP_MEM_HIT%' 
-	    OR  scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
-	    OR  scsq_httpstatus.name like '%UDP_HIT%') 
-	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	   AND  date>".$datestart." 
-	   AND  date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
- 	   AND par=1
-	 GROUP BY ipaddress 
-	 ) 
+SELECT 
+tmp2.name,
+sum(tmp2.sum_in_cache),
+sum(tmp2.sum_out_cache),
+sum(tmp2.sum_bytes),
+sum(tmp2.sum_denied),
+sum(tmp2.sum_bytes) - sum(tmp2.sum_denied),
+sum(tmp2.sum_in_cache)/sum(tmp2.sum_bytes)*100,
+sum(tmp2.sum_out_cache)/sum(tmp2.sum_bytes)*100,
+tmp2.ipaddress
+FROM (
+SELECT 
+nofriends.name,
+tmp.sum_in_cache,
+tmp.sum_out_cache,
+tmp.sum_bytes,
+tmp.sum_denied,
+tmp.ipaddress,
+tmp.n 
+FROM ((SELECT 
+  ipaddress,
+   '2' AS n,
+   
+   SUM(sizeinbytes) AS sum_in_cache,
+   0 AS sum_out_cache,
+   0 as sum_bytes,
+   0 AS sum_denied
+ FROM scsq_quicktraffic, scsq_httpstatus 
 
-  UNION
+ WHERE (scsq_httpstatus.name like '%TCP_HIT%' 
+	 OR scsq_httpstatus.name like '%TCP_IMS_HIT%' 
+	 OR scsq_httpstatus.name like '%TCP_MEM_HIT%' 
+	 OR scsq_httpstatus.name like '%TCP_OFFLINE_HIT%' 
+	 OR scsq_httpstatus.name like '%UDP_HIT%') 
+	AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+	AND date>".$datestart." 
+	AND date<".$dateend." 
+	AND site NOT IN (".$goodSitesList.")
+	 AND par=1
+ GROUP BY ipaddress
+ ) 
 
-	(SELECT 
-	   ipaddress,
-	   '3' AS n,
-	   SUM(sizeinbytes) AS s 
-	 FROM scsq_quicktraffic, scsq_httpstatus 
-	 WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
-	   AND  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
-	   AND  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
-	   AND  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
-	   AND  scsq_httpstatus.name not like '%UDP_HIT%') 
-	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	   AND  date>".$datestart." 
-	   AND  date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
- 	   AND par=1
-	 GROUP BY ipaddress 
-	 ) 
+UNION 
 
-  UNION 
+(SELECT 
+	ipaddress,
+   '3' AS n,
+   0 as sum_in_cache,
+   SUM(sizeinbytes) as sum_out_cache,
+   0 as sum_bytes,
+   0 AS sum_denied
+ FROM scsq_quicktraffic, scsq_httpstatus 
 
-	(SELECT 
-	   ipaddress,
-	   '1' AS n,
-	   SUM(sizeinbytes) AS s 
-	 FROM scsq_quicktraffic 
-	 WHERE date>".$datestart." 
-	   AND date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
- 	   AND par=1
-	 GROUP BY ipaddress 
-	 )) 
-	 AS tmp
+ WHERE (scsq_httpstatus.name not like '%TCP_HIT%' 
+   AND  scsq_httpstatus.name not like '%TCP_IMS_HIT%' 
+   AND  scsq_httpstatus.name not like '%TCP_MEM_HIT%' 
+   AND  scsq_httpstatus.name not like '%TCP_OFFLINE_HIT%' 
+   AND  scsq_httpstatus.name not like '%UDP_HIT%') 
+   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+   AND  date>".$datestart." 
+   AND  date<".$dateend."  
+   AND site NOT IN (".$goodSitesList.")
+   AND par=1	  
+ GROUP BY ipaddress
+ ) 
 
-	 RIGHT JOIN (SELECT 
-		       id,
-		       name 
-		     FROM scsq_ipaddress 
-		     WHERE id NOT IN (".$goodIpaddressList.")) 
-		     AS nofriends 
-	 ON tmp.ipaddress=nofriends.id 
+UNION 
 
-  ORDER BY nofriends.name asc,tmp.n asc;";
+(SELECT 
+ipaddress,
+   '1' AS n,
+   0 as sum_in_cache,
+   0 as sum_out_cache,
+   SUM(sizeinbytes) AS sum_bytes,
+   0 AS sum_denied
+ FROM scsq_quicktraffic 
+ WHERE date>".$datestart." 
+   AND date<".$dateend."  
+   AND site NOT IN (".$goodSitesList.")
+	AND par=1	   
+ GROUP BY ipaddress
+ )
+
+UNION 
+
+ (SELECT 
+ ipaddress,
+	'4' AS n,
+	0 as sum_in_cache,
+	0 as sum_out_cache,
+	0 AS sum_bytes,
+	SUM(sizeinbytes) as sum_denied 
+  FROM scsq_quicktraffic,scsq_httpstatus 
+  WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+  AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+  AND date>".$datestart." 
+  AND date<".$dateend." 
+  AND site NOT IN (".$goodSitesList.")
+  AND par=1   
+  GROUP BY ipaddress
+  )	
+ 
+ ) 
+ AS tmp
+
+ RIGHT JOIN (SELECT 
+		   id,
+		   name 
+		 FROM scsq_ipaddress 
+		 WHERE id NOT IN (".$goodIpaddressList.")) 
+		 AS nofriends 
+ ON tmp.ipaddress=nofriends.id 
+	) tmp2
+GROUP BY tmp2.ipaddress,tmp2.name
+ORDER BY tmp2.name asc;";
 
 
 $queryIpaddressTrafficWithResolve="
@@ -3444,7 +3504,7 @@ $queryCategorySitesTraffic="
 	   AND date<".$dateend." 
 	   AND site NOT IN (".$goodSitesList.")
 	
-	ORDER BY null) 
+	) 
 	AS tmp 
 
 	LEFT JOIN (SELECT 
@@ -3487,7 +3547,7 @@ $queryIpaddressTimeOnline="
 	  AND date<".$dateend." 
 	  AND site NOT IN (".$goodSitesList.")
 	
-	ORDER BY null) 
+	) 
 	AS tmp 
 	LEFT JOIN (SELECT 
 		      id,
@@ -3510,46 +3570,6 @@ $queryIpaddressTimeOnline="
     ".$echoIpaddressAliasColumn."
    ;";
    
-  #postgre version
-if($dbtype==1)
-  $queryIpaddressTimeOnline="
-  SELECT 
-    nofriends.name,
-    tmp.s,
-    nofriends.id 
-    ".$echoIpaddressAliasColumn."
-  FROM (SELECT 
-	  ipaddress,
-	  SUM(sizeinbytes) AS s 
-	FROM scsq_quicktraffic 
-	WHERE date>".$datestart." 
-	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
-	  AND par=1
-	GROUP BY ipaddress
-	) 
-	AS tmp 
-	RIGHT JOIN (SELECT 
-		      id,
-		      name 
-		    FROM scsq_ipaddress 
-		    WHERE id NOT IN (".$goodIpaddressList.")) AS nofriends 
-	ON tmp.ipaddress=nofriends.id  
-	LEFT JOIN (SELECT 
-		      name,
-		      tableid 
-		   FROM scsq_alias 
-		   WHERE typeid=1) 
-		   AS aliastbl 
-	ON nofriends.id=aliastbl.tableid 
-WHERE (1=1)
-  ".$msgNoZeroTraffic."
-
-  GROUP BY nofriends.name,
-    tmp.s,
-    nofriends.id 
-    ".$echoIpaddressAliasColumn."
-   ;";
 
 
 
@@ -5395,7 +5415,7 @@ $queryOneGroupTraffic="
   
   GROUP BY alias_traffic.al_id,alias_traffic.al_name, alias_traffic.al_tableid, alias_traffic.al_typeid) alias_sum_traffic
   
-  LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_sum_traffic.al_id AND sag.groupid='".$currentgroupid."'
+  INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_sum_traffic.al_id AND sag.groupid='".$currentgroupid."'
   
 
 	ORDER BY alias_sum_traffic.al_name asc;";
@@ -5442,8 +5462,8 @@ WHERE
 
 GROUP BY alias_traffic.al_id,alias_traffic.al_name, alias_traffic.al_tableid, alias_traffic.al_typeid) alias_sum_traffic
 
-LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_sum_traffic.al_id AND sag.groupid='".$currentgroupid."'
-
+INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_sum_traffic.al_id AND sag.groupid='".$currentgroupid."'
+  
 
 ORDER BY alias_sum_traffic.al_name asc;";
 
@@ -5508,11 +5528,11 @@ FROM (
 		
 		
 		   ) alias_traffic
-    LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
+    INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 
 
 	GROUP BY al_tableid, al_name, al_typeid
-	ORDER BY null) 
+	) 
 
   UNION 
 
@@ -5554,10 +5574,10 @@ FROM (
 		
 		
 		   ) alias_traffic
-    LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
+    INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 	
 	GROUP BY al_tableid, al_name, al_typeid
-	ORDER BY null) 
+	) 
 
   UNION 
 
@@ -5594,12 +5614,12 @@ FROM (
  
  
 	) alias_traffic
-LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
+INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 
 GROUP BY al_tableid, al_name, al_typeid
 
 
-	 ORDER BY null)) 
+	 )) 
 	 AS alias_sum_traffic
 
 	 ) tmp2
@@ -5667,11 +5687,11 @@ FROM ((SELECT
 	
 	
 	   ) alias_traffic
-LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
+INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 
 
 GROUP BY al_tableid, al_name, al_typeid
-ORDER BY null) 
+) 
 
 UNION 
 
@@ -5713,10 +5733,10 @@ UNION
 	
 	
 	   ) alias_traffic
-LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
+INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 
 GROUP BY al_tableid, al_name, al_typeid
-ORDER BY null) 
+) 
 
 UNION 
 
@@ -5753,12 +5773,12 @@ AND sq.site NOT IN (".$goodSitesList.")
 
 
 ) alias_traffic
-LEFT JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
+INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 
 GROUP BY al_tableid, al_name, al_typeid
 
 
- ORDER BY null)) 
+ )) 
  AS alias_sum_traffic
 
  ) tmp2
@@ -5788,6 +5808,7 @@ $queryOneGroupTopSitesTraffic="
 	scsq_quicktraffic sq
  INNER JOIN scsq_alias sa 
  ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1) 
+
  WHERE
 	sq.date>".$datestart." 
 	AND sq.date<".$dateend."
@@ -5796,6 +5817,7 @@ $queryOneGroupTopSitesTraffic="
 	AND sq.site NOT IN (".$goodSitesList.")
 	
 	) alias_traffic
+	INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 
 	 GROUP BY site
 	 ORDER BY s desc 
@@ -5832,6 +5854,7 @@ AND ipaddress IN (SELECT id from scsq_ipaddress where id NOT IN (".$goodIpaddres
 AND sq.site NOT IN (".$goodSitesList.")
 
 ) alias_traffic
+INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.groupid='".$currentgroupid."'
 
 GROUP BY site
 ORDER BY s desc 
@@ -5862,6 +5885,7 @@ SELECT hrs.hr_txt,
   scsq_quicktraffic sq
   INNER JOIN scsq_alias sa 
   ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1) 
+
   WHERE
   sq.date>".$datestart." 
   AND sq.date<".$dateend."
@@ -5870,6 +5894,7 @@ SELECT hrs.hr_txt,
   AND sq.site NOT IN (".$goodSitesList.")
   ) 
 	AS tmp 
+	INNER JOIN scsq_aliasingroups sag ON sag.aliasid = tmp.al_id AND sag.groupid='".$currentgroupid."'
 
 	group by d 
 	) tmp2
@@ -5934,9 +5959,13 @@ SELECT hrs.hr_txt,
 #postgre version
 if($dbtype==1)
 $queryOneGroupTrafficByHours="
+SELECT hrs.hr_txt,
+		tmp2.sum_bytes,
+		hrs.hr 
+		FROM (
   SELECT 
     cast(to_char(to_timestamp(tmp.date),'HH24') as int) as d,
-    sum(tmp.s) 
+    sum(tmp.s) sum_bytes
   FROM (SELECT
   date,
   login al_login,
@@ -5951,6 +5980,7 @@ $queryOneGroupTrafficByHours="
   scsq_quicktraffic sq
   INNER JOIN scsq_alias sa 
   ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1) 
+
   WHERE
   sq.date>".$datestart." 
   AND sq.date<".$dateend."
@@ -5959,8 +5989,65 @@ $queryOneGroupTrafficByHours="
   AND sq.site NOT IN (".$goodSitesList.")
 	) 
 	AS tmp 
+	INNER JOIN scsq_aliasingroups sag ON sag.aliasid = tmp.al_id AND sag.groupid='".$currentgroupid."'
 
-  GROUP BY d;";
+  GROUP BY d 
+  
+  ) tmp2
+  
+  RIGHT JOIN (
+	select 0 as hr, '0:00-1:00' as hr_txt 
+	UNION all 
+	select 1 as hr, '1:00-2:00' as hr_txt 
+	UNION all 
+	select 2 as hr, '2:00-3:00' as hr_txt 
+	UNION all 
+	select 3 as hr, '3:00-4:00' as hr_txt 
+	UNION all 
+	select 4 as hr, '4:00-5:00' as hr_txt 
+	UNION all 
+	select 5 as hr, '5:00-6:00' as hr_txt 
+	UNION all 
+	select 6 as hr, '6:00-7:00' as hr_txt 
+	UNION all 
+	select 7 as hr, '7:00-8:00' as hr_txt 
+	UNION all 
+	select 8 as hr, '8:00-9:00' as hr_txt 
+	UNION all 
+	select 9 as hr, '9:00-10:00' as hr_txt 
+	UNION all 
+	select 10 as hr, '10:00-11:00' as hr_txt 
+	UNION all 
+	select 11 as hr, '11:00-12:00' as hr_txt 
+	UNION all 
+	select 12 as hr, '12:00-13:00' as hr_txt 
+	UNION all 
+	select 13 as hr, '13:00-14:00' as hr_txt 
+	UNION all 
+	select 14 as hr, '14:00-15:00' as hr_txt 
+	UNION all 
+	select 15 as hr, '15:00-16:00' as hr_txt 
+	UNION all 
+	select 16 as hr, '16:00-17:00' as hr_txt 
+	UNION all 
+	select 17 as hr, '17:00-18:00' as hr_txt 
+	UNION all 
+	select 18 as hr, '18:00-19:00' as hr_txt 
+	UNION all 
+	select 19 as hr, '19:00-20:00' as hr_txt 
+	UNION all 
+	select 20 as hr, '20:00-21:00' as hr_txt 
+	UNION all 
+	select 21 as hr, '21:00-22:00' as hr_txt 
+	UNION all 
+	select 22 as hr, '22:00-23:00' as hr_txt 
+	UNION all 
+	select 23 as hr, '23:00-24:00' as hr_txt 
+	
+				 
+				 ) hrs on hrs.hr=tmp2.d
+				 
+				 order by hrs.hr asc ; ";
 
 
 
@@ -5986,13 +6073,17 @@ $queryOneGroupWhoDownloadBigFiles="
   scsq_traffic sq
   INNER JOIN scsq_alias sa 
   ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1) 
+
   WHERE
   sq.date>".$datestart." 
   AND sq.date<".$dateend."
   AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
   AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
 	) 
-	AS tmp, scsq_logins, scsq_ipaddress
+	AS tmp
+	INNER JOIN scsq_aliasingroups sag ON sag.aliasid = tmp.al_id AND sag.groupid='".$currentgroupid."'
+
+	, scsq_logins, scsq_ipaddress
 
 	WHERE scsq_logins.id=tmp.al_login 
 	and scsq_ipaddress.id=tmp.al_ipaddress	
@@ -6008,8 +6099,8 @@ $queryOneGroupWhoDownloadBigFiles="
     sizeinbytes,
     scsq_ipaddress.name,
     site,
-    login,
-    ipaddress 
+    al_login,
+    al_ipaddress 
   FROM (SELECT
   date,
   login al_login,
@@ -6024,16 +6115,20 @@ $queryOneGroupWhoDownloadBigFiles="
   scsq_traffic sq
   INNER JOIN scsq_alias sa 
   ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1) 
+
   WHERE
 	sq.date>".$datestart." 
 	AND sq.date<".$dateend."
    	  AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
       AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
 	) 
-	AS tmp, scsq_logins,scsq_ipaddress 
+	AS tmp
+	INNER JOIN scsq_aliasingroups sag ON sag.aliasid = tmp.al_id AND sag.groupid='".$currentgroupid."'
 
-  WHERE scsq_logins.id=tmp.login 
-    and scsq_ipaddress.id=tmp.ipaddress
+	, scsq_logins,scsq_ipaddress 
+
+  WHERE scsq_logins.id=tmp.al_login 
+    and scsq_ipaddress.id=tmp.al_ipaddress
   
   ORDER BY sizeinbytes desc 
   LIMIT ".$countWhoDownloadBigFilesLimit.";";
@@ -6059,13 +6154,15 @@ $queryOneGroupPopularSites="
 	FROM
 	scsq_traffic sq
 	INNER JOIN scsq_alias sa 
-	ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1) 
+	ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1)
+ 
 	WHERE
 		  sq.date>".$datestart." 
 		  AND sq.date<".$dateend."
           AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
     ) tmp
+	INNER JOIN scsq_aliasingroups sag ON sag.aliasid = tmp.al_id AND sag.groupid='".$currentgroupid."'
 
 	GROUP BY st
 	
@@ -6074,7 +6171,7 @@ $queryOneGroupPopularSites="
 
 #postgre version
 if($dbtype==1)
-if($typeid==0)
+
 $queryOneGroupPopularSites="
   
   SELECT 
@@ -6097,12 +6194,16 @@ $queryOneGroupPopularSites="
 	scsq_traffic sq
 	INNER JOIN scsq_alias sa 
 	ON (sa.tableid=sq.login and sa.typeid=0) or (sa.tableid=sq.ipaddress and sa.typeid=1) 
+
 	WHERE
 		  sq.date>".$datestart." 
 		  AND sq.date<".$dateend."
 	     AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
     	  AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
 		) tmp
+
+	INNER JOIN scsq_aliasingroups sag ON sag.aliasid = tmp.al_id AND sag.groupid='".$currentgroupid."'
+
 	GROUP BY st
 
   ORDER BY c desc 
