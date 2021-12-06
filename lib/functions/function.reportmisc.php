@@ -1,5 +1,30 @@
 <?php
 
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> function.reportmisc.php </#FN>                                         
+*                         File Birth   > <!#FB> 2021/11/02 20:44:42.135 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/12/06 23:20:28.295 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
+
 function doWriteJsonToFile($globalSS,$json_result,$report_name) {
     $fp = fopen(''.$globalSS['root_dir'].'/modules/Cache/data/'.$report_name.'', 'w');
     fwrite($fp, $json_result);

@@ -1,5 +1,29 @@
 <?php
 
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> function.getreport.php </#FN>                                          
+*                         File Birth   > <!#FB> 2021/12/06 22:19:13.464 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/12/06 23:21:03.702 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 function doGetReportData($globalSS,$query,$template_name) {
 
@@ -230,11 +254,21 @@ foreach ($json as $row)
     foreach ($row as $row_item) {
         $row_line_arr[$j]=strip_tags($row_item);
         $j++;
+        }
+    if($j==3)
+    {
+        $pdf->Cell(30, 6, $row_line_arr[0], 1, 0, 'L', 0);
+        $pdf->Cell(120, 6, $row_line_arr[1], 1, 0, 'L', 0);
+        $pdf->Cell(30, 6, $row_line_arr[2], 1, 0, 'R', 0);
     }
 
-    $pdf->Cell(30, 6, $row_line_arr[0], 1, 0, 'L', 0);
-    $pdf->Cell(120, 6, $row_line_arr[1], 1, 0, 'L', 0);
-    $pdf->Cell(30, 6, $row_line_arr[2], 1, 0, 'R', 0);
+    if($j==4)
+    {
+        $pdf->Cell(30, 6, $row_line_arr[0], 1, 0, 'L', 0);
+        $pdf->Cell(90, 6, $row_line_arr[1], 1, 0, 'L', 0);
+        $pdf->Cell(30, 6, $row_line_arr[2], 1, 0, 'R', 0);
+        $pdf->Cell(30, 6, $row_line_arr[3], 1, 0, 'R', 0);
+    }
     $pdf->Ln();
 }
 

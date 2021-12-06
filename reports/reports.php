@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/11/02 21:14:08.351 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/12/06 23:22:58.434 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -32,6 +32,10 @@ $header='<html>
 <!-- The themes file -->
 <link rel="stylesheet" type="text/css" href="'.$globalSS['root_http'].'/themes/'.$globalSS['globaltheme'].'/global.css"/>
 
+
+
+
+
 </head>
 
 <body>
@@ -42,6 +46,11 @@ $header='<html>
 	<div class="preloader__item"></div>
   </div>
 </div>
+
+
+	
+
+
 
 ';
 
@@ -247,6 +256,7 @@ if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 ?>
 
 
+
 <script language=JavaScript>
 
 function LeftRightDateSwitch(idReport, dom,lr)
@@ -396,6 +406,18 @@ function UpdateLeftMenu(id)
   +'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
   +'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
   +'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value;
+}
+
+var popUpObj;
+
+function showModalPopUp(srv, tableid, typeid){
+
+	popUpObj=window.open("../right.php?srv="+srv+"&id=2&actid=1&modal=1&m_tableid="+tableid+"&m_typeid="+typeid+"","ModalPopUp","width=500," + "height=500");
+
+	popUpObj.focus();
+
+	LoadModalDiv();
+
 }
 
 </script>
@@ -8431,13 +8453,15 @@ if($id==69)
 
 /////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT END
 
-echo "<script>
-window.onload = function () {
-  document.body.classList.add('loaded');
-}
-</script>";
+
 
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])) {
+
+	echo "<script>
+	window.onload = function () {
+	  document.body.classList.add('loaded');
+	}
+	</script>";
 
 $end=microtime(true);
 
@@ -8454,8 +8478,10 @@ echo $_lang['stCREATORS'];
 echo "
 
 </body>
-</html>";
+</html>
+";
 
 } // if(!isset($_GET['pdf'])&& !isset($_GET['csv']))
 
 ?>
+

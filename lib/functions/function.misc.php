@@ -1,5 +1,30 @@
 <?php
 
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> function.misc.php </#FN>                                               
+*                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/12/06 23:20:02.728 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
+
 #узнаем установлен ли модуль категорий
 function doQueryExistsModuleCategory($globalSS){
 
@@ -173,11 +198,30 @@ function doPrintFormAddAlias($globalSS){
 
     include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
     
+    #если окно модальное
+    if (isset($_GET['modal'])) {
+      $modal_tableid=$_GET['m_tableid'];
+      $modal_typeid=$_GET['m_typeid'];
+      $queryOneAlias="select id from scsq_alias where tableid=".$modal_tableid." and typeid=".$modal_typeid.";";
+
+      $line=doFetchOneQuery($globalSS, $queryOneAlias);
+
+      #А что если пытаемся добавить алиас который уже существует? Сразу переходим в редактирование тогда.
+      if($line[0]>0) 
+      echo "<script language=javascript>window.location.href='".$globalSS['root_http']."right.php?srv=".$globalSS['connectionParams']['srv']."&id=2&actid=3&aliasid=".$line[0]."&modal=1'</script>";
+
+      if($modal_typeid==1) $isChecked="checked";  else  $isChecked="";
+    }
+
+    
+
+
+
     $_lang = $globalSS['lang'];
 
     $goodLoginsList=$globalSS['goodLoginsList'];
     $goodIpaddressList=$globalSS['goodIpaddressList'];
- 
+
 
     $queryAllLoginsToAdd="select id,name from scsq_logins  where id NOT IN (".$goodLoginsList.") and id NOT IN (select scsq_alias.tableid from scsq_alias where typeid=0) order by name asc;";
 
@@ -188,12 +232,17 @@ function doPrintFormAddAlias($globalSS){
 
 
         echo "<h2>".$_lang['stFORMADDALIAS']."</h2>";
+        
+      if (!isset($_GET['modal']))          
         echo '
-          <form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=2&actid=2" method="post">
+          <form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=2&actid=2" method="post">';
+        else
+          echo '
+          <form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=2&actid=2&modal=1" method="post">';
           
-          <table class=datatable >
+        echo '  <table class=datatable >
          <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name"></td></tr>
-         <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" onClick="switchTables();" name="typeid"></td></tr>
+         <tr><td>'.$_lang['stTYPECHECK'].':</td> <td> <input type="checkbox" '.$isChecked.' onClick="switchTables();" name="typeid"></td></tr>
          <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" name="activeauth"></td></tr>
              <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin"></td></tr>
              <tr><td>'.$_lang['stUSERPASSWORD'].':</td> <td> <input type="text" name="userpassword"></td></tr>
@@ -207,7 +256,15 @@ function doPrintFormAddAlias($globalSS){
         $result=doFetchQuery($globalSS,$queryAllLoginsToAdd);
         $numrow=1;
 
+    #Если в модальном окне передали тип, то сразу покажем нужную таблицу иначе - действуем как обычно.
+    if(isset($modal_typeid))
+      if($modal_typeid == 0)
         echo "<table id='loginsTable' class=\"datatable\" style='display:table;'>";
+      else
+        echo "<table id='loginsTable' class=\"datatable\" style='display:none;'>";
+    else 
+        echo "<table id='loginsTable' class=\"datatable\" style='display:table;'>";
+
     echo "<tr>";
     echo "    <th >#</th>
           <th >".$_lang['stLOGIN']."</th>
@@ -217,10 +274,16 @@ function doPrintFormAddAlias($globalSS){
           echo "
           <tr>
             <td >".$numrow."</td>
-            <td >".$line[1]."</td>
-            <td><input type='radio' name='tableid' value='".$line[0]."';</td>
-          </tr>
-          ";
+            <td >".$line[1]."</td>";
+          if(isset($modal_tableid))
+            if(($modal_tableid==$line[0])&&($ischecked==""))
+              echo "<td><input type='radio' name='tableid' checked value='".$line[0]."'></td>";
+            else
+              echo "<td><input type='radio' name='tableid' value='".$line[0]."'></td>";  
+          else
+          echo "<td><input type='radio' name='tableid' value='".$line[0]."';</td>";
+          
+          echo "</tr>";
           $numrow++;
         }
         echo "</table>";
@@ -229,7 +292,16 @@ function doPrintFormAddAlias($globalSS){
         $result=doFetchQuery($globalSS,$queryAllIpaddressToAdd);
         $numrow=1;
 
+    #Если в модальном окне передали тип, то сразу покажем нужную таблицу иначе - действуем как обычно.
+    if(isset($modal_typeid))
+      if($modal_typeid == 1)
+        echo "<table id='ipaddressTable' class=\"datatable\" style='display:block;'>";
+      else
         echo "<table id='ipaddressTable' class=\"datatable\" style='display:none;'>";
+    else 
+        echo "<table id='ipaddressTable' class=\"datatable\" style='display:none;'>";
+
+
     echo "<tr>";
     echo "    <th class=unsortable>#</th>
           <th>".$_lang['stIPADDRESS']."</th>
@@ -240,10 +312,16 @@ function doPrintFormAddAlias($globalSS){
           echo "
             <tr>
               <td >".$numrow."</td>
-              <td >".$line[1]."</td>
-              <td><input type='radio' name='tableid' value='".$line[0]."';</td>
-            </tr>
-          ";
+              <td >".$line[1]."</td>";
+          if(isset($modal_tableid))
+            if(($modal_tableid==$line[0])&&($isChecked=="checked"))
+                echo "<td><input type='radio' name='tableid' checked value='".$line[0]."'></td>";
+            else
+                echo "<td><input type='radio' name='tableid' value='".$line[0]."'></td>";
+     
+          else
+            echo  "<td><input type='radio' name='tableid' value='".$line[0]."';</td>";
+          echo "</tr>";
           $numrow++;
         }
 
@@ -285,9 +363,10 @@ function doAliasAdd($globalSS){
       return('Error: Can`t insert alias into table!');
     }
     echo "".$_lang['stALIASADDED']."<br /><br />";
+  if(!isset($_GET['modal']))
     echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";          
-    
-    
+  else
+    echo "Please, close this window";  
   }
 
   function doAliasEdit($globalSS){
@@ -320,9 +399,13 @@ function doAliasAdd($globalSS){
 		
 
 		  echo "<h2>".$_lang['stFORMEDITALIAS']."</h2>";
-          echo '
-            <form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=2&actid=4&aliasid='.$aliasid.'" method="post">
-            <table class=datatable>
+      if(!isset($_GET['modal']))
+        echo '
+            <form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=2&actid=4&aliasid='.$aliasid.'" method="post">';
+      else
+       echo '<form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=2&actid=4&aliasid='.$aliasid.'&modal=1" method="post">';
+
+      echo '       <table class=datatable>
            <tr><td>'.$_lang['stALIASNAME'].':</td> <td><input type="text" name="name" value="'.$line[0].'"></td></tr>
            <tr><td>'.$_lang['stACTIVEAUTH'].':</td> <td> <input type="checkbox" '.$activeIsChecked.' name="activeauth"></td></tr>
 		   <tr><td>'.$_lang['stUSERLOGIN'].':</td> <td> <input type="text" name="userlogin" value="'.$line[4].'"></td></tr>
@@ -351,7 +434,7 @@ function doAliasAdd($globalSS){
             echo "<tr>";
             echo "<td >".$numrow."</td>";
             echo "<td >".$line[1]."</td>";
-            if(($tableid==$line[0])&&($ischecked==""))
+            if(($tableid==$line[0])&&($isChecked==""))
               echo "<td><input type='radio' name='tableid' checked value='".$line[0]."'></td>";
             else
               echo "<td><input type='radio' name='tableid' value='".$line[0]."'></td>";
@@ -437,7 +520,12 @@ function doAliasAdd($globalSS){
     return 'Error: Can`t update 1 alias';
   }
   echo "".$_lang['stALIASUPDATED']."<br /><br />";
+
+  if(!isset($_GET['modal']))
   echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
+else
+  echo "Please, close this window"; 
+
 }
 
 function doAliasDelete($globalSS){

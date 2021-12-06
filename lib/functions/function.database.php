@@ -1,5 +1,30 @@
 <?php
 
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> function.database.php </#FN>                                           
+*                         File Birth   > <!#FB> 2021/11/01 16:41:57.143 </#FB>                                         *
+*                         File Mod     > <!#FT> 2021/12/06 23:20:48.266 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
+
 #This function pass connection params and return dbs connection
 function doConnectToDatabase($params) {
 
