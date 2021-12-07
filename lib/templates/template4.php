@@ -13,7 +13,7 @@ $colftext[3]="total_column_byte";
 $colftext[4]="&nbsp;";
 
 //если есть модуль категорий то добавим столбец
-if($category=="category")
+if($category==", category")
 $colh[0]=4;
 else
 $colh[0]=3;
@@ -27,7 +27,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $colr[1]="<td>numrow</td>";
 $colr[2]="<td>line0</td>";
 $colr[3]="<td>line1</td>";
-$colr[4]="<td>line2</td>";
+$colr[4]="<td>getcategory</td>";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";

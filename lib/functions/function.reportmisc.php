@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.reportmisc.php </#FN>                                         
 *                         File Birth   > <!#FB> 2021/11/02 20:44:42.135 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/12/06 23:20:28.295 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/12/07 22:15:36.335 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -127,6 +127,12 @@ for($n=0;$n<=30;$n++){
        
 }
 
+#Если есть модуль категорий то подтянем налету категорию.
+$itm= explode(":",$line[0]);
+if(preg_match("/getcategory/i", $resultcolr)) {
+    $resrow=doFetchOneQuery($globalSS,"select category from scsq_mod_categorylist where site = '$itm[0]' limit 1");
+    $resultcolr=preg_replace("/getcategory/i", $resrow[0], $resultcolr);
+}
 
 if(isset($i))
 $resultcolr=preg_replace("/numrow/i", $i, $resultcolr);
