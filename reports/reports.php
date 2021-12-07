@@ -4092,8 +4092,8 @@ $queryWhoVisitPopularSiteLogin="
   SELECT 
     nofriends.name, 
     tmp.s,
-    tmp2.name,
-    nofriends.id
+    nofriends.id,
+    tmp2.name
 
   FROM (SELECT 
 	  login,
@@ -4140,8 +4140,8 @@ $queryWhoVisitPopularSiteLogin="
   SELECT 
     nofriends.name, 
     tmp.s,
-    tmp2.name,
-    nofriends.id
+    nofriends.id,
+    tmp2.name
 
   FROM (SELECT 
 	  login,
