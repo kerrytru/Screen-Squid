@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/10/19 22:32:12.042 </#FT>                                         *
+*                         File Mod     > <!#FT> 2021/12/13 20:02:46.371 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -415,8 +415,8 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
 		if($dbtype==1)
 		#postgre 
 		  $queryLogTable="SELECT
-			to_char(to_timestamp(datestart),'YYYY-MM-DD-HH-MM-SS') as d1,
-			to_char(to_timestamp(dateend),'YYYY-MM-DD-HH-MM-SS'),
+			to_char(to_timestamp(datestart),'YYYY-MM-DD-HH24-MI-SS') as d1,
+			to_char(to_timestamp(dateend),'YYYY-MM-DD-HH24-MI-SS'),
  			message
 		  FROM scsq_logtable order by d1 desc";
 
