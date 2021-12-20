@@ -148,7 +148,7 @@ ALTER TABLE scsq_logtable
 
 CREATE TABLE IF NOT EXISTS scsq_quicktraffic
 (
-  id serial NOT NULL,
+  id bigserial NOT NULL,
   date integer NOT NULL,
   login integer,
   ipaddress integer,
@@ -178,7 +178,7 @@ CREATE INDEX scsq_quicktraffic_date_idx
 
 CREATE TABLE IF NOT EXISTS scsq_temptraffic
 (
-  id serial NOT NULL,
+  id bigserial NOT NULL,
   date text NOT NULL,
   login text,
   ipaddress text,
@@ -204,7 +204,7 @@ ALTER TABLE scsq_temptraffic
 
 CREATE TABLE IF NOT EXISTS scsq_traffic
 (
-  id serial NOT NULL,
+  id bigserial NOT NULL,
   date integer NOT NULL,
   login integer,
   ipaddress integer,
