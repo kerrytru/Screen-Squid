@@ -216,13 +216,25 @@
    var $tmpFolder        = "tmp/";
    var $MapID            = NULL;
 
+#ну не работает оно по обычному. Поэтому продублировал в construct
+function __construct($XSize,$YSize){ 
+     $this->XSize   = $XSize;
+     $this->YSize   = $YSize;
+     $this->Picture = imagecreatetruecolor($XSize,$YSize);
+     $C_White =$this->AllocateColor($this->Picture,255,255,255);
+     imagefilledrectangle($this->Picture,0,0,$XSize,$YSize,$C_White);
+     imagecolortransparent($this->Picture,$C_White);
+
+     $this->setFontProperties("tahoma.ttf",8);
+}
+
    /* This function create the background picture */
    function pChart($XSize,$YSize)
     {
      $this->XSize   = $XSize;
      $this->YSize   = $YSize;
-     $this->Picture = imagecreatetruecolor($XSize,$YSize);
-
+ #    $this->Picture = imagecreatetruecolor($XSize,$YSize);
+      $this->Picture = imagecreate($XSize,$YSize);
      $C_White =$this->AllocateColor($this->Picture,255,255,255);
      imagefilledrectangle($this->Picture,0,0,$XSize,$YSize,$C_White);
      imagecolortransparent($this->Picture,$C_White);
@@ -2939,6 +2951,8 @@
      if ( $G < 0 ) { $G = 0; } if ( $G > 255 ) { $G = 255; }
      if ( $B < 0 ) { $B = 0; } if ( $B > 255 ) { $B = 255; }
 
+
+
      $C_Rectangle = $this->AllocateColor($this->Picture,$R,$G,$B);
 
      $Step = 90 / ((3.1418 * $Radius)/2);
@@ -3169,6 +3183,7 @@
      if ( $G < 0 ) { $G = 0; } if ( $G > 255 ) { $G = 255; }
      if ( $B < 0 ) { $B = 0; } if ( $B > 255 ) { $B = 255; }
 
+    
      return(imagecolorallocate($Picture,$R,$G,$B));
     }
 

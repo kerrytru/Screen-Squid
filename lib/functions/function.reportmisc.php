@@ -183,6 +183,10 @@ function doConvertBytes($bytes,$toWhat) {
 //$oneMegabyte = 1024 * 1024;
 $oneMegabyte = 1000 * 1000;
 
+#Если вдруг прилетела пустота
+if($bytes=='')
+    $bytes = 0;
+
     if($toWhat == 'mbytes')
         return $bytes / $oneMegabyte;
 

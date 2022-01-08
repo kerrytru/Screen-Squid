@@ -1668,7 +1668,8 @@ class TCPDF_FONTS {
 			return chr($c);
 		} elseif ($c <= 0x7F) {
 			// one byte
-			return chr($c);
+			return chr((int)$c);
+
 		} elseif ($c <= 0x7FF) {
 			// two bytes
 			return chr(0xC0 | $c >> 6).chr(0x80 | $c & 0x3F);
@@ -1998,7 +1999,7 @@ class TCPDF_FONTS {
 		if ($isunicode) {
 			// requires PCRE unicode support turned on
 			$chars = TCPDF_STATIC::pregSplit('//','u', $str, -1, PREG_SPLIT_NO_EMPTY);
-			$carr = array_map(array('TCPDF_FONTS', 'uniord'), $chars);
+			$carr = array_map(array('TCPDF_FONTS', 'uniord'), (array)$chars);
 		} else {
 			$chars = str_split($str);
 			$carr = array_map('ord', $chars);
