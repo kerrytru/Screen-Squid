@@ -11,12 +11,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> config.php.default </#FN>                                              
 *                         File Birth   > <!#FB> 2021/07/20 21:39:57.169 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/10/19 22:22:32.933 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/01/08 17:15:40.449 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -87,6 +87,14 @@ $connectionParams['dbtype']=$srvdbtype[$srv];
 
 $globalSS['connectionParams'] = $connectionParams;
 
+#Блок значений по умолчанию. Вдруг подключения к базе нет, чтоб интерфейс не поплыл.
+$globalSS['language']="en";
+$globalSS['globaltheme']="default";
+
+
+
+#А вдруг подключения нет? тогда вообще белый экран пользователю покажем и он растеряется
+if(doConnectToDatabase($globalSS['connectionParams'])!="ErrorConnection")
 $globalSS=doReadGlobalParamsTable($globalSS);
 
 include_once("".$globalSS['root_dir']."/lang/".$globalSS['language']."");
