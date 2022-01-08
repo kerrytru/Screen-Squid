@@ -2532,8 +2532,8 @@ function __construct($XSize,$YSize){
        return(0);
       }
 
-     $SpliceRatio   = 360 / $PieSum;
-     $SplicePercent = 100 / $PieSum;
+     $SpliceRatio   = 360 / ($PieSum+1);
+     $SplicePercent = 100 / ($PieSum+1);
 
      /* Calculate all polygons */
      $Angle = 0; $TopPlots = array();// $TopPlots = "";
