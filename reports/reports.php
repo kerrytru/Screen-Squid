@@ -522,8 +522,7 @@ $category = $globalSS['category'];
 //querys for reports
 
 //if($useLoginalias==0)
-$echoLoginAliasColumn="";
-if($useLoginalias==1)
+
 $echoLoginAliasColumn=",aliastbl.name";
 
 
@@ -639,15 +638,7 @@ $queryLoginsTraffic="
 #echo $queryLoginsTraffic;
 
 
-#$queryLoginsTraffic=$queryLoginsTraffic1;
 
-///echo $queryLoginsTraffic1;
-
-//echo $queryLoginsTraffic1;
-
-if($useIpaddressalias==0)
-$echoIpaddressAliasColumn="";
-if($useIpaddressalias==1)
 $echoIpaddressAliasColumn=",aliastbl.name";
 
 #mysql version
