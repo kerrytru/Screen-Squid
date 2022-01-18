@@ -46,9 +46,7 @@ function __construct($variables){ //
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 		";
 
-		$queryAddColumn = "
-		ALTER TABLE scsq_quicktraffic ADD category VARCHAR( 30 ) NULL DEFAULT NULL ;
-		";
+	
 		}
 
 		if($this->vars['connectionParams']['dbtype']==1){
@@ -65,12 +63,7 @@ function __construct($variables){ //
 			) ;
 
 		";
-
-		$queryAddColumn = "
-		ALTER TABLE scsq_quicktraffic ADD category text NULL DEFAULT NULL ;
-		";
 		}
-
 
 
 		$UpdateModules = "
@@ -79,8 +72,6 @@ function __construct($variables){ //
 
 		doQuery($this->vars, $CreateTable) or die ("Can`t create table for Categories");
 
-
-		doQuery($this->vars, $queryAddColumn) or die ("Can`t add column Category");
 
 		
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update modules table");
@@ -99,9 +90,7 @@ function __construct($variables){ //
 		DROP TABLE IF EXISTS scsq_mod_categorylist;
 		";
 
-		$queryDropColumn = "
-		ALTER TABLE scsq_quicktraffic  DROP category;
-		";
+
 
 
 		$UpdateModules = "
@@ -109,8 +98,7 @@ function __construct($variables){ //
 
 		doQuery($this->vars, $query) or die ("Can`t drop table for Categories");
 
-		doQuery($this->vars, $queryDropColumn) or die ("Can`t drop column Category");
-
+	
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update modules");
 
 

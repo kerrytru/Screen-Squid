@@ -131,7 +131,11 @@ for($n=0;$n<=30;$n++){
 $itm= explode(":",$line[0]);
 if(preg_match("/getcategory/i", $resultcolr)) {
     $resrow=doFetchOneQuery($globalSS,"select category from scsq_mod_categorylist where site = '$itm[0]' limit 1");
-    $resultcolr=preg_replace("/getcategory/i", $resrow[0], $resultcolr);
+    if(isset($resrow[0]))
+        $resultcolr=preg_replace("/getcategory/i", $resrow[0], $resultcolr);
+    else
+        $resultcolr=preg_replace("/getcategory/i", "&nbsp;", $resultcolr);"<td>&nbsp;</td>";
+    
 }
 
 if(isset($i))

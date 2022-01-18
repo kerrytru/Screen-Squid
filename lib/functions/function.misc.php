@@ -37,7 +37,7 @@ $result = doFetchOneQuery($globalSS,$queryExistModuleCategory);
 if($result[0] == 1)
     return ', category';
 else
-    return '';
+    return ", '0' as category";
 
 }
 

@@ -534,7 +534,7 @@ $echoLoginAliasColumn=",aliastbl.name";
     tmp.s,
     nofriends.id
 	".$echoLoginAliasColumn."
-	,sumdenied.sum_denied
+	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
           login,
           SUM(sizeinbytes) as 's' 
@@ -588,7 +588,7 @@ $queryLoginsTraffic="
     tmp.s,
     nofriends.id
 	".$echoLoginAliasColumn."
-	, sumdenied.sum_denied
+	, coalesce(sumdenied.sum_denied,0)
   FROM (SELECT 
           login,
           SUM(sizeinbytes) as s 
@@ -657,7 +657,7 @@ $queryIpaddressTraffic="
     tmp.s as 'v_traffic',
     nofriends.id as 'v_name_id' 
 	".$echoIpaddressAliasColumn." 
-	,sumdenied.sum_denied
+	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s 
@@ -683,15 +683,14 @@ $queryIpaddressTraffic="
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
 	LEFT JOIN (SELECT ipaddress, SUM(sizeinbytes) as sum_denied 
-	FROM scsq_quicktraffic, scsq_httpstatus 
-	WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
-	AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
-	AND date>".$datestart." 
-	AND date<".$dateend." 
-	AND site NOT IN (".$goodSitesList.")
-
-	AND par=1   
-	GROUP BY crc32(ipaddress) ,ipaddress
+		FROM scsq_quicktraffic, scsq_httpstatus 
+		WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+			AND date>".$datestart." 
+			AND date<".$dateend." 
+			AND site NOT IN (".$goodSitesList.")
+			AND par=1   
+		GROUP BY crc32(ipaddress) ,ipaddress
 	) as sumdenied ON nofriends.id=sumdenied.ipaddress
 	WHERE (1=1)
   ".$msgNoZeroTraffic."
@@ -714,7 +713,7 @@ if($dbtype==1)
     tmp.s,
     nofriends.id 
 	".$echoIpaddressAliasColumn."
-	, sumdenied.sum_denied
+	, coalesce(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s 
@@ -773,12 +772,12 @@ $querySitesTraffic="
 			else 1
 		end, 
 	 ''
-	 ".$category."
+	 
   
   FROM (SELECT 
 		 sum(sizeinbytes) as s,
 		 site
-		 ".$category."
+		 
 	       FROM scsq_quicktraffic
 	       LEFT  JOIN (SELECT 
 			     id 
@@ -798,7 +797,7 @@ $querySitesTraffic="
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
 	 	 AND site NOT IN (".$goodSitesList.")
-	       GROUP BY CRC32(site),site ".$category."
+	       GROUP BY CRC32(site),site
 	       ORDER BY null
 	      ) as tmp2
 
@@ -815,12 +814,12 @@ $querySitesTraffic="
 		when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]') then 1 else 2 
 	 end,	
 	 ''
-	 ".$category."
+	
   
   FROM (SELECT 
 		 sum(sizeinbytes) as s,
 		 site
-		 ".$category."
+		 
 	       FROM scsq_quicktraffic
 	       LEFT  JOIN (SELECT 
 			     id 
@@ -841,7 +840,7 @@ $querySitesTraffic="
 	   	 AND tmpipaddress.id IS NULL
 	 	 AND site NOT IN (".$goodSitesList.")
 	     
-	       GROUP BY site ".$category."
+	       GROUP BY site 
 	       
 	      ) as tmp2
 
@@ -945,8 +944,9 @@ $queryTopLoginsTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
-    login 
-    ".$echoLoginAliasColumn."
+    nofriends.id 
+	".$echoLoginAliasColumn."
+	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) AS s 
@@ -972,7 +972,17 @@ $queryTopLoginsTraffic="
 		   WHERE typeid=0) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
+	LEFT JOIN (SELECT login, SUM(sizeinbytes) as sum_denied 
+		FROM scsq_quicktraffic, scsq_httpstatus 
+		WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+		AND date>".$datestart." 
+		AND date<".$dateend." 
+		AND site NOT IN (".$goodSitesList.")
 
+		AND par=1   
+		GROUP BY crc32(login) ,login
+	) as sumdenied ON nofriends.id=sumdenied.login
   WHERE tmp.s !=0
 
   ORDER BY s desc 
@@ -984,8 +994,9 @@ $queryTopLoginsTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
-    login 
-    ".$echoLoginAliasColumn."
+    nofriends.id 
+	".$echoLoginAliasColumn."
+	,coalesce(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) AS s 
@@ -1011,7 +1022,17 @@ $queryTopLoginsTraffic="
 		   WHERE typeid=0) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
+	LEFT JOIN (SELECT login, SUM(sizeinbytes) as sum_denied 
+		FROM scsq_quicktraffic, scsq_httpstatus 
+		WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+		AND date>".$datestart." 
+		AND date<".$dateend." 
+		AND site NOT IN (".$goodSitesList.")
 
+		AND par=1   
+		GROUP BY login
+	) as sumdenied ON nofriends.id=sumdenied.login
   WHERE tmp.s !=0
 
   ORDER BY s desc 
@@ -1022,8 +1043,9 @@ $queryTopIpTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
-    ipaddress 
-    ".$echoIpaddressAliasColumn."
+    nofriends.id 
+	".$echoIpaddressAliasColumn."
+	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s 
@@ -1051,7 +1073,16 @@ $queryTopIpTraffic="
 		   WHERE typeid=1) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
-
+	LEFT JOIN (SELECT ipaddress, SUM(sizeinbytes) as sum_denied 
+		FROM scsq_quicktraffic, scsq_httpstatus 
+		WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+			AND date>".$datestart." 
+			AND date<".$dateend." 
+			AND site NOT IN (".$goodSitesList.")
+			AND par=1   
+		GROUP BY crc32(ipaddress) ,ipaddress
+	) as sumdenied ON nofriends.id=sumdenied.ipaddress
   WHERE tmp.s !=0
 
   ORDER BY s desc 
@@ -1063,8 +1094,9 @@ $queryTopIpTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
-    ipaddress 
-    ".$echoIpaddressAliasColumn."
+    nofriends.id 
+	".$echoIpaddressAliasColumn."
+	,coalesce(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  ipaddress,
 	  SUM(sizeinbytes) AS s 
@@ -1092,7 +1124,16 @@ $queryTopIpTraffic="
 		   WHERE typeid=1) 
 		   AS aliastbl 
 	ON nofriends.id=aliastbl.tableid 
-
+	LEFT JOIN (SELECT ipaddress, SUM(sizeinbytes) as sum_denied 
+	FROM scsq_quicktraffic, scsq_httpstatus 
+	WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+		AND date>".$datestart." 
+		AND date<".$dateend." 
+		AND site NOT IN (".$goodSitesList.")
+		AND par=1   
+	GROUP BY ipaddress
+) as sumdenied ON nofriends.id=sumdenied.ipaddress
   WHERE tmp.s !=0
 
   ORDER BY s desc 
@@ -3904,7 +3945,6 @@ $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
 	   SUM(sizeinbytes) AS s
-	   ".$category."
 	   ,sumdenied.sum_denied
 	 FROM scsq_quicktraffic
 	 LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
@@ -3923,7 +3963,7 @@ $queryOneLoginTraffic="
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
 	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) ,scsq_quicktraffic.site ".$category.", sumdenied.sum_denied
+	 GROUP BY CRC32(scsq_quicktraffic.site) ,scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY site asc
 ;";
 
@@ -3933,7 +3973,6 @@ $queryOneLoginTraffic="
 	SELECT 
 	   scsq_quicktraffic.site,
 	   SUM(sizeinbytes) AS s
-	   ".$category."
 	   ,sumdenied.sum_denied
 	 FROM scsq_quicktraffic
 	 LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
@@ -3953,7 +3992,7 @@ $queryOneLoginTraffic="
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
 	AND par=1
-	 GROUP BY scsq_quicktraffic.site ".$category.", sumdenied.sum_denied
+	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY site asc
 ;";
 
@@ -3961,16 +4000,27 @@ $queryOneLoginTraffic="
 
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
-	   site, 
+	   scsq_quicktraffic.site, 
 	   SUM( sizeinbytes ) AS s
-	   ".$category."
+	   ,sumdenied.sum_denied
 	 FROM scsq_quicktraffic
+	 LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
+			FROM scsq_quicktraffic, scsq_httpstatus 
+			WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+			AND date>".$datestart." 
+			AND date<".$dateend." 
+			AND site NOT IN (".$goodSitesList.")
+			AND login=".$currentloginid." 
+			AND par=1   
+		GROUP BY crc32(site) ,site
+	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend."
-	   AND site NOT IN (".$goodSitesList.")
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
-	 GROUP BY CRC32(site), site ".$category."
+	 GROUP BY CRC32(scsq_quicktraffic.site), scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s DESC
 	 LIMIT ".$countTopSitesLimit." 
 ";
@@ -3979,16 +4029,28 @@ $queryOneLoginTopSitesTraffic="
 if($dbtype==1)
 $queryOneLoginTopSitesTraffic="
 	 SELECT 
-	   site, 
+	   scsq_quicktraffic.site, 
 	   SUM( sizeinbytes ) AS s
-	   ".$category."
+	   ,sumdenied.sum_denied
 	 FROM scsq_quicktraffic
+	 LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
+		FROM scsq_quicktraffic, scsq_httpstatus 
+		WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+		AND date>".$datestart." 
+		AND date<".$dateend." 
+		AND site NOT IN (".$goodSitesList.")
+		AND login=".$currentloginid." 
+		AND par=1   
+	GROUP BY crc32(site) ,site
+	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
+
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend."
-	   AND site NOT IN (".$goodSitesList.")
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
-	 GROUP BY site ".$category."
+	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s DESC
 	 LIMIT ".$countTopSitesLimit." 
 ";
@@ -4508,7 +4570,6 @@ $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
 	   sum(sizeinbytes) AS s
-	   ".$category."
 	   , sumdenied.sum_denied
 	 FROM scsq_quicktraffic 
 	LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
@@ -4528,7 +4589,7 @@ $queryOneIpaddressTraffic="
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
 	   
-	 GROUP BY CRC32(scsq_quicktraffic.site),scsq_quicktraffic.site ".$category.", sumdenied.sum_denied	 
+	 GROUP BY CRC32(scsq_quicktraffic.site),scsq_quicktraffic.site, sumdenied.sum_denied	 
 	 ORDER BY scsq_quicktraffic.site asc;";
 
 #postgre version
@@ -4537,7 +4598,7 @@ $queryOneIpaddressTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site AS st,
 	   sum(sizeinbytes) AS s
-	   ".$category."
+	  
 	   ,sumdenied.sum_denied
 	 FROM scsq_quicktraffic
 	 LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
@@ -4559,22 +4620,34 @@ $queryOneIpaddressTraffic="
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   AND par=1
 	   
-	 GROUP BY scsq_quicktraffic.site ".$category.", sumdenied.sum_denied	 
+	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied	 
 	 ORDER BY scsq_quicktraffic.site asc;";
 
 
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
-	   site,
+	   scsq_quicktraffic.site,
 	   SUM(sizeinbytes) as s
-	   ".$category."
+	   ,sumdenied.sum_denied
 	 FROM scsq_quicktraffic 
+	LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
+			FROM scsq_quicktraffic, scsq_httpstatus 
+			WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+			AND date>".$datestart." 
+			AND date<".$dateend." 
+			AND site NOT IN (".$goodSitesList.")
+			AND ipaddress=".$currentipaddressid."
+			AND par=1   
+			GROUP BY crc32(site) ,site
+	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
+
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")	 
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")	 
 	   AND par=1
-	 GROUP BY CRC32(site) ,site ".$category."
+	 GROUP BY CRC32(scsq_quicktraffic.site) ,scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
@@ -4582,16 +4655,28 @@ $queryOneIpaddressTopSitesTraffic="
 if($dbtype==1)
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
-	   site,
+	   scsq_quicktraffic.site,
 	   SUM(sizeinbytes) as s
-	   ".$category."
+	   ,sumdenied.sum_denied
 	 FROM scsq_quicktraffic 
+	 LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
+		FROM scsq_quicktraffic, scsq_httpstatus 
+		WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
+		AND date>".$datestart." 
+		AND date<".$dateend." 
+		AND site NOT IN (".$goodSitesList.")
+		AND ipaddress=".$currentipaddressid."
+		AND par=1   
+		GROUP BY site
+	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
+
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")	 
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")	 
 	   AND par=1
-	 GROUP BY site ".$category."
+	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s desc 
 	 LIMIT ".$countTopSitesLimit." ";
 
