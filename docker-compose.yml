@@ -1,0 +1,32 @@
+version: '3'
+services:
+  screensquid:
+    image: asabhi6776/screensquid:2.1
+    container_name: screensquid_web
+    ports:
+      - 8080:8080
+    volumes:
+      - ./screen-conf:/var/www/html/Screen-Squid
+    restart: always
+    depends_on:
+      - db
+  
+  db:
+    image: mysql:5.7
+    container_name: db_backend
+    ports:
+      - 3307:3306
+    volumes:
+      - ./mysqldb:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=example
+      - MYSQL_USER=screensquid
+      - MYSQL_PASSWORD=screensquid123
+      - MYSQL_DATABASE=screensquid
+
+volumes:
+  screen-conf:
+    driver: local
+  mysqldb:
+    driver: local
