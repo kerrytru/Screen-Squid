@@ -1,7 +1,7 @@
 version: '3'
 services:
   screensquid:
-    image: asabhi6776/screensquid:2.1
+    image: asabhi6776/screensquid:2.3
     container_name: screensquid_web
     ports:
       - 8080:8080
