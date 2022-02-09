@@ -11,12 +11,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> config.php.default </#FN>                                              
 *                         File Birth   > <!#FB> 2021/07/20 21:39:57.169 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/01/08 17:15:40.449 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/02/09 21:45:37.366 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -91,6 +91,12 @@ $globalSS['connectionParams'] = $connectionParams;
 $globalSS['language']="en";
 $globalSS['globaltheme']="default";
 
+#Enable filter sites. 1 - enabled. 0 - default.
+$globalSS['enableFilterSites'] = 0;
+
+#Show traffic for sites. For example we need look for yahoo.com and https://google.com, we should enter it separate with space
+#EXAMPLE $globalSS['filterSites'] = "yahoo.com google.com:443";
+$globalSS['filterSites'] = "vk.com:443 mail.ru:443";
 
 
 #А вдруг подключения нет? тогда вообще белый экран пользователю покажем и он растеряется
@@ -101,7 +107,7 @@ include_once("".$globalSS['root_dir']."/lang/".$globalSS['language']."");
 
 $globalSS['lang']=$_lang;
 
-$vers="2.1b";
+$vers="2.2b";
 
 
 function pathUrl($dir = __DIR__){

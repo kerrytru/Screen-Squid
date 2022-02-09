@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/12/06 23:20:02.728 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/02/09 21:46:16.909 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -78,12 +78,31 @@ function doCreateSitesList($globalSS){
 
     if($globalSS['goodSites'] == "") return "''";
 
-    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
-
     $sitesTmp=implode("','",explode(" ", $globalSS['goodSites']));
     $sitesTmp="'".$sitesTmp."'";
 
     return $sitesTmp;
+
+}
+
+#составим список  учитываемых сайтов
+function doCreateFilterSitesList($globalSS,$whatTable){
+
+  if($globalSS['enableFilterSites'] == "0") return "";
+
+  if($globalSS['filterSites'] == "") return "";
+
+
+  $sitesTmp=implode("','",explode(" ", $globalSS['filterSites']));
+  $sitesTmp="'".$sitesTmp."'";
+
+if($whatTable == "quick")
+  $sitesTmp = "AND scsq_quicktraffic.site in (".$sitesTmp.")";
+if($whatTable == "traffic")
+  $sitesTmp = "AND scsq_traffic.site in (".$sitesTmp.")";
+
+
+  return $sitesTmp;
 
 }
 

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/12/07 22:14:34.797 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/02/09 21:45:54.430 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -501,6 +501,14 @@ $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
 $goodSitesList = doCreateSitesList($globalSS);
 
 
+#если нужно посмотреть тех, кто лазил по нехорошим сайтам, то просто добавим это в фильтр
+#$filterSite="AND scsq_quicktraffic.site in ('vk.com:443')";
+#$filterTrafficSite="AND scsq_traffic.site in ('vk.com:443')";
+
+$filterSite = doCreateFilterSitesList($globalSS, "quick");
+$filterTrafficSite = doCreateFilterSitesList($globalSS,"traffic");
+
+
 
 #split working hours
 list($workStart1, $workEnd1, $workStart2, $workEnd2) = explode(":", $globalSS['workingHours']);
@@ -540,7 +548,8 @@ $echoLoginAliasColumn=",aliastbl.name";
         FROM scsq_quicktraffic 
         WHERE  date>".$datestart."
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   ".$filterSite."
 	   AND par=1
 	GROUP BY CRC32(login),login
 	ORDER BY null) 
@@ -566,8 +575,8 @@ $echoLoginAliasColumn=",aliastbl.name";
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
-
+		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND par=1   
 		GROUP BY crc32(login) ,login
 	) as sumdenied ON nofriends.id=sumdenied.login
@@ -594,7 +603,8 @@ $queryLoginsTraffic="
         FROM scsq_quicktraffic 
         WHERE  date>".$datestart."
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   ".$filterSite."
 	   AND par=1
 	   GROUP BY login
 
@@ -621,8 +631,8 @@ $queryLoginsTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
-
+		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND par=1   
 		GROUP BY  login
 	) as sumdenied ON nofriends.id=sumdenied.login
@@ -655,7 +665,8 @@ $queryIpaddressTraffic="
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
 	  AND par=1
 	GROUP BY CRC32(ipaddress),ipaddress
 	ORDER BY null) 
@@ -679,7 +690,8 @@ $queryIpaddressTraffic="
 			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 			AND date>".$datestart." 
 			AND date<".$dateend." 
-			AND site NOT IN (".$goodSitesList.")
+			AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+			".$filterSite."
 			AND par=1   
 		GROUP BY crc32(ipaddress) ,ipaddress
 	) as sumdenied ON nofriends.id=sumdenied.ipaddress
@@ -711,7 +723,8 @@ if($dbtype==1)
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
 	  AND par=1
 	GROUP BY ipaddress
 	) 
@@ -735,8 +748,8 @@ if($dbtype==1)
 	AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	AND date>".$datestart." 
 	AND date<".$dateend." 
-	AND site NOT IN (".$goodSitesList.")
-
+	AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	".$filterSite."
 	AND par=1   
 	GROUP BY ipaddress
 	) as sumdenied ON nofriends.id=sumdenied.ipaddress
@@ -787,7 +800,8 @@ $querySitesTraffic="
  		 AND par=1
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
-	 	 AND site NOT IN (".$goodSitesList.")
+		  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		  ".$filterSite."
 	       GROUP BY CRC32(site),site
 	       ORDER BY null
 	      ) as tmp2
@@ -829,8 +843,8 @@ $querySitesTraffic="
  		 AND par=1
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
-	 	 AND site NOT IN (".$goodSitesList.")
-	     
+	 	 AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		  ".$filterSite."
 	       GROUP BY site 
 	       
 	      ) as tmp2
@@ -872,8 +886,8 @@ $queryTopSitesTraffic="
  		 AND par=1
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
-	 	 AND site NOT IN (".$goodSitesList.")
-
+	 	 AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		  ".$filterSite."
 	       GROUP BY CRC32(site),site
 	       ORDER BY null
 	      ) as tmp2
@@ -917,8 +931,8 @@ $queryTopSitesTraffic="
  		 AND par=1
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
-	 	 AND site NOT IN (".$goodSitesList.")
-
+	 	 AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		  ".$filterSite."
 	       GROUP BY site
 	     
 	      ) as tmp2
@@ -944,7 +958,8 @@ $queryTopLoginsTraffic="
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend."
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
 	  AND par=1
 	GROUP BY CRC32(login),login 
 	ORDER BY null) 
@@ -969,8 +984,8 @@ $queryTopLoginsTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
-
+		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND par=1   
 		GROUP BY crc32(login) ,login
 	) as sumdenied ON nofriends.id=sumdenied.login
@@ -994,7 +1009,8 @@ $queryTopLoginsTraffic="
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend."
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
 	  AND par=1
 	GROUP BY login 
 	) 
@@ -1019,8 +1035,8 @@ $queryTopLoginsTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
-
+		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND par=1   
 		GROUP BY login
 	) as sumdenied ON nofriends.id=sumdenied.login
@@ -1044,7 +1060,8 @@ $queryTopIpTraffic="
 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
  	  AND par=1
 	GROUP BY CRC32(ipaddress),ipaddress 
 	ORDER BY null) 
@@ -1070,7 +1087,8 @@ $queryTopIpTraffic="
 			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 			AND date>".$datestart." 
 			AND date<".$dateend." 
-			AND site NOT IN (".$goodSitesList.")
+			AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+			".$filterSite."
 			AND par=1   
 		GROUP BY crc32(ipaddress) ,ipaddress
 	) as sumdenied ON nofriends.id=sumdenied.ipaddress
@@ -1095,7 +1113,8 @@ $queryTopIpTraffic="
 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
  	  AND par=1
 	GROUP BY ipaddress 
 	) 
@@ -1121,7 +1140,8 @@ $queryTopIpTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
+		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND par=1   
 	GROUP BY ipaddress
 ) as sumdenied ON nofriends.id=sumdenied.ipaddress
@@ -1162,7 +1182,8 @@ from (
 	  AND date<".$dateend." 
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
 	  AND par=1
 	GROUP BY CRC32(date),date 
 	ORDER BY null) 
@@ -1260,7 +1281,8 @@ from (
 	  AND date<".$dateend." 
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	  ".$filterSite."
 	  AND par=1
 	GROUP BY date)
 	AS tmp
@@ -1338,7 +1360,8 @@ FROM (SELECT
 	FROM scsq_traffic 
 	WHERE  date>".$datestart."
    AND date<".$dateend." 
-   AND site NOT IN (".$goodSitesList.")
+   AND scsq_traffic.site NOT IN (".$goodSitesList.")
+   ".$filterTrafficSite."
    AND (
 	(	
 		(FROM_UNIXTIME(date,'%k:%i')>=str_to_date('".$workStartHour1.":".$workStartMin1."','%k:%i'))     
@@ -1387,7 +1410,8 @@ FROM (SELECT
 	FROM scsq_traffic 
 	WHERE  date>".$datestart."
    AND date<".$dateend." 
-   AND site NOT IN (".$goodSitesList.")
+   AND scsq_traffic.site NOT IN (".$goodSitesList.")
+   ".$filterTrafficSite."
    AND (
 	(	
 		(to_char(to_timestamp(date),'HH24:MI')>=to_char(interval '".$workStartHour1."h ".$workStartMin1."m','HH24:MI'))     
@@ -1435,7 +1459,8 @@ FROM (SELECT
 FROM scsq_traffic 
 WHERE date>".$datestart." 
   AND date<".$dateend." 
-  AND site NOT IN (".$goodSitesList.")
+  AND scsq_traffic.site NOT IN (".$goodSitesList.")
+  ".$filterTrafficSite."
   AND (
 	(	
 		(FROM_UNIXTIME(date,'%k:%i')>=str_to_date('".$workStartHour1.":".$workStartMin1."','%k:%i'))     
@@ -1482,7 +1507,8 @@ FROM (SELECT
 FROM scsq_traffic 
 WHERE date>".$datestart." 
   AND date<".$dateend." 
-  AND site NOT IN (".$goodSitesList.")
+  AND scsq_traffic.site NOT IN (".$goodSitesList.")
+  ".$filterTrafficSite."
   AND (
 	(	
 		(to_char(to_timestamp(date),'HH24:MI')>=to_char(interval '".$workStartHour1."h ".$workStartMin1."m','HH24:MI'))     
@@ -1553,7 +1579,8 @@ SELECT
 	    AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	    AND date>".$datestart." 
 	    AND date<".$dateend." 
-	    AND site NOT IN (".$goodSitesList.")
+		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	    AND par=1
 	 GROUP BY CRC32(login) ,login
 	 ORDER BY null) 
@@ -1577,7 +1604,8 @@ SELECT
 	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	   AND  date>".$datestart." 
 	   AND  date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND par=1	  
 	 GROUP BY CRC32(login) ,login
 	 ORDER BY null) 
@@ -1594,7 +1622,8 @@ SELECT
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	   AND par=1	   
 	 GROUP BY crc32(login) ,login
 	 ORDER BY null)
@@ -1613,7 +1642,8 @@ SELECT
 	  AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1   
 	  GROUP BY crc32(login) ,login
 	  ORDER BY null)	 
@@ -1675,7 +1705,8 @@ SELECT
 	    AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	    AND date>".$datestart." 
 	    AND date<".$dateend." 
-	    AND site NOT IN (".$goodSitesList.")
+	    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	    AND par=1
 	 GROUP BY login
 	 ) 
@@ -1699,7 +1730,8 @@ SELECT
 	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	   AND  date>".$datestart." 
 	   AND  date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND par=1	  
 	 GROUP BY login
 	 ) 
@@ -1716,7 +1748,8 @@ SELECT
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	   AND par=1	   
 	 GROUP BY login
 	 )
@@ -1735,7 +1768,8 @@ SELECT
 	  AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1   
 	  GROUP BY login
 	  )	 
@@ -1796,7 +1830,8 @@ SELECT
 	    AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	    AND date>".$datestart." 
 	    AND date<".$dateend." 
-	    AND site NOT IN (".$goodSitesList.")
+	    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	    AND par=1
 	 GROUP BY CRC32(ipaddress) ,ipaddress
 	 ORDER BY null) 
@@ -1820,7 +1855,8 @@ SELECT
 	   AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	   AND  date>".$datestart." 
 	   AND  date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND par=1	  
 	 GROUP BY CRC32(ipaddress) ,ipaddress
 	 ORDER BY null) 
@@ -1837,7 +1873,8 @@ SELECT
 	 FROM scsq_quicktraffic 
 	 WHERE date>".$datestart." 
 	   AND date<".$dateend."  
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	   AND par=1	   
 	 GROUP BY crc32(ipaddress) ,ipaddress
 	 ORDER BY null)
@@ -1856,7 +1893,8 @@ SELECT
 	  AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1   
 	  GROUP BY crc32(ipaddress) ,ipaddress
 	  ORDER BY null)	
@@ -1915,7 +1953,8 @@ FROM ((SELECT
 	AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 	AND date>".$datestart." 
 	AND date<".$dateend." 
-	AND site NOT IN (".$goodSitesList.")
+			AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	 AND par=1
  GROUP BY ipaddress
  ) 
@@ -1939,7 +1978,8 @@ UNION
    AND  scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
    AND  date>".$datestart." 
    AND  date<".$dateend."  
-   AND site NOT IN (".$goodSitesList.")
+   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
    AND par=1	  
  GROUP BY ipaddress
  ) 
@@ -1956,7 +1996,8 @@ ipaddress,
  FROM scsq_quicktraffic 
  WHERE date>".$datestart." 
    AND date<".$dateend."  
-   AND site NOT IN (".$goodSitesList.")
+   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	AND par=1	   
  GROUP BY ipaddress
  )
@@ -1975,7 +2016,8 @@ UNION
   AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
   AND date>".$datestart." 
   AND date<".$dateend." 
-  AND site NOT IN (".$goodSitesList.")
+  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
   AND par=1   
   GROUP BY ipaddress
   )	
@@ -2006,7 +2048,8 @@ $queryIpaddressTrafficWithResolve="
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	  AND par=1
 	GROUP BY CRC32(ipaddress) , ipaddress
 	ORDER BY null) 
@@ -2037,7 +2080,8 @@ if($dbtype==1)
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
  	  AND par=1
 	GROUP BY ipaddress
 	) 
@@ -2250,7 +2294,8 @@ $queryTrafficByPeriod="
 
 	WHERE tmplogin.id is NULL 
 	  AND tmpipaddress.id IS NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1 
 	GROUP BY crc32(FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m')),d1
 	ORDER BY FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m') asc;
@@ -2282,7 +2327,8 @@ $queryTrafficByPeriod="
 
 	WHERE tmplogin.id is NULL 
 	  AND tmpipaddress.id IS NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1 
 	GROUP BY d1
 	ORDER BY d1 asc;
@@ -2316,7 +2362,8 @@ $queryTrafficByPeriodDay="
 
 	WHERE tmplogin.id is NULL 
 	  AND tmpipaddress.id IS NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
@@ -2352,7 +2399,8 @@ $queryTrafficByPeriodDay="
 
 	WHERE tmplogin.id is NULL 
 	  AND tmpipaddress.id IS NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
@@ -2392,7 +2440,8 @@ SELECT days.day_txt,
 
 	WHERE tmplogin.id is NULL 
 	  AND tmpipaddress.id IS NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
@@ -2450,7 +2499,8 @@ $queryTrafficByPeriodDayname="
 
 	WHERE tmplogin.id is NULL 
 	  AND tmpipaddress.id IS NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
@@ -2493,7 +2543,8 @@ $queryHttpStatus= "
     AND date<".$dateend." 
     AND tmplogin.id is NULL 
     AND tmpipaddress.id IS NULL
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   GROUP BY CRC32(httpstatus),httpstatus,scsq_httpstatus.name
   ORDER BY scsq_httpstatus.name asc;";
@@ -2532,7 +2583,8 @@ $queryHttpStatus= "
     AND date<".$dateend." 
     AND tmplogin.id is NULL 
     AND tmpipaddress.id IS NULL
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   GROUP BY scsq_httpstatus.name, httpstatus 
   ORDER BY scsq_httpstatus.name asc;";
@@ -2561,7 +2613,8 @@ $queryCountIpaddressOnLogins="
 					       id 
 					     FROM scsq_ipaddress 
 					     WHERE id IN (".$goodIpaddressList."))
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	)
 	AS tmp
 
@@ -2595,7 +2648,8 @@ $queryCountLoginsOnIpaddress="
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
 	  AND par=1
-          AND site NOT IN (".$goodSitesList.")
+          		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND scsq_quicktraffic.ipaddress NOT IN (SELECT 
 					       id 
 					     FROM scsq_ipaddress 
@@ -2640,7 +2694,8 @@ $queryWhoVisitSiteOneHourLogin="
         FROM scsq_quicktraffic 
         WHERE  date>".$datestart."
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 	   AND par=1
@@ -2684,7 +2739,8 @@ $queryWhoVisitSiteOneHourIpaddress="
 	FROM scsq_quicktraffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	  AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 	  AND par=1
@@ -2805,7 +2861,8 @@ $queryDomainZonesTraffic="
 			 AND date<".$dateend."
 			 AND tmplogin.id IS NULL 
 			 AND tmpipaddress.id IS NULL
-			 AND site NOT IN (".$goodSitesList.")
+			 		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 			 AND par<2
 			 
 	     GROUP BY domzone	       
@@ -2842,7 +2899,8 @@ $queryDomainZonesTraffic="
 	  	 AND date<".$dateend."
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
-	 	 AND site NOT IN (".$goodSitesList.")
+	 	 		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		 AND par<2
 	     
 	     GROUP BY domzone	       
@@ -2939,7 +2997,8 @@ FROM scsq_quicktraffic
 	  AND date<".$dateend." 
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 GROUP BY login, d, nofriends.name
 
@@ -3097,7 +3156,8 @@ FROM scsq_quicktraffic
 	  AND date<".$dateend." 
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 GROUP BY login, d, nofriends.name
 
@@ -3251,7 +3311,8 @@ FROM scsq_quicktraffic
 	  AND date<".$dateend." 
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 GROUP BY ipaddress,d, nofriends.name
 
@@ -3407,7 +3468,8 @@ FROM scsq_quicktraffic
 	  AND date<".$dateend." 
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 GROUP BY ipaddress,d, nofriends.name
 
@@ -3564,7 +3626,8 @@ FROM scsq_quicktraffic
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
 	  AND site='".$currentsite."'
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 GROUP BY login,d,nofriends.name
 ) tmp2
@@ -3718,7 +3781,8 @@ FROM (
 	  AND tmplogin.id is  NULL 
 	  AND tmpipaddress.id is  NULL
 	  AND site='".$currentsite."'
-	  AND site NOT IN (".$goodSitesList.")
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 GROUP BY ipaddress,d,nofriends.name
 ) tmp2
@@ -3813,7 +3877,8 @@ $queryCategorySitesTraffic="
  		 AND par=1
 		 AND tmplogin.id IS NULL 
 	   	 AND tmpipaddress.id IS NULL
-	 	 AND site NOT IN (".$goodSitesList.")
+	 	 		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	       GROUP BY CRC32(site)
 	       ORDER BY null
 	      ) as tmp2
@@ -3844,7 +3909,7 @@ $queryCategorySitesTraffic="
         FROM scsq_traffic 
         WHERE  date>".$datestart."
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND site NOT IN (".$goodSitesList.")
 	
 	) 
 	AS tmp 
@@ -3887,7 +3952,7 @@ $queryIpaddressTimeOnline="
 	FROM scsq_traffic 
 	WHERE date>".$datestart." 
 	  AND date<".$dateend." 
-	  AND site NOT IN (".$goodSitesList.")
+		AND site NOT IN (".$goodSitesList.")
 	
 	) 
 	AS tmp 
@@ -3944,7 +4009,8 @@ $queryOneLoginTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
+				AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND login=".$currentloginid." 
 		AND par=1   
 	 GROUP BY crc32(site) ,site
@@ -3952,7 +4018,8 @@ $queryOneLoginTraffic="
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
+	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 
 	AND par=1
 	 GROUP BY CRC32(scsq_quicktraffic.site) ,scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY site asc
@@ -3972,7 +4039,8 @@ $queryOneLoginTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
+				AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND login=".$currentloginid." 
 		AND par=1   
 	GROUP BY crc32(site) ,site
@@ -3981,7 +4049,8 @@ $queryOneLoginTraffic="
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
+	   	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite."    
 	AND par=1
 	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY site asc
@@ -4001,7 +4070,8 @@ $queryOneLoginTopSitesTraffic="
 			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 			AND date>".$datestart." 
 			AND date<".$dateend." 
-			AND site NOT IN (".$goodSitesList.")
+					AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 			AND login=".$currentloginid." 
 			AND par=1   
 		GROUP BY crc32(site) ,site
@@ -4009,7 +4079,8 @@ $queryOneLoginTopSitesTraffic="
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend."
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 
 	   AND par=1
 	 GROUP BY CRC32(scsq_quicktraffic.site), scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s DESC
@@ -4030,7 +4101,8 @@ $queryOneLoginTopSitesTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
+				AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND login=".$currentloginid." 
 		AND par=1   
 	GROUP BY crc32(site) ,site
@@ -4039,7 +4111,8 @@ $queryOneLoginTopSitesTraffic="
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend."
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 
 	   AND par=1
 	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s DESC
@@ -4063,7 +4136,8 @@ from (
 	WHERE login=".$currentloginid." 
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
-          AND site NOT IN (".$goodSitesList.")
+          		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1	
 	GROUP BY CRC32(date) , date
 	ORDER BY null) 
@@ -4150,7 +4224,8 @@ from (
 	WHERE login=".$currentloginid." 
 	  AND date>".$datestart." 
 	  AND date<".$dateend." 
-          AND site NOT IN (".$goodSitesList.")
+          		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1	
 	GROUP BY date 
 	) 
@@ -4422,7 +4497,8 @@ $queryOneLoginIpTraffic="
  where login=".$currentloginid." 
    and date>".$datestart." 
    and date<".$dateend." 
-   AND site NOT IN (".$goodSitesList.")
+   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
    AND par=1
   GROUP BY CRC32(ipaddress), ipaddress";
   
@@ -4455,7 +4531,8 @@ $queryOneLoginIpTraffic="
  where login=".$currentloginid." 
    and date>".$datestart." 
    and date<".$dateend." 
-   AND site NOT IN (".$goodSitesList.")
+   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
    AND par=1
   GROUP BY ipaddress, nofriends.name, tmp2.name ";
 
@@ -4569,7 +4646,8 @@ $queryOneIpaddressTraffic="
 			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 			AND date>".$datestart." 
 			AND date<".$dateend." 
-			AND site NOT IN (".$goodSitesList.")
+			AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 			AND ipaddress=".$currentipaddressid."
 			AND par=1   
 			GROUP BY crc32(site) ,site
@@ -4577,7 +4655,11 @@ $queryOneIpaddressTraffic="
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
+	   	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   ".$filterSite."
+
 	   AND par=1
 	   
 	 GROUP BY CRC32(scsq_quicktraffic.site),scsq_quicktraffic.site, sumdenied.sum_denied	 
@@ -4598,7 +4680,8 @@ $queryOneIpaddressTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
+				AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND ipaddress=".$currentipaddressid."
 		AND par=1   
 		GROUP BY site
@@ -4608,7 +4691,8 @@ $queryOneIpaddressTraffic="
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 
 	   AND par=1
 	   
 	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied	 
@@ -4627,7 +4711,8 @@ $queryOneIpaddressTopSitesTraffic="
 			AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 			AND date>".$datestart." 
 			AND date<".$dateend." 
-			AND site NOT IN (".$goodSitesList.")
+					AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 			AND ipaddress=".$currentipaddressid."
 			AND par=1   
 			GROUP BY crc32(site) ,site
@@ -4636,7 +4721,8 @@ $queryOneIpaddressTopSitesTraffic="
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")	 
+	   	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 	 
 	   AND par=1
 	 GROUP BY CRC32(scsq_quicktraffic.site) ,scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s desc 
@@ -4656,7 +4742,8 @@ $queryOneIpaddressTopSitesTraffic="
 		AND scsq_httpstatus.id=scsq_quicktraffic.httpstatus 
 		AND date>".$datestart." 
 		AND date<".$dateend." 
-		AND site NOT IN (".$goodSitesList.")
+				AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 		AND ipaddress=".$currentipaddressid."
 		AND par=1   
 		GROUP BY site
@@ -4665,7 +4752,8 @@ $queryOneIpaddressTopSitesTraffic="
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")	 
+	   	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 	 
 	   AND par=1
 	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s desc 
@@ -4686,7 +4774,8 @@ SELECT hrs.hr_txt,
 	where ipaddress=".$currentipaddressid." 
 	  and date>".$datestart." 
 	  and date<".$dateend." 
-          AND site NOT IN (".$goodSitesList.")
+          		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 	group by crc32(date),date 
 	order by null) 
@@ -4770,7 +4859,8 @@ SELECT hrs.hr_txt,
 	where ipaddress=".$currentipaddressid." 
 	  and date>".$datestart." 
 	  and date<".$dateend." 
-          AND site NOT IN (".$goodSitesList.")
+          		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	  AND par=1
 	group by date 
 	) 
@@ -5004,7 +5094,8 @@ $queryOneLoginOneHourTraffic="
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 	 GROUP BY CRC32(site) 
@@ -5020,7 +5111,8 @@ $queryOneLoginOneHourTraffic="
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND cast(to_char(to_timestamp(date),'HH24') as int)>=".$currenthour."
 	   AND cast(to_char(to_timestamp(date),'HH24') as int)<".($currenthour+1)."
 	 GROUP BY site 
@@ -5034,7 +5126,8 @@ $queryOneIpaddressOneHourTraffic="
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
  	 GROUP BY CRC32(site) 
@@ -5051,7 +5144,8 @@ $queryOneIpaddressOneHourTraffic="
 	 WHERE ipaddress=".$currentipaddressid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
-	   AND site NOT IN (".$goodSitesList.")
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
 	   AND cast(to_char(to_timestamp(date),'HH24') as int)>=".$currenthour."
 	   AND cast(to_char(to_timestamp(date),'HH24') as int)<".($currenthour+1)."
  	 GROUP BY site 
@@ -5166,7 +5260,8 @@ $queryLoginsHttpStatus="
   where httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   group by crc32(nofriends.name) 
   order by nofriends.name asc;";
@@ -5202,7 +5297,8 @@ if($dbtype==1)
   where httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   group by nofriends.name,login,tmp2.name  
   order by nofriends.name asc;";
@@ -5236,7 +5332,8 @@ $queryIpaddressHttpStatus="
   where httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   GROUP BY crc32(nofriends.name)
   ORDER BY nofriends.name asc;";
@@ -5270,7 +5367,8 @@ $queryIpaddressHttpStatus="
   where httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   GROUP BY nofriends.name, ipaddress, tmp2.name 
   ORDER BY nofriends.name asc;";
@@ -5378,7 +5476,8 @@ $queryOneIpaddressLoginsTraffic="
   WHERE ipaddress=".$currentipaddressid." 
     and date>".$datestart." 
     and date<".$dateend." 
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   GROUP BY CRC32(login),login";
 
@@ -5413,7 +5512,8 @@ $queryOneIpaddressLoginsTraffic="
   WHERE ipaddress=".$currentipaddressid." 
     and date>".$datestart." 
     and date<".$dateend." 
-    AND site NOT IN (".$goodSitesList.")
+    		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
     AND par=1
   GROUP BY login, nofriends.name, tmp2.name";
 

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/11/01 11:33:54.808 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/02/09 21:46:34.382 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.0.1 </#FV>                                                           
+*                         File Version > <!#FV> 2.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -297,9 +297,9 @@ tmp2.httpstatus,
 FROM (SELECT 
 case
 
-	when (SUBSTRING_INDEX(site,'/',1) REGEXP '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?')  
-		then SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)
-		else SUBSTRING_INDEX(site,'/',1) 
+	when left(substring_index(substring_index(site,'/',1),'.',-1),1) REGEXP '[0-9]' 
+		then SUBSTRING_INDEX(site,'/',1)
+		else SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) 
 	end as st, 
 sizeinbytes,
 date,
@@ -311,7 +311,7 @@ where date>".$lastday." and numproxy=".$numproxy."
 ORDER BY id asc 
 ) as tmp2
 
-GROUP BY CRC32(tmp2.st),FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus,tmp2.st,date
+GROUP BY tmp2.st,FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus,date
 ;
 ";
 }
