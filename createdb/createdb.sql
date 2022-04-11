@@ -246,13 +246,15 @@ INSERT INTO `scsq_modules_param` (`id`, `module`, `param`, `val`, `switch`, `com
 (17, 'Global', 'enableNofriends', '', 1, 'Enable hide friends in reports'),
 (18, 'Global', 'goodLogins', '', 0, 'Friends list, separate with blank. For example, $goodLogins="Vasya Sergey Petr"'),
 (19, 'Global', 'goodIpaddress', '', 0, 'Friends list, separate with blank. For example, $goodIpaddress="172.16.1.1 172.16.5.16"'),
-(20, 'Global', 'enableNoSites', '', 1, 'Enable filter good sites. If enable, $goodSites were not shown in statistic.'),
-(21, 'Global', 'goodSites', '', 0, 'List good sites $goodSites="vk.me facebook.com ipp"'),
+(20, 'Global', 'enableNoSites', '', 1, 'Enable filter good sites. If enable, goodSites were not shown in statistic.'),
+(21, 'Global', 'goodSites', '', 0, 'List good sites "vk.me facebook.com ipp" without quotation'),
 (22, 'Global', 'csv_decimalSymbol', ',', 0, 'decimal symbol separator for CSV export'),
 (23, 'Global', 'globaltheme', 'default', 0, 'theme'),
 (24, 'Global', 'enableUseDecode', '', 1, 'use urldecode to decode % characters in request'),
 (25, 'Global', 'workingHours', '8-00:12-30:13-00:17-20', 0, 'Set working hours. For example, set two periods From 8:00 to 12:30 and from 13 to 17'),
-(26, 'Global', 'showZeroTrafficInReports', '0', 0, 'Show zero traffic in reports');
+(26, 'Global', 'showZeroTrafficInReports', '0', 0, 'Show zero traffic in reports'),
+(27, 'Global', 'enableFilterSites', '', 1, 'Enable use filter sites. If enable, only filterSites were shown in statistic.'),
+(28, 'Global', 'filterSites', '', 0, 'List filter sites "vk.me facebook.com:433 ipp" without quotation.');
 
 
 
