@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/02/09 21:46:16.909 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/04/11 22:50:12.488 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -275,10 +275,14 @@ function doPrintFormAddAlias($globalSS){
         $result=doFetchQuery($globalSS,$queryAllLoginsToAdd);
         $numrow=1;
 
+
+    echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'alias\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
+
     #Если в модальном окне передали тип, то сразу покажем нужную таблицу иначе - действуем как обычно.
+    
     if(isset($modal_typeid))
       if($modal_typeid == 0)
-        echo "<table id='loginsTable' class=\"datatable\" style='display:table;'>";
+        echo "<table id='' class=\"datatable\" style='display:table;'>";
       else
         echo "<table id='loginsTable' class=\"datatable\" style='display:none;'>";
     else 
@@ -438,6 +442,7 @@ function doAliasAdd($globalSS){
 
       $result=doFetchQuery($globalSS,$queryAllLogins);
           $numrow=1;
+          echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'alias\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
 
           if($isChecked=="checked")
             echo "<table id='loginsTable' class=datatable style='display:none;'>";
@@ -652,6 +657,7 @@ function doPrintFormAddGroup($globalSS){
 
     $result=doFetchQuery($globalSS, $queryAllAlias);
     $numrow=1;
+    echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'group\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
 
   echo "<table id='aliasTable' class=datatable>";
   echo "<tr>
@@ -769,11 +775,10 @@ echo '
    $result1=doFetchQuery($globalSS, $queryGroupMembers);
 
    $numrow=1;
+   echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'group\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
 
-   if($isChecked=="checked")
-     echo "<table id='loginsTable' class=datatable style='display:none;'>";
-   else
-     echo "<table id='loginsTable' class=datatable style='display:table;'>";
+ 
+     echo "<table id='aliasTable' class=datatable style='display:table;'>";
    echo "<tr>
 <th >#</th>
 <th>".$_lang['stALIAS']."</th>

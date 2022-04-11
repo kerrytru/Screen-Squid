@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/12/13 20:02:46.371 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/04/11 22:49:28.990 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -72,6 +72,44 @@ function PartlyReportsIpaddress(idReport, dom, ip,ipname,site)
 parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&ip='+ip+'&ipname='+ipname+'&site='+site;
 }
 
+
+function QuickFinder(v_type) {
+  // Объявить переменные
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("QInput");
+  filter = input.value.toUpperCase();
+
+  if(v_type=="alias") {
+    if (document.getElementById("loginsTable").style.display == "table" ) {
+    table = document.getElementById("loginsTable");
+  }
+  
+  if (document.getElementById("ipaddressTable").style.display == "table" ) {
+    table = document.getElementById("ipaddressTable");
+  }
+
+}
+
+if(v_type=="group") {
+    table = document.getElementById("aliasTable");
+}
+  
+    
+  tr = table.getElementsByTagName("tr");
+
+  // Перебирайте все строки таблицы и скрывайте тех, кто не соответствует поисковому запросу
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[1];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
 
 </script>
 
