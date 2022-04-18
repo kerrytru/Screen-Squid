@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/02/09 21:45:54.430 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/04/18 21:12:43.704 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -55,36 +55,29 @@ $header=$header.'
 
 ';
 
-if(isset($_GET['srv']))
-  $srv=$_GET['srv'];
-else
-  $srv=0;
+
+$paramsGET = array();
+
+//номер БД
+if(isset($_GET['srv']))  $srv=$_GET['srv']; else  $srv=0;
 
 //reports id
 
-if (isset($_GET['id']))
-$id=$_GET['id'];
-else
-$id=0;
+//ID номер отчёта
+if (isset($_GET['id']))	$id=$_GET['id']; else $id=0;
 
-if(isset($_GET['date']))
-  $querydate=$_GET['date'];
-else
-  $querydate=date("d-m-Y");
-
-if(isset($_GET['date2']))
-  $querydate2=$_GET['date2'];
-else
-  $querydate2="";
+//даты отбора для периода
+if(isset($_GET['date'])) $querydate=$_GET['date']; else $querydate=date("d-m-Y");
+if(isset($_GET['date2'])) $querydate2=$_GET['date2']; else $querydate2="";
 
 list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
 
-if(isset($_GET['dom']))
-  $dayormonth=$_GET['dom'];
-else
-  $dayormonth="day";
+//отчет за день или месяц
+if(isset($_GET['dom'])) $dayormonth=$_GET['dom']; else $dayormonth="day";
 
-  if(isset($_GET['loginname']))
+//имя логина
+//миме??
+if(isset($_GET['loginname']))
   {
 	$currentlogin=$_GET['loginname'];
 	$currentmime=$_GET['loginname'];
@@ -94,23 +87,17 @@ else
 	$currentlogin="";
 	$currentmime="";
   }
+ 
+//id логина
+  if(isset($_GET['login']))	$currentloginid=$_GET['login']; else $currentloginid="";
   
-  if(isset($_GET['login']))
-	$currentloginid=$_GET['login'];
-  else
-	$currentloginid="";
+//IP адрес в явном виде
+  if(isset($_GET['ipname'])) $currentipaddress=$_GET['ipname']; else $currentipaddress="";
   
+//id IP адреса
+  if(isset($_GET['ip'])) $currentipaddressid=$_GET['ip'];  else	$currentipaddressid="";
   
-  if(isset($_GET['ipname']))
-	$currentipaddress=$_GET['ipname'];
-  else
-	$currentipaddress="";
-  
-  if(isset($_GET['ip']))
-	$currentipaddressid=$_GET['ip'];
-  else
-	$currentipaddressid="";
-  
+ //сайт в явном виде 
   if(isset($_GET['site']))
   {
 	$currentsite=$_GET['site'];
@@ -132,41 +119,20 @@ else
 	$currenthour=0;
   }
   
-  if(isset($_GET['group']))
-	$currentgroupid=$_GET['group'];
-  else
-	$currentgroupid="";
-  
-  if(isset($_GET['typeid']))
-	$typeid=$_GET['typeid'];
-  else
-	$typeid="";
-  
-  
-  if(isset($_GET['groupname']))
-	$currentgroup=$_GET['groupname'];
-  else
-	$currentgroup="";
-  
-  if(isset($_GET['httpname']))
-	$currenthttpname=$_GET['httpname'];
-  else
-	$currenthttpname="";
-  
-  if(isset($_GET['httpstatus']))
-	$currenthttpstatusid=$_GET['httpstatus'];
-  else
-	$currenthttpstatusid="";
-  
-  if(isset($_GET['loiid']))
-	$currentloiid=$_GET['loiid'];
-  else
-	$currentloiid="";
-  
-  if(isset($_GET['loiname']))
-	$currentloiname=$_GET['loiname'];
-  else
-	$currentloiname="";
+  //id группы в явном виде
+  if(isset($_GET['group']))	$currentgroupid=$_GET['group'];  else $currentgroupid="";
+  //тип
+  if(isset($_GET['typeid'])) $typeid=$_GET['typeid']; else	$typeid="";
+ //имя группы в явном виде 
+  if(isset($_GET['groupname']))	$currentgroup=$_GET['groupname']; else $currentgroup="";
+ //хттп статус в явном виде
+  if(isset($_GET['httpname'])) $currenthttpname=$_GET['httpname']; else $currenthttpname="";
+ //хттп статус id
+  if(isset($_GET['httpstatus'])) $currenthttpstatusid=$_GET['httpstatus']; else	$currenthttpstatusid="";
+ //логин или IP адрес
+  if(isset($_GET['loiid'])) $currentloiid=$_GET['loiid']; else $currentloiid="";
+ //логин или ip адрес в явном виде
+  if(isset($_GET['loiname'])) $currentloiname=$_GET['loiname']; else $currentloiname="";
 
 
 ///с этим что-то надо будет сделать. Убрать лишнюю дублирующуюся информацию
@@ -242,14 +208,6 @@ if(isset($_GET['clearcache']))
 }
 
 
-//если не генерируем файл на выход, то выводим заголовки
-if(!isset($_GET['pdf']) && !isset($_GET['csv']))
-{
-echo $header;
-
-}
-
-
 $start=microtime(true);
 
 
@@ -257,6 +215,8 @@ $start=microtime(true);
 // Javascripts
 
 if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
+//если не генерируем файл на выход, то выводим заголовки
+	echo $header;
 ?>
 
 
@@ -303,6 +263,10 @@ function LeftRightDateSwitch(idReport, dom,lr)
 
 function FastDateSwitch(idReport, dom)
 {
+if(window.document.fastdateswitch_form.date2_field.value!='')
+  dom = "btw";
+	
+
   if(window.document.fastdateswitch_form.date_field.value=='')
     parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
 +'&date='+window.document.fastdateswitch_form.date_field_hidden.value
@@ -6789,15 +6753,29 @@ mn=new Array(
 
 <script src="../javascript/calendar_ru.js" type="text/javascript"></script>
 
-
 <form name=fastdateswitch_form onsubmit="return false;">
-<p><?php echo $_lang['stFASTDATESWITCH']?><p>
-<input type="text" name=date_field onfocus="this.select();lcs(this)"
-    onclick="event.cancelBubble=true;this.select();lcs(this)">
-<a href="Javascript:FastDateSwitch(<?php echo $_GET['id'] ?>,'day')"><?php echo $_lang['stDAY']?></a>&nbsp;<a href="Javascript:FastDateSwitch(<?php echo $_GET['id']; ?>,'month')"><?php echo $_lang['stMONTH']?></a>
-<br /><br />
-<input type="text" name=date2_field onfocus="this.select();lcs(this)"
-    onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;<a href="Javascript:FastDateSwitch(<?php echo $_GET['id']; ?>,'btw')"><?php echo $_lang['stSPECIFIED']; ?></a>
+
+
+</a>
+<table align=right>
+<tr>
+	<td><?php echo $_lang['stFASTDATESWITCH']?></td>
+	<td>
+<input type="text" name=date_field value="<?php echo $querydate;?>" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">
+<input type="text" name=date2_field value="<?php echo $querydate2;?>" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;&nbsp;
+<a href="Javascript:FastDateSwitch(<?php echo $_GET['id'] ?>,'day')">GO</a>&nbsp;&nbsp;
+
+	&nbsp;&nbsp;
+
+</p>
+</td>
+
+</tr>
+
+
+</table>
+
+
 <input type="hidden" name=date_field_hidden value="<?php echo $_GET['date']; ?>">
 <input type="hidden" name=dom_field_hidden value="<?php echo $dayormonth; ?>">
 <input type="hidden" name=loginname_field_hidden value="<?php echo $currentlogin; ?>">
@@ -6814,7 +6792,7 @@ mn=new Array(
 <input type="hidden" name=loiname_field_hidden value="<?php echo $currentloiname; ?>">
 
 </form>
-
+<br><br>
 
 
 <h3><a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','l')"><<</a>
