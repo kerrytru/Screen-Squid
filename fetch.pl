@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/02/09 21:46:34.382 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/06/04 23:26:50.903 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -81,6 +81,11 @@ local $minbytestoparse=-1; #bytes, default -1
 
 #=====================================================================
 local $useLockFile=1; # 1 = create lock file when script is running, default 1 -enabled. 0 -disabled
+
+#контроль того, чтобы данные из логов не были старыми. Защита чтобы не загрузить повторно данные.
+#По умолчанию включен.
+local $flagNeverWriteOldData=1; # Prevent to write old data. default 1 - enabled. 0 - disabled. Be careful!
+
 #=======================CONFIGURATION END==============================
 
 local $sqltext="";
@@ -374,8 +379,10 @@ $countlines=$countlines+1;
   my @item = split " ", $line; 
 
 #check date before add to sqltext
-  
-  if($item[0]>$lastdate+1) {
+
+
+
+  if($item[0]>$lastdate+1 or $flagNeverWriteOldData == 0) {
 #  if($item[0]>0) {
 
     if($item[4]>$minbytestoparse) {
