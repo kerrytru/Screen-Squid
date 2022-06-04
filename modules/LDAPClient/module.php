@@ -1,7 +1,29 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:46:02 PM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> module.php </#FN>                                                      
+*                         File Birth   > <!#FB> 2022/04/11 23:57:47.378 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/06/04 22:05:58.927 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 class LDAPClient
 {
@@ -32,9 +54,13 @@ function __construct($variables){ //
   function GetConnectionLDAP()
   {
 
-
-  $this->ldap_conn = @ldap_connect($this->vars['connectionParams']['ldapserver']) or die("Could not connect to LDAP server.");
-  ldap_set_option($this->ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+    try {
+        $this->ldap_conn = @ldap_connect($this->vars['connectionParams']['ldapserver']) or die("Could not connect to LDAP server.");
+        ldap_set_option($this->ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+    } catch (\Error $e) {
+        echo 'Error: Something going wrong. I cant connect to LDAP server. Check have you php-ldap module and correct config.php in module directory';
+        die();
+    }
 
  return true;
 
@@ -50,6 +76,8 @@ function __construct($variables){ //
         //
 if( $this->ldap_conn ) {
 
+    //Инициализируем переменную
+    $username="(not found)";
     // binding to ldap server
     $ldapbind = ldap_bind( $this->ldap_conn, $this->vars['connectionParams']['ldapuser'], $this->vars['connectionParams']['ldappass']) or die ("Error trying to bind: ".ldap_error($this->ldap_conn));
 
@@ -57,10 +85,15 @@ if( $this->ldap_conn ) {
     if ($ldapbind) {
        // echo "LDAP bind successful...<br /><br />";
        
-        $result = ldap_search( $this->ldap_conn,$this->vars['connectionParams']['ldaptree'], "(uid=".$loginname.")") or die ("Error in search query: ".ldap_error($this->ldap_conn));
+       //Попробуем отловить проблемные логины. Со всякими спезнаками. Их будем просто пропускать. 
+       //Просто иначе полуаем Bad search filter.
+       try {
+        $result = ldap_search( $this->ldap_conn,$this->vars['connectionParams']['ldaptree'], "(uid=".$loginname.")");
         $data = ldap_get_entries( $this->ldap_conn, $result);
-       
-      
+  
+         } catch (\Exception $e) {
+            $username="(not found)";
+         }
         // iterate over array and print data for each entry
         //echo '<h1>Show me the users</h1>';
         for ($i=0; $i<$data["count"]; $i++) {

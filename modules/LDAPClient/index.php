@@ -1,5 +1,28 @@
 <?php
 
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> index.php </#FN>                                                       
+*                         File Birth   > <!#FB> 2022/06/04 23:00:24.599 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/06/04 23:14:50.470 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
 
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
@@ -107,7 +130,7 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 			# попробуем полностью протестировать код.
 			echo "Начинаем синхронизацию с LDAP <br>";
           foreach($result as $line) {
-			echo "Цикл итерация ".$numrow."<br>";
+			echo "Цикл итерация ".$numrow."<br><br>";
 
 			echo "Ищем значение алиаса для логина ".$line[1]."<br>";
 			  $aliasname="";
@@ -116,7 +139,7 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 
 			  echo "Функция вернула алиас = '".$aliasname."' для логина '".$line[1]."'<br>";
 		
-			  if($aliasname !="")
+			  if($aliasname !="(not found)")
 				  {
 					echo "Начинаем запись.<br>";
 					echo "Узнаем, есть ли уже алиас для логина = '".$line[1]."'.<br>";
@@ -145,9 +168,9 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 							  }
 					 echo "Цикл прошёл<br><br>";
 					
-					 $numrow++;
+					 
 				  }
-   
+				  $numrow++;
             
           }
 			
