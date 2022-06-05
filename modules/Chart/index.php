@@ -1,7 +1,29 @@
 <?php
 
-#Build date Tuesday 21st of July 2020 13:05:20 PM
-#Build revision 1.0
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> index.php </#FN>                                                       
+*                         File Birth   > <!#FB> 2022/04/11 23:57:46.893 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/06/05 12:48:08.311 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
@@ -55,21 +77,6 @@ $variableSet['dbtype']=$dbtype;
 
 $variableSet['language']=$language;
 
-#в зависимости от типа БД, подключаем разные модули
-if($dbtype==0)
-include("../../lib/dbDriver/mysqlmodule.php");
-
-if($dbtype==1)
-include("../../lib/dbDriver/pgmodule.php");
-
-	    #в зависимости от типа БД, подключаем разные модули
-		if($dbtype==0)
-		$ssq = new m_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-	
-		if($dbtype==1)
-		$ssq = new p_ScreenSquid($variableSet); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
-
-//echo "<h2>".$_lang['stDBDAEMONMODULE']."</h2><br />";
 
 $start=microtime(true);
 
