@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.reportmisc.php </#FN>                                         
 *                         File Birth   > <!#FB> 2021/11/02 20:44:42.135 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/12/07 22:15:36.335 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/06/22 21:45:16.911 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -118,7 +118,14 @@ if(preg_match("/lang_var/i", $resultcolr))
 
     #убираем предупреждения если используются 2 или 3 элемента из массива line
 if(isset($line[0]) && preg_match("/gethostbyaddr_line_0/i", $resultcolr))
-    $resultcolr=preg_replace("/gethostbyaddr_line_0/i", gethostbyaddr($line[0]), $resultcolr);
+   # $resultcolr=preg_replace("/gethostbyaddr_line_0/i", gethostbyaddr($line[0]), $resultcolr);
+{
+    $line_split=explode(":",$line[0]);
+    if(filter_var($line_split[0], FILTER_VALIDATE_IP))
+        $resultcolr=preg_replace("/gethostbyaddr_line_0/i", "(".gethostbyaddr($line_split[0]).")", $resultcolr);
+    else
+       $resultcolr=preg_replace("/gethostbyaddr_line_0/i", "", $resultcolr);
+}
 
 
 for($n=0;$n<=30;$n++){

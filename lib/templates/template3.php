@@ -34,7 +34,12 @@ $colh[6]="<th>".$colhtext[6]."</th>";
 
 $colr[0]=1; 
 $colr[1]="<td>numrow</td>";
+
+if($globalSS['gethostbyaddr']==1)
+    $colr[2]="<td>line0 gethostbyaddr_line_0</td>";
+else
 $colr[2]="<td>line0</td>";
+
 $colr[3]="<td>line1</td>";
 $colr[4]="<td><a href=javascript:GoPartlyReports(18,'".$dayormonth."','line2','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','line2','','1','line0')>".$_lang['stIPADDRESSES']."</a></td>";
 $colr[5]="<td><a href=javascript:GoPartlyReports(53,'".$dayormonth."','line3','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(54,'".$dayormonth."','line3','','1','line0')>".$_lang['stIPADDRESSES']."</a></td>";

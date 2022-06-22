@@ -11,12 +11,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> config.php.default </#FN>                                              
 *                         File Birth   > <!#FB> 2021/07/20 21:39:57.169 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/02/09 21:45:37.366 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/06/22 21:44:56.622 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -53,9 +53,11 @@ foreach($files as $file) {
  
 }
 
-
+$globalSS['gethostbyaddr']=0; //enable gethostbyaddr
 
 $globalSS['debug']=0; //режим отладки
+
+
 
 if($globalSS['debug']==1)
 {
