@@ -20,7 +20,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=javascript:GoPartlyReports(44,'".$dayormonth."','line2','line0','0','".$currenthour."')>line0</a></td>";
+$colr[2]="<td><a href=javascript:GoPartlyReports(44,'".$dayormonth."','line2','line0','1','".$currenthour."')>line0</a></td>";
 $colr[3]="<td>line1</td>";
 $colr[4]="<td>line3</td>";
 

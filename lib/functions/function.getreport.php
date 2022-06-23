@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.getreport.php </#FN>                                          
 *                         File Birth   > <!#FB> 2021/12/06 22:19:13.464 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/12/06 23:21:03.702 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/06/23 21:18:03.446 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -54,6 +54,7 @@ function doGetReportData($globalSS,$query,$template_name) {
     $countTopIpLimit=$globalSS['countTopIpLimit'];
     $countPopularSitesLimit=$globalSS['countPopularSitesLimit'];
     $countWhoDownloadBigFilesLimit=$globalSS['countWhoDownloadBigFilesLimit'];
+    $currenthour=$globalSS['currenthour'];
 
     include_once('function.database.php');
     include_once('function.reportmisc.php');

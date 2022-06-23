@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/04/18 21:12:43.704 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/06/23 21:17:50.050 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -108,8 +108,8 @@ if(isset($_GET['loginname']))
   
   //костыль для отчетов 41 и 42 и 43 и 44
   // TODO убрать костыль 08.01.2022
-  //$currenthour=$_GET['site'];
-  $currenthour=0;
+  $currenthour=$_GET['site'];
+  //$currenthour=0;
 
 	}
   else
@@ -151,6 +151,7 @@ $globalSS['currentipaddressid']=$currentipaddressid;
 $globalSS['currentloginid']=$currentloginid;
 $globalSS['currentipaddress']=$currentipaddress;
 $globalSS['currentlogin']=$currentlogin;
+$globalSS['currenthour']=$currenthour;
 
 $globalSS['params']=$params;
 
@@ -2663,7 +2664,7 @@ $queryWhoVisitSiteOneHourLogin="
 	   AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 	   AND par=1
-	GROUP BY CRC32(login) 
+	GROUP BY CRC32(login),login 
 	ORDER BY null) 
 	AS tmp 
 
@@ -2684,7 +2685,7 @@ $queryWhoVisitSiteOneHourLogin="
 WHERE (1=1)
   ".$msgNoZeroTraffic."
 
-  GROUP BY nofriends.name;";
+  order by nofriends.name asc;";
 
 if($useIpaddressalias==0)
 $echoIpaddressAliasColumn="";
@@ -2708,7 +2709,7 @@ $queryWhoVisitSiteOneHourIpaddress="
 	  AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	  AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
 	  AND par=1
-	GROUP BY CRC32(ipaddress) 
+	GROUP BY CRC32(ipaddress),ipaddress 
 	ORDER BY null) 
 	AS tmp 
 	RIGHT JOIN (SELECT 
@@ -2727,7 +2728,7 @@ $queryWhoVisitSiteOneHourIpaddress="
 WHERE (1=1)
   ".$msgNoZeroTraffic."
 
-  GROUP BY nofriends.name ;";
+  ORDER BY nofriends.name asc ;";
 
 $queryMimeTypesTraffic="
   SELECT 
@@ -5054,7 +5055,7 @@ $queryOneLoginOneHourTraffic="
 	 SELECT 
 	   site,
 	   SUM(sizeinbytes) AS s 
-	 FROM scsq_traffic 
+	 FROM scsq_quicktraffic 
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
@@ -5062,7 +5063,7 @@ $queryOneLoginOneHourTraffic="
 		".$filterSite."
 	   AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
-	 GROUP BY CRC32(site) 
+	 GROUP BY CRC32(site),site 
   	 ORDER BY site asc;";
   	 
   	 #postgre version
@@ -5071,7 +5072,7 @@ $queryOneLoginOneHourTraffic="
 	 SELECT 
 	   site,
 	   SUM(sizeinbytes) AS s 
-	 FROM scsq_traffic 
+	 FROM scsq_quicktraffic 
 	 WHERE login=".$currentloginid." 
 	   AND date>".$datestart." 
 	   AND date<".$dateend." 
@@ -5094,8 +5095,8 @@ $queryOneIpaddressOneHourTraffic="
 		".$filterSite."
 	   AND FROM_UNIXTIME(date,'%k')>=".$currenthour."
 	   AND FROM_UNIXTIME(date,'%k')<".($currenthour+1)."
- 	 GROUP BY CRC32(site) 
-	 ORDER BY st asc ";
+ 	 GROUP BY CRC32(site) ,site
+	 ORDER BY site asc ";
 
 
 #postgre version
@@ -5113,7 +5114,7 @@ $queryOneIpaddressOneHourTraffic="
 	   AND cast(to_char(to_timestamp(date),'HH24') as int)>=".$currenthour."
 	   AND cast(to_char(to_timestamp(date),'HH24') as int)<".($currenthour+1)."
  	 GROUP BY site 
-	 ORDER BY st asc ";
+	 ORDER BY site asc ";
 
 $queryVisitingWebsiteByTimeIpaddress="
   SELECT DISTINCT 
