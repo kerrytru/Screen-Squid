@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/23 21:17:50.050 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/06/25 23:13:50.701 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.7.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -2687,6 +2687,52 @@ WHERE (1=1)
 
   order by nofriends.name asc;";
 
+  #postgres version
+  if($dbtype==1)
+  $queryWhoVisitSiteOneHourLogin="
+  SELECT 
+    nofriends.name,
+    tmp.s,
+    nofriends.id
+    ".$echoLoginAliasColumn."
+  FROM (SELECT 
+          login,
+          SUM(sizeinbytes) as s 
+        FROM scsq_quicktraffic 
+        WHERE  date>".$datestart."
+	   AND date<".$dateend." 
+	   		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+		AND(to_char(to_timestamp(date),'HH24')>=to_char(interval '".$currenthour."h' ,'HH24'))     
+		AND(to_char(to_timestamp(date),'HH24') < to_char(interval '".($currenthour+1)."h','HH24'))
+   
+
+	   AND par=1
+	GROUP BY login 
+	) 
+	AS tmp 
+
+	RIGHT JOIN (SELECT 
+		      id,
+		      name 
+		    FROM scsq_logins 
+		    WHERE id NOT IN (".$goodLoginsList.")) 
+		    AS nofriends 
+	ON tmp.login=nofriends.id  
+ 	LEFT JOIN (SELECT 
+		      name,
+		      tableid 
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+  ".$msgNoZeroTraffic."
+
+  order by nofriends.name asc;";
+
+
+
 if($useIpaddressalias==0)
 $echoIpaddressAliasColumn="";
 if($useIpaddressalias==1)
@@ -2729,6 +2775,47 @@ WHERE (1=1)
   ".$msgNoZeroTraffic."
 
   ORDER BY nofriends.name asc ;";
+ 
+  #postgres version
+ if($dbtype==1)
+ $queryWhoVisitSiteOneHourIpaddress="
+ SELECT 
+   nofriends.name,
+   tmp.s,
+   nofriends.id 
+   ".$echoIpaddressAliasColumn."
+ FROM (SELECT 
+	 ipaddress,
+	 SUM(sizeinbytes) AS s 
+   FROM scsq_quicktraffic 
+   WHERE date>".$datestart." 
+	 AND date<".$dateend." 
+			 AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+	   ".$filterSite."
+	   AND(to_char(to_timestamp(date),'HH24')>=to_char(interval '".$currenthour."h' ,'HH24'))     
+	   AND(to_char(to_timestamp(date),'HH24') < to_char(interval '".($currenthour+1)."h','HH24'))
+	  AND par=1
+   GROUP BY ipaddress 
+   ) 
+   AS tmp 
+   RIGHT JOIN (SELECT 
+			 id,
+			 name 
+		   FROM scsq_ipaddress 
+		   WHERE id NOT IN (".$goodIpaddressList.")) AS nofriends 
+   ON tmp.ipaddress=nofriends.id  
+   LEFT JOIN (SELECT 
+			 name,
+			 tableid 
+		  FROM scsq_alias 
+		  WHERE typeid=1) 
+		  AS aliastbl 
+   ON nofriends.id=aliastbl.tableid 
+WHERE (1=1)
+ ".$msgNoZeroTraffic."
+
+ ORDER BY nofriends.name asc ;";
+
 
 $queryMimeTypesTraffic="
   SELECT 
