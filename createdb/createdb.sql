@@ -254,7 +254,8 @@ INSERT INTO `scsq_modules_param` (`id`, `module`, `param`, `val`, `switch`, `com
 (25, 'Global', 'workingHours', '8-00:12-30:13-00:17-20', 0, 'Set working hours. For example, set two periods From 8:00 to 12:30 and from 13 to 17'),
 (26, 'Global', 'showZeroTrafficInReports', '0', 0, 'Show zero traffic in reports'),
 (27, 'Global', 'enableFilterSites', '', 1, 'Enable use filter sites. If enable, only filterSites were shown in statistic.'),
-(28, 'Global', 'filterSites', '', 0, 'List filter sites "vk.me facebook.com:433 ipp" without quotation.');
+(28, 'Global', 'filterSites', '', 0, 'List filter sites "vk.me facebook.com:433 ipp" without quotation.'),
+(29, 'Global', 'DefaultRepDate', 'on', 1, 'After start, first report will be opened on yesterday(on) or current day (off).');
 
 
 

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/04/11 22:49:28.990 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/07/01 22:55:43.732 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -913,7 +913,13 @@ echo "<br /><br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)
 
 echo $_lang['stCREATORS'];
 
-$newdate=strtotime(date("d-m-Y"))-86400;
+
+//Открыть отчёт от текущей даты или от вчера по умолчанию
+if($globalSS['DefaultRepDate'])
+  $newdate=strtotime(date("d-m-Y"))-86400;
+else
+  $newdate=strtotime(date("d-m-Y"));
+
 $newdate=date("d-m-Y",$newdate);
 
 
