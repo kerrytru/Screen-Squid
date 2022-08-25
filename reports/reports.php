@@ -4095,7 +4095,7 @@ $queryOneLoginTraffic="
 		".$filterSite."
 		AND login=".$currentloginid." 
 		AND par=1   
-	GROUP BY crc32(site) ,site
+	GROUP BY site
 	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
 
 	 WHERE login=".$currentloginid." 
@@ -4157,7 +4157,7 @@ $queryOneLoginTopSitesTraffic="
 		".$filterSite."
 		AND login=".$currentloginid." 
 		AND par=1   
-	GROUP BY crc32(site) ,site
+	GROUP BY site
 	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
 
 	 WHERE login=".$currentloginid." 

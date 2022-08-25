@@ -22,12 +22,6 @@
 
 
 
-
-
-
-
-  $srv=$_COOKIE['srv'];
-
 #чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
 date_default_timezone_set(date_default_timezone_get());
 
@@ -35,6 +29,7 @@ date_default_timezone_set(date_default_timezone_get());
 
 include("../../../config.php");
 
+$srv=$_COOKIE['srv'];
 
 $addr=$address[$srv];
 $usr=$user[$srv];
@@ -89,11 +84,14 @@ if((($_GET['id']>=25) and ($_GET['id']<=29)) or ($_GET['id']==55) or ($_GET['id'
 else
     $query = "SELECT id,hash FROM scsq_alias WHERE id = '".intval($_COOKIE['id'])."' LIMIT 1";
 
+
+
 $row=doFetchOneQuery($globalSS, $query);
   
 
+
 #    if(($row['hash'] !== $_COOKIE['hash']) or ($row['id'] !== $_COOKIE['id']))
-    if(($row[1] !== $_COOKIE['hash']) or ($row[0] !== $_COOKIE['id']))
+    if((trim($row[1]) !== trim($_COOKIE['hash'])) or (trim($row[0]) !== trim($_COOKIE['id'])))
 
     {
         setcookie("id", "", 0, "/");
@@ -3879,7 +3877,7 @@ $queryOneLoginTraffic="
 		".$filterSite."
 		AND login=".$currentloginid." 
 		AND par=1   
-	GROUP BY crc32(site) ,site
+	GROUP BY site
 	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
 
 	 WHERE login=".$currentloginid." 
@@ -3941,7 +3939,7 @@ $queryOneLoginTopSitesTraffic="
 		".$filterSite."
 		AND login=".$currentloginid." 
 		AND par=1   
-	GROUP BY crc32(site) ,site
+	GROUP BY site
 	) as sumdenied ON scsq_quicktraffic.site=sumdenied.site
 
 	 WHERE login=".$currentloginid." 

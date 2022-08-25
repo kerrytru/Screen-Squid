@@ -67,6 +67,7 @@ $variableSet['addr']=$addr;
 $variableSet['usr']=$usr;
 $variableSet['psw']=$psw;
 $variableSet['dbase']=$dbase;
+$variableSet['dbtype']=$dbtype;
 
 $globalSS['connectionParams']=$variableSet;
 
