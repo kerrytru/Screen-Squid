@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/07/01 22:55:43.732 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/05 21:03:32.809 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -903,7 +903,18 @@ if(isset($_GET['actid']))
 
     }  //end GET[id]=8
 
-
+    if($_GET['id']==9) {
+	
+	
+   	
+     echo "<h2>PHPINFO:</h2>";
+  phpinfo();
+ 
+ 
+ 
+                   
+ 
+     }  //end GET[id]=9
 
 $end=microtime(true);
 

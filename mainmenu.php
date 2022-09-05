@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/11/02 23:05:07.982 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/05 21:03:23.096 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -289,8 +289,19 @@ echo "
     tree.add(new WebFXTreeItem('".$_lang['stADDREMOVE']."','javascript:GoRightReport(0,8)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
     tree.add(new WebFXTreeItem('DONATE','javascript:GoInternetLink(\'https://sobe.ru/na/na_novuyu_versiyu_screen_squid\')','','',''));
     tree.add(new WebFXTreeItem('Wiki','javascript:GoInternetLink(\'https://sourceforge.net/p/screen-squid/wiki/Home/\')','','',''));
+";
+if($globalSS['debug']==1) {
+	echo "
+	var debugtree = new WebFXTreeItem('Debug');
+	
+	debugtree.add(new WebFXTreeItem('phpinfo','javascript:GoRightReport(0,9)'));
+	
+	tree.add(debugtree);
+	";
+	
+	}
 
-
+echo "
 document.write(tree);
 }
 </script>
