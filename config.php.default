@@ -11,12 +11,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> config.php.default </#FN>                                              
 *                         File Birth   > <!#FB> 2021/07/20 21:39:57.169 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/22 21:44:56.622 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/05 22:59:29.009 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -100,6 +100,10 @@ $globalSS['enableFilterSites'] = 0;
 #EXAMPLE $globalSS['filterSites'] = "yahoo.com google.com:443";
 $globalSS['filterSites'] = "vk.com:443 mail.ru:443";
 
+#Enable filter size in bytes. 1 - enabled. 0 - default.
+$globalSS['enableFilterSizeinbytes'] = "0";
+#Set sizeinbytes condition for example ">1000" means greater than 1000 bytes. "<1000" means less than 1000 bytes or "between 100 and 200"
+$globalSS['filterSizeinbytes'] = ">1000";
 
 #А вдруг подключения нет? тогда вообще белый экран пользователю покажем и он растеряется
 if(doConnectToDatabase($globalSS['connectionParams'])!="ErrorConnection")

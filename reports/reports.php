@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/25 23:13:50.701 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/05 23:10:03.339 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.7.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.8.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -475,6 +475,8 @@ $goodSitesList = doCreateSitesList($globalSS);
 $filterSite = doCreateFilterSitesList($globalSS, "quick");
 $filterTrafficSite = doCreateFilterSitesList($globalSS,"traffic");
 
+$filterSizeinbytes = doCreateFilterSizeinbytes($globalSS);
+
 
 
 #split working hours
@@ -517,6 +519,7 @@ $echoLoginAliasColumn=",aliastbl.name";
 	   AND date<".$dateend." 
 	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 	   ".$filterSite."
+
 	   AND par=1
 	GROUP BY CRC32(login),login
 	ORDER BY null) 
@@ -4456,7 +4459,7 @@ $queryVisitingWebsiteByTimeLogin="
 	  AND date<".$dateend." 
           AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
-  
+		  ".$filterSizeinbytes."
 	ORDER BY null) 
 	AS tmp  
   
@@ -4469,7 +4472,8 @@ $queryVisitingWebsiteByTimeLogin="
   SELECT DISTINCT 
     site,
     '0',
-    to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') AS d
+	to_char(to_timestamp(tmp.date),'DD-MM-YYYY HH24:MI:SS') AS d
+	
    
   FROM (SELECT 
 	  date,
@@ -4480,7 +4484,7 @@ $queryVisitingWebsiteByTimeLogin="
 	  AND date<".$dateend." 
           AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
           AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
-  
+		  ".$filterSizeinbytes."
 	) 
 	AS tmp  
   
@@ -5220,7 +5224,7 @@ $queryVisitingWebsiteByTimeIpaddress="
 	  and date<".$dateend." 
           AND SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) NOT IN (".$goodSitesList.")
           AND SUBSTRING_INDEX(site,'/',1)  NOT IN (".$goodSitesList.")
-	
+		  ".$filterSizeinbytes."
 	order by null) 
 	as tmp  
   
@@ -5243,7 +5247,7 @@ $queryVisitingWebsiteByTimeIpaddress="
 	  and date<".$dateend." 
       AND reverse(split_part(reverse(split_part(site,'/',1)),'.',2)) NOT IN (".$goodSitesList.")
       AND split_part(site,'/',1)  NOT IN (".$goodSitesList.")
-	
+      ".$filterSizeinbytes."
 	) 
 	as tmp  
   

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/04/11 22:50:12.488 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/05 23:10:13.242 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -103,6 +103,20 @@ if($whatTable == "traffic")
 
 
   return $sitesTmp;
+
+}
+
+#составим фильтр по размеру учитываемого трафика
+function doCreateFilterSizeinbytes($globalSS){
+
+  if($globalSS['enableFilterSizeinbytes'] == "0") return "";
+
+  if($globalSS['filterSizeinbytes'] == "") return "";
+
+  $sizeTmp = "AND sizeinbytes ".$globalSS['filterSizeinbytes'];
+
+
+  return $sizeTmp;
 
 }
 
