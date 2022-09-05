@@ -108,8 +108,10 @@ if(isset($_GET['loginname']))
   
   //костыль для отчетов 41 и 42 и 43 и 44
   // TODO убрать костыль 08.01.2022
+ if($_GET['id']==41 || $_GET['id']==42 || $_GET['id']==43 || $_GET['id']==44) 
   $currenthour=$_GET['site'];
-  //$currenthour=0;
+  else
+  $currenthour=0;
 
 	}
   else
