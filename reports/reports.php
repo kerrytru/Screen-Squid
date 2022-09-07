@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/05 23:10:03.339 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/07 22:45:09.740 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.8.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.9.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -67,20 +67,17 @@ if(isset($_GET['srv']))  $srv=$_GET['srv']; else  $srv=0;
 if (isset($_GET['id']))	$id=$_GET['id']; else $id=0;
 
 //даты отбора для периода
-if(isset($_GET['date'])) $querydate=$_GET['date']; else $querydate=date("d-m-Y");
-if(isset($_GET['date2'])) $querydate2=$_GET['date2']; else $querydate2="";
+if(isset($_REQUEST['date']) && $_REQUEST['date']!="") $querydate=$_REQUEST['date']; else $querydate=date("d-m-Y");
+if(isset($_REQUEST['date2'])) $querydate2=$_REQUEST['date2']; else $querydate2="";
 
 list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
 
-//отчет за день или месяц
-if(isset($_GET['dom'])) $dayormonth=$_GET['dom']; else $dayormonth="day";
 
 //имя логина
 //миме??
 if(isset($_GET['loginname']))
   {
 	$currentlogin=$_GET['loginname'];
-	$currentmime=$_GET['loginname'];
   }
   else
   {
@@ -226,84 +223,9 @@ if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 
 <script language=JavaScript>
 
-function LeftRightDateSwitch(idReport, dom,lr)
-{
-  var stringdate=window.document.fastdateswitch_form.date_field_hidden.value;
-  var arraydate=stringdate.split('-');
-  var leftdate=new Date(arraydate[2],arraydate[1]-1,arraydate[0]);
-  var rightdate=new Date(arraydate[2],arraydate[1]-1,arraydate[0]);
-  var ldate;
-  var rdate;
-  if((dom=='day')  || (dom=='btw'))  {
-    leftdate.setDate(leftdate.getDate()-1);
-    rightdate.setDate(rightdate.getDate()+1);
-  }
 
-  if(dom=='month') {
-    leftdate.setMonth(leftdate.getMonth()-1);
-    rightdate.setMonth(rightdate.getMonth()+1);
-  }
 
-  var mp1l=leftdate.getMonth()+1;
-  var mp1r=rightdate.getMonth()+1;
-  
-  if(mp1l<10) mp1l='0'+mp1l;
-  
-  if(mp1r<10) mp1r='0'+mp1r;
 
-  ldate=leftdate.getDate()+'-'+mp1l+'-'+leftdate.getFullYear();
-  rdate=rightdate.getDate()+'-'+mp1r+'-'+rightdate.getFullYear();
-
-  if(lr=='l')
-    window.document.fastdateswitch_form.date_field.value=ldate;
-  else if(lr=='r')
-    window.document.fastdateswitch_form.date_field.value=rdate;
-  else
-    window.document.fastdateswitch_form.date_field.value=lr;
-
-  FastDateSwitch(idReport,dom);
-}
-
-function FastDateSwitch(idReport, dom)
-{
-if(window.document.fastdateswitch_form.date2_field.value!='')
-  dom = "btw";
-	
-
-  if(window.document.fastdateswitch_form.date_field.value=='')
-    parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
-+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
-+'&dom='+dom
-+'&login='+window.document.fastdateswitch_form.login_field_hidden.value
-+'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
-+'&ip='+window.document.fastdateswitch_form.ip_field_hidden.value
-+'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
-+'&site='+window.document.fastdateswitch_form.site_field_hidden.value
-+'&group='+window.document.fastdateswitch_form.group_field_hidden.value
-+'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid='+window.document.fastdateswitch_form.typeid_field_hidden.value
-+'&httpstatus='+window.document.fastdateswitch_form.httpstatus_field_hidden.value
-+'&httpname='+window.document.fastdateswitch_form.httpname_field_hidden.value
-+'&loiid='+window.document.fastdateswitch_form.loiid_field_hidden.value
-+'&loiname='+window.document.fastdateswitch_form.loiname_field_hidden.value;
-  else
-    parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
-+'&date='+window.document.fastdateswitch_form.date_field.value
-+'&date2='+window.document.fastdateswitch_form.date2_field.value
-+'&dom='+dom
-+'&login='+window.document.fastdateswitch_form.login_field_hidden.value
-+'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
-+'&ip='+window.document.fastdateswitch_form.ip_field_hidden.value
-+'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
-+'&site='+window.document.fastdateswitch_form.site_field_hidden.value
-+'&group='+window.document.fastdateswitch_form.group_field_hidden.value
-+'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid='+window.document.fastdateswitch_form.typeid_field_hidden.value
-+'&httpstatus='+window.document.fastdateswitch_form.httpstatus_field_hidden.value
-+'&httpname='+window.document.fastdateswitch_form.httpname_field_hidden.value
-+'&loiid='+window.document.fastdateswitch_form.loiid_field_hidden.value
-+'&loiname='+window.document.fastdateswitch_form.loiname_field_hidden.value;
-}
 
 
 //JS function to open reports page with some additional parameters.
@@ -405,33 +327,41 @@ function showModalPopUp(srv, tableid, typeid){
 
 
 
-///костыль для отчетов по периодам
-/// 21 - по месяцам, 39 - по дням, 40 - по имени дня
-if(($_GET['id']==21)||($_GET['id']==39)||($_GET['id']==40))
-$dayormonth="month";
 
-
-if($dayormonth=="day") {
-  $querydom="%d-%m-%Y";
-  $datestart=strtotime($querydate);
-  $dateend=strtotime($querydate) + 86400;
-  $weekdaynumber=date("w",$datestart);
-}
-if($dayormonth=="month")  {
-  $querydom="%m-%Y";
-  $querydate=$month."-".$year;
+//Если второй даты нет, то предполагаем, что трафик за сутки
+if($querydate2=="") {
+	$datestart=strtotime($querydate);
+	$dateend=strtotime($querydate) + 86400;
+	$querydate_str=$querydate;
+  }
+  
+  //а если вторая дата есть, то трафик с даты по дату
+  if($querydate2!="")  {
+	$datestart=strtotime($querydate);
+	$dateend=strtotime($querydate2) + 86400;
+	$dayname="";
+	$querydate_str = $querydate." - ".$querydate2; 
+  }
+  
+  ///костыль для отчетов по периодам
+  /// 21 - по месяцам, 39 - по дням, 40 - по имени дня
+  if(($_GET['id']==39)||($_GET['id']==40))
+  {
   $numdaysinmonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
   $datestart=mktime(0,0,0,$month,1,$year);
   $dateend=$datestart + 86400*$numdaysinmonth;
-}
+  $querydate=date("d-m-Y",$datestart);
+  $querydate2=date("d-m-Y",$dateend-86400);
+  $querydate_str = $querydate." - ".$querydate2; 
 
-if($dayormonth=="btw")  {
-  $querydom="%d-%m-%Y";
-  $datestart=strtotime($querydate);
-  $dateend=strtotime($querydate2) + 86400;
-  $dayormonth="day";
-//  $weekdaynumber=date("w",$datestart);
-}
+  }
+  //Не будем вводить в заблуждение и сотрем даты
+  if($_GET['id']==21){
+
+	$querydate="";
+	$querydate2="";
+
+	} 
 
 
 
@@ -455,10 +385,6 @@ $dayname="(".$_lang['stSUNDAY'].")";
 
 if($enableShowDayNameInReports==0)
 $dayname="";
-
-if($dayormonth=="month")
-$dayname="";
-
 
 
 
@@ -6847,17 +6773,20 @@ mn=new Array(
 
 <script src="../javascript/calendar_ru.js" type="text/javascript"></script>
 
-<form name=fastdateswitch_form onsubmit="return false;">
 
+<?php
 
-</a>
+$dfltAction=doCreateGetArray($globalSS);
+
+echo '<form name=fastdateswitch_form action="reports.php?'.$dfltAction.'" method=POST>';
+?>
 <table align=right>
 <tr>
 	<td><?php echo $_lang['stFASTDATESWITCH']?></td>
 	<td>
-<input type="text" name=date_field value="<?php echo $querydate;?>" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">
-<input type="text" name=date2_field value="<?php echo $querydate2;?>" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;&nbsp;
-<a href="Javascript:FastDateSwitch(<?php echo $_GET['id'] ?>,'day')">GO</a>&nbsp;&nbsp;
+<input type="text" name=date value="<?php echo $querydate;?>"  onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">
+<input type="text" name=date2 value="<?php echo $querydate2;?>" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;&nbsp;
+<input type="submit" value="GO">&nbsp;&nbsp;
 
 	&nbsp;&nbsp;
 
@@ -6866,160 +6795,136 @@ mn=new Array(
 
 </tr>
 
-
 </table>
-
-
-<input type="hidden" name=date_field_hidden value="<?php echo $_GET['date']; ?>">
-<input type="hidden" name=dom_field_hidden value="<?php echo $dayormonth; ?>">
-<input type="hidden" name=loginname_field_hidden value="<?php echo $currentlogin; ?>">
-<input type="hidden" name=login_field_hidden value="<?php echo $currentloginid; ?>">
-<input type="hidden" name=ipname_field_hidden value="<?php echo $currentipaddress; ?>">
-<input type="hidden" name=ip_field_hidden value="<?php echo $currentipaddressid; ?>">
-<input type="hidden" name=site_field_hidden value="<?php echo $currentsite; ?>">
-<input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
-<input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
-<input type="hidden" name=typeid_field_hidden value="<?php echo $typeid; ?>">
-<input type="hidden" name=httpname_field_hidden value="<?php echo $currenthttpname; ?>">
-<input type="hidden" name=httpstatus_field_hidden value="<?php echo $currenthttpstatusid; ?>">
-<input type="hidden" name=loiid_field_hidden value="<?php echo $currentloiid; ?>">
-<input type="hidden" name=loiname_field_hidden value="<?php echo $currentloiname; ?>">
 
 </form>
 <br><br>
 
 
-<h3><a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','l')"><<</a>
-&nbsp;<?php echo $querydate; ?>&nbsp;
-<a href="Javascript:LeftRightDateSwitch(<?php echo $_GET['id'];?>,'<?php echo $dayormonth; ?>','r')">>></a>
-</h3>
+
 <?php
 }
 ///CALENDAR END
 
-#костыль для перехода с произвольных отчетов
-if($_GET['dom']=="btw"){
-$dayname="";
-$querydate = $querydate." - ".$querydate2; 
-}
+
 
 ///REPORTS HEADERS
 
 $repheader="";
 
 if($id==1)
-$repheader="<h2>".$_lang['stLOGINSTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader="<h2>".$_lang['stLOGINSTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==2)
-$repheader="<h2>".$_lang['stIPADDRESSTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader="<h2>".$_lang['stIPADDRESSTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==3)
-$repheader= "<h2>".$_lang['stSITESTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stSITESTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==4)
-$repheader= "<h2>".$_lang['stTOPSITESTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTOPSITESTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==5)
-$repheader= "<h2>".$_lang['stTOPLOGINSTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTOPLOGINSTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==6)
-$repheader= "<h2>".$_lang['stTOPIPTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTOPIPTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==7)
-$repheader= "<h2>".$_lang['stTRAFFICBYHOURS']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTRAFFICBYHOURS']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==8)
-$repheader= "<h2>".$_lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==9)
-$repheader= "<h2>".$_lang['stONELOGINTOPSITESTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONELOGINTOPSITESTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==10)
-$repheader= "<h2>".$_lang['stONELOGINTRAFFICBYHOURS']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONELOGINTRAFFICBYHOURS']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==11)
-$repheader= "<h2>".$_lang['stONEIPADRESSTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEIPADRESSTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==12)
-$repheader= "<h2>".$_lang['stONEIPADDRESSTOPSITESTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEIPADDRESSTOPSITESTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==13)
-$repheader= "<h2>".$_lang['stONEIPADDRESSTRAFFICBYHOURS']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEIPADDRESSTRAFFICBYHOURS']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==14)
-$repheader= "<h2>".$_lang['stLOGINSTRAFFICWIDE']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stLOGINSTRAFFICWIDE']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==15)
-$repheader= "<h2>".$_lang['stIPADDRESSTRAFFICWIDE']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stIPADDRESSTRAFFICWIDE']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==16)
-$repheader= "<h2>".$_lang['stIPADDRESSTRAFFICWITHRESOLVE']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stIPADDRESSTRAFFICWITHRESOLVE']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==17)
-$repheader= "<h2>".$_lang['stPOPULARSITES']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stPOPULARSITES']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==18)
-$repheader= "<h2>".$_lang['stWHOVISITSITELOGIN']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stWHOVISITSITELOGIN']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==19)
-$repheader= "<h2>".$_lang['stWHOVISITSITEIPADDRESS']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stWHOVISITSITEIPADDRESS']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==20)
-$repheader= "<h2>".$_lang['stWHODOWNLOADBIGFILES']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stWHODOWNLOADBIGFILES']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==21)
 $repheader= "<h2>".$_lang['stTRAFFICBYPERIOD']."</h2>";
 
 if($id==22)
-$repheader= "<h2>".$_lang['stVISITINGWEBSITELOGINS']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname." ".$_lang['stBYDAYTIME']."</h2>";
+$repheader= "<h2>".$_lang['stVISITINGWEBSITELOGINS']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stBYDAYTIME']."</h2>";
 
 if($id==23)
-$repheader= "<h2>".$_lang['stVISITINGWEBSITEIPADDRESS']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate." ".$dayname." ".$_lang['stBYDAYTIME']."</h2>";
+$repheader= "<h2>".$_lang['stVISITINGWEBSITEIPADDRESS']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stBYDAYTIME']."</h2>";
 
 if($id==24)
-$repheader= "<h2>".$_lang['stGROUPSTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stGROUPSTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==25)
-$repheader= "<h2>".$_lang['stONEGROUPTRAFFIC']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEGROUPTRAFFIC']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==26)
-$repheader= "<h2>".$_lang['stONEGROUPTRAFFIC']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate." ".$dayname." ".$_lang['stEXTENDED']."</h2>";
+$repheader= "<h2>".$_lang['stONEGROUPTRAFFIC']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stEXTENDED']."</h2>";
 
 if($id==27)
-$repheader= "<h2>".$_lang['stONEGROUPTOPSITESTRAFFIC']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEGROUPTOPSITESTRAFFIC']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==28)
-$repheader= "<h2>".$_lang['stONEGROUPTRAFFICBYHOURS']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEGROUPTRAFFICBYHOURS']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==29)
-$repheader= "<h2>".$_lang['stONEGROUPWHODOWNLOADBIGFILES']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEGROUPWHODOWNLOADBIGFILES']." ".$currentgroup." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==30)
-$repheader= "<h2>".$_lang['stHTTPSTATUSES']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stHTTPSTATUSES']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==31)
-$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." ".$_lang['stLOGINSFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." ".$_lang['stLOGINSFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==32)
-$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." ".$_lang['stIPADDRESSFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." ".$_lang['stIPADDRESSFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==33)
-$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentloiname.") ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentloiname.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==34)
-$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentloiname.") ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentloiname.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==35)
-$repheader= "<h2>".$_lang['stONELOGINIPTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONELOGINIPTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==36)
-$repheader= "<h2>".$_lang['stONEIPADDRESSLOGINSTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stONEIPADDRESSLOGINSTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==37)
-$repheader= "<h2>".$_lang['stLOGINSIPTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stLOGINSIPTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==38)
-$repheader= "<h2>".$_lang['stIPADDRESSLOGINSTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stIPADDRESSLOGINSTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==39)
 $repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAY']."</h2>";
@@ -7028,91 +6933,91 @@ if($id==40)
 $repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAYNAME']."</h2>";
 
 if($id==41)
-$repheader= "<h2>".$_lang['stWHOVISITSITES']." ".$_lang['stFOR']." ".$querydate." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
+$repheader= "<h2>".$_lang['stWHOVISITSITES']." ".$_lang['stFOR']." ".$querydate_str." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
 
 if($id==42)
-$repheader= "<h2>".$_lang['stWHOVISITSITES']." ".$_lang['stFOR']." ".$querydate." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
+$repheader= "<h2>".$_lang['stWHOVISITSITES']." ".$_lang['stFOR']." ".$querydate_str." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
 
 if($id==43)
-$repheader= "<h2>".$_lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
+$repheader= "<h2>".$_lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
 
 if($id==44)
-$repheader= "<h2>".$_lang['stONELOGINTOPSITESTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
+$repheader= "<h2>".$_lang['stONELOGINTOPSITESTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
 
 if($id==45)
-$repheader= "<h2>".$_lang['stMIMETYPESTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stMIMETYPESTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==46)
-$repheader= "<h2>".$_lang['stMIMETYPESTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stMIMETYPESTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==47)
-$repheader= "<h2>".$_lang['stMIMETYPESTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stMIMETYPESTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==48)
-$repheader= "<h2>".$_lang['stDOMAINZONESTRAFFIC']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stDOMAINZONESTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==49)
-$repheader= "<h2>".$_lang['stDASHBOARD']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stDASHBOARD']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==50)
-$repheader= "<h2>".$_lang['stTRAFFICBYHOURSLOGINS']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTRAFFICBYHOURSLOGINS']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==51)
-$repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESS']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESS']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==52)
-$repheader= "<h2>".$_lang['stTRAFFICBYCATEGORIES']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTRAFFICBYCATEGORIES']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==53)
-$repheader= "<h2>".$_lang['stTRAFFICBYHOURSLOGINSONESITE']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTRAFFICBYHOURSLOGINSONESITE']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==54)
-$repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTRAFFICBYHOURSIPADDRESSONESITE']." <b>".$currentsite."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==55)
-$repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==56)
-$repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==57)
-$repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stPOPULARSITES']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==58)
-$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==59)
-$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==60)
-$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stCONTENT']." <b>".$currentmime."</b> <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==61)
-$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==62)
-$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==63)
-$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stDASHBOARD']." <b>".$currentgroup."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==64)
-$repheader= "<h2>".$_lang['stLOGINSTIMEONLINE']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stLOGINSTIMEONLINE']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==65)
-$repheader= "<h2>".$_lang['stIPADDRESSTIMEONLINE']." ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stIPADDRESSTIMEONLINE']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==66)
-$repheader= "<h2>".$_lang['stLOGINBIGFILES']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stLOGINBIGFILES']." <b>".$currentlogin."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==67)
-$repheader= "<h2>".$_lang['stIPADDRESSBIGFILES']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stIPADDRESSBIGFILES']." <b>".$currentipaddress."</b> ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==68)
-$repheader= "<h2>".$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==69)
-$repheader= "<h2>".$_lang['stTOPIPWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stTOPIPWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 
 if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {

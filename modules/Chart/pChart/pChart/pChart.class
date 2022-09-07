@@ -577,6 +577,18 @@ function __construct($XSize,$YSize){
 
        $Value     = $this->VMin + ($i-1) * (( $this->VMax - $this->VMin ) / $Divisions);
        $Value     = round($Value * pow(10,$Decimals)) / pow(10,$Decimals);
+  
+      //error in php 8.0
+      if(!isset($DataDescription["Format"])) 
+      { 
+        $DataDescription["Format"]["Y"]="number";
+        $DataDescription["Format"]["X"]="number";
+      }
+        $Value.$DataDescription["Unit"]["Y"] = "";
+        $Value.$DataDescription["Unit"]["X"] = "";
+      //error solved
+
+
        if ( $DataDescription["Format"]["Y"] == "number" )
         $Value = $Value.$DataDescription["Unit"]["Y"];
        if ( $DataDescription["Format"]["Y"] == "time" )

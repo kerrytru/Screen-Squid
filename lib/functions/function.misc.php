@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/05 23:10:13.242 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/07 22:45:42.230 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -120,6 +120,24 @@ function doCreateFilterSizeinbytes($globalSS){
 
 }
 
+#составим список $_GET параметров
+function doCreateGetArray($globalSS){
+
+  $i=0;
+  $retarray=array();
+  $ret="";
+  foreach($_GET as $val => $key){
+    #дату не будем записывать предварительно
+    if($val=="date") continue;
+    if($val=="date2") continue;
+
+    $retarray[$i]=$val."=".$key;
+    $i++;
+  }
+  $ret=implode("&",$retarray);
+  return $ret;
+
+}
 
 #Функции работы с алиасами
 function doPrintAllAliases($globalSS){

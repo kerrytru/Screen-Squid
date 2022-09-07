@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/05 21:03:23.096 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/07 22:46:11.575 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -45,21 +45,12 @@ parent.left.location.href=frame1;
 parent.right.location.href=frame2;
 }
 
+//Функция перехода по меню
 function GoReport(srv,id)
 {
-if((id==21) || (id==39) || (id==40) ) {
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value
-+'&dom=month&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid='+parent.right.window.document.fastdateswitch_form.typeid_field_hidden.value
-+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-}
-else
-{
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value
-+'&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid='+parent.right.window.document.fastdateswitch_form.typeid_field_hidden.value
-+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-}
+
+parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date.value+'&date2='+parent.right.window.document.fastdateswitch_form.date2.value;
+
 
 }
 

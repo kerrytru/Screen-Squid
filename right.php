@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/05 21:03:32.809 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/07 22:45:56.279 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -453,8 +453,8 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
 		if($dbtype==1)
 		#postgre 
 		  $queryLogTable="SELECT
-			to_char(to_timestamp(datestart),'YYYY-MM-DD-HH24-MI-SS') as d1,
-			to_char(to_timestamp(dateend),'YYYY-MM-DD-HH24-MI-SS'),
+			to_char(to_timestamp(datestart),'YYYY-MM-DD HH24:MI:SS') as d1,
+			to_char(to_timestamp(dateend),'YYYY-MM-DD HH24:MI:SS'),
  			message
 		  FROM scsq_logtable order by d1 desc";
 
@@ -936,11 +936,8 @@ $newdate=date("d-m-Y",$newdate);
 
 ?>
 <form name=fastdateswitch_form>
-    <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
-    <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value="<?php if(isset($currentgroupid)) echo $currentgroupid; else echo "0"; ?>">
-    <input type="hidden" name=groupname_field_hidden value="<?php if(isset($currentgroup)) echo $currentgroup; else echo "0"; ?>">
-    <input type="hidden" name=typeid_field_hidden value="<?php if(isset($typeid)) echo $typeid; else echo "0";?>">
+    <input type="hidden" name=date value="<?php echo $newdate; ?>">
+    <input type="hidden" name=date2 value="<?php echo $newdate; ?>">
     </form>
 </body>
 </html>
