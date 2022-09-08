@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> left.php </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/09/11 17:04:26.557 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/10/19 22:33:34.231 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/08 23:36:06.100 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -77,10 +77,24 @@ parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+par
 
 }
 
-
+//Функция перехода по частным отчетам. Всё также берем srv и id отчета. Остальное припишем прямо из адресной строки правого фрейма
 function GoPartlyReport(srv,id)
 {
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value+'&login='+parent.right.window.document.fastdateswitch_form.login_field_hidden.value+'&loginname='+parent.right.window.document.fastdateswitch_form.loginname_field_hidden.value+'&ip='+parent.right.window.document.fastdateswitch_form.ip_field_hidden.value+'&ipname='+parent.right.window.document.fastdateswitch_form.ipname_field_hidden.value;
+	var loc = ""; //возьмем адрес из правого фрейма 
+	var arr = []
+	var ret = "";
+
+	loc = parent.right.location.href;
+	arr = loc.split('?');
+	//Удалим первые два параметра srv и id.
+	arr = arr[1].split('&');
+	arr.shift(); //раз
+	arr.shift(); //два
+
+	//объединим оставшиеся элементы через & и это будет наша строка
+	ret = arr.join('&');
+
+parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date.value+'&date2='+parent.right.window.document.fastdateswitch_form.date2.value+'&'+ret;
 }
 
 

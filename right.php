@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/07 22:45:56.279 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/08 23:36:18.247 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -937,7 +937,7 @@ $newdate=date("d-m-Y",$newdate);
 ?>
 <form name=fastdateswitch_form>
     <input type="hidden" name=date value="<?php echo $newdate; ?>">
-    <input type="hidden" name=date2 value="<?php echo $newdate; ?>">
+    <input type="hidden" name=date2 value="">
     </form>
 </body>
 </html>

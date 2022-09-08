@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/07 22:45:09.740 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/08 23:37:00.605 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.9.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.10.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -225,22 +225,30 @@ if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 
 
 
-
-
-
-//JS function to open reports page with some additional parameters.
-//idReport - id of report
-//dom - day or month report
-//id - id login or id ipaddress or id group
-//idname - visible name login(Yoda) or name ipaddress(172.16.120.33) or name group(StarWars club)
-//idsign - login (0) or ipaddress (1) or group login (3) or group ipaddress (4) or httpstatus id >4
-//par1 - sitename if report need it or httpstatus name
-
-
-
-function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
+//переход к частным отчетам по логину, IP адресу или ещё чему
+//параметры не указываем, а работаем с массивом arguments, т.е. сколько передали, столько и обрабатываем
+//чтобы не думать, в функциях будем передать названия полей для GET и его параметр
+//например GoPartlyReports('id',8,'login',3) будет означать &id=8&login=3
+function GoPartlyReports()
 {
+//alert(arguments[0]);
+var j = 0;
 
+var args = [];
+var ret ="";
+
+for (var i = 0; i < arguments.length; i=i+2) {
+  args[j] = arguments[i]+'='+arguments[i+1];
+  j=j+1;
+}
+
+ret = args.join('&');
+
+parent.right.location.href='reports.php?srv=<?php echo $srv ?>&'+ret+
+		'&date='+window.document.fastdateswitch_form.date.value+'&date2='+window.document.fastdateswitch_form.date2.value;
+
+
+/*
 	if(idsign==0)
 	{
 		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+
@@ -289,16 +297,14 @@ function GoPartlyReports(idReport, dom, id, idname, idsign, par1)
 		+'&loiid='+idsign
 		+'&loiname='+par1;
 	}
-
+*/
 }
 
 
 function UpdateLeftMenu(id)
 {
-  parent.left.location.href='<?php echo $globalSS['root_http']?>/left.php?srv=<?php echo $srv ?>&id='+id
-  +'&loginname='+window.document.fastdateswitch_form.loginname_field_hidden.value
-  +'&ipname='+window.document.fastdateswitch_form.ipname_field_hidden.value
-  +'&groupname='+window.document.fastdateswitch_form.groupname_field_hidden.value;
+  parent.left.location.href='<?php echo $globalSS['root_http']?>/left.php?srv=<?php echo $srv; ?>&id='+id
+  +'&loginname=<?php echo $currentlogin; ?>&ipname=<?php echo $currentipaddress; ?>&groupname=<?php echo $currentgroup; ?>';
 }
 
 var popUpObj;
@@ -341,6 +347,7 @@ if($querydate2=="") {
 	$dateend=strtotime($querydate2) + 86400;
 	$dayname="";
 	$querydate_str = $querydate." - ".$querydate2; 
+	
   }
   
   ///костыль для отчетов по периодам
