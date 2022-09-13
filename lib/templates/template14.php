@@ -16,7 +16,7 @@ $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
 
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=\"javascript:GoPartlyReports(25,'".$dayormonth."','line2','line0',3+line3,'')\">line0</a></td>";
+$colr[2]="<td><a href=\"javascript:GoPartlyReports('id',25,'groupid','line2','groupname','line0','grouptypeid',3+line3)\">line0</a></td>";
 $colr[3]="<td>line1</td>";
 
 

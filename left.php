@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> left.php </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/09/11 17:04:26.557 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/08 23:36:06.100 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/13 23:33:57.589 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -44,38 +44,6 @@ parent.left.location.href=frame1;
 parent.right.location.href=frame2;
 }
 
-
-function GoReport(srv,id)
-{
-if((id==21) || (id==39) || (id==40) ) {
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value
-+'&dom=month&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid='+parent.right.window.document.fastdateswitch_form.typeid_field_hidden.value
-+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-}
-else if ((id==1) || (id==5) || (id==14) || (id==50) || (id==64) || (id==68) ) ///если отчеты по логинам, то сразу typeid=0 установим
-{
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value
-+'&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid=0'
-+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-}
-else if ((id==2) || (id==6) || (id==15) || (id==51) || (id==65) || (id==69) ) ///если отчеты по IP адресам, то сразу typeid=1 установим
-{
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value
-+'&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid=1'
-+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-}
-else
-{
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value
-+'&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-+'&typeid='+parent.right.window.document.fastdateswitch_form.typeid_field_hidden.value
-+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-}
-
-}
 
 //Функция перехода по частным отчетам. Всё также берем srv и id отчета. Остальное припишем прямо из адресной строки правого фрейма
 function GoPartlyReport(srv,id)
@@ -231,13 +199,13 @@ echo "
 
 	
 //Reports	
-	reports.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoReport(".$srv.",63);'));
-	reports.add(new WebFXTreeItem('".$_lang['stONEGROUPTRAFFIC']."','javascript:GoReport(".$srv.",25)'));
-	reports.add(new WebFXTreeItem('".$_lang['stONEGROUPTRAFFIC']." ".$_lang['stEXTENDED']."','javascript:GoReport(".$srv.",26)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTOPSITESTRAFFIC']."','javascript:GoReport(".$srv.",27)'));
-	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURS']."','javascript:GoReport(".$srv.",28)'));
-	reports.add(new WebFXTreeItem('".$_lang['stWHODOWNLOADBIGFILES']."','javascript:GoReport(".$srv.",29)'));
-	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoReport(".$srv.",55)'));
+	reports.add(new WebFXTreeItem('".$_lang['stDASHBOARD']."','javascript:GoPartlyReport(".$srv.",63);'));
+	reports.add(new WebFXTreeItem('".$_lang['stONEGROUPTRAFFIC']."','javascript:GoPartlyReport(".$srv.",25)'));
+	reports.add(new WebFXTreeItem('".$_lang['stONEGROUPTRAFFIC']." ".$_lang['stEXTENDED']."','javascript:GoPartlyReport(".$srv.",26)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTOPSITESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",27)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYHOURS']."','javascript:GoPartlyReport(".$srv.",28)'));
+	reports.add(new WebFXTreeItem('".$_lang['stWHODOWNLOADBIGFILES']."','javascript:GoPartlyReport(".$srv.",29)'));
+	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoPartlyReport(".$srv.",55)'));
 	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
 
 	

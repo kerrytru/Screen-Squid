@@ -30,7 +30,7 @@ $colr[1]="<td>numrow";
 $colr[2]="<td>line0</td>";
 $colr[3]="<td>line2</td>";
 $colr[4]="<td>line1</td>";
-$colr[5]="<td><a href=javascript:GoPartlyReports(18,'".$dayormonth."','1','','0','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(19,'".$dayormonth."','1','','1','line0')>".$_lang['stIPADDRESSES']."</a></td>";
+$colr[5]="<td><a href=javascript:GoPartlyReports('id',18,'sitetypeid',1,'typeid','0','site','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports('id',19,'sitetypeid',1,'typeid','1','site','line0')>".$_lang['stIPADDRESSES']."</a></td>";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";

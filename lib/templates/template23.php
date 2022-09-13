@@ -22,8 +22,8 @@ $colr[1]="<td>numrow</td>";
 $colr[2]="<td>line0</td>";
 $colr[3]="<td>line1</td>";
 
-$colr[4]="<td><a href=javascript:LeftRightDateSwitch(1,'day','line2')>".$_lang['stLOGINS']."</a> / 
-<a href=javascript:LeftRightDateSwitch(2,'day','line2')>".$_lang['stIPADDRESS']."</a></td>";
+$colr[4]="<td><a href=javascript:GoPartlyReports('id',1)>".$_lang['stLOGINS']."</a> / 
+<a href=javascript:GoPartlyReports('id',2)>".$_lang['stIPADDRESS']."</a></td>";
 
 
 $colf[1]="<td>".$colftext[1]."</td>";

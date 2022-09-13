@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/07 22:46:11.575 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/13 23:34:06.177 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -55,11 +55,6 @@ parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+par
 }
 
 
-function GoPartlyReport(srv,id)
-{
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value+'&login='+parent.right.window.document.fastdateswitch_form.login_field_hidden.value+'&loginname='+parent.right.window.document.fastdateswitch_form.loginname_field_hidden.value+'&ip='+parent.right.window.document.fastdateswitch_form.ip_field_hidden.value+'&ipname='+parent.right.window.document.fastdateswitch_form.ipname_field_hidden.value;
-}
-
 function GoRightReport(srv,id)
 {
 parent.right.location.href='right.php?srv='+srv+'&id='+id;
@@ -77,7 +72,7 @@ function GoInternetLink(dest_link)
 
 function GoOnlineReport(srv,id)
 {
-parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value;
+parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date.value+'&date2='+parent.right.window.document.fastdateswitch_form.date2.value;
 }
 
 

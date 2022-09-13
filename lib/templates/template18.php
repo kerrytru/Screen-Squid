@@ -20,7 +20,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 $colr[1]="<td>numrow</td>";
 $colr[2]="<td>line0</td>";
 $colr[3]="<td>line2</td>";
-$colr[4]="<td><a href=javascript:GoPartlyReports(31,'".$dayormonth."','line3','line0','5','')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports(32,'".$dayormonth."','line3','line0','5','')>".$_lang['stIPADDRESSES']."</a></td>";
+$colr[4]="<td><a href=javascript:GoPartlyReports('id',31,'httpstatusid','line3','httpstatusname','line0')>".$_lang['stLOGINS']."</a>&nbsp;/&nbsp;<a href=javascript:GoPartlyReports('id',32,'httpstatusid','line3','httpstatusname','line0')>".$_lang['stIPADDRESSES']."</a></td>";
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";

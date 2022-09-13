@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.reportmisc.php </#FN>                                         
 *                         File Birth   > <!#FB> 2021/11/02 20:44:42.135 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/22 21:45:16.911 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/13 23:34:24.145 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -212,9 +212,9 @@ function doGenerateUniqueNameReport($params) {
     //имя БД (т.к. брать id - некорректно. Завтра базу выключат и под её ID кэш будет показываться)
     //id отчета
     //date
-    //Дневной, месячный или промежуточный
+    //date2
     //id объекта (логина, ip адреса, группы)
-    return "report_".$params['dbase']."_".$params['idReport']."_".$params['date']."_".$params['period']."_".$params['idLogin']."_".$params['idIpaddress'];   
+    return "report_".$params['dbase']."_".$params['idReport']."_".$params['date']."_".$params['date2']."_".$params['idLogin']."_".$params['idIpaddress'];   
 }    
 
 ?>

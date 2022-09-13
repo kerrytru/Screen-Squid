@@ -22,7 +22,7 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 
 
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=\"javascript:GoPartlyReports(58,'".$dayormonth."','line2','line0',0,'')\">line0</a></td>";
+$colr[2]="<td><a href=\"javascript:GoPartlyReports('id',58,'mime','line0')\">line0</a></td>";
 $colr[3]="<td>line1</td>";
 
 

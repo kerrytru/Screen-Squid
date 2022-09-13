@@ -22,7 +22,8 @@ $colh[3]="<th>".$colhtext[3]."</th>";
 
 
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=\"javascript:GoPartlyReports(60,'".$dayormonth."','".$currentipaddressid."','line0',1,'".$currentipaddress."')\">line0</a></td>";
+$colr[2]="<td><a href=\"javascript:GoPartlyReports('id',60,'ipaddressid','".$currentipaddressid."','mime','line0','typeid',1,'ipaddressname','".$currentipaddress."')\">line0</a></td>";
+
 $colr[3]="<td>line1</td>";
 
 

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/08 23:37:00.605 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/13 23:34:57.140 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.10.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.11.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -74,76 +74,54 @@ list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
 
 
 //имя логина
-//миме??
-if(isset($_GET['loginname']))
-  {
-	$currentlogin=$_GET['loginname'];
-  }
-  else
-  {
-	$currentlogin="";
-	$currentmime="";
-  }
- 
+
+
+//id типа сайта 1 - 10.102.10.22, 2 - www.yandex.ru
+  if(isset($_GET['sitetypeid']))	$currentsitetypeid=$_GET['sitetypeid']; else $currentsitetypeid="";
+
+//логин в явном виде
+  if(isset($_GET['loginname'])) $currentlogin=$_GET['loginname']; else $currentlogin="";
+
 //id логина
-  if(isset($_GET['login']))	$currentloginid=$_GET['login']; else $currentloginid="";
+  if(isset($_GET['loginid']))	$currentloginid=$_GET['loginid']; else $currentloginid="";
   
 //IP адрес в явном виде
-  if(isset($_GET['ipname'])) $currentipaddress=$_GET['ipname']; else $currentipaddress="";
+  if(isset($_GET['ipaddressname'])) $currentipaddress=$_GET['ipaddressname']; else $currentipaddress="";
   
 //id IP адреса
-  if(isset($_GET['ip'])) $currentipaddressid=$_GET['ip'];  else	$currentipaddressid="";
+  if(isset($_GET['ipaddressid'])) $currentipaddressid=$_GET['ipaddressid'];  else	$currentipaddressid="";
   
  //сайт в явном виде 
-  if(isset($_GET['site']))
-  {
-	$currentsite=$_GET['site'];
-  if($currentlogin=="")
-	$currentlogin=$_GET['site'];
-  if($currentipaddress=="")
-	$currentipaddress=$_GET['site'];
-  
-  //костыль для отчетов 41 и 42 и 43 и 44
-  // TODO убрать костыль 08.01.2022
- if($_GET['id']==41 || $_GET['id']==42 || $_GET['id']==43 || $_GET['id']==44) 
-  $currenthour=$_GET['site'];
-  else
-  $currenthour=0;
+  if(isset($_GET['site'])) 	$currentsite=$_GET['site']; else	$currentsite="";
 
-	}
-  else
-  {
-	$currentsite="";
-	
-	$currenthour=0;
-  }
-  
+ //mime в явном виде 
+ if(isset($_GET['mime'])) 	$currentmime=$_GET['mime']; else	$currentmime="";
+
+
+//час в явном виде для 41 и 42 
+if(isset($_GET['hour'])) 	$currenthour=$_GET['hour']; else	$currenthour="0";
+
   //id группы в явном виде
-  if(isset($_GET['group']))	$currentgroupid=$_GET['group'];  else $currentgroupid="";
-  //тип
+  if(isset($_GET['groupid']))	$currentgroupid=$_GET['groupid'];  else $currentgroupid="";
+  //тип 0 - логины, 1 - ip адреса
   if(isset($_GET['typeid'])) $typeid=$_GET['typeid']; else	$typeid="";
  //имя группы в явном виде 
   if(isset($_GET['groupname']))	$currentgroup=$_GET['groupname']; else $currentgroup="";
  //хттп статус в явном виде
-  if(isset($_GET['httpname'])) $currenthttpname=$_GET['httpname']; else $currenthttpname="";
+  if(isset($_GET['httpstatusname'])) $currenthttpname=$_GET['httpstatusname']; else $currenthttpname="";
  //хттп статус id
-  if(isset($_GET['httpstatus'])) $currenthttpstatusid=$_GET['httpstatus']; else	$currenthttpstatusid="";
- //логин или IP адрес
-  if(isset($_GET['loiid'])) $currentloiid=$_GET['loiid']; else $currentloiid="";
- //логин или ip адрес в явном виде
-  if(isset($_GET['loiname'])) $currentloiname=$_GET['loiname']; else $currentloiname="";
-
+  if(isset($_GET['httpstatusid'])) $currenthttpstatusid=$_GET['httpstatusid']; else	$currenthttpstatusid="";
+ 
 
 ///с этим что-то надо будет сделать. Убрать лишнюю дублирующуюся информацию
 $params = array();
 $params['dbase']=$db[$srv];
 $params['idReport']=$id;
 $params['date']=$querydate;
-$params['period']=$dayormonth;
+$params['date2']=$querydate2;
 $params['idLogin']=$currentloginid;   
 $params['idIpaddress']=$currentipaddress; 
 
-$globalSS['dayormonth']=$dayormonth;
 $globalSS['currenthttpname']=$currenthttpname;
 $globalSS['currenthttpstatusid']=$currenthttpstatusid;
 $globalSS['currentipaddressid']=$currentipaddressid;
@@ -712,6 +690,8 @@ $querySitesTraffic="
 
   ORDER BY site asc
 ;";
+
+
 
 #postgre version
 if($dbtype==1)
@@ -2004,11 +1984,11 @@ WHERE (1=1)
 
 
 $queryPopularSites="
+
 	SELECT 
 	  SUBSTRING_INDEX(site,'/',1) AS st,
 	  sum(sizeinbytes) AS s,
 	  count(1) AS c
-	  
 	  
 	FROM scsq_traffic 
 
@@ -2041,8 +2021,7 @@ $queryPopularSites="
   SELECT 
 	  split_part(site,'/',1) AS st,
 	  sum(sizeinbytes) AS s,
-	  count(1) AS c
- 
+	  count(1) AS c	  
 	  
 	FROM scsq_traffic 
 
@@ -4280,7 +4259,7 @@ from (
  
   ";
 
-#костыль для правильного разбора сайтов (currentloginid 1 или 2)
+
 
 $queryWhoVisitPopularSiteLogin="
   SELECT 
@@ -4299,8 +4278,8 @@ $queryWhoVisitPopularSiteLogin="
 	  AND date<".$dateend."
 	
 	AND 	  (case
-				when (".$currentloginid."=1) and (SUBSTRING_INDEX(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentloginid."=2) and (SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)) ='".$currentsite."' then TRUE
+				when (".$currentsitetypeid."=1) and (SUBSTRING_INDEX(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentsitetypeid."=2) and (SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
@@ -4347,8 +4326,8 @@ $queryWhoVisitPopularSiteLogin="
 	  AND date<".$dateend."
 	
 	AND 	  (case
-				when (".$currentloginid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentloginid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
+				when (".$currentsitetypeid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentsitetypeid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
@@ -4936,8 +4915,8 @@ $queryWhoVisitPopularSiteIpaddress="
 	  AND date<".$dateend."
 	
 	AND 	  (case
-				when (".$currentipaddressid."=1) and (SUBSTRING_INDEX(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentipaddressid."=2) and (SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)) ='".$currentsite."' then TRUE
+				when (".$currentsitetypeid."=1) and (SUBSTRING_INDEX(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentsitetypeid."=2) and (SUBSTRING_INDEX(SUBSTRING_INDEX(scsq_traffic.site,'/',1),'.',-2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
@@ -4982,8 +4961,8 @@ $queryWhoVisitPopularSiteIpaddress="
 	  AND date<".$dateend."
 	
 	AND 	  (case
-				when (".$currentipaddressid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
-				when (".$currentipaddressid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
+				when (".$currentsitetypeid."=1) and (split_part(site,'/',1)='".$currentsite."') then TRUE 
+				when (".$currentsitetypeid."=2) and reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) ='".$currentsite."' then TRUE
 				else FALSE
 			end ) = TRUE
 	
@@ -5254,7 +5233,7 @@ $queryLoginsHttpStatus="
     		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 		".$filterSite."
     AND par=1
-  group by crc32(nofriends.name) 
+  group by crc32(nofriends.name),nofriends.name, login,tmp2.name
   order by nofriends.name asc;";
   
   
@@ -5326,10 +5305,11 @@ $queryIpaddressHttpStatus="
     		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
 		".$filterSite."
     AND par=1
-  GROUP BY crc32(nofriends.name)
+  GROUP BY crc32(nofriends.name),nofriends.name, ipaddress, tmp2.name
   ORDER BY nofriends.name asc;";
   
   #postgre version
+  if($dbtype==1)
   $queryIpaddressHttpStatus="
   SELECT 
     nofriends.name,
@@ -5372,7 +5352,7 @@ $queryOneLoginOneHttpStatus="
 
   LEFT JOIN scsq_logins ON scsq_logins.id=scsq_traffic.login 
 
-  WHERE login='".$currentloiid."' 
+  WHERE login='".$currentloginid."' 
     and httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
@@ -5391,7 +5371,7 @@ $queryOneLoginOneHttpStatus="
 
   LEFT JOIN scsq_logins ON scsq_logins.id=scsq_traffic.login 
 
-  WHERE login='".$currentloiid."' 
+  WHERE login='".$currentloginid."' 
     and httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
@@ -5408,7 +5388,7 @@ $queryOneIpaddressOneHttpStatus="
 
   LEFT JOIN scsq_ipaddress ON scsq_ipaddress.id=scsq_traffic.ipaddress 
 
-  WHERE ipaddress='".$currentloiid."' 
+  WHERE ipaddress='".$currentipaddressid."' 
     and httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
@@ -5427,7 +5407,7 @@ $queryOneIpaddressOneHttpStatus="
 
   LEFT JOIN scsq_ipaddress ON scsq_ipaddress.id=scsq_traffic.ipaddress 
 
-  WHERE ipaddress='".$currentloiid."' 
+  WHERE ipaddress='".$currentipaddressid."' 
     and httpstatus='".$currenthttpstatusid."' 
     and date>".$datestart." 
     and date<".$dateend." 
@@ -5678,6 +5658,7 @@ $queryOneMimeOneLogin="
 ";
 
 #postgre version
+if($dbtype==1)
 $queryOneMimeOneLogin="
   SELECT 
     scsq_traf.site,
@@ -5767,6 +5748,7 @@ $queryOneMimeOneIpaddress="
 ";
 
 #postgre version
+if($dbtype==1)
 $queryOneMimeOneIpaddress="
   SELECT 
     scsq_traf.site,
@@ -6783,6 +6765,7 @@ mn=new Array(
 
 <?php
 
+//Вычитаем все GET параметры и соберем в строку. Чтобы ничего не придумывать.
 $dfltAction=doCreateGetArray($globalSS);
 
 echo '<form name=fastdateswitch_form action="reports.php?'.$dfltAction.'" method=POST>';
@@ -6916,10 +6899,10 @@ if($id==32)
 $repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." ".$_lang['stIPADDRESSFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==33)
-$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentloiname.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentloginname.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==34)
-$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentloiname.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
+$repheader= "<h2>".$_lang['stHTTPSTATUS']." ".$currenthttpname." (".$currentipname.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
 if($id==35)
 $repheader= "<h2>".$_lang['stONELOGINIPTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
@@ -6949,7 +6932,7 @@ if($id==43)
 $repheader= "<h2>".$_lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
 
 if($id==44)
-$repheader= "<h2>".$_lang['stONELOGINTOPSITESTRAFFIC']." ".$currentlogin." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
+$repheader= "<h2>".$_lang['stONEIPADRESSTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname." ".$_lang['stFROM']." ".$currenthour." ".$_lang['stUNTIL']." ".($currenthour+1)."</h2>";
 
 if($id==45)
 $repheader= "<h2>".$_lang['stMIMETYPESTRAFFIC']." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
@@ -7034,31 +7017,18 @@ echo "<tr>";
 echo "<td valign=middle width='80%'>".$repheader."</td>";
 }
 
-#если переменных нет, то скажем что они пусты
-if(isset($_GET['date2'])) $v_date2 = "&date2=".$_GET['date2']; else $v_date2="";
-if(isset($_GET['login'])) $v_login = "&login=".$_GET['login']; else $v_login="";
-if(isset($_GET['loginname'])) $v_loginname = "&loginname=".$_GET['loginname']; else $v_loginname="";
-if(isset($_GET['ip'])) $v_ip = "&ip=".$_GET['ip']; else $v_ip="";
-if(isset($_GET['ipname'])) $v_ipname = "&ipname=".$_GET['ipname']; else $v_ipname="";
-if(isset($_GET['httpstatus'])) $v_httpstatus = "&httpstatus=".$_GET['httpstatus']; else $v_httpstatus="";
-if(isset($_GET['httpname'])) $v_httpname = "&httpname=".$_GET['httpname']; else $v_httpname="";
-if(isset($_GET['loiid'])) $v_loiid = "&loiid=".$_GET['loiid']; else $v_loiid="";
-if(isset($_GET['loiname'])) $v_loiname = "&loiname=".$_GET['loiname']; else $v_loiname="";
-if(isset($_GET['site'])) $v_site = "&site=".$_GET['site']; else $v_site="";
-if(isset($_GET['group'])) $v_group = "&group=".$_GET['group']; else $v_group="";
-if(isset($_GET['groupname'])) $v_groupname = "&groupname=".$_GET['groupname']; else $v_groupname="";
-if(isset($_GET['typeid'])) $v_typeid = "&typeid=".$_GET['typeid']; else $v_typeid="";
+
 
 $globalSS['repheader'] = $repheader;
 $globalSS['typeid'] = $typeid;
 
 
 if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
-echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt=Image title='Generate PDF'></a>
-								 <a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&csv=1><img src='../img/csvicon.png' width=32 height=32 alt=Image title='Generate CSV'></a>";
+echo "<td valign=top>&nbsp;&nbsp;<a href=reports.php?date=".$querydate."&date2=".$querydate2."&".$dfltAction."&pdf=1><img src='../img/pdficon.jpg' width=32 height=32 alt=Image title='Generate PDF'></a>
+								 <a href=reports.php?date=".$querydate."&date2=".$querydate2."&".$dfltAction."&csv=1><img src='../img/csvicon.png' width=32 height=32 alt=Image title='Generate CSV'></a>";
 #Если файл есть в кэше, то покажем иконку - кэшировано. Если нажать на неё, то удалится только один файл этого отчёта
 if(file_exists ("".$globalSS['root_dir']."/modules/Cache/data/".doGenerateUniqueNameReport($globalSS['params'])))
-echo "							 <a href=reports.php?srv=".$_GET['srv']."&id=".$_GET['id']."&date=".$_GET['date'].$v_date2."&dom=".$_GET['dom'].$v_login.$v_loginname.$v_ip.$v_ipname.$v_site.$v_group.$v_groupname.$v_typeid.$v_httpstatus.$v_httpname.$v_loiid.$v_loiname."&clearcache=1><img src='../img/cached.png' width=35 height=35 alt='Image' title='Clear cache'></a>";
+echo "							 <a href=reports.php?date=".$querydate."&date2=".$querydate2."&".$dfltAction."&clearcache=1><img src='../img/cached.png' width=35 height=35 alt='Image' title='Clear cache'></a>";
 
 echo "</td>";
 
