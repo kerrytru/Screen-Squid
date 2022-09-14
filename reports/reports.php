@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/13 23:34:57.140 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/14 22:19:33.856 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.11.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.12.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -56,8 +56,6 @@ $header=$header.'
 ';
 
 
-$paramsGET = array();
-
 //номер БД
 if(isset($_GET['srv']))  $srv=$_GET['srv']; else  $srv=0;
 
@@ -71,9 +69,6 @@ if(isset($_REQUEST['date']) && $_REQUEST['date']!="") $querydate=$_REQUEST['date
 if(isset($_REQUEST['date2'])) $querydate2=$_REQUEST['date2']; else $querydate2="";
 
 list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
-
-
-//имя логина
 
 
 //id типа сайта 1 - 10.102.10.22, 2 - www.yandex.ru
@@ -145,12 +140,6 @@ $useIpaddressalias = $globalSS['useIpaddressalias'];
 
 
 #Большой костыль end
-
-$countTopSitesLimit=$globalSS['countTopSitesLimit'];
-$countTopLoginLimit=$globalSS['countTopLoginLimit'];
-$countTopIpLimit=$globalSS['countTopIpLimit'];
-$countPopularSitesLimit=$globalSS['countPopularSitesLimit'];
-$countWhoDownloadBigFilesLimit=$globalSS['countWhoDownloadBigFilesLimit'];
 
 
 include("".$globalSS['root_dir']."/modules/Chart/module.php");
@@ -225,57 +214,6 @@ ret = args.join('&');
 parent.right.location.href='reports.php?srv=<?php echo $srv ?>&'+ret+
 		'&date='+window.document.fastdateswitch_form.date.value+'&date2='+window.document.fastdateswitch_form.date2.value;
 
-
-/*
-	if(idsign==0)
-	{
-		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport+
-		'&date='+window.document.fastdateswitch_form.date_field_hidden.value
-		+'&dom='+dom
-		+'&login='+id
-		+'&loginname='+idname
-		+'&typeid=0'
-		+'&site='+par1;
-	}
-	if(idsign==1)
-	{
-		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
-		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
-		+'&dom='+dom
-		+'&ip='+id
-		+'&ipname='+idname
-		+'&typeid=1'
-		+'&site='+par1;
-	}
-	if(idsign==3)
-	{
-		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
-		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
-		+'&dom='+dom
-		+'&group='+id
-		+'&groupname='+idname
-		+'&typeid=0';
-	}
-	if(idsign==4)
-	{
-		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
-		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
-		+'&dom='+dom
-		+'&group='+id
-		+'&groupname='+idname
-		+'&typeid=1';
-	}
-	if(idsign>4)
-	{
-		parent.right.location.href='reports.php?srv=<?php echo $srv ?>&id='+idReport
-		+'&date='+window.document.fastdateswitch_form.date_field_hidden.value
-		+'&dom='+dom
-		+'&httpstatus='+id
-		+'&httpname='+idname
-		+'&loiid='+idsign
-		+'&loiname='+par1;
-	}
-*/
 }
 
 
@@ -285,6 +223,8 @@ function UpdateLeftMenu(id)
   +'&loginname=<?php echo $currentlogin; ?>&ipname=<?php echo $currentipaddress; ?>&groupname=<?php echo $currentgroup; ?>';
 }
 
+
+//Функция, чтобы редактирование алиасов например, открывать прямо тут же, без перезагрузки
 var popUpObj;
 
 function showModalPopUp(srv, tableid, typeid){
@@ -309,9 +249,6 @@ function showModalPopUp(srv, tableid, typeid){
 
 
 
-
-
-
 //Если второй даты нет, то предполагаем, что трафик за сутки
 if($querydate2=="") {
 	$datestart=strtotime($querydate);
@@ -328,7 +265,7 @@ if($querydate2=="") {
 	
   }
   
-  ///костыль для отчетов по периодам
+  ///
   /// 21 - по месяцам, 39 - по дням, 40 - по имени дня
   if(($_GET['id']==39)||($_GET['id']==40))
   {
@@ -409,18 +346,14 @@ $globalSS['category'] = doQueryExistsModuleCategory($globalSS);
 $category = $globalSS['category'];
 //querys for reports
 
-//if($useLoginalias==0)
-
-$echoLoginAliasColumn=",aliastbl.name";
-
 
 #mysql version
    $queryLoginsTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
-    nofriends.id
-	".$echoLoginAliasColumn."
+    nofriends.id,
+	aliastbl.name
 	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
           login,
@@ -466,8 +399,8 @@ $echoLoginAliasColumn=",aliastbl.name";
 
   GROUP BY nofriends.name,
 		   nofriends.id,
-		   tmp.s
-		   ".$echoLoginAliasColumn.", sumdenied.sum_denied;";
+		   tmp.s,
+		   aliastbl.name, sumdenied.sum_denied;";
 
 #postgre version
 if($dbtype==1)
@@ -475,8 +408,8 @@ $queryLoginsTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
-    nofriends.id
-	".$echoLoginAliasColumn."
+    nofriends.id,
+	aliastbl.name
 	, coalesce(sumdenied.sum_denied,0)
   FROM (SELECT 
           login,
@@ -522,23 +455,18 @@ $queryLoginsTraffic="
 
   GROUP BY nofriends.name,
     nofriends.id,
-    tmp.s
-    ".$echoLoginAliasColumn.", sumdenied.sum_denied
+    tmp.s,
+    aliastbl.name, sumdenied.sum_denied
 ;";
 
-#echo $queryLoginsTraffic;
-
-
-
-$echoIpaddressAliasColumn=",aliastbl.name";
 
 #mysql version
 $queryIpaddressTraffic="
   SELECT 
     nofriends.name as 'v_name',
     tmp.s as 'v_traffic',
-    nofriends.id as 'v_name_id' 
-	".$echoIpaddressAliasColumn." 
+    nofriends.id as 'v_name_id', 
+	aliastbl.name
 	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  ipaddress,
@@ -584,8 +512,8 @@ $queryIpaddressTraffic="
 
   GROUP BY nofriends.name,
     tmp.s,
-    nofriends.id 
-	".$echoIpaddressAliasColumn.", sumdenied.sum_denied
+    nofriends.id, 
+	aliastbl.name, sumdenied.sum_denied
 	ORDER BY nofriends.name asc
    ;";
 
@@ -595,8 +523,8 @@ if($dbtype==1)
   SELECT 
     nofriends.name,
     tmp.s,
-    nofriends.id 
-	".$echoIpaddressAliasColumn."
+    nofriends.id, 
+	aliastbl.name	
 	, coalesce(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  ipaddress,
@@ -639,8 +567,8 @@ WHERE (1=1)
 
   GROUP BY nofriends.name,
     tmp.s,
-    nofriends.id 
-	".$echoIpaddressAliasColumn.", sumdenied.sum_denied
+    nofriends.id, 
+	aliastbl.name, sumdenied.sum_denied
   ORDER BY nofriends.name asc
    ;";
 
@@ -780,7 +708,7 @@ $queryTopSitesTraffic="
  
 	 
   ORDER BY tmp2.s desc
-  LIMIT ".$countTopSitesLimit." ";
+  LIMIT ".$globalSS['countTopSitesLimit']." ";
 
 //echo $queryTopSitesTraffic;
 
@@ -823,7 +751,7 @@ $queryTopSitesTraffic="
 
 	 
   ORDER BY tmp2.s desc
-  LIMIT ".$countTopSitesLimit." ";
+  LIMIT ".$globalSS['countTopSitesLimit']." ";
 
 //echo $queryTopSitesTraffic;
 
@@ -832,8 +760,8 @@ $queryTopLoginsTraffic="
   SELECT 
     nofriends.name,
     tmp.s,
-    nofriends.id 
-	".$echoLoginAliasColumn."
+    nofriends.id, 
+	aliastbl.name
 	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  login,
@@ -884,7 +812,7 @@ $queryTopLoginsTraffic="
     nofriends.name,
     tmp.s,
     nofriends.id 
-	".$echoLoginAliasColumn."
+	,aliastbl.name
 	,coalesce(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  login,
@@ -926,7 +854,7 @@ $queryTopLoginsTraffic="
   WHERE tmp.s !=0
 
   ORDER BY s desc 
-  LIMIT ".$countTopLoginLimit.";";
+  LIMIT ".$globalSS['countTopLoginLimit'].";";
 
 #mysql version
 $queryTopIpTraffic="
@@ -934,7 +862,7 @@ $queryTopIpTraffic="
     nofriends.name,
     tmp.s,
     nofriends.id 
-	".$echoIpaddressAliasColumn."
+	,aliastbl.name
 	,ifnull(sumdenied.sum_denied,0)
   FROM (SELECT 
 	  ipaddress,
@@ -978,7 +906,7 @@ $queryTopIpTraffic="
   WHERE tmp.s !=0
 
   ORDER BY s desc 
-  LIMIT ".$countTopIpLimit.";";
+  LIMIT ".$globalSS['countTopIpLimit'].";";
 
 #postgre version
 if($dbtype==1)
@@ -1031,7 +959,7 @@ $queryTopIpTraffic="
   WHERE tmp.s !=0
 
   ORDER BY s desc 
-  LIMIT ".$countTopIpLimit.";";
+  LIMIT ".$globalSS['countTopIpLimit'].";";
 
 #mysql version
 $queryTrafficByHours="
@@ -1235,8 +1163,8 @@ $queryTopLoginsWorkingHoursTraffic="
 SELECT 
 nofriends.name,
 tmp.s,
-nofriends.id
-".$echoLoginAliasColumn."
+nofriends.id,
+aliastbl.name
 FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) as 's' 
@@ -1285,8 +1213,8 @@ $queryTopLoginsWorkingHoursTraffic="
 SELECT 
 nofriends.name,
 tmp.s,
-nofriends.id
-".$echoLoginAliasColumn."
+nofriends.id,
+aliastbl.name
 FROM (SELECT 
 	  login,
 	  SUM(sizeinbytes) as s 
@@ -1334,8 +1262,8 @@ $queryTopIpWorkingHoursTraffic="
 SELECT 
 nofriends.name,
 tmp.s,
-nofriends.id 
-".$echoIpaddressAliasColumn."
+nofriends.id,
+aliastbl.name
 FROM (SELECT 
   ipaddress,
   SUM(sizeinbytes) AS s 
@@ -1382,8 +1310,8 @@ $queryTopIpWorkingHoursTraffic="
 SELECT 
 nofriends.name,
 tmp.s,
-nofriends.id 
-".$echoIpaddressAliasColumn."
+nofriends.id,
+aliastbl.name
 FROM (SELECT 
   ipaddress,
   SUM(sizeinbytes) AS s 
@@ -2013,7 +1941,7 @@ $queryPopularSites="
    GROUP BY st
    
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
   
 #postgre version
 if($dbtype==1)
@@ -2046,7 +1974,7 @@ $queryPopularSites="
 	GROUP BY st
   
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
 
 
 $queryWhoDownloadBigFiles="
@@ -2097,7 +2025,7 @@ $queryWhoDownloadBigFiles="
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
   
   	ORDER BY sizeinbytes desc 
-    LIMIT ".$countWhoDownloadBigFilesLimit."
+    LIMIT ".$globalSS['countWhoDownloadBigFilesLimit']."
 ";
 
 
@@ -2149,7 +2077,7 @@ $queryWhoDownloadBigFiles="
   INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
   	ORDER BY sizeinbytes desc 
-  	LIMIT ".$countWhoDownloadBigFilesLimit."
+  	LIMIT ".$globalSS['countWhoDownloadBigFilesLimit']."
 ";
 
 $queryTrafficByPeriod="
@@ -4053,7 +3981,7 @@ $queryOneLoginTopSitesTraffic="
 	   AND par=1
 	 GROUP BY CRC32(scsq_quicktraffic.site), scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s DESC
-	 LIMIT ".$countTopSitesLimit." 
+	 LIMIT ".$globalSS['countTopSitesLimit']." 
 ";
 
 #postgre version
@@ -4085,7 +4013,7 @@ $queryOneLoginTopSitesTraffic="
 	   AND par=1
 	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s DESC
-	 LIMIT ".$countTopSitesLimit." 
+	 LIMIT ".$globalSS['countTopSitesLimit']." 
 ";
 
 $queryOneLoginTrafficByHours="
@@ -4417,7 +4345,7 @@ $queryOneLoginPopularSites="
 	GROUP BY st
 	
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
 
 
   #postgre version
@@ -4436,7 +4364,7 @@ $queryOneLoginPopularSites="
   GROUP BY st
 
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
 
 
 ///IP адреса на одном логине
@@ -4567,7 +4495,7 @@ $queryLoginDownloadBigFiles="
   INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
   ORDER BY sizeinbytes desc 
-  	LIMIT ".$countWhoDownloadBigFilesLimit."
+  	LIMIT ".$globalSS['countWhoDownloadBigFilesLimit']."
 ";
 
 #postgre version
@@ -4601,7 +4529,7 @@ $queryLoginDownloadBigFiles="
   INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
   ORDER BY sizeinbytes desc 
-  	LIMIT ".$countWhoDownloadBigFilesLimit."
+  	LIMIT ".$globalSS['countWhoDownloadBigFilesLimit']."
 ";
 
 $queryOneIpaddressTraffic="
@@ -4696,7 +4624,7 @@ $queryOneIpaddressTopSitesTraffic="
 	   AND par=1
 	 GROUP BY CRC32(scsq_quicktraffic.site) ,scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s desc 
-	 LIMIT ".$countTopSitesLimit." ";
+	 LIMIT ".$globalSS['countTopSitesLimit']." ";
 
 #postgre version
 if($dbtype==1)
@@ -4727,7 +4655,7 @@ $queryOneIpaddressTopSitesTraffic="
 	   AND par=1
 	 GROUP BY scsq_quicktraffic.site, sumdenied.sum_denied
 	 ORDER BY s desc 
-	 LIMIT ".$countTopSitesLimit." ";
+	 LIMIT ".$globalSS['countTopSitesLimit']." ";
 
 $queryOneIpaddressTrafficByHours="
 SELECT hrs.hr_txt,
@@ -5017,7 +4945,7 @@ $queryIpaddressDownloadBigFiles="
   INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
   	ORDER BY sizeinbytes desc 
-  	LIMIT ".$countWhoDownloadBigFilesLimit."
+  	LIMIT ".$globalSS['countWhoDownloadBigFilesLimit']."
 ";
 
 #postgre version
@@ -5050,7 +4978,7 @@ $queryIpaddressDownloadBigFiles="
   INNER JOIN scsq_logins as scsq_log on scsq_log.id=tmp.login
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
   	ORDER BY sizeinbytes desc 
-  	LIMIT ".$countWhoDownloadBigFilesLimit."
+  	LIMIT ".$globalSS['countWhoDownloadBigFilesLimit']."
 ";
 
 
@@ -5179,7 +5107,7 @@ $queryOneIpaddressPopularSites="
 
 	GROUP BY st
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
 
 
 #postgre version
@@ -5199,7 +5127,7 @@ $queryOneIpaddressPopularSites="
 	GROUP BY st 
   
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
 
 
 $queryLoginsHttpStatus="
@@ -6328,7 +6256,7 @@ $queryOneGroupTopSitesTraffic="
 
 	 GROUP BY site
 	 ORDER BY s desc 
-	 LIMIT ".$countTopSitesLimit." ";
+	 LIMIT ".$globalSS['countTopSitesLimit']." ";
 
 
 
@@ -6365,7 +6293,7 @@ INNER JOIN scsq_aliasingroups sag ON sag.aliasid = alias_traffic.al_id AND sag.g
 
 GROUP BY site
 ORDER BY s desc 
-LIMIT ".$countTopSitesLimit." ";
+LIMIT ".$globalSS['countTopSitesLimit']." ";
 
 
 
@@ -6595,7 +6523,7 @@ $queryOneGroupWhoDownloadBigFiles="
 	WHERE scsq_logins.id=tmp.al_login 
 	and scsq_ipaddress.id=tmp.al_ipaddress	
 	ORDER BY sizeinbytes desc 
-  LIMIT ".$countWhoDownloadBigFilesLimit.";";
+  LIMIT ".$globalSS['countWhoDownloadBigFilesLimit'].";";
 
 
 #postgre version
@@ -6638,7 +6566,7 @@ $queryOneGroupWhoDownloadBigFiles="
     and scsq_ipaddress.id=tmp.al_ipaddress
   
   ORDER BY sizeinbytes desc 
-  LIMIT ".$countWhoDownloadBigFilesLimit.";";
+  LIMIT ".$globalSS['countWhoDownloadBigFilesLimit'].";";
 
 
 
@@ -6674,7 +6602,7 @@ $queryOneGroupPopularSites="
 	GROUP BY st
 	
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
 
 #postgre version
 if($dbtype==1)
@@ -6714,7 +6642,7 @@ $queryOneGroupPopularSites="
 	GROUP BY st
 
   ORDER BY c desc 
-  LIMIT ".$countPopularSitesLimit.";";
+  LIMIT ".$globalSS['countPopularSitesLimit'].";";
 
 //querys for group reports end
 
@@ -7883,7 +7811,7 @@ $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
 $numrow=1;
-while ($numrow<$countTopLoginLimit)
+while ($numrow<$globalSS['countTopLoginLimit'])
 {
 	if (!isset($arrLine0[$numrow-1])) {
 		$arrLine0[$numrow-1]="NO DATA";
@@ -7900,7 +7828,7 @@ $numrow++;
  
 $userData['charttype']="pie";
 $userData['chartname']="toplogins";
-$userData['charttitle']=$_lang['stTOPLOGINSTRAFFIC']." (".$_lang['stTOP']."-".$countTopLoginLimit.")";
+$userData['charttitle']=$_lang['stTOPLOGINSTRAFFIC']." (".$_lang['stTOP']."-".$globalSS['countTopLoginLimit'].")";
 $userData['arrSerie1']=$arrLine1;
 $userData['arrSerie2']=$arrLine0;
 
@@ -7924,7 +7852,7 @@ $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
 $numrow=1;
-while ($numrow<$countTopIpLimit)
+while ($numrow<$globalSS['countTopIpLimit'])
 {
 	if ($arrLine0[$numrow-1]=="") {
 		$arrLine0[$numrow-1]="NO DATA";
@@ -7940,7 +7868,7 @@ $numrow++;
 
 $userData['charttype']="pie";
 $userData['chartname']="topips";
-$userData['charttitle']=$_lang['stTOPIPTRAFFIC']." (".$_lang['stTOP']."-".$countTopIpLimit.")";
+$userData['charttitle']=$_lang['stTOPIPTRAFFIC']." (".$_lang['stTOP']."-".$globalSS['countTopIpLimit'].")";
 $userData['arrSerie1']=$arrLine1;
 $userData['arrSerie2']=$arrLine0;
 
@@ -7963,7 +7891,7 @@ $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
 $numrow=1;
-while ($numrow<$countTopSitesLimit)
+while ($numrow<$globalSS['countTopSitesLimit'])
 {
 	if ($arrLine0[$numrow-1]=="") {
 		$arrLine0[$numrow-1]="NO DATA";
@@ -7980,7 +7908,7 @@ $numrow++;
 
 $userData['charttype']="pie";
 $userData['chartname']="topsites";
-$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+$userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$globalSS['countTopSitesLimit'].")";
 $userData['arrSerie1']=$arrLine1;
 $userData['arrSerie2']=$arrLine0;
 
@@ -8003,7 +7931,7 @@ $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
 $numrow=1;
-while ($numrow<$countPopularSitesLimit)
+while ($numrow<$globalSS['countPopularSitesLimit'])
 {
 	if ($arrLine0[$numrow-1]=="") {
 		$arrLine0[$numrow-1]="NO DATA";
@@ -8021,7 +7949,7 @@ $numrow++;
 
 $userData['charttype']="pie";
 $userData['chartname']="toppop";
-$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+$userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$globalSS['countPopularSitesLimit'].")";
 $userData['arrSerie1']=$arrLine1;
 $userData['arrSerie2']=$arrLine0;
 
@@ -8273,7 +8201,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
  
  $numrow=1;
- while ($numrow<$countTopSitesLimit)
+ while ($numrow<$globalSS['countTopSitesLimit'])
  {
 	 if ($arrLine0[$numrow-1]=="") {
 		 $arrLine0[$numrow-1]="NO DATA";
@@ -8290,7 +8218,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  
  $userData['charttype']="pie";
  $userData['chartname']="topsites";
- $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+ $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$globalSS['countTopSitesLimit'].")";
  $userData['arrSerie1']=$arrLine1;
  $userData['arrSerie2']=$arrLine0;
  
@@ -8313,7 +8241,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
  $numrow=1;
- while ($numrow<$countPopularSitesLimit)
+ while ($numrow<$globalSS['countPopularSitesLimit'])
  {
 	 if ($arrLine0[$numrow-1]=="") {
 		 $arrLine0[$numrow-1]="NO DATA";
@@ -8331,7 +8259,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  
  $userData['charttype']="pie";
  $userData['chartname']="toppop";
- $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+ $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$globalSS['countPopularSitesLimit'].")";
  $userData['arrSerie1']=$arrLine1;
  $userData['arrSerie2']=$arrLine0;
  
@@ -8401,7 +8329,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
  
  $numrow=1;
- while ($numrow<$countTopSitesLimit)
+ while ($numrow<$globalSS['countTopSitesLimit'])
  {
 	 if ($arrLine0[$numrow-1]=="") {
 		 $arrLine0[$numrow-1]="NO DATA";
@@ -8418,7 +8346,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  
  $userData['charttype']="pie";
  $userData['chartname']="topsites";
- $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+ $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$globalSS['countTopSitesLimit'].")";
  $userData['arrSerie1']=$arrLine1;
  $userData['arrSerie2']=$arrLine0;
  
@@ -8441,7 +8369,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
  $numrow=1;
- while ($numrow<$countPopularSitesLimit)
+ while ($numrow<$globalSS['countPopularSitesLimit'])
  {
 	 if ($arrLine0[$numrow-1]=="") {
 		 $arrLine0[$numrow-1]="NO DATA";
@@ -8459,7 +8387,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  
  $userData['charttype']="pie";
  $userData['chartname']="toppop";
- $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+ $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$globalSS['countPopularSitesLimit'].")";
  $userData['arrSerie1']=$arrLine1;
  $userData['arrSerie2']=$arrLine0;
  
@@ -8531,7 +8459,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
  
  $numrow=1;
- while ($numrow<$countTopSitesLimit)
+ while ($numrow<$globalSS['countTopSitesLimit'])
  {
 	 if ($arrLine0[$numrow-1]=="") {
 		 $arrLine0[$numrow-1]="NO DATA";
@@ -8548,7 +8476,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  
  $userData['charttype']="pie";
  $userData['chartname']="topsites";
- $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$countTopSitesLimit.")";
+ $userData['charttitle']=$_lang['stTOPSITESTRAFFIC']." (".$_lang['stTOP']."-".$globalSS['countTopSitesLimit'].")";
  $userData['arrSerie1']=$arrLine1;
  $userData['arrSerie2']=$arrLine0;
  
@@ -8571,7 +8499,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
  $numrow=1;
- while ($numrow<$countPopularSitesLimit)
+ while ($numrow<$globalSS['countPopularSitesLimit'])
  {
 	 if ($arrLine0[$numrow-1]=="") {
 		 $arrLine0[$numrow-1]="NO DATA";
@@ -8589,7 +8517,7 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  
  $userData['charttype']="pie";
  $userData['chartname']="toppop";
- $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$countPopularSitesLimit.")";
+ $userData['charttitle']=$_lang['stPOPULARSITES']." (".$_lang['stTOP']."-".$globalSS['countPopularSitesLimit'].")";
  $userData['arrSerie1']=$arrLine1;
  $userData['arrSerie2']=$arrLine0;
  
