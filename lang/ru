@@ -246,4 +246,7 @@ $_lang['stREPORTSCOMMON']="Отчеты общие";
 $_lang['stDENIEDMEGABYTES']="Заблокированный трафик";
 $_lang['stINCOMEMEGABYTES']="Принятый трафик";
 
+//2.3
+$_lang['stDICTIONARY']="Справочники";
+
 ?>

@@ -245,4 +245,7 @@ $_lang['stREPORTSCOMMON']="Report common";
 //2.1
 $_lang['stDENIEDMEGABYTES']="Blocked traffic";
 $_lang['stINCOMEMEGABYTES']="Accepted traffic";
+
+//2.3
+$_lang['stDICTIONARY']="Dictionaries";
 ?>

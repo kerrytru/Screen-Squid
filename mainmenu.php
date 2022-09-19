@@ -77,6 +77,7 @@ parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+pa
 
 
 
+
 </script>
 
 </head>
@@ -220,12 +221,22 @@ echo "
 	
 
 //Misc
-	rootproxy.add(new WebFXTreeItem('".$_lang['stBYGROUP']."','javascript:GoReport(".$srv.",24);','','img/themes/default/Reports.png','img/themes/default/Reports.png'));
+//internal module
+var dictmodule = new WebFXTreeItem('".$_lang['stDICTIONARY']."');
+dictmodule.add(new WebFXTreeItem('".$_lang['stLOGINS']."','javascript:GoLink(\'modules/dictionary/index.php?srv=".$srv."&id=1\',\'right\')','','img/themes/default/User.png','img/themes/default/User.png'));
+dictmodule.add(new WebFXTreeItem('".$_lang['stIPADDRESS']."','javascript:GoLink(\'modules/dictionary/index.php?srv=".$srv."&id=2\',\'right\')','','img/themes/default/User.png','img/themes/default/User.png'));
+
+dictmodule.add(new WebFXTreeItem('".$_lang['stALIASES']."','javascript:GoRightReport(".$srv.",2)','','img/themes/default/Users.png','img/themes/default/Users.png'));
+dictmodule.add(new WebFXTreeItem('".$_lang['stGROUPS']."','javascript:GoRightReport(".$srv.",3)','','img/themes/default/UserGroups.png','img/themes/default/UserGroups.png'));
+
+rootproxy.add(dictmodule);
+
+rootproxy.add(new WebFXTreeItem('".$_lang['stBYGROUP']."','javascript:GoReport(".$srv.",24);','','img/themes/default/Reports.png','img/themes/default/Reports.png'));
 	rootproxy.add(new WebFXTreeItem('".$_lang['stFASTSEARCH']."','javascript:GoRightReport(".$srv.",4)','','img/themes/default/Search.png','img/themes/default/Search.png'));
 	rootproxy.add(new WebFXTreeItem('".$_lang['stSTATS']."','javascript:GoRightReport(".$srv.",1)','','img/themes/default/Statistics.png','img/themes/default/Statistics.png'));
 	rootproxy.add(new WebFXTreeItem('".$_lang['stLOGTABLE']."','javascript:GoRightReport(".$srv.",5)','','img/themes/default/Job.png','img/themes/default/Job.png'));
-	rootproxy.add(new WebFXTreeItem('".$_lang['stALIASES']."','javascript:GoRightReport(".$srv.",2)','','img/themes/default/Users.png','img/themes/default/Users.png'));
-	rootproxy.add(new WebFXTreeItem('".$_lang['stGROUPS']."','javascript:GoRightReport(".$srv.",3)','','img/themes/default/UserGroups.png','img/themes/default/UserGroups.png'));
+
+
 
 //Modules	
 	var modulemanager = new WebFXTreeItem('".$_lang['stMODULEMANAGER']."','javascript:GoRightReport(".$srv.",7)','','img/themes/default/Nodes.png','img/themes/default/Nodes.png');

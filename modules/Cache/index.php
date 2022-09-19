@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/09/11 17:07:22.149 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/09/11 17:07:27.120 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/19 20:40:23.954 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -95,18 +95,8 @@ echo "<br /><br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)
 
 echo $_lang['stCREATORS'];
 
-$newdate=strtotime(date("d-m-Y"))-86400;
-$newdate=date("d-m-Y",$newdate);
-
-
 
 ?>
-<form name=fastdateswitch_form>
-    <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
-    <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value=0>
-    <input type="hidden" name=groupname_field_hidden value=0>
-    <input type="hidden" name=typeid_field_hidden value=0>
-    </form>
+
 </body>
 </html>
