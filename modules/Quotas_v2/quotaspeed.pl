@@ -76,6 +76,8 @@ use DBI; # DBI  Perl!!!
 
 #=======================CONFIGURATION BEGIN============================
 
+my $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
+
 #mysql default config
 if($dbtype==0){
 $host = "localhost"; # host s DB
@@ -130,7 +132,7 @@ $dbh = DBI->connect_cached("DBI:mysql:$db:$host:$port",$user,$pass);
 }
 
 if($dbtype==1){ #postgre
-$dbh = DBI->connect_cached("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+$dbh = DBI->connect_cached("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
 }
 
 #get quota status
@@ -167,7 +169,7 @@ $row[0]=-1;
 
 #if quota status = 0 then all is good (pass user) 
         	if($row[0] == 0) {
-#				$answ='OK tag1=fastspeed';
+
 				$answ='OK tag1=fastspeed';
 
 			}

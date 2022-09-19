@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/04 23:26:50.903 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/19 21:33:42.600 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -131,7 +131,7 @@ sub doFetchQuery {
     }
 
     if($dbtype==1){ #postgre
-    $dbh_child = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
     }
     
       $sth = $dbh_child->prepare($sqlquery);
@@ -153,7 +153,7 @@ sub doQueryToDatabase {
     }
 
     if($dbtype==1){ #postgre
-    $dbh_child = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
     }
     
       $sth = $dbh_child->prepare($sqlquery);
@@ -537,6 +537,12 @@ doWriteToTerminal($now2);
 
 doWriteToLogFile("$now1 ===> $now2     records counted $countlines,   records added $countadded");
 doWriteToLogTable("$countlines records counted , $countadded records added ");
+
+#если посчитано 0 записей, то с логом что-то не так.
+if($countlines==0) {
+doWriteToLogTable("Something going wrong. Check manual, that your log file located in $filetoparse");
+}
+
 
 #delete lock file
 unlink("fetch.lock");

@@ -34,7 +34,7 @@ $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
 }
 
 if($dbtype==1){ #postgre
-$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+$dbh = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
 }
 
 $countQuotas=0;
