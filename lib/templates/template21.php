@@ -19,8 +19,8 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=javascript:GoPartlyReports(8,'".$dayormonth."','line2','line0','0','')>line0</a></td>";
-$colr[3]="<td><a href=javascript:GoPartlyReports(35,'".$dayormonth."','line2','line0','0','')>line4</a></td>";
+$colr[2]="<td><a href=javascript:GoPartlyReports('id',8,'loginid','line2','loginname','line0','typeid','0')>line0</a></td>";
+$colr[3]="<td><a href=javascript:GoPartlyReports('id',35,'loginid','line2','loginname','line0','typeid','0')>line4</a></td>";
 $colr[4]="<td>line3</td>";
 
 

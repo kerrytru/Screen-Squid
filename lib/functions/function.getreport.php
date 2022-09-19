@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.getreport.php </#FN>                                          
 *                         File Birth   > <!#FB> 2021/12/06 22:19:13.464 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/23 21:18:03.446 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/19 21:16:21.909 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -30,7 +30,6 @@ function doGetReportData($globalSS,$query,$template_name) {
     #возможно костыль
     $_lang=$globalSS['lang'];
 
-    $dayormonth=$globalSS['dayormonth'];
     $currenthttpname=$globalSS['currenthttpname'];
     $currenthttpstatusid=$globalSS['currenthttpstatusid'];
     $currentipaddressid=$globalSS['currentipaddressid'];

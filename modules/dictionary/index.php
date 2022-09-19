@@ -140,9 +140,23 @@ if(isset($_GET['id'])){
 
 } //if(isset($_GET['id'])){
 
-         
+		 
+	//Открыть отчёт от текущей даты или от вчера по умолчанию
+if($globalSS['DefaultRepDate'])
+$newdate=strtotime(date("d-m-Y"))-86400;
+else
+$newdate=strtotime(date("d-m-Y"));
+
+$newdate=date("d-m-Y",$newdate);
 
 
+?>
+<form name=fastdateswitch_form>
+  <input type="hidden" name=date value="<?php echo $newdate; ?>">
+  <input type="hidden" name=date2 value="">
+  </form>
+
+<?php
 
 $end=microtime(true);
 
@@ -153,6 +167,8 @@ echo "<br /><br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)
 echo "</body>";
 echo "</html>";
 }
+
+
 
 
 ?>

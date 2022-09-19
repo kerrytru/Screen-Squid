@@ -34,7 +34,7 @@ $colh[8]="<th>".$colhtext[8]."</th>";
 $colh[9]="<th>".$colhtext[9]."</th>";
 
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=javascript:GoPartlyReports(11,'".$dayormonth."','line8','line0','1','')>line0</a></td>";
+$colr[2]="<td><a href=javascript:GoPartlyReports('id',11,'ipaddressid','line8','ipaddressname','line0','1','')>line0</a></td>";
 $colr[3]="<td>line3</td>";
 $colr[4]="<td>line4</td>";
 $colr[5]="<td>line5</td>";

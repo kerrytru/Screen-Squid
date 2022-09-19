@@ -22,7 +22,7 @@ $colh[5]="<th>".$colhtext[5]."</th>";
 
 $colr[0]=1; ///report type 1 - prostoi, 2 - po vremeni, 3 - wide
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=\"javascript:GoPartlyReports('id',11,'ip','line2','ipname','line0 (line3)','typeid',1)\">line0</a></td>";
+$colr[2]="<td><a href=\"javascript:GoPartlyReports('id',11,'ipaddressid','line2','ipaddressname','line0 (line3)','typeid',1)\">line0</a></td>";
 $colr[3]="<td>line1</td>";
 $colr[4]="<td>line4</td>";
 $colr[5]="<td>line3 <input id=\"ButtonAdd\" type=\"button\" value=\"+\" onclick=\"showModalPopUp(".$globalSS['connectionParams']['srv'].",'line2',1)\" /></td>";

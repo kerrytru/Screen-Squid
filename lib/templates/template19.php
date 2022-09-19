@@ -19,7 +19,7 @@ $colh[4]="<th>".$colhtext[4]."</th>";
 
 
 $colr[1]="<td>numrow</td>";
-$colr[2]="<td><a href=javascript:GoPartlyReports(33,'".$dayormonth."','".$currenthttpstatusid."','".$currenthttpname."','line3','line0')>line0</a></td>";
+$colr[2]="<td><a href=javascript:GoPartlyReports('id',33,'httpstatusid','".$currenthttpstatusid."','httpstatusname','".$currenthttpname."','line3','line0')>line0</a></td>";
 $colr[3]="<td>line2</td>";
 $colr[4]="<td>line4</td>";
 

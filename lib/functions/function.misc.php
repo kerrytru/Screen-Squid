@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/07 22:45:42.230 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/19 21:16:34.238 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -1010,7 +1010,7 @@ function doReadGlobalParamsTable($globalSS){
 
     include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
   
-    $queryReadParams="select param,val,switch,comment from scsq_modules_param where module='Global';";
+    $queryReadParams="select param,val,switch,comment from scsq_modules_param where module='Global' order by id asc;";
   
     $result=doFetchQuery($globalSS,$queryReadParams);
    
