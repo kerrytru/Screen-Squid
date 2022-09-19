@@ -339,4 +339,7 @@ INSERT INTO scsq_modules_param (id, module, param, val, switch, comment) VALUES
 (26, 'Global', 'showZeroTrafficInReports', '0', 0, 'Show zero traffic in reports'),
 (27, 'Global', 'enableFilterSites', '', 1, 'Enable use filter sites. If enable, only filterSites were shown in statistic.'),
 (28, 'Global', 'filterSites', '', 0, 'List filter sites "vk.me facebook.com:433 ipp" without quotation.'),
-(29, 'Global', 'DefaultRepDate', 'on', 1, 'After start, first report will be opened on yesterday(on) or current day (off).');
+(29, 'Global', 'DefaultRepDate', 'on', 1, 'After start, first report will be opened on yesterday(on) or current day (off).'),
+(30, 'Global', 'enableFilterSizeinbytes', '', 1, 'Enable filter size in bytes for report by day time'),
+(31, 'Global', 'filterSizeinbytes', '', 0, 'Set sizeinbytes condition for example ">1000" means greater than 1000 bytes. "<1000" means less than 1000 bytes or "between 100 and 200"');
+
