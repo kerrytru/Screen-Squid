@@ -85,6 +85,8 @@ $variableSet['ldapserver']=$ldapserver;
 $variableSet['ldapuser']=$ldapuser;
 $variableSet['ldappass']=$ldappass;
 $variableSet['ldaptree']=$ldaptree;
+$variableSet['fldUsername']=$fldUsername;
+
 
 $variableSet['language']=$language;
 

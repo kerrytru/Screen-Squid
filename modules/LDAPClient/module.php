@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> module.php </#FN>                                                      
 *                         File Birth   > <!#FB> 2022/04/11 23:57:47.378 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/04 22:05:58.927 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/19 21:44:56.538 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -88,7 +88,7 @@ if( $this->ldap_conn ) {
        //Попробуем отловить проблемные логины. Со всякими спезнаками. Их будем просто пропускать. 
        //Просто иначе полуаем Bad search filter.
        try {
-        $result = ldap_search( $this->ldap_conn,$this->vars['connectionParams']['ldaptree'], "(uid=".$loginname.")");
+        $result = ldap_search( $this->ldap_conn,$this->vars['connectionParams']['ldaptree'], "(".$this->vars['connectionParams']['fldUsername']."=".$loginname.")");
         $data = ldap_get_entries( $this->ldap_conn, $result);
   
          } catch (\Exception $e) {
