@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/19 21:33:42.600 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/20 21:03:29.590 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -478,12 +478,21 @@ sub doSetLockFile {
 #check if script already launched (cause cron), then exit.
 #else create lock file
 if (-e "fetch.lock") {
-  doWriteToLogFile("Cant start script cause fetch.lock is found");
-  doWriteToLogTable("Cant start script cause fetch.lock is found");
+
+#cause this lock file may be somewhere, try to say it to admin
+#open it in regular way and try to get path from filehandle
+  open(OUT, ">>fetch.lock");
+ 
+  $fileno=fileno(OUT);
+  $qfn = readlink("/proc/$$/fd/$fileno");
+  
+  doWriteToLogFile("Cant start script cause fetch.lock is found in $qfn");
+  doWriteToLogTable("Cant start script cause fetch.lock is found in $qfn");
   exit;
 }
 else
 {
+  
   open(OUT, ">>fetch.lock");
   close(OUT);
 }
