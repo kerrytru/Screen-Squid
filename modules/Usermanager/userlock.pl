@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 
-#Build date Monday 27th of April 2020 13:01:29 PM
-#Build revision 1.3
+
 
 =com
 This script is user manager helper. If user1 active = false, helper send to squid signal to block user1 access.
@@ -20,7 +19,7 @@ If your authorization by login:
 
 #acl section
 external_acl_type e_lock ttl=10 negative_ttl=10 %LOGIN /path/to/script/userlock.pl
-acl a_block external e_lock
+acl a_lock external e_lock
 
 If your authorization by IP address:
 
@@ -38,6 +37,8 @@ http_access allow a_lock
 use DBI; # DBI  Perl!!!
 
 #=======================CONFIGURATION BEGIN============================
+
+my $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
 
 #mysql default config
 if($dbtype==0){
@@ -72,7 +73,7 @@ $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
 }
 
 if($dbtype==1){ #postgre
-$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+$dbh = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
 }
 
 

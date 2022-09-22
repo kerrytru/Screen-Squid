@@ -1,10 +1,26 @@
 <?php
 
-#Build date Friday 24th of April 2020 16:05:25 PM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> index.php </#FN>                                                       
+*                         File Birth   > <!#FB> 2022/04/11 23:57:47.370 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/09/22 21:41:06.860 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
 
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
+
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -12,6 +28,8 @@ else
   $srv=0;
 
 include("../../config.php");
+
+
 
 $language=$globalSS['language'];
 
@@ -61,24 +79,6 @@ document.getElementById("ipaddressTable").style.display="table";
 <?php
 
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-
-$variableSet['language']=$language;
-
-$globalSS['connectionParams']=$variableSet;
-
-
 $usermanagerex = new Usermanager($globalSS);
 	
 
@@ -112,51 +112,41 @@ $start=microtime(true);
 
 ///SQL querys
 
-if($dbtype==0)
-$str = "group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
-	group_concat(scsq_groups.id order by scsq_groups.name asc)";
-
-if($dbtype==1)
-$str = "string_agg(scsq_groups.name, ',' order by scsq_groups.name asc) as gconcat,
-	string_agg(CAST(scsq_groups.id as text), ',' order by scsq_groups.name asc)";
-	
-    
-               $queryAllAliases="
-	   SELECT 
-	     tmp.alname,
-	     tmp.altypeid,
-	     tmp.altableid,
-	     tmp.alid,
-	     tmp.tablename,
-	     ".$str."
-	  FROM ((SELECT 
-		scsq_alias.name as alname,
-		scsq_alias.typeid as altypeid,
-		scsq_alias.tableid as altableid,
-		scsq_alias.id as alid,
-		scsq_logins.name as tablename 
-	       FROM scsq_alias 
-	       LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
-	       WHERE scsq_alias.typeid=0) 
-
-	       UNION 
-			
-	        (SELECT 
-		   scsq_alias.name as alname,
-		   scsq_alias.typeid as altypeid,
-		   scsq_alias.tableid as altableid,
-		   scsq_alias.id as alid,
-		   scsq_ipaddress.name as tablename 
-		 FROM scsq_alias 
-		 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
-		 WHERE scsq_alias.typeid=1)) as tmp
 	  
-	  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
-	  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
-	  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
-	  ORDER BY alname asc";
-	  
+    $queryCopyAllAliases="
+    SELECT 
+      tmp.alname,
+      tmp.altypeid,
+      tmp.altableid,
+      tmp.alid,
+      tmp.tablename
+      
+   FROM ((SELECT 
+     scsq_alias.name as alname,
+     scsq_alias.typeid as altypeid,
+     scsq_alias.tableid as altableid,
+     scsq_alias.id as alid,
+     scsq_logins.name as tablename 
+        FROM scsq_alias 
+        LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
+        WHERE scsq_alias.typeid=0) 
 
+        UNION 
+         
+         (SELECT 
+        scsq_alias.name as alname,
+        scsq_alias.typeid as altypeid,
+        scsq_alias.tableid as altableid,
+        scsq_alias.id as alid,
+        scsq_ipaddress.name as tablename 
+      FROM scsq_alias 
+      LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+      WHERE scsq_alias.typeid=1)) as tmp
+   
+   LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
+   LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
+   GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
+   ORDER BY alname asc";
 
 
             $queryAllUsers="SELECT 
@@ -339,10 +329,7 @@ $newdate=date("d-m-Y",$newdate);
 ?>
 <form name=fastdateswitch_form>
     <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
-    <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value=0>
-    <input type="hidden" name=groupname_field_hidden value=0>
-    <input type="hidden" name=typeid_field_hidden value=0>
+
     </form>
 </body>
 </html>

@@ -1,7 +1,29 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:49:01 PM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> module.php </#FN>                                                      
+*                         File Birth   > <!#FB> 2022/04/11 23:57:47.356 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/09/20 21:26:18.829 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 
 class Usermanager
@@ -67,7 +89,18 @@ $queryOneAliasValue="
   function Install()
   {
 
+	#Может модуль уже был установлен?
+	$queryFindModule = "SELECT id FROM scsq_modules where name='Usermanager'";
 
+	$findModule=doFetchOneQuery($this->vars, $queryFindModule);
+
+	if(!isset($findModule[0])) $findModule[0]=0;
+
+	#если модуль уже есть, то вернемся.
+	if($findModule[0]>0) {
+		echo "<script language=javascript>alert('Module already installed')</script>";
+		return;
+	}
 
 # Table structure for table `scsq_mod_usermanager`
 
