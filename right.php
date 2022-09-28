@@ -10,19 +10,24 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/08 23:36:18.247 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/28 22:25:01.583 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.7.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
 
   
   include("config.php");
- 
+
+  #если нет авторизации, сразу выходим
+if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) )
+{
+	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
+}
 
   #если есть дружеские логины, IP адреса или сайты. Соберём их.
   $globalSS['goodLoginsList']=doCreateFriendList($globalSS,'logins');

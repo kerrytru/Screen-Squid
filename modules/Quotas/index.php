@@ -1,11 +1,28 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:47:19 PM
-#Build revision 1.4
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> index.php </#FN>                                                       
+*                         File Birth   > <!#FB> 2022/09/28 22:01:17.324 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/09/28 22:28:19.462 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
 
 
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
+
+
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -13,6 +30,13 @@ else
   $srv=0;
 
 include("../../config.php");
+
+#если нет авторизации, сразу выходим
+if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) )
+{
+	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
+}
+
 include("module.php");
 include_once($globalSS['root_dir']."/lang/".$globalSS['language']);
 	if (file_exists("langs/".$globalSS['language']))

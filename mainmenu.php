@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/13 23:34:06.177 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/28 22:24:48.785 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -24,6 +24,12 @@
  
 
 include("config.php");
+
+#если нет авторизации, сразу выходим
+if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) )
+{
+	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
+}
 
 ?>
 <html>
@@ -287,6 +293,12 @@ echo "
     tree.add(new WebFXTreeItem('DONATE','javascript:GoInternetLink(\'https://sobe.ru/na/na_novuyu_versiyu_screen_squid\')','','',''));
     tree.add(new WebFXTreeItem('Wiki','javascript:GoInternetLink(\'https://sourceforge.net/p/screen-squid/wiki/Home/\')','','',''));
 ";
+if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==1)) and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) )
+{
+echo "tree.add(new WebFXTreeItem('Logout','javascript:GoLink(\'".$globalSS['root_http']."modules/PrivateAuth/logout.php\')','','',''));";
+}
+
+
 if($globalSS['debug']==1) {
 	echo "
 	var debugtree = new WebFXTreeItem('Debug');

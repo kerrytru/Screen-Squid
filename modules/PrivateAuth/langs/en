@@ -1,0 +1,15 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Auth module";
+
+$_lang['stLOGINTOADMIN'] = "Log in";
+
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
+
+
+?>

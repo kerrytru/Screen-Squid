@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> oreports.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 23:03:28.656 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/02/07 11:40:11.367 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/09/28 22:28:50.054 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -40,6 +40,11 @@ else
 
 include("../config.php");
 
+#если нет авторизации, сразу выходим
+if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) )
+{
+	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
+}
 
 $dbtype = $globalSS['connectionParams']['dbtype'];
 

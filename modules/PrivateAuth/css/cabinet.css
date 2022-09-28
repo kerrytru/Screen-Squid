@@ -1,0 +1,212 @@
+
+html, body, div,
+h1, p, pre,
+a, form{
+  margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+	font-family: sans-serif;
+}
+
+
+/* HTML5 display-role reset for older browsers */
+
+footer, header {
+	display: block;
+}
+
+body {
+	line-height: 1;
+}
+
+img {
+    border: 0; /* 1 */
+    -ms-interpolation-mode: bicubic; /* 2 */
+}
+
+button,
+input,
+select,
+textarea {
+    font-size: 100%; /* 1 */
+    margin: 0; /* 2 */
+    vertical-align: baseline; /* 3 */
+    *vertical-align: middle; /* 3 */
+}
+
+
+
+
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+
+#page {display: block; width: 100%;}
+#page_in {display: block; width: 80%;}
+p {font-size: 1.2em; line-height: 1.5;}
+
+header {margin-top: 1em;}
+
+
+nav {display: block; width: 100%; margin-top: 3em;}
+ul {display: block; width: 100%; text-align: center;}
+li {float:left; width: 20%; text-align: center; font-size: 1.5em; min-width: 150px;}
+
+h1 {font-size: 3em; display: block; width: 90%; margin-left: 9%; padding-top: 8px; text-align: center; background: #FFF;font-family: sans-serif;}
+h2 {font-size: 2em; padding-top: 1em; padding-bottom: 0.5em; color: #e8540d;}
+
+.clr {clear: both;}
+.line {display: block; width: 100%; border-bottom: solid 8px #CECF9C; margin-bottom: 2em; margin-top: 2em;}
+
+#left_col {display: block; width: 20%; float: left;}
+#right_col {display: block; width: 79%; float: right;}
+#login {}
+
+footer {display: block; padding-bottom: 2em;}
+
+#login field {
+  	width:350px; 
+        float:left; 
+        margin: 0 15px 15px 0; 
+        text-align:center;
+        padding: 10px;
+}
+
+
+#login field {
+	
+	-webkit-border-radius: 0 0 0px 0px;
+	-moz-border-radius: 0 0 0px 0px;
+	border-radius: 0 0 0px 0px;
+	padding: 0px 0px;
+}
+
+#login field p {
+	color: #000;
+	margin-bottom: 8px;
+}
+
+#login field input[type="text"], #login fieldset input[type="password"] {
+	background-color: #eee;
+	color: #777;
+	padding: 4px 10px;
+	width: 270px;
+}
+
+#login field input[type="password"], #login fieldset input[type="password"] {
+	background-color: #eee;
+	color: #777;
+	padding: 4px 10px;
+	width: 270px;
+}
+
+#login field input[type="email"], #login fieldset input[type="password"] {
+	background-color: #eee;
+	color: #777;
+	padding: 4px 10px;
+	width: 270px;
+}
+
+#login field textarea{
+	background-color: #eee;
+	color: #777;
+	padding: 4px 10px;
+	width: 270px;
+	height: 100px;
+}
+
+
+#login field input[type="submit"] {
+	text-decoration:none; 
+	text-align: left; 
+	padding:11px 32px; 
+	display: block;
+	border:solid 1px #a0a0a0; 
+	-webkit-border-radius:4px;
+	-moz-border-radius:4px; 
+	border-radius: 4px; 
+	font:14px Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	color:#646473; 
+	background-color:#ffffff; 
+	background-image: -moz-linear-gradient(top, #ffffff 0%, #c6c6c6 100%); 
+	background-image: -webkit-linear-gradient(top, #ffffff 0%, #c6c6c6 100%); 
+	background-image: -o-linear-gradient(top, #ffffff 0%, #c6c6c6 100%); 
+	background-image: -ms-linear-gradient(top, #ffffff 0% ,#c6c6c6 100%); 
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c6c6c6', endColorstr='#c6c6c6',GradientType=0 ); 
+	background-image: linear-gradient(top, #ffffff 0% ,#c6c6c6 100%);   
+	-webkit-box-shadow:0px 0px 2px #bababa, inset 0px 0px 1px #ffffff; 
+	-moz-box-shadow: 0px 0px 2px #bababa,  inset 0px 0px 1px #ffffff;  
+	box-shadow:0px 0px 2px #bababa, inset 0px 0px 1px #ffffff; 
+	margin:0 auto;
+}
+
+
+#login fieldset {
+	
+	-webkit-border-radius: 0 0 0px 0px;
+	-moz-border-radius: 0 0 0px 0px;
+	border-radius: 0 0 0px 0px;
+	padding: 0px 0px;
+}
+
+#login fieldset p {
+	color: #000;
+	margin-bottom: 8px;
+}
+
+#login fieldset input[type="text"], #login fieldset input[type="password"] {
+	background-color: #eee;
+	color: #777;
+	padding: 4px 10px;
+	width: 270px;
+}
+
+#login fieldset input[type="email"], #login fieldset input[type="password"] {
+	background-color: #eee;
+	color: #777;
+	padding: 4px 10px;
+	width: 270px;
+}
+
+#login fieldset textarea{
+	background-color: #eee;
+	color: #777;
+	padding: 4px 10px;
+	width: 270px;
+	height: 100px;
+}
+
+
+#login fieldset input[type="submit"] {
+	text-decoration:none; 
+	text-align: left; 
+	padding:11px 32px; 
+	display: block;
+	border:solid 1px #a0a0a0; 
+	-webkit-border-radius:4px;
+	-moz-border-radius:4px; 
+	border-radius: 4px; 
+	font:14px Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	color:#646473; 
+	background-color:#ffffff; 
+	background-image: -moz-linear-gradient(top, #ffffff 0%, #c6c6c6 100%); 
+	background-image: -webkit-linear-gradient(top, #ffffff 0%, #c6c6c6 100%); 
+	background-image: -o-linear-gradient(top, #ffffff 0%, #c6c6c6 100%); 
+	background-image: -ms-linear-gradient(top, #ffffff 0% ,#c6c6c6 100%); 
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c6c6c6', endColorstr='#c6c6c6',GradientType=0 ); 
+	background-image: linear-gradient(top, #ffffff 0% ,#c6c6c6 100%);   
+	-webkit-box-shadow:0px 0px 2px #bababa, inset 0px 0px 1px #ffffff; 
+	-moz-box-shadow: 0px 0px 2px #bababa,  inset 0px 0px 1px #ffffff;  
+	box-shadow:0px 0px 2px #bababa, inset 0px 0px 1px #ffffff; 
+	margin:0 auto;
+}
+
+
