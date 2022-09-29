@@ -7851,16 +7851,13 @@ $arrLine0=doGetArrayData($globalSS,$json_result,1);
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
-$numrow=1;
-while ($numrow<$globalSS['countTopIpLimit'])
+$arr_lenght=count($arrLine0);
+while ($arr_lenght<$countTopIpLimit)
 {
-	if ($arrLine0[$numrow-1]=="") {
-		$arrLine0[$numrow-1]="NO DATA";
-		$arrLine1[$numrow-1]=0;
-	}
-$numrow++;
+    $arrLine0[$arr_lenght]="NO DATA";
+    $arrLine1[$arr_lenght]=0;
+    $arr_lenght++;
 }
-
 
 //top ip end
 
@@ -7890,16 +7887,13 @@ $arrLine0=doGetArrayData($globalSS,$json_result,1);
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
-$numrow=1;
-while ($numrow<$globalSS['countTopSitesLimit'])
+$arr_lenght=count($arrLine0);
+while ($arr_lenght<$countTopIpLimit)
 {
-	if ($arrLine0[$numrow-1]=="") {
-		$arrLine0[$numrow-1]="NO DATA";
-		$arrLine1[$numrow-1]=0;
-	}
-$numrow++;
+    $arrLine0[$arr_lenght]="NO DATA";
+    $arrLine1[$arr_lenght]=0;
+    $arr_lenght++;
 }
-
 
 //top IP end
 
@@ -7930,16 +7924,13 @@ $arrLine0=doGetArrayData($globalSS,$json_result,1);
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
-$numrow=1;
-while ($numrow<$globalSS['countPopularSitesLimit'])
+$arr_lenght=count($arrLine0);
+while ($arr_lenght<$countTopIpLimit)
 {
-	if ($arrLine0[$numrow-1]=="") {
-		$arrLine0[$numrow-1]="NO DATA";
-		$arrLine1[$numrow-1]=0;
-	}
-$numrow++;
+    $arrLine0[$arr_lenght]="NO DATA";
+    $arrLine1[$arr_lenght]=0;
+    $arr_lenght++;
 }
-
 
 //top popular end
 

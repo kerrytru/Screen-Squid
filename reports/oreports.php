@@ -183,9 +183,9 @@ function doGetAliasNameByIP($globalSS,$ipname){
 
 #create list of friends
 if($globalSS['enableNofriends']==1) {
-if($goodLogins!="")
+if(isset($goodLogins) && $goodLogins!="")
   $friendsLogin=implode("','",explode(" ", $globalSS['goodLogins']));
-if($goodIpaddress!="")
+if(isset($goodIpaddress) && $goodIpaddress!="")
   $friendsIpaddress=implode("','",explode(" ", $globalsSS['goodIpaddress']));
 }
 
@@ -351,7 +351,7 @@ $tmp=fgets($fp,2048);
 $ptmp.=$tmp;
 }
 
-if(preg_match("/HTTP/1.0 200 OK/",$ptmp)){
+if(preg_match("/HTTP\/1.0 200 OK/",$ptmp)){
 echo "Error: No connection to Squid";
 $errCheck=1;
 }

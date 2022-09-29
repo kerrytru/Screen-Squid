@@ -343,3 +343,37 @@ INSERT INTO scsq_modules_param (id, module, param, val, switch, comment) VALUES
 (30, 'Global', 'enableFilterSizeinbytes', '', 1, 'Enable filter size in bytes for report by day time'),
 (31, 'Global', 'filterSizeinbytes', '', 0, 'Set sizeinbytes condition for example ">1000" means greater than 1000 bytes. "<1000" means less than 1000 bytes or "between 100 and 200"');
 
+CREATE OR REPLACE FUNCTION crc32(text_string text) RETURNS bigint AS $$
+DECLARE
+    tmp bigint;
+    i int;
+    j int;
+    byte_length int;
+    binary_string bytea;
+BEGIN
+    IF text_string IS NULL OR text_string = '' THEN
+        RETURN 0;
+    END IF;
+
+    i = 0;
+    tmp = 4294967295;
+    byte_length = bit_length(text_string) / 8;
+    binary_string = decode(replace(text_string, E'\\\\', E'\\\\\\\\'), 'escape');
+    LOOP
+        tmp = (tmp # get_byte(binary_string, i))::bigint;
+        i = i + 1;
+        j = 0;
+        LOOP
+            tmp = ((tmp >> 1) # (3988292384 * (tmp & 1)))::bigint;
+            j = j + 1;
+            IF j >= 8 THEN
+                EXIT;
+            END IF;
+        END LOOP;
+        IF i >= byte_length THEN
+            EXIT;
+        END IF;
+    END LOOP;
+    RETURN (tmp # 4294967295);
+END
+$$ IMMUTABLE LANGUAGE plpgsql;
