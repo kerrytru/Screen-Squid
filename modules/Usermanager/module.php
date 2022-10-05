@@ -33,6 +33,7 @@ function __construct($variables){ //
     $this->vars = $variables;
     	
 	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
+	include_once(''.$this->vars['root_dir'].'/lib/functions/function.modules.php');
 
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
@@ -89,15 +90,9 @@ $queryOneAliasValue="
   function Install()
   {
 
-	#Может модуль уже был установлен?
-	$queryFindModule = "SELECT id FROM scsq_modules where name='Usermanager'";
-
-	$findModule=doFetchOneQuery($this->vars, $queryFindModule);
-
-	if(!isset($findModule[0])) $findModule[0]=0;
 
 	#если модуль уже есть, то вернемся.
-	if($findModule[0]>0) {
+	if(doQueryExistsModule($this->vars,'Usermanager')>0) {
 		echo "<script language=javascript>alert('Module already installed')</script>";
 		return;
 	}
@@ -145,7 +140,8 @@ $queryOneAliasValue="
 
 		doQuery($this->vars, $CopyAlias) or die ("Can`t copy aliases to module table");
 
-		echo "".$this->lang['stINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stINSTALLED']."')</script>";
+
 	 }
   
  function Uninstall() #добавить LANG
@@ -161,8 +157,8 @@ $queryOneAliasValue="
 		doQuery($this->vars,$query) or die ("Can`t uninstall module!");
 		doQuery($this->vars,$UpdateModules) or die ("Can`t update module table");
 
+		echo "<script language=javascript>alert('".$this->lang['stUNINSTALLED']."')</script>";
 	
-		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
 
   }
 
