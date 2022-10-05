@@ -551,6 +551,7 @@ echo "<tr>";
 echo "<td>".$i."</td>";
 echo "<td>".$line[0]."</td>";
 echo "<td>".$line[2]."</td>"; //username
+if($line[1]!="")
 $line[1]=round($line[1],2);
 echo "<td>".$line[1]."</td>";
 echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&iadd=".$line[0].">".$_lang['stADD']."</a></td>";
@@ -559,6 +560,7 @@ if($globalSS['useIpaddressalias'] == 1)
 if($globalSS['useLoginalias'] == 1)
 	echo "<td>".(doGetAliasNameByLogin($globalSS,$line[2]))."</td>"; //alias
 echo "</tr>";
+if($line[1]!="")
 $totalspeed+=$line[1];
     }
 echo "<tr>
