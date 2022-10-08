@@ -3,6 +3,10 @@
 #Build date Thursday 7th of May 2020 18:47:37 PM
 #Build revision 1.2
 
+#TODO
+
+#1. Функции добавления, редактирования, удаления квоты перенести в модуль.
+
 class Quotas
 {
 
@@ -12,6 +16,8 @@ function __construct($variables){ //
   
 	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
 	include_once(''.$this->vars['root_dir'].'/lib/functions/function.reportmisc.php');
+
+	include(''.$this->vars['root_dir'].'/lang/'.$this->vars['language']);
 	
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
@@ -28,81 +34,33 @@ function __construct($variables){ //
    
   }
 
- 
-
-  function GetAliasDayTraffic($aliasid,$goodSitesList) #по алиасу возвращаем его дневной траффик
-  {
-
-
-
-$queryAlias = "
- 	SELECT 
-	   tableid,
-	   typeid
- 		   FROM scsq_alias 
-		   WHERE id=".$aliasid."
-	;";
-
-	$row=doFetchOneQuery($this->vars,$queryAlias) or die ("Can`t get alias traffic");
-
-if($row[1] == 0)
-$columnname = "login";
-else
-$columnname = "ipaddress";
-
-$querydate=date("d-m-Y");
-#$querydate=date("26-11-2018");# for debug
-$datestart=strtotime($querydate);
-$dateend=strtotime($querydate) + 86400;
-
-$queryOneAliasTraffic="
- 	SELECT 
-	   SUM(sizeinbytes) as s
- 
-		   FROM scsq_quicktraffic 
-		   WHERE date>".$datestart." 
-		     AND date<".$dateend."
-	             AND site NOT IN (".$goodSitesList.")
-		     AND ".$columnname." = ".$row[0]." 
-		   GROUP BY ".$columnname."
-	;";
-
-	$SumSizeTraffic=doFetchOneQuery($this->vars, $queryOneAliasTraffic) or die ("Can`t get one alias traffic");
-
-#Задействовать другую функцию!
-    return doConvertBytes($SumSizeTraffic[0], 'mbytes');
-
-    
-}
 
  function GetAliasValue($aliasid) #по алиасу возвращаем элемент из таблицы логинов/ip адресов
   {
 
 
+
 $queryAlias = "
- 	SELECT 
-	   tableid,
-	   typeid
- 		   FROM scsq_alias 
-		   WHERE id=".$aliasid."
-	;";
+			SELECT 
+			tmp.tablename
 
-	$row=doFetchOneQuery($this->vars, $queryAlias) or die ("Can`t get alias");
+			FROM ((SELECT 
+			scsq_logins.name as tablename 
+			FROM scsq_alias 
+			LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id
+			WHERE scsq_alias.typeid=0 and scsq_alias.id=".$aliasid.") 
 
-if($row[1] == 0)
-$tablename = "logins";
-else
-$tablename = "ipaddress";
+			UNION 
+			
+			(SELECT 
+			scsq_ipaddress.name as tablename 
+			FROM scsq_alias 
+			LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+			WHERE scsq_alias.typeid=1 and scsq_alias.id=".$aliasid.")) as tmp
+			GROUP BY tmp.tablename";
 
 
-$queryOneAliasValue="
- 	SELECT 
-	   name
- 		   FROM scsq_".$tablename." 
-		   WHERE id =".$row[0]." 
-	 ;";
-
-	$row=doFetchOneQuery($this->vars, $queryOneAliasValue) or die ('Error: Cant get login/ipaddress for tableid');
+	$row=doFetchOneQuery($this->vars, $queryAlias) or die ('Error: Cant get login/ipaddress for tableid');
 
 
     return $row[0];
@@ -110,72 +68,478 @@ $queryOneAliasValue="
     
 }
 
-function GetQuotaStatusByAlias($aliasid) #по алиасу возвращаем статус 0 - норма, >0 превышение квоты
-  {
+#Функционал работы с квотами
+function doPrintAll($globalSS){
 
-$aliasid = $aliasid + 0; #защита от пустых значений
-
-$queryAlias = "
- 	SELECT 
-	   status
- 		   FROM scsq_mod_quotas 
-		   WHERE aliasid=".$aliasid."
-	;";
-
-	$row=doFetchOneQuery($this->vars, $queryAlias) or die ("Can`t get quota status by alias");
 	
-    return $row[0];
+    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+    
+	$_lang=$this->lang;
+	
+	$queryAll="SELECT 
+	sm.id,
+	sm.aliasid,
+	sa.name,
+	sumday,
+	summonth,
+	quotaday,
+	quotamonth,
+	quota,
+	status,
+	sm.active,
+	sa.id
+	 FROM scsq_mod_quotas sm, scsq_alias sa
+	 WHERE sm.aliasid = sa.id
+	 ORDER BY aliasid asc;";
+
+
+$result=doFetchQuery($globalSS, $queryAll);
+$numrow=1;
+  echo "<a href=index.php?srv=".$this->vars['connectionParams']['srv'].">".$_lang['stREFRESH']."</a>";
+echo "<br /><br />";
+echo "<table class=datatable>
+
+<tr>
+  <th class=unsortable><b>#</b></th>
+	  	<th><b>".$_lang['stQUOTASSTATUS']."</b></th>
+ 		<th><b>".$_lang['stALIAS']."</b></th>
+	  	<th><b>".$_lang['stVALUE']."</b></th>
+	 	<th class=unsortable><b>".$_lang['stQUOTASCURRENT']."</b></th>
+		<th class=unsortable><b>".$_lang['stQUOTASDAY']."</b></th>
+		<th class=unsortable><b>".$_lang['stQUOTASTRAFFICDAY']."</b></th>
+		<th class=unsortable><b>".$_lang['stQUOTASMONTH']."</b></th>
+		<th class=unsortable><b>".$_lang['stQUOTASTRAFFICMONTH']."</b></th>
+		<th><b>".$_lang['stQUOTASACTIVE']."</b></th>
+		<th><b>Action</b></th>
+</tr>";
+
+foreach($result as $line) {
+
+#раскрасим строки в зависимости от статуса по квотам
+if($line[8] == 0) $alarmclass=""; #нет превышения
+if($line[8] == 1) $alarmclass="class=quotaAlm1"; #дневная превышена
+if($line[8] == 2) $alarmclass="class=quotaAlm2"; #месячная превышена
+
+  
+ echo "<tr >
+
+		<td $alarmclass>".$numrow."</td>
+		<td align=center $alarmclass>".$line[8]."</td>                 
+		<td align=center $alarmclass><a href=index.php?srv=".$this->vars['connectionParams']['srv']."&actid=3&quotaid=".$line[0].">".$line[2]."&nbsp;</a></td>
+		<td $alarmclass>".$this->GetAliasValue($line[10])."</td>
+		<td align=center $alarmclass>".$line[7]."&nbsp;</td>
+		<td align=center $alarmclass>".$line[5]."&nbsp;</td>
+		<td align=center $alarmclass>".$line[3]."</td>
+		<td align=center $alarmclass>".$line[6]."&nbsp;</td>
+		<td align=center $alarmclass>".$line[4]."</td>                 
+		<td align=center $alarmclass>".$line[9]."</td>  
+		<td align=center $alarmclass><a href=index.php?srv=".$this->vars['connectionParams']['srv']."&actid=5&quotaid=".$line[0].">Delete&nbsp;</a></td>
+
+			 
+	  </tr>";
+  $numrow++;
+}
+echo "</table>";
+echo "<br />";
+echo "<a href=index.php?srv=".$this->vars['connectionParams']['srv']."&actid=1>".$_lang['stQUOTASADDQUOTA']."</a>";
+echo "<br />";
+
 
     
-}
+    }
+
+
+function doPrintFormAdd($globalSS){
+
+    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+	
+	$_lang=$this->lang;
+
+	if($this->vars['connectionParams']['dbtype']==0)
+	$str = "group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
+		group_concat(scsq_groups.id order by scsq_groups.name asc)";
+	
+	if($this->vars['connectionParams']['dbtype']==1)
+	$str = "string_agg(scsq_groups.name, ',' order by scsq_groups.name asc) as gconcat,
+		string_agg(CAST(scsq_groups.id as text), ',' order by scsq_groups.name asc)";
+		
+		
+				   $queryAllAliases="
+		   SELECT 
+			 tmp.alname,
+			 tmp.altypeid,
+			 tmp.altableid,
+			 tmp.alid,
+			 tmp.tablename,
+			 ".$str."
+		  FROM ((SELECT 
+			scsq_alias.name as alname,
+			scsq_alias.typeid as altypeid,
+			scsq_alias.tableid as altableid,
+			scsq_alias.id as alid,
+			scsq_logins.name as tablename 
+			   FROM scsq_alias 
+			   LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
+			   WHERE scsq_alias.typeid=0) 
+	
+			   UNION 
+				
+				(SELECT 
+			   scsq_alias.name as alname,
+			   scsq_alias.typeid as altypeid,
+			   scsq_alias.tableid as altableid,
+			   scsq_alias.id as alid,
+			   scsq_ipaddress.name as tablename 
+			 FROM scsq_alias 
+			 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+			 WHERE scsq_alias.typeid=1)) as tmp
+		  
+		  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
+		  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
+		  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
+		  ORDER BY alname asc";
+		  
+		  
+			$queryAllAliasesHaveNotQuota="
+			 SELECT 
+			 tmp.alname,
+			 tmp.altypeid,
+			 tmp.altableid,
+			 tmp.alid,
+			 tmp.tablename,
+			 ".$str."
+		  FROM ((SELECT 
+			scsq_alias.name as alname,
+			scsq_alias.typeid as altypeid,
+			scsq_alias.tableid as altableid,
+			scsq_alias.id as alid,
+			scsq_logins.name as tablename 
+			   FROM scsq_alias 
+			   LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
+			   WHERE scsq_alias.typeid=0) 
+	
+			   UNION 
+				
+				(SELECT 
+			   scsq_alias.name as alname,
+			   scsq_alias.typeid as altypeid,
+			   scsq_alias.tableid as altableid,
+			   scsq_alias.id as alid,
+			   scsq_ipaddress.name as tablename 
+			 FROM scsq_alias 
+			 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+			 WHERE scsq_alias.typeid=1)) as tmp
+		  
+		  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
+		  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
+		  
+		  WHERE alid NOT IN (select aliasid from scsq_mod_quotas)
+		  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
+		  ORDER BY alname asc";
+
+
+	echo $_lang['stQUOTASFORMADDQUOTA'];
+	echo '
+	  <form action="index.php?srv='.$this->vars['connectionParams']['srv'].'&actid=2" method="post">
+	  '.$_lang['stQUOTASDAY'].': <input type="text" value="0" name="quotaday" ><br />
+	  '.$_lang['stQUOTASMONTH'].': <input type="text" value="0" name="quotamonth"><br />
+	  <input type="hidden" name=sumday value="0">
+	  <input type="hidden" name=summonth value="0">
+	  '.$_lang['stQUOTASACTIVE'].': <input type="checkbox" name="active"><br /> 
+	  '.$_lang['stQUOTASEXCLUDE'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
+	  '.$_lang['stVALUE'].':<br />';
+
+
+	  $result=doFetchQuery($this->vars,$queryAllAliases) or die ('Error: Cant select aliases from scsq_alias table');
+$numrow=1;
+
+	echo "<table id='loginsTable' class=datatable style='display:table;'>";
+	echo "<tr>
+  <th class=unsortable>#</th>
+  <th>".$_lang['stALIAS']."</th>
+  <th class=unsortable>".$_lang['stINCLUDE']."</th>
+  </tr>";
+
+	foreach($result as $line) {
+	  echo "
+		<tr>
+		  <td >".$numrow."</td>
+		  <td >".$line[0]."</td>
+		  <td><input type='radio' name='aliasid' value='".$line[3]."';</td>
+		</tr>";
+	  $numrow++;
+	}
+
+	echo "</table>";
+
+$result=doFetchQuery($this->vars, $queryAllAliasesHaveNotQuota);       
+$numrow=1;
+
+	echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
+	echo "<tr>
+  <th class=unsortable>#</th>
+  <th>".$_lang['stALIAS']."</th>
+  <th class=unsortable>".$_lang['stINCLUDE']."</th>
+  </tr>";
+
+	foreach($result as $line) {
+	  echo "
+		<tr>
+		  <td >".$numrow."</td>
+		  <td >".$line[0]."</td>
+		  <td><input type='radio' name='aliasid' value='".$line[3]."';</td>
+		</tr>";
+	  $numrow++;
+	}
+
+	echo "</table>";
 
 
 
-  function GetAliasMonthTraffic($aliasid,$goodSitesList) #по алиасу возвращаем его дневной траффик
-  {
+	 echo '
+	  <input type="submit" value="'.$_lang['stADD'].'"><br />
+	  </form>
+	  <br />';
 
 
-$queryAlias = "
- 	SELECT 
-	   tableid,
-	   typeid
- 		   FROM scsq_alias 
-		   WHERE id=".$aliasid."
-	;";
+    }
 
-	$row=doFetchOneQuery($this->vars, $queryAlias) or die ("Can`t query alias table");
+function doAdd($globalSS,$params){
 
-if($row[1] == 0)
-$columnname = "login";
+    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+      
+    $_lang = $this->lang;
+
+
+	$aliasid=$params['aliasid'];
+	$quotaday=$params['quotaday'];
+	$quotamonth=$params['quotamonth'];
+	$active=$params['active'];
+
+
+			$sql="INSERT INTO scsq_mod_quotas (aliasid, quota, quotaday, quotamonth,active) VALUES ($aliasid, $quotaday,$quotaday,$quotamonth,$active)";
+
+			if (!doQuery($this->vars, $sql)) {
+			  die('Error: Cant insert into scsq_mod_quotas table' );
+			}
+  }
+
+  function doEdit($globalSS,$params){
+
+    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+      
+    $_lang = $this->lang;
+
+	if($this->vars['connectionParams']['dbtype']==0)
+	$str = "group_concat(scsq_groups.name order by scsq_groups.name asc) as gconcat,
+		group_concat(scsq_groups.id order by scsq_groups.name asc)";
+	
+	if($this->vars['connectionParams']['dbtype']==1)
+	$str = "string_agg(scsq_groups.name, ',' order by scsq_groups.name asc) as gconcat,
+		string_agg(CAST(scsq_groups.id as text), ',' order by scsq_groups.name asc)";
+		
+		
+				   $queryAllAliases="
+		   SELECT 
+			 tmp.alname,
+			 tmp.altypeid,
+			 tmp.altableid,
+			 tmp.alid,
+			 tmp.tablename,
+			 ".$str."
+		  FROM ((SELECT 
+			scsq_alias.name as alname,
+			scsq_alias.typeid as altypeid,
+			scsq_alias.tableid as altableid,
+			scsq_alias.id as alid,
+			scsq_logins.name as tablename 
+			   FROM scsq_alias 
+			   LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
+			   WHERE scsq_alias.typeid=0) 
+	
+			   UNION 
+				
+				(SELECT 
+			   scsq_alias.name as alname,
+			   scsq_alias.typeid as altypeid,
+			   scsq_alias.tableid as altableid,
+			   scsq_alias.id as alid,
+			   scsq_ipaddress.name as tablename 
+			 FROM scsq_alias 
+			 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+			 WHERE scsq_alias.typeid=1)) as tmp
+		  
+		  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
+		  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
+		  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
+		  ORDER BY alname asc";
+		  
+		  
+			$queryAllAliasesHaveNotQuota="
+			 SELECT 
+			 tmp.alname,
+			 tmp.altypeid,
+			 tmp.altableid,
+			 tmp.alid,
+			 tmp.tablename,
+			 ".$str."
+		  FROM ((SELECT 
+			scsq_alias.name as alname,
+			scsq_alias.typeid as altypeid,
+			scsq_alias.tableid as altableid,
+			scsq_alias.id as alid,
+			scsq_logins.name as tablename 
+			   FROM scsq_alias 
+			   LEFT JOIN scsq_logins ON scsq_alias.tableid=scsq_logins.id 
+			   WHERE scsq_alias.typeid=0) 
+	
+			   UNION 
+				
+				(SELECT 
+			   scsq_alias.name as alname,
+			   scsq_alias.typeid as altypeid,
+			   scsq_alias.tableid as altableid,
+			   scsq_alias.id as alid,
+			   scsq_ipaddress.name as tablename 
+			 FROM scsq_alias 
+			 LEFT JOIN scsq_ipaddress ON scsq_alias.tableid=scsq_ipaddress.id 
+			 WHERE scsq_alias.typeid=1)) as tmp
+		  
+		  LEFT JOIN scsq_aliasingroups ON scsq_aliasingroups.aliasid=tmp.alid
+		  LEFT JOIN scsq_groups ON scsq_aliasingroups.groupid=scsq_groups.id
+		  
+		  WHERE alid NOT IN (select aliasid from scsq_mod_quotas)
+		  GROUP BY tmp.altableid,tmp.alname,tmp.altypeid,tmp.alid,tmp.tablename
+		  ORDER BY alname asc";
+
+
+
+	$quotaid=$params['quotaid'];
+
+    $queryOneQuota="select aliasid,quota,quotaday,quotamonth,sm.active,sa.name,sm.id,sumday,summonth from scsq_mod_quotas sm, scsq_alias sa where sm.id='".$quotaid."' and sm.aliasid=sa.id;";
+
+	$line=doFetchOneQuery($this->vars, $queryOneQuota) or die ('Error: Cant select one quota from scsq_mod_quotas');
+             
+
+	if($line[4]==1)  $isChecked="checked"; else  $isChecked="";
+
+
+	echo '
+	  <form action="index.php?srv='.$this->vars['connectionParams']['srv'].'&actid=4&quotaid='.$quotaid.'" method="post">
+ 	 '	.$_lang['stALIAS'].': '.$line[5].'<br /><br />
+	 '.$_lang['stQUOTASCURRENT'].': <input type="text" name="quota" value="'.$line[1].'"><br />
+	 '.$_lang['stQUOTASDAY'].': <input type="text" name="quotaday" value="'.$line[2].'"><br />
+	 '.$_lang['stQUOTASMONTH'].': <input type="text" name="quotamonth" value="'.$line[3].'"><br />
+ 	<input type="hidden" name=sumday value="'.$line[7].'">
+ 	<input type="hidden" name=summonth value="'.$line[8].'">
+	 '.$_lang['stQUOTASACTIVE'].': <input type="checkbox" '.$isChecked.' name="active"><br /> 
+
+	'.$_lang['stQUOTASEXCLUDE'].': <input type="checkbox" onClick="switchTables();" name="typeid"><br /><br />
+	 '.$_lang['stVALUE'].':<br />';
+
+	  $checkedAliasid = $line[0];
+
+	  $result=doFetchQuery($this->vars, $queryAllAliases) or die('Error: Cant select all aliases from scsq_alias');
+	  $numrow=1;
+
+	echo "<table id='loginsTable' class=datatable style='display:table;'>";
+	echo "<tr>
+  <th class=unsortable>#</th>
+  <th>".$_lang['stALIAS']."</th>
+  <th class=unsortable>".$_lang['stINCLUDE']."</th>
+  </tr>";
+
+	foreach($result as $line) {
+	  echo "
+		<tr>
+		  <td >".$numrow."</td>
+		  <td >".$line[0]."</td>";
+if($line[3]==$checkedAliasid)
+echo        "<td><input type='radio' name='aliasid' checked value='".$line[3]."';</td>";
 else
-$columnname = "ipaddress";
+echo         "<td><input type='radio' name='aliasid' value='".$line[3]."';</td>";
+echo         "</tr>";
+	  $numrow++;
+	}
 
-$querydate=date("d-m-Y");
-#$querydate=date("26-11-2018");# for debug
-list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
-$querydate=$month."-".$year;
-$numdaysinmonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-$datestart=mktime(0,0,0,$month,1,$year);
-$dateend=$datestart + 86400*$numdaysinmonth;
+	echo "</table>";
 
-$queryOneAliasTraffic="
- 	SELECT 
-	   SUM(sizeinbytes) as s
- 
-		   FROM scsq_quicktraffic 
-		   WHERE date>".$datestart." 
-		     AND date<".$dateend."
-	             AND site NOT IN (".$goodSitesList.")
-		     AND ".$columnname." = ".$row[0]." 
-		   GROUP BY ".$columnname."
-	;";
+$result=doFetchQuery($this->vars, $queryAllAliasesHaveNotQuota);       
+$numrow=1;
 
-	$SumSizeTraffic=doFetchQuery($this->vars, $queryOneAliasTraffic) or die ("Can`t get one alias traffic");
+	echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
+	echo "<tr>
+  <th class=unsortable>#</th>
+  <th>".$_lang['stALIAS']."</th>
+  <th class=unsortable>".$_lang['stINCLUDE']."</th>
+  </tr>";
 
-    return doConvertBytes($SumSizeTraffic[0],'mbytes');
+	foreach($result as $line) {
+	  echo "
+		<tr>
+		  <td >".$numrow."</td>
+		  <td >".$line[0]."</td>
+		  <td><input type='radio' name='aliasid' value='".$line[3]."';</td>
+		</tr>";
+	  $numrow++;
+	}
 
-    
+	echo "</table>";
+
+	 echo '
+	   <input type="submit" value="'.$_lang['stSAVE'].'"><br />
+	   </form>
+	   <form action="index.php?srv='.$this->vars['connectionParams']['srv'].'&actid=5&quotaid='.$quotaid.'" method="post">
+	   <input type="submit" value="'.$_lang['stDELETE'].'"><br />
+	   </form>
+	   <br />';
+  }
+
+  function doSave($globalSS,$params){
+
+    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+      
+    $_lang = $this->lang;
+  
+	$aliasid=$params['aliasid'];
+	$quotaday=$params['quotaday'];
+	$quotamonth=$params['quotamonth'];
+	$active=$params['active'];
+	$quotaid=$params['quotaid'];
+	$datestart=$params['datestart'];
+	$quota=$params['quota'];
+	
+	$queryUpdateOneQuota="update scsq_mod_quotas set aliasid=".$aliasid.",quota=".$quota.",quotaday=".$quotaday.",quotamonth=".$quotamonth.",active=".$active.",status=0, datemodified=".$datestart." where id=".$quotaid."";
+
+
+	if (!doQuery($this->vars, $queryUpdateOneQuota)) {
+		die('Error: Can`t update one quota');
+	  }
+
 }
+
+function doDelete($globalSS,$params){
+
+  include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+    
+  $_lang = $this->lang;
+
+  $aliasid=$params['aliasid'];
+  $quotaday=$params['quotaday'];
+  $quotamonth=$params['quotamonth'];
+  $active=$params['active'];
+  $quotaid=$params['quotaid'];
+  $datestart=$params['datestart'];
+
+  $queryDeleteOneQuota="delete from scsq_mod_quotas where id=".$quotaid.";";
+
+  
+   if (!doQuery($this->vars, $queryDeleteOneQuota)) {
+	die('Error: Cant DELETE one quota from scsq_mod_quotas ');
+  }
+
+}
+
 
   function Install()
   {
