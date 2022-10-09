@@ -1,9 +1,35 @@
 #!/usr/bin/perl
 
-#Build date Wednesday 5th of August 2020 16:58:54 PM
-#Build revision 1.3
+=cut
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> quotaupdate.pl </#FN>                                                  
+*                         File Birth   > <!#FB> 2022/10/05 22:46:05.830 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/10/05 22:46:16.430 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 0.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+=cut
+
 
 use DBI; # DBI  Perl!!!
+
+#TODO
+#1. Привести всё к функциям
+#2. В части расчёта месячной квоты необходимо ввести параметр последней даты расчёта. То есть на новые сутки первый расчёт длинный ( потому что будет считать с начала месяца, а потом просто подбавлять дневную в каждом из расчетов)
+
 
 #=======================CONFIGURATION BEGIN============================
 
@@ -15,7 +41,7 @@ $host = "localhost"; # host s DB
 $port = "3306"; # port DB
 $user = "mysql-user"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test5"; # name DB
+$db = "test4"; # name DB
 }
 #postgresql default config
 if($dbtype==1){
@@ -26,145 +52,216 @@ $pass = "pass"; # pasword k DB
 $db = "test"; # name DB
 }
 
-print $now=localtime;
 
-#make conection to DB
-if($dbtype==0){ #mysql
-$dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+#здесь будем хранить данные дат чтобы десять раз за ними не бегать
+local $datestart_day;
+local $dateend_day;
+local $datestart_month;
+local $dateend_month;
+local $datestart;
+local $dateend;
+
+local $countQuotas;
+
+
+
+#делаем запросы в базу, получаем ответы
+sub doFetchQuery {
+
+    my $sqlquery=shift;
+
+
+    if($dbtype==0){ #mysql
+    $dbh_child = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
+    }
+    
+      $sth = $dbh_child->prepare($sqlquery);
+      $sth->execute;
+      @row=$sth->fetchrow_array;
+      $sth->finish();
+      $dbh_child->disconnect();
+
+  return @row;
+
 }
 
-if($dbtype==1){ #postgre
-$dbh = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
+#делаем запрос к базе, ничего не возвращаем
+sub doQueryToDatabase {
+
+    my $sqlquery=shift;
+
+    if($dbtype==0){ #mysql
+    $dbh_child = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
+    }
+    
+      $sth = $dbh_child->prepare($sqlquery);
+      $sth->execute;
+      $sth->finish();
+      $dbh_child->disconnect();
+
 }
 
-$countQuotas=0;
 
 #очистим таблицу квот от алиасов, которые были удалены, а в таблице квот остались
-$sql_refreshquota="delete from scsq_mod_quotas where aliasid not in (select id from scsq_alias);";
-$sth = $dbh->prepare($sql_refreshquota);
-$sth->execute; #
+sub doRefreshListQuota {
+	$sql_refreshquota="delete from scsq_mod_quotas where aliasid not in (select id from scsq_alias);";
+	doQueryToDatabase($sql_refreshquota);
+
+}
 
 #соберем даты по квотам. для дневной
+
+sub doGetDates {
+
 if($dbtype==0){
-$queryd="date(sysdate())";
-$sql_queryDate = " unix_timestamp($queryd) ";
+#$queryd="sysdate()";
+$queryd="'2019-08-07'";
+$queryDayStart="date($queryd)";
+$queryDayEnd="date($queryd + INTERVAL 1 DAY)";
+
+#$sql_queryDayDate = " unix_timestamp($queryd) ";
+
+$queryMonthStart="DATE_FORMAT($queryd,\"%Y-%m-1\")";
+$queryMonthEnd="DATE_FORMAT($queryd + INTERVAL 1 MONTH,\"%Y-%m-1\")";
+
+$sql_queryDate .= "unix_timestamp($queryDayStart),unix_timestamp($queryDayEnd) ,unix_timestamp($queryMonthStart),unix_timestamp($queryMonthEnd)";
+
 }
 
 if($dbtype==1){
-	
-$queryd="current_date";
+#для дня	
+#$queryd="current_date";
 #$queryd="to_timestamp('2019-08-07','YYYY-MM-DD')"; #for debug
+$queryDayStart="current_date";
+$queryDayEnd="current_date + INTERVAL '1 DAY'";
 
-$sql_queryDate = " extract(epoch from $queryd) ";
+
+#для месяца
+
+$queryMonthStart="to_char($queryd,'YYYY-MM-1')";
+$queryMonthEnd="to_char($queryd + INTERVAL '1 MONTH','YYYY-MM-1')";
+
+
+
+$sql_queryDate .= "extract(epoch from to_timestamp($queryDayStart,'YYYY-MM-DD')),extract(epoch from to_timestamp($queryDayEnd,'YYYY-MM-DD')),extract(epoch from to_timestamp($queryMonthStart,'YYYY-MM-DD')),extract(epoch from to_timestamp($queryMonthEnd,'YYYY-MM-DD'))";
+
 }
-
-
-#$queryd="'2018-11-26'"; #for debug
 
 #для месячной
 
-if($dbtype==0){
-$queryd="sysdate()";
-$querydstart="DATE_FORMAT($queryd,\"%Y-%m-1\")";
-$querydend="DATE_FORMAT($queryd + INTERVAL 1 MONTH,\"%Y-%m-1\")";
-
-$sql_queryDate .= ",unix_timestamp($querydstart),unix_timestamp($querydend)";
-}
-
-if($dbtype==1){
-$queryd="current_date";
-#$queryd="to_timestamp('2019-08-07','YYYY-MM-DD')"; #for debug
-$querydstart="to_char($queryd,'YYYY-MM-1')";
-$querydend="to_char($queryd + INTERVAL '1 MONTH','YYYY-MM-1')";
-
-$sql_queryDate .= ",extract(epoch from to_timestamp($querydstart,'YYYY-MM-DD')),extract(epoch from to_timestamp($querydend,'YYYY-MM-DD'))";
-}
-
 $sql_queryDate = "select ".$sql_queryDate;
 
-$sth = $dbh->prepare($sql_queryDate);
-$sth->execute; #
-@datenow=$sth->fetchrow_array;
+@dates=doFetchQuery($sql_queryDate);
 
-#get aliasid from quotas module 
-$sql_getquota="select aliasid,q.active, quota, quotamonth, datemodified, quotaday ,a.tableid, a.typeid, sumday, summonth , status 
-				from scsq_mod_quotas q, scsq_alias a
-				where a.id=q.aliasid";
-$sthr = $dbh->prepare($sql_getquota);
-$sthr->execute; #
+#разложим и будем пользоватся в скрипте
+$datestart_day =   $dates[0];
+$dateend_day = 	   $dates[1];
+$datestart_month = $dates[2];
+$dateend_month =   $dates[3];
 
-while (@row = $sthr->fetchrow_array())
-
-    {
-$aliasid = $row[0];
-$active = $row[1];
-$quota = $row[2];
-$quotamonth = $row[3];
-$datemodified = $row[4];
-$quotaday = $row[5];
-
-$tableid = $row[6];
-$typeid = $row[7];
-
-$sumday = $row[8];
-$summonth = $row[9];
-$statusquota = $row[10];
-
-if($typeid == 0){
-$columnname = "login";
-}
-else
-{
-$columnname = "ipaddress";
 }
 
-$querydate=$datenow[0]; #curday
 
-$datestart=$querydate;
-$dateend=$querydate + 86400;
+
+#возьмем и рассчитаем разом сразу все значения для модуля квот.
+sub doCalcQuotas {
+
+$datestart=$datestart_day;
+$dateend=$dateend_day;
+
+
+#mysql version
+   $queryAliasDayTraffic="
+UPDATE scsq_mod_quotas q
+JOIN (
+
+SELECT
+	aliasdata.id,
+    aliasdata.s/1024/1024 sumday
 	
-$queryOneAliasTraffic="
- 	SELECT 
-	   SUM(sizeinbytes) as s
- 
-		   FROM scsq_quicktraffic 
-		   WHERE date>".$datestart." 
-		     AND date<".$dateend."
-	             AND ".$columnname." = ".$tableid." 
-		   GROUP BY ".$columnname."
-	;";
 
-$sth = $dbh->prepare($queryOneAliasTraffic);
-$sth->execute; #
+FROM (
+  SELECT 
+    tmp.s,
+	aliastbl.id,
+	aliastbl.name,
+	aliastbl.tableid
+  FROM (SELECT 
+          login,
+          SUM(sizeinbytes) as 's' 
+        FROM scsq_quicktraffic 
+        WHERE  date>".$datestart." 
+	   AND date<".$dateend."
+	   AND par=1
+	GROUP BY CRC32(login),login
+	ORDER BY null) 
+	AS tmp 
 
-$DaySumSizeTraffic = $sth->fetchrow_array;
-$DaySumSizeTraffic = int(($DaySumSizeTraffic + 0)/1024/1024); 
-#print int($DaySumSizeTraffic/1000/1000);
-#print "\n";
+ 	INNER JOIN (SELECT 
+		      id, name,tableid		      
+		   FROM scsq_alias 
+		   WHERE typeid=0) 
+		   AS aliastbl 
+	ON tmp.login=aliastbl.tableid
+	INNER JOIN scsq_mod_quotas q ON aliastbl.id=q.aliasid and q.active=1
+
+  GROUP BY aliastbl.name,aliastbl.id,aliastbl.tableid,tmp.s
+UNION ALL
+SELECT 
+    tmp.s,
+	aliastbl.id,
+	aliastbl.name,
+	aliastbl.tableid
+  FROM (SELECT 
+          ipaddress,
+          SUM(sizeinbytes) as 's' 
+        FROM scsq_quicktraffic 
+        WHERE  date>".$datestart."  
+	   AND date<".$dateend."  
+	   AND par=1
+	GROUP BY CRC32(ipaddress),ipaddress
+	ORDER BY null) 
+	AS tmp 
+
+ 	INNER JOIN (SELECT 
+		      id, name,tableid		      
+		   FROM scsq_alias 
+		   WHERE typeid=1) 
+		   AS aliastbl 
+	ON tmp.ipaddress=aliastbl.tableid
+	INNER JOIN scsq_mod_quotas q ON aliastbl.id=q.aliasid and q.active=1
+
+	GROUP BY aliastbl.name,aliastbl.id,aliastbl.tableid,tmp.s
+   ) aliasdata
+) res on q.aliasid=res.id
+set q.sumday=res.sumday
+
+   ;";		   
+		   
+
+doQueryToDatabase($queryAliasDayTraffic);		   
 
 
-#month quota
+$countQuotas=$countQuotas+1;
 
 
-$datestart=$datenow[1]; #first day in month
-$dateend=$datenow[2]; #first day next month
+
+}
+
+
+
+#установим статусы
+sub doSetStatus {
 	
-$queryOneAliasTraffic="
- 	SELECT 
-	   SUM(sizeinbytes) as s
- 
-		   FROM scsq_quicktraffic 
-		   WHERE date>".$datestart." 
-		     AND date<".$dateend."
-	             AND ".$columnname." = ".$tableid." 
-		   GROUP BY ".$columnname."
-	;";
-
-$sth = $dbh->prepare($queryOneAliasTraffic);
-$sth->execute; #
-
-$MonthSumSizeTraffic = $sth->fetchrow_array;
-$MonthSumSizeTraffic = int(($MonthSumSizeTraffic + 0)/1024/1024);
+$MonthSumSizeTraffic=0;
 
 #print int($MonthSumSizeTraffic);
 
@@ -199,25 +296,29 @@ $status=0; #нет превышения квоты
 
 
 }
-if($querydate > $datemodified) { #если текущая дата перешла на новый день, то обновим текущую квоту на дефолтную дня
-$newdayquota = "quota=$quotaday,datemodified=$querydate,";
-}
-else
-{
-$newdayquota="";
-}
 
 #print $querydate." - ".$datemodified;
 
 #update if we have something to update.
-if($statusquota!=$status or $summonth!=$MonthSumSizeTraffic or $sumday!=$DaySumSizeTraffic) {
-$sql_updatequota = "UPDATE scsq_mod_quotas SET $newdayquota sumday=$DaySumSizeTraffic,summonth=$MonthSumSizeTraffic, status=$status where aliasid=$aliasid;";
-$sth = $dbh->prepare($sql_updatequota);
-$sth->execute; #
-$countQuotas=$countQuotas+1;
+#if($statusquota!=$status or $summonth!=$MonthSumSizeTraffic or $sumday!=$DaySumSizeTraffic) {
+
 }
 
-     }
+#Если новый день наступил, то обнулим используемый трафик
+sub doRefreshQuotaByDay {
+	$sql_refreshdayly = "update scsq_mod_quotas set quota=quotaday, sumday=0, datemodified=".$datestart_day." where datemodified<".$datestart_day."";
+	doQueryToDatabase($sql_refreshdayly);
+
+}
+
+
+#main program
+
+print $now=localtime;
+doGetDates;
+doRefreshListQuota;
+doRefreshQuotaByDay;
+doCalcQuotas;
 
 print "\n";
 print $now=localtime;
