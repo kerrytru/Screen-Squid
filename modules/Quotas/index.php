@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/09/28 22:01:17.324 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/08 22:59:08.294 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/10 22:00:41.088 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -130,8 +130,8 @@ $paramsQuota['quotamonth']=$quotamonth;
 $paramsQuota['active']=$active;
 $paramsQuota['quotaid']=$quotaid;
 $paramsQuota['quota']=$quota;
-$paramsQuota['sumday']=$sumday;
-$paramsQuota['summonth']=$summonth;
+#$paramsQuota['sumday']=$sumday;
+#$paramsQuota['summonth']=$summonth;
 $paramsQuota['datestart']=$datestart;
 
 

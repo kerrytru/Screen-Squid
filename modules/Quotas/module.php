@@ -1,11 +1,32 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:47:37 PM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> module.php </#FN>                                                      
+*                         File Birth   > <!#FB> 2022/10/10 21:13:58.662 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/10/10 22:00:22.569 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 #TODO
 
-#1. Функции добавления, редактирования, удаления квоты перенести в модуль.
 
 class Quotas
 {
@@ -107,8 +128,6 @@ echo "<table class=datatable>
 	 	<th class=unsortable><b>".$_lang['stQUOTASCURRENT']."</b></th>
 		<th class=unsortable><b>".$_lang['stQUOTASDAY']."</b></th>
 		<th class=unsortable><b>".$_lang['stQUOTASTRAFFICDAY']."</b></th>
-		<th class=unsortable><b>".$_lang['stQUOTASMONTH']."</b></th>
-		<th class=unsortable><b>".$_lang['stQUOTASTRAFFICMONTH']."</b></th>
 		<th><b>".$_lang['stQUOTASACTIVE']."</b></th>
 		<th><b>Action</b></th>
 </tr>";
@@ -130,8 +149,6 @@ if($line[8] == 2) $alarmclass="class=quotaAlm2"; #месячная превыш�
 		<td align=center $alarmclass>".$line[7]."&nbsp;</td>
 		<td align=center $alarmclass>".$line[5]."&nbsp;</td>
 		<td align=center $alarmclass>".$line[3]."</td>
-		<td align=center $alarmclass>".$line[6]."&nbsp;</td>
-		<td align=center $alarmclass>".$line[4]."</td>                 
 		<td align=center $alarmclass>".$line[9]."</td>  
 		<td align=center $alarmclass><a href=index.php?srv=".$this->vars['connectionParams']['srv']."&actid=5&quotaid=".$line[0].">Delete&nbsp;</a></td>
 
@@ -242,7 +259,6 @@ function doPrintFormAdd($globalSS){
 	echo '
 	  <form action="index.php?srv='.$this->vars['connectionParams']['srv'].'&actid=2" method="post">
 	  '.$_lang['stQUOTASDAY'].': <input type="text" value="0" name="quotaday" ><br />
-	  '.$_lang['stQUOTASMONTH'].': <input type="text" value="0" name="quotamonth"><br />
 	  <input type="hidden" name=sumday value="0">
 	  <input type="hidden" name=summonth value="0">
 	  '.$_lang['stQUOTASACTIVE'].': <input type="checkbox" name="active"><br /> 
@@ -429,7 +445,6 @@ function doAdd($globalSS,$params){
  	 '	.$_lang['stALIAS'].': '.$line[5].'<br /><br />
 	 '.$_lang['stQUOTASCURRENT'].': <input type="text" name="quota" value="'.$line[1].'"><br />
 	 '.$_lang['stQUOTASDAY'].': <input type="text" name="quotaday" value="'.$line[2].'"><br />
-	 '.$_lang['stQUOTASMONTH'].': <input type="text" name="quotamonth" value="'.$line[3].'"><br />
  	<input type="hidden" name=sumday value="'.$line[7].'">
  	<input type="hidden" name=summonth value="'.$line[8].'">
 	 '.$_lang['stQUOTASACTIVE'].': <input type="checkbox" '.$isChecked.' name="active"><br /> 
@@ -509,7 +524,7 @@ $numrow=1;
 	$datestart=$params['datestart'];
 	$quota=$params['quota'];
 	
-	$queryUpdateOneQuota="update scsq_mod_quotas set aliasid=".$aliasid.",quota=".$quota.",quotaday=".$quotaday.",quotamonth=".$quotamonth.",active=".$active.",status=0, datemodified=".$datestart." where id=".$quotaid."";
+	$queryUpdateOneQuota="update scsq_mod_quotas set aliasid=".$aliasid.",quota=".$quota.",quotaday=".$quotaday.",quotamonth=".$quotamonth.",active=".$active.", datemodified=".$datestart." where id=".$quotaid."";
 
 
 	if (!doQuery($this->vars, $queryUpdateOneQuota)) {
@@ -544,7 +559,11 @@ function doDelete($globalSS,$params){
   function Install()
   {
 
-
+	#если модуль уже есть, то вернемся.
+	if(doQueryExistsModule($this->vars,'Quotas')>0) {
+		echo "<script language=javascript>alert('Module already installed')</script>";
+		return;
+	}
 
 # Table structure for table `scsq_mod_quotas`
 
@@ -561,6 +580,7 @@ function doDelete($globalSS,$params){
 			  sumday int(11) DEFAULT '0',
 			  summonth int(11) DEFAULT '0',
 			  datemodified int(11) DEFAULT NULL,
+			  datecalc int(11) DEFAULT NULL,
 			  PRIMARY KEY (id)
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 		";
@@ -578,6 +598,7 @@ function doDelete($globalSS,$params){
 			  sumday integer DEFAULT 0,
 			  summonth integer DEFAULT 0,
 			  datemodified integer DEFAULT NULL,
+			  datecalc integer DEFAULT NULL,
 			  CONSTRAINT scsq_mod_quotas_pkey PRIMARY KEY (id)
 			);
 
@@ -592,7 +613,7 @@ function doDelete($globalSS,$params){
 		
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		echo "".$this->lang['stINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stINSTALLED']."')</script>";
 	 }
   
  function Uninstall() #добавить LANG
@@ -609,7 +630,7 @@ function doDelete($globalSS,$params){
 
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stUNINSTALLED']."')</script>";
 
   }
 
