@@ -151,8 +151,6 @@ include("".$globalSS['root_dir']."/modules/Chart/module.php");
 $grap = new Chart($globalSS); #получим экземпляр класса и будем уже туда закидывать запросы на исполнение
 
 
-// Include the main TCPDF library (search for installation path).
-include("".$globalSS['root_dir']."/lib/tcpdf/tcpdf.php");
 
 
 //если есть команда pdf, то не выводим заголовки
@@ -161,6 +159,9 @@ if(isset($_GET['pdf']))
 {
 $makepdf=1;
 $globalSS['makepdf']=1;
+// Include the main TCPDF library (search for installation path).
+include("".$globalSS['root_dir']."/lib/tcpdf/tcpdf.php");
+
 }
 
 $globalSS['makecsv']=0;
