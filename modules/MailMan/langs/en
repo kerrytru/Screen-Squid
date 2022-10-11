@@ -1,0 +1,11 @@
+<?php
+
+//1.00
+
+$_lang['stMODULEDESC'] = "Module to send mail messages";
+
+
+$_lang['stINSTALLED']="Installed";
+$_lang['stUNINSTALLED']="Uninstalled";
+
+?>
