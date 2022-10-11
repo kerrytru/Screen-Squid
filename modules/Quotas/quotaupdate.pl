@@ -27,11 +27,11 @@
 use DBI; # DBI  Perl!!!
 
 #TODO
-# 1. Убрать костыль doQueryToDatabaseRows
+# 1. Убрать костыль doQueryToDatabaseRows (11.10.2022)
 
 #=======================CONFIGURATION BEGIN============================
 
-my $dbtype = "1"; #type of db - 0 - MySQL, 1 - PostGRESQL
+my $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
 
 #mysql default config
 if($dbtype==0){
@@ -50,6 +50,7 @@ $pass = "pass"; # pasword k DB
 $db = "test5"; # name DB
 }
 
+#=======================CONFIGURATION END============================
 
 #здесь будем хранить данные дат чтобы десять раз за ними не бегать
 local $datestart_day;
