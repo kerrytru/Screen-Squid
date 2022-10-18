@@ -66,8 +66,21 @@ if (file_exists("langs/".$language))
 
 $start=microtime(true);
       
-echo "<br><p>It`s ok, if you see only this line.</p>";   
+$mailmanex = new MailMan($globalSS);
 
+echo "<h2>MAIL BOX</h2>";
+
+if(isset($_GET['actid'])) {
+$actid = $_GET['actid'];
+  
+# если есть команда на очистку ящика
+  if($actid==1)
+    $mailmanex->doCleanAll($globalSS);
+
+}
+
+
+$mailmanex->doPrintAll($globalSS);
 
 $end=microtime(true);
 
