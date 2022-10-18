@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/20 21:03:29.590 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/17 22:33:56.199 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -487,7 +487,7 @@ if (-e "fetch.lock") {
   $qfn = readlink("/proc/$$/fd/$fileno");
   
   doWriteToLogFile("Cant start script cause fetch.lock is found in $qfn");
-  doWriteToLogTable("Cant start script cause fetch.lock is found in $qfn");
+  doWriteToLogTable("FETCH PROBLEM: Cant start script cause fetch.lock is found in $qfn");
   exit;
 }
 else
@@ -545,11 +545,11 @@ $now2=localtime;
 doWriteToTerminal($now2);
 
 doWriteToLogFile("$now1 ===> $now2     records counted $countlines,   records added $countadded");
-doWriteToLogTable("$countlines records counted , $countadded records added ");
+doWriteToLogTable("FETCH OK: $countlines records counted , $countadded records added ");
 
 #если посчитано 0 записей, то с логом что-то не так.
 if($countlines==0) {
-doWriteToLogTable("Something going wrong. Check manual, that your log file located in $filetoparse");
+doWriteToLogTable("FETCH PROBLEM: Something going wrong. Check manual, that your log file located in $filetoparse");
 }
 
 
