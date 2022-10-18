@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> login.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/11/02 23:11:12.035 </#FB>                                         *
-*                         File Mod     > <!#FT> 2021/11/02 23:12:18.676 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/18 22:15:55.249 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -44,6 +44,13 @@ function generateCode($length=6) {
 
 include("../../config.php");
 
+$start=microtime(true);
+
+$message = array();
+
+$message['datestart']=$start;
+$message['dateend']=$start;
+
 $language=$globalSS['language'];
 
 include_once("../../lang/$language");
@@ -68,7 +75,10 @@ if($pass == md5(md5($_POST['password'])))
 		    {
 			$hash = md5(generateCode(10));	
 			# set cookie
-			
+
+			$message['message']="PRIVATEAUTH INFO: Client IP = ".$_SERVER['REMOTE_ADDR']." succesfully auth.";
+			doWriteToLogTable($globalSS,$message);
+
 			setcookie("loggedAdm", 1, 0, '/');
 			
 			header("Location: ".$globalSS['root_http']."index.php"); exit();
@@ -81,7 +91,9 @@ if($pass == md5(md5($_POST['password'])))
 
 		    {
 			//wrong password
-		       echo "<script> alert('".$_lang['stAUTHFAIL']."')</script>";
+			$message['message']="PRIVATEAUTH INFO: Client IP = ".$_SERVER['REMOTE_ADDR']." ERROR AUTH.";
+			doWriteToLogTable($globalSS,$message);
+			echo "<script> alert('".$_lang['stAUTHFAIL']."')</script>";
 			
 
 		    }
