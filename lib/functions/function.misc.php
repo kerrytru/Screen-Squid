@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/19 21:16:34.238 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/18 22:13:59.754 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -1026,5 +1026,18 @@ function doReadGlobalParamsTable($globalSS){
       }
       return $globalSS;
     }
+
+
+#Функции работы с группами
+function doWriteToLogTable($globalSS, $params){
+
+  include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+ 
+  $sqlquery="insert into scsq_logtable (datestart,dateend,message) VALUES ('".$params['datestart']."','".$params['dateend']."','".$params['message']."');";
+
+  doQuery($globalSS,$sqlquery);
+
+      
+  }
 
 ?>
