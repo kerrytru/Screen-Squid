@@ -43,15 +43,15 @@ function generateCode($length=6) {
 
 
 
-
-
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
-
-
 include("../../config.php");
 include("config.php");
 
+$start=microtime(true);
+
+$message = array();
+
+$message['datestart']=$start;
+$message['dateend']=$start;
 
 //Определим номер базы, по имени указанной в конфиге. Так проще.
 $srv=array_search($cab_dbname, $db); 
@@ -141,6 +141,8 @@ if($dbtype==1)
 			if($groupquery==1)
 			{
 			setcookie("tableid", $row[0], 0);
+			setcookie("idmenu", 4, 0);
+
 			setcookie("srv", $srv, 0);
 			setcookie("idreport", 25, 0);
 			setcookie("typeid", $row[4], 0);
@@ -148,6 +150,8 @@ if($dbtype==1)
 			setcookie("namelogin", $_POST['userlogin'], 0);
 			setcookie("realname", $row[5], 0);
 
+			$message['message']="CABINET INFO: Client IP = ".$_SERVER['REMOTE_ADDR'].", LOGIN = ".$row[5]." AUTH OK.";
+			doWriteToLogTable($globalSS,$message);
 
 			#header("Location: reports.php?srv=".$srv."&id=25&date=".$querydate."&dom=day&login=&groupname=&typeid=".$row[4]."&group=".$row[0].""); exit();
 			header("Location: index.php"); exit();
@@ -164,13 +168,19 @@ if($dbtype==1)
 				setcookie("querydate", $querydate, 0);
 				setcookie("namelogin", $_POST['userlogin'], 0);
 				setcookie("realname", $row[5], 0);
-	
+				setcookie("idmenu", 1, 0);
+
+				$message['message']="CABINET INFO: Client IP = ".$_SERVER['REMOTE_ADDR'].", ALIAS = ".$row[5]." AUTH OK.";
+				doWriteToLogTable($globalSS,$message);
+		
 				#header("Location: reports/reports.php?srv=".$srv."&id=8&date=".$querydate."&dom=day&login=".$row[3]."&groupname=&typeid=".$row[4]."&group="); exit();
 				header("Location: index.php"); exit();
 			}			
 			if($row[4]==1)
 			{
 				setcookie("tableid", $row[3], 0);
+				setcookie("idmenu", 2, 0);
+
 				setcookie("srv", $srv, 0);
 				setcookie("idreport", 11, 0);
 				setcookie("typeid", $row[4], 0);
@@ -178,7 +188,9 @@ if($dbtype==1)
 				setcookie("namelogin", $_POST['userlogin'], 0);
 				setcookie("realname", $row[5], 0);
 
-				
+				$message['message']="CABINET INFO: Client IP = ".$_SERVER['REMOTE_ADDR'].", ALIAS = ".$row[5]." AUTH OK.";
+				doWriteToLogTable($globalSS,$message);
+					
 				header("Location: index.php"); exit();
 				}
 			}
@@ -189,6 +201,9 @@ if($dbtype==1)
 
 		    {
 			//wrong password
+			$message['message']="CABINET INFO: Client IP = ".$_SERVER['REMOTE_ADDR'].", LOGIN = ".$_POST['userlogin']." AUTH ERROR.";
+			doWriteToLogTable($globalSS,$message);
+
 		       echo "<script> alert('".$_lang['stAUTHFAIL']."')</script>";
 			
 

@@ -37,7 +37,7 @@ header("Location: login.php"); exit();
 </head>
 <frameset cols="400,*" >
     <frame name="left" src="left.php" frameborder="0" scrolling="no">
-<frame name="right" src="reports/reports.php" frameborder="0">
+<frame name="right" src="reports/reports.php?" frameborder="0">
 <noframes>
 <body>
 <p>This page uses frames, but your browser doesn't support them.</p>

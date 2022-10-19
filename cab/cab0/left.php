@@ -1,7 +1,29 @@
 <?php
 
-#Build date Saturday 16th of May 2020 17:55:55 PM
-#Build revision 1.1
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> left.php </#FN>                                                        
+*                         File Birth   > <!#FB> 2022/10/19 21:15:30.138 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/10/19 21:15:48.501 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 include("../../config.php");
 
@@ -29,36 +51,28 @@ parent.right.location.href=frame2;
 
 
 
-function GoReport(srv,id)
-{
-if(id==999) {
-	parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id;
-}
-else {
-
-	if((id==21) || (id==39) || (id==40) ) {
-	parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value
-	+'&dom=month&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-	+'&typeid='+parent.right.window.document.fastdateswitch_form.typeid_field_hidden.value
-	+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-	}
-	else
-	{
-	parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value
-	+'&groupname='+parent.right.window.document.fastdateswitch_form.groupname_field_hidden.value
-	+'&typeid='+parent.right.window.document.fastdateswitch_form.typeid_field_hidden.value
-	+'&group='+parent.right.window.document.fastdateswitch_form.group_field_hidden.value;
-	}
-}
 
 
-}
 
-
+//Функция перехода по частным отчетам. Всё также берем srv и id отчета. Остальное припишем прямо из адресной строки правого фрейма
 function GoPartlyReport(srv,id)
 {
-	
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+parent.right.window.document.fastdateswitch_form.dom_field_hidden.value+'&login='+parent.right.window.document.fastdateswitch_form.login_field_hidden.value+'&loginname='+parent.right.window.document.fastdateswitch_form.loginname_field_hidden.value+'&ip='+parent.right.window.document.fastdateswitch_form.ip_field_hidden.value+'&ipname='+parent.right.window.document.fastdateswitch_form.ipname_field_hidden.value;
+	var loc = ""; //возьмем адрес из правого фрейма 
+	var arr = []
+	var ret = "";
+
+	loc = parent.right.location.href;
+
+	arr = loc.split('?');
+	//Удалим первые два параметра srv и id.
+	arr = arr[1].split('&');
+	arr.shift(); //раз
+	arr.shift(); //два
+
+	//объединим оставшиеся элементы через & и это будет наша строка
+	ret = arr.join('&');
+
+parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date.value+'&date2='+parent.right.window.document.fastdateswitch_form.date2.value;
 }
 
 
@@ -108,8 +122,8 @@ if (document.getElementById) {
 
 ";
 
-if(isset($_GET['id']))
-  $idmenu=$_GET['id'];
+if(isset($_COOKIE['idmenu']))
+  $idmenu=$_COOKIE['idmenu'];
 else
   $idmenu=0;
 
