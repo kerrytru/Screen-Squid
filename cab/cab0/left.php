@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> left.php </#FN>                                                        
 *                         File Birth   > <!#FB> 2022/10/19 21:15:30.138 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/19 21:15:48.501 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/20 21:05:40.889 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -49,7 +49,10 @@ parent.left.location.href=frame1;
 parent.right.location.href=frame2;
 }
 
-
+function GoLink(dest_link,dest_target)
+{
+parent.right.location.href=dest_link;
+}
 
 
 
@@ -227,7 +230,7 @@ echo "
 
 
 echo "
-
+reports.add(new WebFXTreeItem('Logout','javascript:GoLink(\'logout.php\')','','',''));
 document.write(reports);
 }
 </script>

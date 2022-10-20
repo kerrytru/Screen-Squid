@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/09/11 17:04:26.556 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/01 20:01:21.604 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/20 21:37:26.448 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.1 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -80,6 +80,31 @@ $header=$header.'
 if (isset($_COOKIE['logged'])and($_COOKIE['logged']==1)) {
 
 
+	if (isset($_COOKIE['idalias']) and isset($_COOKIE['hash']))
+{
+
+if((($_GET['idreport']>=25) and ($_GET['idreport']<=29)) or ($_GET['idreport']==55) or ($_GET['idreport']==63))
+    $query = "SELECT id,hash FROM scsq_groups WHERE id = '".intval($_COOKIE['idalias'])."' LIMIT 1";
+else
+    $query = "SELECT id,hash FROM scsq_alias WHERE id = '".intval($_COOKIE['idalias'])."' LIMIT 1";
+
+
+
+$row=doFetchOneQuery($globalSS, $query);
+  
+
+
+#    if(($row['hash'] !== $_COOKIE['hash']) or ($row['id'] !== $_COOKIE['id']))
+    if((trim($row[1]) !== trim($_COOKIE['hash'])) or (trim($row[0]) !== trim($_COOKIE['idalias'])))
+
+    {
+        setcookie("idalias", "", 0, "/");
+        setcookie("hash", "", 0, "/");
+		header("Location: index.php"); exit();
+      // something going wrong
+	}
+	
+}
 
 
 //fix for cabinet
@@ -6738,7 +6763,7 @@ mn=new Array(
 </script>
 
 
-<script src="../javascript/calendar_ru.js" type="text/javascript"></script>
+<script src="../../../javascript/calendar_ru.js" type="text/javascript"></script>
 
 
 <?php
@@ -7153,8 +7178,8 @@ if($id==8)
 
   doPrintTable($globalSS,$json_result);
 
-if($globalSS['makepdf']==0 && $globalSS['makecsv']==0)
-echo "<script>UpdateLeftMenu(1);</script>";
+
+
 }
 
 /////////// ONE LOGIN TRAFFIC REPORT END
@@ -7226,8 +7251,8 @@ if($id==11)
   $json_result=doGetReportData($globalSS,$queryOneIpaddressTraffic,'template4.php');
 
   doPrintTable($globalSS,$json_result);
-  if($globalSS['makepdf']==0 && $globalSS['makecsv']==0)
-  echo "<script>UpdateLeftMenu(2);</script>";
+
+
 }
 
 /////////// ONE IPADDRESS TRAFFIC REPORT END
@@ -7427,8 +7452,8 @@ if($id==25)
   $json_result=doGetReportData($globalSS,$queryOneGroupTraffic,'template15.php');
   doPrintTable($globalSS,$json_result);
 
-if($globalSS['makepdf']==0 && $globalSS['makecsv']==0)
-echo "<script>UpdateLeftMenu(4);</script>";
+
+
 }
 
 /////////// ONE GROUP LOGINS/IPADDRESS TRAFFIC REPORT END
@@ -7634,8 +7659,8 @@ if($id==35)
   doPrintTable($globalSS,$json_result);
 
 
-if($makepdf==0 && $makecsv==0)
-echo "<script>UpdateLeftMenu(1);</script>";
+
+
 }
 
 
@@ -7649,8 +7674,8 @@ if($id==36)
   $json_result=doGetReportData($globalSS,$queryOneIpaddressLoginsTraffic,'template1.php');
   doPrintTable($globalSS,$json_result);
 
-if($makepdf==0 && $makecsv==0)
-echo "<script>UpdateLeftMenu(2);</script>";
+
+
 }
 
 
@@ -7736,8 +7761,8 @@ if($id==43)
   $json_result=doGetReportData($globalSS,$queryOneLoginOneHourTraffic,'template4.php');
   doPrintTable($globalSS,$json_result);
 
-if($makepdf==0 && $makecsv==0)
-echo "<script>UpdateLeftMenu(1);</script>";
+
+
 }
 
 /////////// ONE LOGIN ONE HOUR TRAFFIC REPORT END
@@ -7750,8 +7775,8 @@ if($id==44)
   $json_result=doGetReportData($globalSS,$queryOneIpaddressOneHourTraffic,'template4.php');
   doPrintTable($globalSS,$json_result);
 
-if($makepdf==0 and $makecsv==0)
-echo "<script>UpdateLeftMenu(2);</script>";
+
+
 }
 
 /////////// ONE IPADDRESS ONE HOUR TRAFFIC REPORT END

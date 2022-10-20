@@ -111,7 +111,8 @@ if($dbtype==1)
 	if($row[1] == md5(md5($_POST['password'])) && $row[2] == 1 && $row[0]>0)
 
 		    {
-       			
+				   # на тот случай, если хакер подкинет куки, мы создадим хэш и загрузим его в базу.
+				   # если куки есть, а хэш не совпадает, то вероятно этот хакер авторизацию не проходил
 		        $hash = md5(generateCode(10));
 		
 			if($groupquery==1)
@@ -124,7 +125,7 @@ if($dbtype==1)
 
 			# set cookie
 
-			setcookie("id", $row[0], 0);
+			setcookie("idalias", $row[0], 0);
 
 			setcookie("hash", $hash, 0);
 
