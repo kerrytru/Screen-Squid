@@ -259,6 +259,7 @@ if($querydate2=="") {
 	$datestart=strtotime($querydate);
 	$dateend=strtotime($querydate) + 86400;
 	$querydate_str=$querydate;
+	$weekdaynumber=date("w",$datestart);
   }
   
   //а если вторая дата есть, то трафик с даты по дату
