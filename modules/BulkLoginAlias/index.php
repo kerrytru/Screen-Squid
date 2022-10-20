@@ -31,6 +31,15 @@ $srv=0;
 
 include("../../config.php");
 
+#если нет авторизации, сразу выходим
+if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) 
+	and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) 
+	and (!file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/hash"))
+	)
+{
+	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
+}
+
 $language=$globalSS['language'];
 
 

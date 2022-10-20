@@ -26,7 +26,7 @@
 include("../../config.php");
 
 setcookie("loggedAdm", 0, 0,'/');
-
+unlink('hash');
 
 ?>
 

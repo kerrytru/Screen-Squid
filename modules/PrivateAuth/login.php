@@ -79,6 +79,10 @@ if($pass == md5(md5($_POST['password'])))
 			$message['message']="PRIVATEAUTH INFO: Client IP = ".$_SERVER['REMOTE_ADDR']." succesfully auth.";
 			doWriteToLogTable($globalSS,$message);
 
+
+			#запишем хэш в файл.
+			file_put_contents('hash',$hash);
+
 			setcookie("loggedAdm", 1, 0, '/');
 			
 			header("Location: ".$globalSS['root_http']."index.php"); exit();
