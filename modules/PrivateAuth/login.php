@@ -83,8 +83,9 @@ if($pass == md5(md5($_POST['password'])))
 			#запишем хэш в файл.
 			file_put_contents('hash',$hash);
 
-			setcookie("loggedAdm", 1, 0, '/');
+			setcookie("loggedAdm", 1, time()+3600, '/');
 			
+
 			header("Location: ".$globalSS['root_http']."index.php"); exit();
 				
 			}
