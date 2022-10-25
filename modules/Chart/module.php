@@ -1,7 +1,29 @@
 <?php
 
-#Build date Monday 17th of August 2020 10:09:48 AM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> module.php </#FN>                                                      
+*                         File Birth   > <!#FB> 2022/09/28 21:52:47.264 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/10/25 22:39:51.107 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.1 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 class Chart
 {
@@ -16,14 +38,9 @@ function __construct($variables){ //
      include("pChart/pChart/pData.class");
 	 include("pChart/pChart/pChart.class");	
 	 
-	 include(__DIR__."/config.php"); //module config	
-
-
 
 	
-
-	
-	$this->chartlib = $chartlib;
+	$this->chartlib = doGetParam($this->vars,'Chart','chartlib');
 	
 	#clean directory for svg
 	foreach (glob($this->vars['root_dir']."/pictures/*.svg") as $filename) {
@@ -234,15 +251,14 @@ if($graphtype['trafficbyhours']==1)
  
 
   function Install()
-  {
+  	{
+	echo "<script language=javascript>alert('This is system module, its already installed')</script>";
 
-		echo "This is system module, its already installed<br /><br />";
 	 }
   
  function Uninstall() 
   {
-
-		echo "This is system module, you cant uninstall it<br /><br />";
+	echo "<script language=javascript>alert('This is system module, you cant uninstall it')</script>";
 
   }
 

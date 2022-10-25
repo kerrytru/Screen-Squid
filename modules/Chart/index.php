@@ -10,23 +10,18 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/04/11 23:57:46.893 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/05 12:48:08.311 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/25 22:39:58.289 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.1 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
 
 
 
-
-
-
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -71,28 +66,40 @@ include_once("../../lang/$language");
 <?php
 
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-
-$variableSet['language']=$language;
 
 
 $start=microtime(true);
 
-   
- 
-echo "<br><p>It`s ok, if you see only this line.</p>";
-         
+
+    #write config 
+    if(isset($_POST['submit'])){
+      doSetParam($globalSS,'Chart','chartlib',$_POST['chartlib']);
+    
+    }
+
+    $chartlibpar=doGetParam($globalSS,'Chart','chartlib');
+  
+echo "<h3>Config module</h3>";
+
+echo "Current value: ".$chartlibpar;
+
+    echo '
+    <form action="index.php" method="post">
+       <table class=datatable>
+       <tr>
+<td>Using chart library:</td>
+<td>
+<select name="chartlib">
+  <option value="pChart" />pChart</option>
+  <option value="pygal" />pygal</option>
+</select>
+</td>
+</tr>
+</table>
+   <br />
+    <input type="submit" name=submit value="Save"><br />
+    </form>
+    ';
 
 
 $end=microtime(true);
