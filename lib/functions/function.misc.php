@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/18 22:13:59.754 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/25 22:12:49.478 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.7.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -249,6 +249,7 @@ function doPrintFormAddAlias($globalSS){
 
     include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
     
+    $isChecked="";
     #если окно модальное
     if (isset($_GET['modal'])) {
       $modal_tableid=$_GET['m_tableid'];
@@ -392,25 +393,18 @@ function doPrintFormAddAlias($globalSS){
 
     }
 
-function doAliasAdd($globalSS){
+function doAliasAdd($globalSS,$alias_params){
 
     include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
       
     $_lang = $globalSS['lang'];
 
-    $name=$_POST['name'];
-
-    if(!isset($_POST['typeid'])) $typeid=0;  else  $typeid=1;
-    if(!isset($_POST['activeauth'])) $activeauth=0; else $activeauth=1;
-
-    #если не выбран ни один логин или IP адрес, вернём ошибку. 
-    #По хорошему, нужно напиать валидатор формы, чтобы JS не давал пройти дальше.
-   # echo "tableid=".$_POST['tableid'];
-    if($_POST['tableid']=="") die ('Error: No login or ipaddress choosed! Alias cant be added');
-
-    $tableid=$_POST['tableid'];
-    $userlogin=$_POST['userlogin'];
-    $userpassword=md5(md5(trim($_POST['userpassword'])));
+    $name = $alias_params['name'];
+    $typeid = $alias_params['typeid'];
+    $tableid = $alias_params['tableid'];
+    $userlogin = $alias_params['userlogin'];
+    $userpassword = $alias_params['userpassword'];
+    $activeauth = $alias_params['activeauth'];
 
     $sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
 
@@ -584,14 +578,14 @@ else
 
 }
 
-function doAliasDelete($globalSS){
+function doAliasDelete($globalSS,$aliasid){
 
   include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
     
   $_lang = $globalSS['lang'];
 
 
-  $aliasid = $_GET['aliasid'];
+  
 
   $queryDeleteOneAlias="delete from scsq_alias where id='".$aliasid."'";
   $queryDeleteOneAliasFromGroup="delete from scsq_aliasingroups where aliasid='".$aliasid."'";
@@ -1028,7 +1022,7 @@ function doReadGlobalParamsTable($globalSS){
     }
 
 
-#Функции работы с группами
+
 function doWriteToLogTable($globalSS, $params){
 
   include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
