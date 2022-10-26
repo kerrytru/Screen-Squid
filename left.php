@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> left.php </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/09/11 17:04:26.557 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/28 22:24:38.416 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/26 21:55:59.246 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -149,6 +149,9 @@ echo "
 	reports.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",46)'));
 	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoPartlyReport(".$srv.",56)'));
 	reports.add(new WebFXTreeItem('".$_lang['stBIGFILES']."','javascript:GoPartlyReport(".$srv.",66)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAY']."','javascript:GoPartlyReport(".$srv.",70)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAYNAME']."','javascript:GoPartlyReport(".$srv.",71)'));
+
 	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
 
 	
@@ -185,6 +188,8 @@ echo "
 	reports.add(new WebFXTreeItem('".$_lang['stMIMETYPESTRAFFIC']."','javascript:GoPartlyReport(".$srv.",47)'));
 	reports.add(new WebFXTreeItem('".$_lang['stPOPULARSITES']."','javascript:GoPartlyReport(".$srv.",57)'));
 	reports.add(new WebFXTreeItem('".$_lang['stBIGFILES']."','javascript:GoPartlyReport(".$srv.",67)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAY']."','javascript:GoPartlyReport(".$srv.",72)'));
+	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAYNAME']."','javascript:GoPartlyReport(".$srv.",73)'));
 
 	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
 

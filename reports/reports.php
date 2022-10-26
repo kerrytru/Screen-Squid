@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/28 22:29:01.498 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/26 21:55:36.843 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.13.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.14.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -2295,9 +2295,14 @@ SELECT days.day_txt,
 #postgre version
 if($dbtype==1)
 $queryTrafficByPeriodDayname="
+SELECT days.day_txt,
+		tmp2.sum_bytes
+		
+		FROM
+		(
   	SELECT
 	  to_char(to_timestamp(scsq_quicktraffic.date),'ID') AS d1,
-	  SUM(scsq_quicktraffic.sizeinbytes)
+	  SUM(scsq_quicktraffic.sizeinbytes) sum_bytes
 	  	  
 	FROM scsq_quicktraffic
 
@@ -2324,7 +2329,28 @@ $queryTrafficByPeriodDayname="
 	  AND date<".$dateend." 
 	  AND par=1
 	GROUP BY d1
-	
+	) tmp2
+  
+	RIGHT JOIN (
+	  select 0 as day_num, 'stSUNDAY' as day_txt, 7 as day_rus_num
+	  UNION all 
+	  select 1 as day_num, 'stMONDAY' as day_txt, 1 as day_rus_num
+	  UNION all 
+	  select 2 as day_num, 'stTUESDAY' as day_txt, 2 as day_rus_num 
+	  UNION all 
+	  select 3 as day_num, 'stWEDNESDAY' as day_txt, 3 as day_rus_num 
+	  UNION all 
+	  select 4 as day_num, 'stTHURSDAY' as day_txt, 4 as day_rus_num 
+	  UNION all 
+	  select 5 as day_num, 'stFRIDAY' as day_txt, 5 as day_rus_num 
+	  UNION all 
+	  select 6 as day_num, 'stSATURDAY' as day_txt, 6 as day_rus_num 
+
+	  
+				   
+				   ) days on days.day_num::integer=tmp2.d1::integer
+				   
+				   order by days.day_rus_num asc
 ;";
 
 
@@ -5730,6 +5756,281 @@ $queryOneMimeOneIpaddress="
   INNER JOIN scsq_ipaddress as scsq_ip on scsq_ip.id=tmp.ipaddress
 ";
 
+$queryOneLoginTrafficByPeriodDay="
+  	SELECT
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%d.%m.%Y') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes),
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%d-%m-%Y') AS d2,
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d') AS d3
+
+	FROM scsq_quicktraffic
+
+	WHERE login=".$currentloginid."
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1, d2, d3
+	ORDER BY d3 asc;
+;";
+
+#postgre version
+if($dbtype==1)
+$queryOneLoginTrafficByPeriodDay="
+  	SELECT
+	  to_char(to_timestamp(scsq_quicktraffic.date),'DD.MM.YYYY') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes),
+	  to_char(to_timestamp(scsq_quicktraffic.date),'DD-MM-YYYY') AS d2,
+	  to_char(to_timestamp(scsq_quicktraffic.date),'YYYY-MM-DD') AS d3
+	  
+	FROM scsq_quicktraffic
+
+
+	WHERE login=".$currentloginid."
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1, d2, d3
+	ORDER BY d3 asc
+	
+;";
+
+//echo $queryTrafficByPeriodDay;
+
+$queryOneLoginTrafficByPeriodDayname="
+SELECT days.day_txt,
+		tmp2.sum_bytes
+		
+		FROM
+		(
+  	SELECT
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%w') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes) as sum_bytes
+	  
+	FROM scsq_quicktraffic
+
+
+	WHERE login=".$currentloginid."
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY crc32(d1),d1
+
+	) tmp2
+  
+	RIGHT JOIN (
+	  select 0 as day_num, 'stSUNDAY' as day_txt, 7 as day_rus_num
+	  UNION all 
+	  select 1 as day_num, 'stMONDAY' as day_txt, 1 as day_rus_num
+	  UNION all 
+	  select 2 as day_num, 'stTUESDAY' as day_txt, 2 as day_rus_num 
+	  UNION all 
+	  select 3 as day_num, 'stWEDNESDAY' as day_txt, 3 as day_rus_num 
+	  UNION all 
+	  select 4 as day_num, 'stTHURSDAY' as day_txt, 4 as day_rus_num 
+	  UNION all 
+	  select 5 as day_num, 'stFRIDAY' as day_txt, 5 as day_rus_num 
+	  UNION all 
+	  select 6 as day_num, 'stSATURDAY' as day_txt, 6 as day_rus_num 
+
+	  
+				   
+				   ) days on days.day_num=tmp2.d1
+				   
+				   order by days.day_rus_num asc
+	
+
+;";
+
+#postgre version
+if($dbtype==1)
+$queryOneLoginTrafficByPeriodDayname="
+SELECT days.day_txt,
+		tmp2.sum_bytes
+		
+		FROM
+		(
+  	SELECT
+	  to_char(to_timestamp(scsq_quicktraffic.date),'ID') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes) sum_bytes
+	  	  
+	FROM scsq_quicktraffic
+
+
+	WHERE login=".$currentloginid."
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1
+	) tmp2
+  
+	RIGHT JOIN (
+	  select 0 as day_num, 'stSUNDAY' as day_txt, 7 as day_rus_num
+	  UNION all 
+	  select 1 as day_num, 'stMONDAY' as day_txt, 1 as day_rus_num
+	  UNION all 
+	  select 2 as day_num, 'stTUESDAY' as day_txt, 2 as day_rus_num 
+	  UNION all 
+	  select 3 as day_num, 'stWEDNESDAY' as day_txt, 3 as day_rus_num 
+	  UNION all 
+	  select 4 as day_num, 'stTHURSDAY' as day_txt, 4 as day_rus_num 
+	  UNION all 
+	  select 5 as day_num, 'stFRIDAY' as day_txt, 5 as day_rus_num 
+	  UNION all 
+	  select 6 as day_num, 'stSATURDAY' as day_txt, 6 as day_rus_num 
+
+	  
+				   
+				   ) days on days.day_num::integer=tmp2.d1::integer
+				   
+				   order by days.day_rus_num asc
+;";
+
+
+$queryOneIpaddressTrafficByPeriodDay="
+  	SELECT
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%d.%m.%Y') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes),
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%d-%m-%Y') AS d2,
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%Y-%m-%d') AS d3
+
+	FROM scsq_quicktraffic
+
+	WHERE ipaddress=".$currentipaddressid." 
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1, d2, d3
+	ORDER BY d3 asc;
+;";
+
+#postgre version
+if($dbtype==1)
+$queryOneIpaddressTrafficByPeriodDay="
+  	SELECT
+	  to_char(to_timestamp(scsq_quicktraffic.date),'DD.MM.YYYY') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes),
+	  to_char(to_timestamp(scsq_quicktraffic.date),'DD-MM-YYYY') AS d2,
+	  to_char(to_timestamp(scsq_quicktraffic.date),'YYYY-MM-DD') AS d3
+	  
+	FROM scsq_quicktraffic
+
+
+	WHERE ipaddress=".$currentipaddressid." 
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1, d2, d3
+	ORDER BY d3 asc
+	
+;";
+
+//echo $queryTrafficByPeriodDay;
+
+$queryOneIpaddressTrafficByPeriodDayname="
+SELECT days.day_txt,
+		tmp2.sum_bytes
+		
+		FROM
+		(
+  	SELECT
+	  FROM_UNIXTIME(scsq_quicktraffic.date,'%w') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes) as sum_bytes
+	  
+	FROM scsq_quicktraffic
+
+	WHERE ipaddress=".$currentipaddressid." 
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY crc32(d1),d1
+
+	) tmp2
+  
+	RIGHT JOIN (
+	  select 0 as day_num, 'stSUNDAY' as day_txt, 7 as day_rus_num
+	  UNION all 
+	  select 1 as day_num, 'stMONDAY' as day_txt, 1 as day_rus_num
+	  UNION all 
+	  select 2 as day_num, 'stTUESDAY' as day_txt, 2 as day_rus_num 
+	  UNION all 
+	  select 3 as day_num, 'stWEDNESDAY' as day_txt, 3 as day_rus_num 
+	  UNION all 
+	  select 4 as day_num, 'stTHURSDAY' as day_txt, 4 as day_rus_num 
+	  UNION all 
+	  select 5 as day_num, 'stFRIDAY' as day_txt, 5 as day_rus_num 
+	  UNION all 
+	  select 6 as day_num, 'stSATURDAY' as day_txt, 6 as day_rus_num 
+
+	  
+				   
+				   ) days on days.day_num=tmp2.d1
+				   
+				   order by days.day_rus_num asc
+	
+
+;";
+
+#postgre version
+if($dbtype==1)
+$queryOneIpaddressTrafficByPeriodDayname="
+SELECT days.day_txt,
+		tmp2.sum_bytes
+		
+		FROM
+		(
+  	SELECT
+	  to_char(to_timestamp(scsq_quicktraffic.date),'ID') AS d1,
+	  SUM(scsq_quicktraffic.sizeinbytes) sum_bytes
+	  	  
+	FROM scsq_quicktraffic
+
+	WHERE ipaddress=".$currentipaddressid." 
+	  		AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+	  AND date>".$datestart." 
+	  AND date<".$dateend." 
+	  AND par=1
+	GROUP BY d1
+	) tmp2
+  
+	RIGHT JOIN (
+	  select 0 as day_num, 'stSUNDAY' as day_txt, 7 as day_rus_num
+	  UNION all 
+	  select 1 as day_num, 'stMONDAY' as day_txt, 1 as day_rus_num
+	  UNION all 
+	  select 2 as day_num, 'stTUESDAY' as day_txt, 2 as day_rus_num 
+	  UNION all 
+	  select 3 as day_num, 'stWEDNESDAY' as day_txt, 3 as day_rus_num 
+	  UNION all 
+	  select 4 as day_num, 'stTHURSDAY' as day_txt, 4 as day_rus_num 
+	  UNION all 
+	  select 5 as day_num, 'stFRIDAY' as day_txt, 5 as day_rus_num 
+	  UNION all 
+	  select 6 as day_num, 'stSATURDAY' as day_txt, 6 as day_rus_num 
+
+	  
+				   
+				   ) days on days.day_num::integer=tmp2.d1::integer
+				   
+				   order by days.day_rus_num asc
+;";
+
+
+
 //partly queries end
 
 //************************************
@@ -6946,6 +7247,17 @@ $repheader= "<h2>".$_lang['stTOPLOGINSWORKINGHOURSTRAFFIC']." (".$workStart1." -
 if($id==69)
 $repheader= "<h2>".$_lang['stTOPIPWORKINGHOURSTRAFFIC']." (".$workStart1." - ".$workEnd1." | ".$workStart2." - ".$workEnd2.") ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
 
+if($id==70)
+$repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAY']." <b>".$currentlogin."</b> </h2>";
+
+if($id==71)
+$repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAYNAME']." <b>".$currentlogin."</b> </h2>";
+
+if($id==72)
+$repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAY']." <b>".$currentipaddress."</b> </h2>";
+
+if($id==73)
+$repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAYNAME']." <b>".$currentipaddress."</b> </h2>";
 
 if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 
@@ -8622,6 +8934,53 @@ if($id==69)
 
 /////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT END
 
+/////////////// TRAFFIC ONE LOGIN BY PERIOD PER DAY REPORT
+
+if($id==70)
+{
+		
+		$json_result=doGetReportData($globalSS,$queryOneLoginTrafficByPeriodDay,'template23.php');
+		doPrintTable($globalSS,$json_result);
+	
+}
+
+/////////////// TRAFFIC ONE LOGIN BY PERIOD PER DAY REPORT END
+
+/////////////// TRAFFIC  ONE LOGIN BY PERIOD PER DAYNAME REPORT
+
+if($id==71)
+{
+
+	$json_result=doGetReportData($globalSS,$queryOneLoginTrafficByPeriodDayname,'template24.php');
+	doPrintTable($globalSS,$json_result);
+
+
+
+}
+
+/////////////// TRAFFIC ONE LOGIN BY PERIOD PER DAYNAME REPORT END
+
+
+/////////////// TRAFFIC ONE IPADDRESS BY PERIOD PER DAY REPORT
+
+if($id==72)
+{
+
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressTrafficByPeriodDay,'template23.php');
+	doPrintTable($globalSS,$json_result);
+
+}
+
+/////////////// TRAFFIC ONE IPADDRESS BY PERIOD PER DAY REPORT END
+
+/////////////// TRAFFIC  ONE IPADDRESS BY PERIOD PER DAYNAME REPORT
+
+if($id==73)
+{
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressTrafficByPeriodDayname,'template24.php');
+	doPrintTable($globalSS,$json_result);
+
+}
 
 
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])) {

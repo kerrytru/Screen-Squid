@@ -11,7 +11,7 @@ $colftext[2]=$_lang['stTOTAL'];
 $colftext[3]="total_column_byte";
 $colftext[4]="&nbsp;";
 
-$colh[0]=4;
+$colh[0]=3;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
 $colh[3]="<th>".$colhtext[3]."</th>";
