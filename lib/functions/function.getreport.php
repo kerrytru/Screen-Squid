@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.getreport.php </#FN>                                          
 *                         File Birth   > <!#FB> 2021/12/06 22:19:13.464 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/19 21:16:21.909 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/29 22:47:53.357 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -171,6 +171,30 @@ function doGetArrayData($globalSS,$json_result,$column_number) {
         }
 
     return array_slice($arrayData,1);
+
+}
+
+
+#Костыль для того, чтобы склеить два массива
+#array_new[0] = array1[0] (array2[0])
+function doConcatArraysData($globalSS,$array1,$array2) {
+
+    #если выводим CSV, то сразу уходим.
+    if($globalSS['makecsv']==1)
+        return;
+
+    if($globalSS['makepdf']==1)
+        return;
+        
+    $arrayData = array();
+    
+    $i=0;
+ 
+    for($i=0;$i<count($array1);$i++) {
+        $arrayData[$i] = $array1[$i]." (".$array2[$i].")";        
+        }
+
+    return $arrayData;
 
 }
 

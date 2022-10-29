@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/26 21:55:36.843 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/10/29 22:47:04.818 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.14.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.15.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -8128,6 +8128,16 @@ $json_result=doGetReportData($globalSS,$queryTopLoginsTraffic,'template1.php');
 $arrLine0 = array(); //logins
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
 
+if($globalSS['useLoginalias']) {
+	$arrLine4 = array(); //alias name
+	$arrLine4=doGetArrayData($globalSS,$json_result,4);
+
+	$arrLine0=doConcatArraysData($globalSS,$arrLine0,$arrLine4);
+}
+
+
+
+
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
 
@@ -8168,6 +8178,14 @@ $json_result=doGetReportData($globalSS,$queryTopIpTraffic,'template2.php');
 
 $arrLine0 = array(); //ipaddress
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
+
+if($globalSS['useIpaddressalias']) {
+	$arrLine4 = array(); //alias name
+	$arrLine4=doGetArrayData($globalSS,$json_result,4);
+
+	$arrLine0=doConcatArraysData($globalSS,$arrLine0,$arrLine4);
+}
+
 
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
