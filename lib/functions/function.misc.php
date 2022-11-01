@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/25 22:12:49.478 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/01 22:11:32.695 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.7.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.8.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -411,19 +411,27 @@ function doAliasAdd($globalSS,$alias_params){
     if (!doQuery($globalSS,$sql)) {
       return('Error: Can`t insert alias into table!');
     }
+
+      #если передаем спец сигнал external, то значит действуем из какого-нибудь модуля.
+if (!isset($alias_params['external'])) {
+
+
     echo "".$_lang['stALIASADDED']."<br /><br />";
   if(!isset($_GET['modal']))
     echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";          
   else
     echo "Please, close this window";  
-  }
+  
+}
+ 
+}
 
   function doAliasEdit($globalSS){
 
     include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
       
     $_lang = $globalSS['lang'];
-    
+   
     $aliasid = $_GET['aliasid'];
 
     $goodLoginsList=$globalSS['goodLoginsList'];
@@ -536,29 +544,21 @@ function doAliasAdd($globalSS,$alias_params){
 
   }
 
-  function doAliasSave($globalSS){
+  function doAliasSave($globalSS,$alias_params){
 
     include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
       
     $_lang = $globalSS['lang'];
   
+    $aliasid = $alias_params['aliasid'];
+    $name = $alias_params['name'];
+    $typeid = $alias_params['typeid'];
+    $tableid = $alias_params['tableid'];
+    $userlogin = $alias_params['userlogin'];
+    $userpassword = $alias_params['userpassword'];
+    $activeauth = $alias_params['activeauth'];
+    $changepassword = $alias_params['changepassword'];
 
-    $aliasid = $_GET['aliasid'];
-    $name=$_POST['name'];
-
-    if(!isset($_POST['typeid'])) $typeid=0;  else  $typeid=1;
-    if(!isset($_POST['activeauth'])) $activeauth=0; else $activeauth=1;
-
-    $tableid=$_POST['tableid'];
-    $userlogin=$_POST['userlogin'];
-    $userpassword=md5(md5(trim($_POST['userpassword'])));
-
-    if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
-    $changepassword=1;
-    else
-    $changepassword=0;
-
-    
 
     if($changepassword==1)        
     $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$aliasid."'";
@@ -569,12 +569,17 @@ function doAliasAdd($globalSS,$alias_params){
     if (!doQuery($globalSS, $queryUpdateOneAlias)) {
     return 'Error: Can`t update 1 alias';
   }
+  #если передаем спец сигнал external, то значит действуем из какого-нибудь модуля.
+if (!isset($alias_params['external'])) {
+
+
   echo "".$_lang['stALIASUPDATED']."<br /><br />";
 
   if(!isset($_GET['modal']))
   echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
 else
   echo "Please, close this window"; 
+}
 
 }
 

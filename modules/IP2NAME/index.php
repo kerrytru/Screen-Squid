@@ -1,10 +1,29 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:44:28 PM
-#Build revision 1.3
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> index.php </#FN>                                                       
+*                         File Birth   > <!#FB> 2022/11/01 22:07:09.322 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/11/01 22:09:51.577 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
 
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
+
+
+
+
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -54,27 +73,6 @@ include_once(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
 
 
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-$variableSet['ip2name_file']=$ip2name_file;
-$variableSet['ip2name_separator']=$ip2name_separator;
-
-$variableSet['language']=$language;
-
-$globalSS['connectionParams']=$variableSet;
-
-
-
 $ip2name_ex = new IP2NAME($globalSS);
 
 
@@ -85,7 +83,46 @@ echo "<h2>".$_lang['stMODULEDESC']."</h2><br />";
 
 $start=microtime(true);
 
+    #write config 
+    if(isset($_POST['submit'])){
+		doSetParam($globalSS,'IP2NAME','ip2name_file',$_POST['ip2name_file']);
+		doSetParam($globalSS,'IP2NAME','ip2name_separator',$_POST['ip2name_separator']);
+	  
+	  }
+  
+	  $ip2name_file=doGetParam($globalSS,'IP2NAME','ip2name_file');
+	  $ip2name_separator=doGetParam($globalSS,'IP2NAME','ip2name_separator');
 
+  echo "<h3>Config module</h3>";
+  
+ 
+	  echo '
+	  <form action="index.php" method="post">
+		 <table class=datatable>
+		 <tr>
+  <td>ip2name_file</td>
+  <td>
+  <input type="text" name="ip2name_file" value="'.$ip2name_file.'">
+  </td>
+<td>';
+echo file_exists("".$globalSS['root_dir']."/modules/IP2NAME/".$ip2name_file."") ?  'OK: File found': 'ERROR: File not found';
+echo '</td>
+  </tr>
+  <tr>
+  <td>ip2name_separator</td>
+  <td>
+  <input type="text" name="ip2name_separator" value="'.$ip2name_separator.'">
+ <td>
+ &nbsp;
+ </td> 
+  </td>
+  </tr>
+
+  </table>
+	 <br />
+	  <input type="submit" name=submit value="Save"><br />
+	  </form>
+	  ';
 
 
 
@@ -108,58 +145,72 @@ $start=microtime(true);
 			//зададим изначальный IP адрес. мало ли, всё-таки отбираем через like
 			$ip2name_ipaddress = "000.000.000.000";
 			$numrow = 0;
-			
+			$numerror = 0;
+			echo "<h4>LOG OPERATION:</h4>";
 			while($str = fgets($openfile))
 			{
 				
 					$ipaddress_str = explode($ip2name_separator,$str);
-			
+
+					
+
 					$aliasname="";
 			  #запросим у БД есть ли такой IP. И если есть то возьмём его id
 			  $ipaddress_id=$ip2name_ex->GetIdByIp($ipaddress_str[0]);
-			 
-			 if($ipaddress_id !="")
-				  {
-			
-					         $sql="select id from scsq_alias where tableid='$ipaddress_id' and typeid=1";
-					         $idAlias = doFetchOneQuery($globalSS,$sql);
-					         
-					         					         
-					         #если алиас существует, то обновим его. иначе создадим
-					         if($idAlias[0]>0)
-								$sql="UPDATE scsq_alias SET name='$ipaddress_str[1]' WHERE id='$idAlias[0]'";
-							
-							 else 
-								$sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$ipaddress_str[1]', '1','$ipaddress_id','','','0')";
-      
-							 
-							  if (!doQuery($globalSS, $sql)) {
-								die('Error: Can`t insert alias into table!');
-							  }
-					$numrow++;
-				  }
+
+
+			  #ip адрес не найден
+			  if($ipaddress_id == "") {
+				echo "ERROR: $ipaddress_str[0] did not match to any ip in scsq_ipaddress table<br>";
+				$numerror++;
+				continue;
+			  }
+			  
+			  $alias_params=array();
+			  
+			  #спецсигнал. сообщим функции, что мы используем её извне.
+ 	 	  	  $alias_params['external']=1;
+			  $alias_params['name']=$ipaddress_str[1];
+			  $alias_params['typeid']=1;
+			  $alias_params['tableid']=$ipaddress_id;
+			  #эти параметры заглушим пока.
+			  $alias_params['userlogin']="";
+			  $alias_params['userpassword']="";
+			  $alias_params['activeauth']=0;
+			  $alias_params['changepassword']=0;
+
+
+			  #запросим у БД есть ли такой алиас
+			  $aliasid = $ipaddress_id != "" ? $ip2name_ex->GetAliasIdByIp($ipaddress_id) : "";
+
+			  $alias_params['aliasid']=$aliasid; 
+
+			  $aliasid == "" ? doAliasAdd($globalSS,$alias_params) : doAliasSave($globalSS,$alias_params); 
+
+			  if ($aliasid == "") echo "ADDED: $ipaddress_str[0], $ipaddress_str[1]<br>";  
+			  
+			  else echo "UPDATED: $ipaddress_str[0], $ipaddress_str[1] (aliasid = $aliasid)<br>";
+
+
+			  $numrow++;
+
    
             }
           
-		
+		echo "<br>";
 		echo	$_lang['stIP2NAMECREATEDUPDATED']." ".$numrow." ".$_lang['stIP2NAMEALIASES'];
+		echo "<br>";
+		echo	"Errors count ".$numerror.". Check log operation.";
 
 
 			  
-          echo "<a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
+          echo "<br><br><br><a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
 			  
 			
 
 		  
 
             } //end actid=1
-
-
-     
-echo "<br /><br/>
-".$_lang['stIP2NAMEATTENTIONMESSAGE']."
-";
-         
 
 
 

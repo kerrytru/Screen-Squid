@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/25 22:13:09.369 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/01 22:11:50.690 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.8.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.9.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -246,7 +246,26 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
 
         }
         if($actid==4) { //сохранение изменений UPDATE
-          doAliasSave($globalSS);
+
+         #соберем параметры в массив и отправим. Удобно будет потом отовсюду пользоватся.
+         $alias_params = array();
+
+         $alias_params['name']=$_POST['name'];
+         $alias_params['aliasid'] = $_GET['aliasid'];
+
+         if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
+         $alias_params['changepassword']=1;
+         else
+         $alias_params['changepassword']=0;
+
+         if(!isset($_POST['typeid'])) $alias_params['typeid']=0;  else  $alias_params['typeid']=1;
+         if(!isset($_POST['activeauth'])) $alias_params['activeauth']=0; else $alias_params['activeauth']=1;
+     
+         $alias_params['tableid']=$_POST['tableid'];
+         $alias_params['userlogin']=$_POST['userlogin'];
+         $alias_params['userpassword']=md5(md5(trim($_POST['userpassword'])));
+
+          doAliasSave($globalSS,$alias_params);
  
         }
 
