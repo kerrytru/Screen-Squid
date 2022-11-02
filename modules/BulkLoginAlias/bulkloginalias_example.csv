@@ -1,4 +1,0 @@
-login;password;alias_name;quota_daily;quota_month;active_quota;active_usermanager //Delete  this line before import
-apetrov;123456;Andrey Petrov;400;2000;1;1
-iivanov;123qwe;Ilya Ivanov;300;1000;1;1
-osidorova;qweasd;Olga Sidorova;500;1000;1;1
