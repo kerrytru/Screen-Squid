@@ -402,9 +402,9 @@ function doAliasAdd($globalSS,$alias_params){
     $name = $alias_params['name'];
     $typeid = $alias_params['typeid'];
     $tableid = $alias_params['tableid'];
-    $userlogin = $alias_params['userlogin'];
-    $userpassword = $alias_params['userpassword'];
-    $activeauth = $alias_params['activeauth'];
+    $userlogin = isset($alias_params['userlogin']) ? $alias_params['userlogin'] : '';
+    $userpassword = isset($alias_params['userpassword']) ? $alias_params['userpassword'] : '';
+    $activeauth = isset($alias_params['activeauth']) ? $alias_params['activeauth'] : '0';
 
     $sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
 
@@ -550,13 +550,20 @@ if (!isset($alias_params['external'])) {
       
     $_lang = $globalSS['lang'];
   
+    #Так как мы не всегда сможем все параметры алиаса передать, а чаще будем передавать только изменяемые параметры, то чтобы не переживать - старые параметры будем оставлять на месте.
+
+    $queryOneAlias="select name,typeid,tableid,id,userlogin,password,active from scsq_alias where id='".$alias_params['aliasid']."';";
+
+    $line=doFetchOneQuery($globalSS, $queryOneAlias);
+
     $aliasid = $alias_params['aliasid'];
-    $name = $alias_params['name'];
-    $typeid = $alias_params['typeid'];
-    $tableid = $alias_params['tableid'];
-    $userlogin = $alias_params['userlogin'];
-    $userpassword = $alias_params['userpassword'];
-    $activeauth = $alias_params['activeauth'];
+  
+    $name = isset($alias_params['name']) ? $alias_params['name'] : $line[0];
+    $typeid = isset($alias_params['typeid']) ? $alias_params['typeid'] : $line[1];
+    $tableid = isset($alias_params['tableid']) ? $alias_params['tableid'] : $line[2];
+    $userlogin = isset($alias_params['userlogin']) ? $alias_params['userlogin'] : $line[4];
+    $userpassword = isset($alias_params['userpassword']) ? $alias_params['userpassword'] : $line[5];
+    $activeauth = isset($alias_params['activeauth']) ? $alias_params['activeauth'] : $line[6];
     $changepassword = $alias_params['changepassword'];
 
 
@@ -1038,5 +1045,65 @@ function doWriteToLogTable($globalSS, $params){
 
       
   }
+
+
+  function GetIdByIpaddress($globalSS, $ipaddress) #по ip получаем  ID
+  {
+    include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
+
+	$sqlGetId = "
+		SELECT id FROM scsq_ipaddress t where t.name = '$ipaddress';";
+
+
+		$result=doFetchOneQuery($globalSS, $sqlGetId);
+
+return isset($result[0]) ? $result[0] : "" ;
+
+
+}
+
+function GetIdByLogin($globalSS,$login) #по логину получаем  ID
+{
+
+$sqlGetId = "
+  SELECT id FROM scsq_logins t where t.name = '$login';";
+
+
+  $result=doFetchOneQuery($globalSS, $sqlGetId);
+
+return isset($result[0]) ? $result[0] : "" ;
+
+
+}
+
+function GetAliasIdByIpaddressId($globalSS,$ipaddress_id) #по ip_id получаем  Alias ID
+{
+
+  $sqlGetId = "
+	  SELECT id FROM scsq_alias t where t.tableid = '$ipaddress_id' and typeid=1;";
+
+
+	  $result=doFetchOneQuery($globalSS, $sqlGetId);
+
+	  return isset($result[0]) ? $result[0] : "" ;
+
+
+}
+
+function GetAliasIdByLoginId($globalSS,$login_id) #по login_id получаем  Alias ID
+{
+
+  $sqlGetId = "
+	  SELECT id FROM scsq_alias t where t.tableid = '$login_id' and typeid=0;";
+
+
+	  $result=doFetchOneQuery($globalSS, $sqlGetId);
+
+	  return isset($result[0]) ? $result[0] : "" ;
+
+
+}
+
+
 
 ?>

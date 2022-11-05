@@ -10,23 +10,17 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/06/04 23:00:24.599 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/06/04 23:14:50.470 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/05 21:53:43.782 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
 
 
-
-
-
-
-#чтобы убрать возможные ошибки с датой, установим на время исполнения скрипта ту зону, которую отдает система.
-date_default_timezone_set(date_default_timezone_get());
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
@@ -78,35 +72,6 @@ include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-$variableSet['ldapserver']=$ldapserver;
-$variableSet['ldapuser']=$ldapuser;
-$variableSet['ldappass']=$ldappass;
-$variableSet['ldaptree']=$ldaptree;
-$variableSet['fldUsername']=$fldUsername;
-
-
-$variableSet['language']=$language;
-
-$globalSS['connectionParams']=$variableSet;
-
-$ldap_client = new LDAPClient($globalSS);
-
-  #если есть дружеские логины, IP адреса или сайты. Соберём их.
-  $goodLoginsList=doCreateFriendList($globalSS,'logins');
-  $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
-  $goodSitesList = doCreateSitesList($globalSS);
 
 
 if(!isset($_GET['id']))
@@ -114,6 +79,89 @@ echo "<h2>".$_lang['stMODULEDESC']."</h2><br />";
 
 $start=microtime(true);
 
+   #write config 
+   if(isset($_POST['submit'])){
+
+	doSetParam($globalSS,'LDAPClient','ldapserver',$_POST['ldapserver']);
+	doSetParam($globalSS,'LDAPClient','ldapuser',$_POST['ldapuser']);
+	doSetParam($globalSS,'LDAPClient','ldappass',$_POST['ldappass']);
+	doSetParam($globalSS,'LDAPClient','ldaptree',$_POST['ldaptree']);
+	doSetParam($globalSS,'LDAPClient','fldUsername',$_POST['fldUsername']);
+	doSetParam($globalSS,'LDAPClient','LDAP_OPT_PROTOCOL_VERSION',isset($_POST['LDAP_OPT_PROTOCOL_VERSION'])? 1:0);
+	doSetParam($globalSS,'LDAPClient','LDAP_OPT_REFERRALS',isset($_POST['LDAP_OPT_REFERRALS'])? 1:0);
+
+
+
+  }
+
+  
+$globalSS['connectionParams']['ldapserver']=doGetParam($globalSS,'LDAPClient','ldapserver');
+$globalSS['connectionParams']['ldapuser']=doGetParam($globalSS,'LDAPClient','ldapuser');
+$globalSS['connectionParams']['ldappass']=doGetParam($globalSS,'LDAPClient','ldappass');
+$globalSS['connectionParams']['ldaptree']=doGetParam($globalSS,'LDAPClient','ldaptree');
+$globalSS['connectionParams']['fldUsername']=doGetParam($globalSS,'LDAPClient','fldUsername');
+$globalSS['connectionParams']['LDAP_OPT_PROTOCOL_VERSION']=doGetParam($globalSS,'LDAPClient','LDAP_OPT_PROTOCOL_VERSION');
+$globalSS['connectionParams']['LDAP_OPT_REFERRALS']=doGetParam($globalSS,'LDAPClient','LDAP_OPT_REFERRALS');
+
+$ldap_client = new LDAPClient($globalSS);
+
+#если есть дружеские логины, IP адреса или сайты. Соберём их.
+$goodLoginsList=doCreateFriendList($globalSS,'logins');
+$goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
+$goodSitesList = doCreateSitesList($globalSS);
+
+echo "<h3>Config module</h3>";
+
+
+  echo '
+  <form action="index.php" method="post">
+	 <table class=datatable>
+	 <tr>
+<td>ldapserver</td>
+<td>
+<input type="text" name="ldapserver" value="'.$globalSS['connectionParams']['ldapserver'].'">
+</td>
+<td>';
+echo $ldap_client->doCheckLDAPBind()==1 ?  'OK: Connection established': 'ERROR: No connection';
+echo '</td>
+</tr>
+<tr>
+	<td>ldapuser</td>
+	<td><input type="text" name="ldapuser" value="'.$globalSS['connectionParams']['ldapuser'].'"></td>
+	<td>&nbsp;</td> 
+</tr>
+<tr>
+	<td>ldappass</td>
+	<td><input type="text" name="ldappass" value="'.$globalSS['connectionParams']['ldappass'].'"></td>
+	<td>&nbsp;</td> 
+</tr>
+<tr>
+	<td>ldaptree</td>
+	<td><input type="text" name="ldaptree" value="'.$globalSS['connectionParams']['ldaptree'].'"></td>
+	<td>&nbsp;</td> 
+</tr>
+<tr>
+	<td>fldUsername</td>
+	<td><input type="text" name="fldUsername" value="'.$globalSS['connectionParams']['fldUsername'].'"></td>
+	<td>&nbsp;</td> 
+</tr>
+<tr>
+	<td>LDAP_OPT_PROTOCOL_VERSION</td>
+	<td><input type="checkbox" '.($globalSS['connectionParams']['LDAP_OPT_PROTOCOL_VERSION']==1 ? 'checked' : "").' name="LDAP_OPT_PROTOCOL_VERSION" value="'.$globalSS['connectionParams']['LDAP_OPT_PROTOCOL_VERSION'].'"></td>
+	<td>&nbsp;</td> 
+</tr>
+<tr>
+	<td>LDAP_OPT_REFERRALS</td>
+	<td><input type="checkbox" '.($globalSS['connectionParams']['LDAP_OPT_REFERRALS']==1 ? 'checked' : "").' name="LDAP_OPT_REFERRALS" ></td>
+	<td>&nbsp;</td> 
+</tr>
+
+
+</table>
+ <br />
+  <input type="submit" name=submit value="Save"><br />
+  </form>
+  ';
 
 
 
@@ -137,7 +185,11 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
           if($_GET['actid']==1) {
 
          $result=doFetchQuery($globalSS, $queryAllLogins);
-          $numrow=0;
+		  $numrow=0;
+		  
+		  $numerror=0;
+		  $numadded=0;
+
 			# попробуем полностью протестировать код.
 			echo "Начинаем синхронизацию с LDAP <br>";
           foreach($result as $line) {
@@ -155,119 +207,63 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 					echo "Начинаем запись.<br>";
 					echo "Узнаем, есть ли уже алиас для логина = '".$line[1]."'.<br>";
 					
-					         $sql="select id from scsq_alias where tableid=$line[0] and typeid=0";
-					         $idAlias = doFetchOneQuery($globalSS, $sql);
+					         $idAlias = GetAliasIdByLoginId($globalSS, $line[0]);
 					         
 					         
-							 echo "Поиск вернул id алиаса = '".$idAlias[0]."'.<br>";
+							 echo "Поиск вернул id алиаса = '".$idAlias."'.<br>";
 					         
 					         #если алиас существует, то обновим его. иначе создадим
-					         if($idAlias[0]>0)
+					         if($idAlias>0)
 							{
-							 $sql="UPDATE scsq_alias SET name='$aliasname' WHERE id='$idAlias[0]'";
-							 echo "Обновили наименование алиаса для id алиаса = '".$idAlias[0]."'. Теперь имя алиаса = '".$aliasname."'.<br>";
+							 $alias_params=array();
+							 $alias_params['name'] = $aliasname;
+							 $alias_params['aliasid'] = $idAlias;
+							 $alias_params['external'] = 1;
+							 
+							 doAliasSave($globalSS,$alias_params);
+
+							 echo "Обновили наименование алиаса для id алиаса = '".$idAlias."'. Теперь имя алиаса = '".$aliasname."'.<br>";
+							 $numadded++;
 							}
 							 else 
 								{
-								$sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$aliasname', '0','$line[0]','$line[1]','','0')";
+									$alias_params=array();
+									$alias_params['name'] = $aliasname;
+									$alias_params['typeid'] = '0';
+									$alias_params['tableid'] = $line[0];
+									$alias_params['userlogin'] = $line[1];
+									$alias_params['activeauth'] = '0';
+									$alias_params['external'] = 1;
+									
+								
+								doAliasAdd($globalSS,$alias_params);	
+
 								echo "Создали новый алиас = '".$aliasname."' для логина = '".$line[1]."'.<br>";
-								}
+								$numadded++;
+							}
 							
 					   
-							  if (!doQuery($globalSS, $sql)) {
-								die('Error: Can`t insert alias into table!');
-							  }
+							
 					 echo "Цикл прошёл<br><br>";
 					
-					 
+					
 				  }
+
+				  
+
+				  
 				  $numrow++;
-            
           }
 			
 
-echo $_lang['stLDAPCREATEDUPDATED']." ".$numrow." ".$_lang['stLDAPALIASES'];
+echo $_lang['stLDAPCREATEDUPDATED']." ".$numadded." ".$_lang['stLDAPALIASES'];
 
 
 			  
-          echo "<a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
+          echo "<br><br><a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
 
             } //end actid=1
 
-
-     
-echo "<br /><br/>
-".$_lang['stLDAPATTENTIONMESSAGE']."
-<br /><br />".$_lang['stLDAPIMPORTANTVARIABLES']."
-<br /><br />
-<table class=datatable>
-<tr>
-	<th class=unsortable>
-		".$_lang['stLDAPVARIABLE']."
-	</th>
-
-	<th class=unsortable>
-		".$_lang['stLDAPDEFAULTVALUE']."
-	</th>
-	<th class=unsortable>
-		".$_lang['stLDAPCOMMENT']."
-	</th>
-
-</tr>
-<tr>
-	<td>
-		".$_lang['stLDAPHOST']."
-	</td>
-
-	<td>
-		".$_lang['stLDAPHOSTVALUE']."
-	</td>
-	<td>
-		".$_lang['stLDAPHOSTCOMMENT']."
-	</td>
-
-</tr>
-<tr>
-	<td>
-		".$_lang['stLDAPUSER']."
-	</td>
-	<td>
-		".$_lang['stLDAPUSERVALUE']."
-	</td>
-	<td>
-		".$_lang['stLDAPUSERCOMMENT']."
-	</td>
-
-</tr>
-<tr>
-	<td>
-		".$_lang['stLDAPPASS']."
-	</td>
-
-	<td>
-		".$_lang['stLDAPPASSVALUE']."
-	</td>
-	<td>
-		".$_lang['stLDAPPASSCOMMENT']."
-	</td>
-
-</tr>
-<tr>
-	<td>
-		".$_lang['stLDAPBRANCH']."
-	</td>
-
-	<td>
-		".$_lang['stLDAPBRANCHVALUE']."
-	</td>
-	<td>
-		".$_lang['stLDAPBRANCHCOMMENT']."
-	</td>
-	
-</tr>
-</table>
-
-";
          
 
 

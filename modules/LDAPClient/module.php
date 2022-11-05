@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> module.php </#FN>                                                      
 *                         File Birth   > <!#FB> 2022/04/11 23:57:47.378 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/19 21:44:56.538 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/05 21:53:35.528 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -51,23 +51,46 @@ function __construct($variables){ //
       return $this->lang['stMODULEDESC']; 
   }
 
+  #just for check credentials
+  function doCheckLDAPBind()
+  {
+
+    if(!$this->GetConnectionLDAP())
+         $this->GetConnectionLDAP();
+    
+    $ldapbind = ldap_bind( $this->ldap_conn, $this->vars['connectionParams']['ldapuser'], $this->vars['connectionParams']['ldappass']);
+
+    ldap_close($this->ldap_conn);
+    return $ldapbind;
+
+
+ }
+
+
   function GetConnectionLDAP()
   {
 
     try {
-        $this->ldap_conn = @ldap_connect($this->vars['connectionParams']['ldapserver']) or die("Could not connect to LDAP server.");
-        ldap_set_option($this->ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-    } catch (\Error $e) {
+        $this->ldap_conn = @ldap_connect($this->vars['connectionParams']['ldapserver']);
+        if($this->vars['connectionParams']['LDAP_OPT_PROTOCOL_VERSION']==1)
+            ldap_set_option($this->ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        if($this->vars['connectionParams']['LDAP_OPT_REFERRALS']==1)
+            ldap_set_option($this->ldap_conn, LDAP_OPT_REFERRALS, 0);
+ 
+        } catch (\Error $e) {
+       
         echo 'Error: Something going wrong. I cant connect to LDAP server. Check have you php-ldap module and correct config.php in module directory';
         die();
     }
 
- return true;
+
+    return true;
+
 
  }
  
 
-  function GetUsernameByLogin($loginname) #по алиасу возвращаем его дневной траффик
+  function GetUsernameByLogin($loginname) 
   {
 
 	if(!$this->GetConnectionLDAP())
@@ -86,21 +109,17 @@ if( $this->ldap_conn ) {
        // echo "LDAP bind successful...<br /><br />";
        
        //Попробуем отловить проблемные логины. Со всякими спезнаками. Их будем просто пропускать. 
-       //Просто иначе полуаем Bad search filter.
-       try {
+       //Просто иначе получаем Bad search filter.
         $result = ldap_search( $this->ldap_conn,$this->vars['connectionParams']['ldaptree'], "(".$this->vars['connectionParams']['fldUsername']."=".$loginname.")");
-        $data = ldap_get_entries( $this->ldap_conn, $result);
+        if(!is_bool($result))
+          $data = ldap_get_entries( $this->ldap_conn, $result);
   
-         } catch (\Exception $e) {
-            $username="(not found)";
-         }
         // iterate over array and print data for each entry
         //echo '<h1>Show me the users</h1>';
         for ($i=0; $i<$data["count"]; $i++) {
            // echo "dn is: ". $data[$i]["dn"] ."<br />";
 			  $username=$data[$i]["cn"][0];
-           // echo "User: ". $data[$i]["cn"][0] ."<br />";
-           // echo "Uid: ". $data[$i]["uid"][0] ."<br />";
+
     
         }
        
@@ -121,7 +140,20 @@ ldap_close($this->ldap_conn);
 
   function Install()
   {
+	#если модуль уже есть, то вернемся.
+	if(doQueryExistsModule($this->vars,'LDAPClient')>0) {
+		echo "<script language=javascript>alert('Module already installed')</script>";
+		return;
+	}
 
+	$UpdateParameters="INSERT INTO scsq_modules_param (id, module, param, val, switch, comment) VALUES
+		(2100,'LDAPClient', 'ldapserver', 'localhost', 0, 'LDAP server IP'),
+        (2101,'LDAPClient', 'ldapuser', 'cn=Manager,dc=my-domain,dc=com', 0, 'Username to connect'),
+        (2102,'LDAPClient', 'ldappass', '12345678', 0, 'password to connect'),
+        (2103,'LDAPClient', 'ldaptree', 'DC=my-domain,DC=com', 0, 'ldap tree'),
+        (2104,'LDAPClient', 'fldUsername', 'uid', 0, 'Field where username is stored'),
+        (2105,'LDAPClient', 'LDAP_OPT_PROTOCOL_VERSION', 0, 1, 'Enable LDAP_OPT_PROTOCOL_VERSION 3'),
+        (2106,'LDAPClient', 'LDAP_OPT_REFERRALS', 0, 1, 'Enable LDAP_OPT_REFERRALS')";
 
 
 		$UpdateModules = "
@@ -130,19 +162,24 @@ ldap_close($this->ldap_conn);
 
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
+        doQuery($this->vars, $UpdateParameters) or die ("Can`t update parameters table");
 
-		echo "".$this->lang['stINSTALLED']."<br /><br />";
+        echo "<script language=javascript>alert('".$this->lang['stINSTALLED']."')</script>";
  }
   
  function Uninstall() #добавить LANG
   {
 
+        $UpdateParameters="DELETE from scsq_modules_param  where module='LDAPClient'";
+
 		$UpdateModules = "
 		DELETE FROM scsq_modules where name = 'LDAPClient';";
 
-		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
+        doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
+        
+        doQuery($this->vars, $UpdateParameters) or die ("Can`t update parameters table");
 
-		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stUNINSTALLED']."')</script>";
 	
   }
 
