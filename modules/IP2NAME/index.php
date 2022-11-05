@@ -44,7 +44,6 @@ if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0))
 $language=$globalSS['language'];
 
 
-include("config.php");
 include("module.php");
 include("../../lang/$language");
 	if (file_exists("langs/".$language))
@@ -112,10 +111,10 @@ echo '</td>
   <td>ip2name_separator</td>
   <td>
   <input type="text" name="ip2name_separator" value="'.$ip2name_separator.'">
+  </td>
  <td>
  &nbsp;
- </td> 
-  </td>
+   </td>
   </tr>
 
   </table>
@@ -156,7 +155,7 @@ echo '</td>
 
 					$aliasname="";
 			  #запросим у БД есть ли такой IP. И если есть то возьмём его id
-			  $ipaddress_id=$ip2name_ex->GetIdByIp($ipaddress_str[0]);
+			  $ipaddress_id=GetIdByIpaddress($globalSS, $ipaddress_str[0]);
 
 
 			  #ip адрес не найден
@@ -173,15 +172,13 @@ echo '</td>
 			  $alias_params['name']=$ipaddress_str[1];
 			  $alias_params['typeid']=1;
 			  $alias_params['tableid']=$ipaddress_id;
-			  #эти параметры заглушим пока.
-			  $alias_params['userlogin']="";
-			  $alias_params['userpassword']="";
+
 			  $alias_params['activeauth']=0;
 			  $alias_params['changepassword']=0;
 
 
 			  #запросим у БД есть ли такой алиас
-			  $aliasid = $ipaddress_id != "" ? $ip2name_ex->GetAliasIdByIp($ipaddress_id) : "";
+			  $aliasid = $ipaddress_id != "" ? GetAliasIdByIpaddressId($globalSS, $ipaddress_id) : "";
 
 			  $alias_params['aliasid']=$aliasid; 
 

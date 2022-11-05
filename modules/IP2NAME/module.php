@@ -51,33 +51,6 @@ function __construct($variables){ //
 
  
 
-  function GetIdByIp($ipaddress) #по ip получаем  ID
-  {
-
-	$sqlGetId = "
-		SELECT id FROM scsq_ipaddress t where t.name = '$ipaddress';";
-
-
-		$result=doFetchOneQuery($this->vars, $sqlGetId);
-
-return isset($result[0]) ? $result[0] : "" ;
-
-
-}
-
-function GetAliasIdByIp($ipaddress_id) #по ip_id получаем  Alias ID
-{
-
-  $sqlGetId = "
-	  SELECT id FROM scsq_alias t where t.tableid = '$ipaddress_id' and typeid=1;";
-
-
-	  $result=doFetchOneQuery($this->vars, $sqlGetId);
-
-	  return isset($result[0]) ? $result[0] : "" ;
-
-
-}
 
 
   function Install()
