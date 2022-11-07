@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/01 22:11:50.690 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/07 21:57:18.422 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.9.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.10.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -70,14 +70,27 @@ document.getElementById("ipaddressTable").style.display="table";
 
 }
 
-function PartlyReportsLogin(idReport, dom, login,loginname,site)
+//переход к частным отчетам по логину, IP адресу или ещё чему
+//параметры не указываем, а работаем с массивом arguments, т.е. сколько передали, столько и обрабатываем
+//чтобы не думать, в функциях будем передать названия полей для GET и его параметр
+//например GoPartlyReports('id',8,'login',3) будет означать &id=8&login=3
+function GoPartlyReports()
 {
-parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&login='+login+'&loginname='+loginname+'&site='+site;
+//alert(arguments[0]);
+var j = 0;
+
+var args = [];
+var ret ="";
+
+for (var i = 0; i < arguments.length; i=i+2) {
+  args[j] = arguments[i]+'='+arguments[i+1];
+  j=j+1;
 }
 
-function PartlyReportsIpaddress(idReport, dom, ip,ipname,site)
-{
-parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom+'&ip='+ip+'&ipname='+ipname+'&site='+site;
+ret = args.join('&');
+
+parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&'+ret;
+
 }
 
 
@@ -431,7 +444,7 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
                   foreach ($result as $line) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
-                    echo "<td><a href=javascript:PartlyReportsLogin(8,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
+                    echo "<td><a href=javascript:GoPartlyReports('id','8','loginid','".$line[1]."','loginname','".$line[0]."','typeid','0')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
@@ -461,7 +474,7 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
                   foreach ($result as $line) {
                     echo "<tr>";
                     echo "<td>".$numrow."</td>";
-                    echo "<td><a href=javascript:PartlyReportsIpaddress(11,'day','".$line[1]."','".$line[0]."','')>".$line[0]."</td>";
+                    echo "<td><a href=javascript:GoPartlyReports('id','11','ipaddressid','".$line[1]."','ipaddressname','".$line[0]."','typeid','1')>".$line[0]."</td>";
                     echo "</tr>";
                     $numrow++;
                   }
