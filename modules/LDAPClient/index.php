@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/06/04 23:00:24.599 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/05 21:53:43.782 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/07 21:42:25.235 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -179,9 +179,11 @@ echo '</td>
 
 
 echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHRONIZETOLDAP']."</a><br />";
+echo "<br>";
+echo "<a href=index.php?srv=".$srv."&actid=2 target=right>Get one leaf from AD</a><br />";
 			}
 		
-		if(isset($_GET['actid']))
+		if(isset($_GET['actid'])) {
           if($_GET['actid']==1) {
 
          $result=doFetchQuery($globalSS, $queryAllLogins);
@@ -191,26 +193,29 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 		  $numadded=0;
 
 			# попробуем полностью протестировать код.
-			echo "Начинаем синхронизацию с LDAP <br>";
-          foreach($result as $line) {
-			echo "Цикл итерация ".$numrow."<br><br>";
+			echo "<h4>LOG OPERATION:</h4>";
 
-			echo "Ищем значение алиаса для логина ".$line[1]."<br>";
+			echo "Starting synchronizing with LDAP <br>";
+
+          foreach($result as $line) {
+			echo "Try #".$numrow."<br><br>";
+
+			echo "Try ot find alias for login ".$line[1]."<br>";
 			  $aliasname="";
 			  #запросим у LDAP есть ли такой логин. И если есть то возьмём его имя
 			  $aliasname=$ldap_client->GetUsernameByLogin($line[1]);
 
-			  echo "Функция вернула алиас = '".$aliasname."' для логина '".$line[1]."'<br>";
+			  echo "LDAP returned alias = '".$aliasname."' for login '".$line[1]."'<br>";
 		
 			  if($aliasname !="(not found)")
 				  {
-					echo "Начинаем запись.<br>";
-					echo "Узнаем, есть ли уже алиас для логина = '".$line[1]."'.<br>";
+					echo "Lets try to write to the alias table.<br>";
+					echo "Is there an alias for login = '".$line[1]."'?<br>";
 					
 					         $idAlias = GetAliasIdByLoginId($globalSS, $line[0]);
 					         
 					         
-							 echo "Поиск вернул id алиаса = '".$idAlias."'.<br>";
+							 echo "We got id alias = '".$idAlias."'.<br>";
 					         
 					         #если алиас существует, то обновим его. иначе создадим
 					         if($idAlias>0)
@@ -222,7 +227,7 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 							 
 							 doAliasSave($globalSS,$alias_params);
 
-							 echo "Обновили наименование алиаса для id алиаса = '".$idAlias."'. Теперь имя алиаса = '".$aliasname."'.<br>";
+							 echo "Alias with id = '".$idAlias."' is updated. Now its name = '".$aliasname."'.<br>";
 							 $numadded++;
 							}
 							 else 
@@ -238,18 +243,17 @@ echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stLDAPSYNCHR
 								
 								doAliasAdd($globalSS,$alias_params);	
 
-								echo "Создали новый алиас = '".$aliasname."' для логина = '".$line[1]."'.<br>";
+								echo "Create new alias '".$aliasname."' for login = '".$line[1]."'.<br>";
 								$numadded++;
 							}
 							
 					   
-							
-					 echo "Цикл прошёл<br><br>";
+					#цикл прошёл
+					 echo "<br><br><br>";
 					
 					
 				  }
 
-				  
 
 				  
 				  $numrow++;
@@ -264,7 +268,14 @@ echo $_lang['stLDAPCREATEDUPDATED']." ".$numadded." ".$_lang['stLDAPALIASES'];
 
             } //end actid=1
 
-         
+			#попробуем прочитать схему из AD для выбранного одного пользователя
+			if($_GET['actid']==2) {
+		
+				$ldap_client->GetOneFromScheme();
+				echo "<br><br><a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
+			} //
+
+		} //isset actid
 
 
 
@@ -282,12 +293,6 @@ $newdate=date("d-m-Y",$newdate);
 
 
 ?>
-<form name=fastdateswitch_form>
-    <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
-    <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value=0>
-    <input type="hidden" name=groupname_field_hidden value=0>
-    <input type="hidden" name=typeid_field_hidden value=0>
-    </form>
+
 </body>
 </html>

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> module.php </#FN>                                                      
 *                         File Birth   > <!#FB> 2022/04/11 23:57:47.378 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/05 21:53:35.528 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/07 21:42:33.794 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -136,6 +136,48 @@ return $username;
 ldap_close($this->ldap_conn);
    
 }
+
+
+function GetOneFromScheme() 
+  {
+
+	if(!$this->GetConnectionLDAP())
+        $this->GetConnectionLDAP();
+        
+        //
+if( $this->ldap_conn ) {
+
+
+    // binding to ldap server
+    $ldapbind = ldap_bind( $this->ldap_conn, $this->vars['connectionParams']['ldapuser'], $this->vars['connectionParams']['ldappass']) or die ("Error trying to bind: ".ldap_error($this->ldap_conn));
+
+    // verify binding
+    if ($ldapbind) {
+       // echo "LDAP bind successful...<br /><br />";
+       
+       //Попробуем отловить проблемные логины. Со всякими спезнаками. Их будем просто пропускать. 
+       //Просто иначе получаем Bad search filter.
+        $result = ldap_search( $this->ldap_conn,$this->vars['connectionParams']['ldaptree'],"(cn=*)",[],0, $sizelimit=1);
+        if(!is_bool($result))
+          $data = ldap_get_entries( $this->ldap_conn, $result);
+  
+          $json_data=json_encode($data,JSON_PRETTY_PRINT);
+
+          
+         echo "<pre>$json_data</pre>";
+    } else {
+        echo "LDAP bind failed...";
+    }
+
+
+}
+
+// all done? clean up
+ldap_close($this->ldap_conn);
+   
+}
+
+
 
 
   function Install()
