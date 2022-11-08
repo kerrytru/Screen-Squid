@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.getreport.php </#FN>                                          
 *                         File Birth   > <!#FB> 2021/12/06 22:19:13.464 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/29 22:47:53.357 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/08 23:15:31.369 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -208,13 +208,23 @@ function doMakeCSV($globalSS, $json_result) {
 
 /// GENERATE CSV FILE
 
-	header("Content-Type:application/csv"); 
-	header("Content-Disposition:attachment;filename=report.csv"); 
-	echo "\xEF\xBB\xBF"; // UTF-8 BOM
-    $row_line_arr = array();    
-        
-    $fp = fopen("php://output",'w') or die("Can't open php://output");
+   $row_line_arr = array();    
 
+    //Close and output PDF document
+    $report_file_name=doGenerateUniqueNameReport($globalSS['params']);
+
+    if(!isset($_REQUEST['external'])) {
+        header("Content-Type:application/csv"); 
+        header("Content-Disposition:attachment;filename=report.csv"); 
+        echo "\xEF\xBB\xBF"; // UTF-8 BOM
+    
+      $fp = fopen("php://output",'w') or die("Can't open php://output");
+    }
+    else
+    {
+         $fp = fopen("".$globalSS['root_dir']."/modules/ExportRep/output/".$report_file_name.".csv",'w') or die("Can't open new file");
+         fprintf($fp, "\xEF\xBB\xBF"); // UTF-8 BOM
+    }    
  
     foreach ($json as $row)
     {
@@ -241,7 +251,7 @@ function doMakePDF($globalSS,$json_result) {
 
     $json = json_decode($json_result);
 
-    
+   
     //Так как данные уже готовы, то мы просто чистим от тэгов и заполняем файл заголовки, обозначаем, 
     //что сейчас будет строка и пишем как есть.
 
@@ -250,7 +260,8 @@ include_once("".$globalSS['root_dir']."/lib/tcpdf/tcpdf.php");
 
 
 // create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+#$pdf = new TCPDF(PDF_LANDSCAPE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new TCPDF('L', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
@@ -279,26 +290,46 @@ foreach ($json as $row)
         $row_line_arr[$j]=strip_tags($row_item);
         $j++;
         }
+      
     if($j==3)
     {
         $pdf->Cell(30, 6, $row_line_arr[0], 1, 0, 'L', 0);
         $pdf->Cell(120, 6, $row_line_arr[1], 1, 0, 'L', 0);
-        $pdf->Cell(30, 6, $row_line_arr[2], 1, 0, 'R', 0);
+        $pdf->Cell(40, 6, $row_line_arr[2], 1, 0, 'R', 0);
     }
 
     if($j==4)
     {
+        
         $pdf->Cell(30, 6, $row_line_arr[0], 1, 0, 'L', 0);
         $pdf->Cell(90, 6, $row_line_arr[1], 1, 0, 'L', 0);
-        $pdf->Cell(30, 6, $row_line_arr[2], 1, 0, 'R', 0);
-        $pdf->Cell(30, 6, $row_line_arr[3], 1, 0, 'R', 0);
+        $pdf->Cell(40, 6, $row_line_arr[2], 1, 0, 'R', 0);
+        $pdf->Cell(60, 6, $row_line_arr[3], 1, 0, 'R', 0);
     }
+
+    if($j==5)
+    {
+        
+        $pdf->Cell(30, 6, $row_line_arr[0], 1, 0, 'L', 0);
+        $pdf->Cell(90, 6, $row_line_arr[1], 1, 0, 'L', 0);
+        $pdf->Cell(40, 6, $row_line_arr[2], 1, 0, 'R', 0);
+        $pdf->Cell(60, 6, $row_line_arr[3], 1, 0, 'R', 0);
+        $pdf->Cell(60, 6, $row_line_arr[4], 1, 0, 'R', 0);
+
+    }
+
     $pdf->Ln();
 }
 
 //Close and output PDF document
+$report_file_name=doGenerateUniqueNameReport($globalSS['params']);
 
-$pdf->Output("".$globalSS['root_dir']."/output/report.pdf", 'D');
+
+
+if(!isset($_REQUEST['external']))
+$pdf->Output("".$globalSS['root_dir']."/output/".$report_file_name.".pdf", 'D');
+else
+$pdf->Output("".$globalSS['root_dir']."/modules/ExportRep/output/".$report_file_name.".pdf", 'F');
 
 unset($pdf);
 //PDF END
