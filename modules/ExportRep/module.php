@@ -1,7 +1,28 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:40:17 PM
-#Build revision 1.3
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> module.php </#FN>                                                      
+*                         File Birth   > <!#FB> 2022/09/28 21:52:47.271 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/11/08 20:46:17.464 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
 
 
 class ExportRep
@@ -14,8 +35,7 @@ function __construct($variables){ //
 	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
 	include_once(''.$this->vars['root_dir'].'/lib/functions/function.reportmisc.php');
 		
-	// create new PDF document
-
+	
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
 	else	
@@ -37,215 +57,27 @@ function __construct($variables){ //
 function CreateLoginsPDF($repvars)
   {
 
-$this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
+$get = array(
+	'srv'  => $this->vars['connectionParams']['srv'],
+	'id' => $repvars['id'],
+	'loginid' => $repvars['loginid'],
+	'loginname' => $repvars['loginname'],
+	'typeid' => $repvars['typeid'],
+	'date' => $repvars['querydate'],
+	'date2' => $repvars['querydate2'],
+	'pdf' => '1',
+	'external' => '1'
+);
+ 
 
-$querydate = $repvars['querydate'];
-$querydate2 = $repvars['querydate2']; 
-$currentlogin = $repvars['currentlogin'];
-$currentloginid=$repvars['currentloginid'];
-$goodSitesList = $repvars['goodSitesList'];
+$ch = curl_init($this->vars['root_http']."/reports/reports.php?" . http_build_query($get));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_HEADER, false);
+$html = curl_exec($ch);
+curl_close($ch);
 
-$sortcolumn = $repvars['sortcolumn'];
-$sortorder = $repvars['sortorder'];
-
-
-$datestart=strtotime($querydate);
-$dateend=strtotime($querydate2) + 86400;
-$querydate = $querydate." - ".$querydate2; 
-
-$category = $this->vars['category'];
-
-$numrow=0;
-
-$repheader= "<h2>".$this->lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$this->lang['stFOR']." ".$querydate."</h2>";
-
-
-
- /////////// ONE LOGIN TRAFFIC REPORT
-$queryOneLoginTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
-	   ".$category."
-	 FROM scsq_quicktraffic
-	 
-	 WHERE login=".$currentloginid."
-	   AND date>".$datestart." 
-	   AND date<".$dateend."
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
-	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) ,site ".$category."
-	 ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-
-#postgre version
-if($this->vars['connectionParams']['dbtype']==1)
-$queryOneLoginTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
-	   ".$category."
-	 FROM scsq_quicktraffic
-	 
-	 WHERE login=".$currentloginid." 
-	   AND date>".$datestart." 
-	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
-	AND par=1
-	 GROUP BY scsq_quicktraffic.site ".$category."
-	 ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-
-//if($id==8)
-///{
-$colhtext[1]="#";
-$colhtext[2]=$this->lang['stSITE'];
-$colhtext[3]=$this->lang['stMEGABYTES'];
-$colhtext[4]=$this->lang['stCATEGORY'];
-
-$colftext[1]="";
-$colftext[2]=$this->lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="";
-
-//если потребуется включим. пока выключено (19.04.2020)
-//если есть модуль категорий то добавим столбец
-//if($category=="category")
-//$colh[0]=4;
-//else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=doFetchQuery($this->vars, $queryOneLoginTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-
-
-/////////// ONE LOGIN TRAFFIC REPORT END	 
-
-//}
-
-$totalmb=0;
-
-//PARSE SQL
-foreach ($result as $line) {
-#if($enableUseiconv==1)
-#$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=doConvertBytes($line[1],'mbytes');
-
-$totalmb=$totalmb+$line[1];
-@$rows[$numrow]=implode(";;",$line);
-$numrow++;
-}
-
-//// GENERATE PDF FILE
-
-
-//PDF
-
-// set margins
-$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$this->pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-$this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-$this->pdf->SetHeaderData('','', '', 'powered by TCPDF');
-$this->pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', 8));
-
-// set font
-$this->pdf->SetFont('dejavusans', '', 10);
-
-$this->pdf->AddPage();
-
-//add header of report
-$this->pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
-
-if(($colh[0]==3)or($colh[0]==5))
-{
-	  $this->pdf->Cell(30, 6, $colhtext[1], 1, 0, 'L', 0);
-      $this->pdf->Cell(120, 6, $colhtext[2], 1, 0, 'L', 0);
-      $this->pdf->Cell(30, 6, $colhtext[3], 1, 0, 'R', 0);
-      $this->pdf->Ln();
-}
-
-$i=1;
-
-while ($i<$numrow) {
-$line=explode(';;',$rows[$i]);
-
-
-for($j=2;$j<=$colh[0];$j++){
-$resultcolr[$j]=$colr[$j];
-$resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line1/i", round($line[1],2), $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
-if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
-$resultcolr[$j]=$matches[2];
-//HTML array in $matches[1]
-}
-
-
-
-
-if(($colh[0]==3)or($colh[0]==5))
-{
-      $this->pdf->Cell(30, 6, $i, 1, 0, 'L', 0);
-      $this->pdf->Cell(120, 6, $resultcolr[2], 1, 0, 'L', 0);
-      $this->pdf->Cell(30, 6, $resultcolr[3], 1, 0, 'R', 0);
-      $this->pdf->Ln();
-}
-
-
-
-for($j=1;$j<=$colh[0];$j++)
-$resultcolr[$j]="";
-
-$i++;
-}
-
-for($i=1;$i<=$colh[0];$i++){
-if (preg_match("/totalmb/i", $colf[$i])) {
-preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=round($totalmb,2);
-}
-}
-
-
-if(($colh[0]==3)or($colh[0]==5))
-{
-	  $this->pdf->Cell(30, 6, $colftext[1], 1, 0, 'L', 0);
-      $this->pdf->Cell(120, 6, $colftext[2], 1, 0, 'L', 0);
-      $this->pdf->Cell(30, 6, $colftext[3], 1, 0, 'R', 0);
-      $this->pdf->Ln();
-}
-
-
-//Close and output PDF document
-
-$this->pdf->Output("output/TrafficLogin_".$currentlogin."_".$querydate.".pdf", 'F');
-
-unset($this->pdf);
-
-//PDF END
-
-//echo $pdff;
-
-/// GENERATE PDF FILE END
 
   }
 
@@ -253,427 +85,50 @@ unset($this->pdf);
 function CreateIpaddressPDF($repvars)
   {
 
-$this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-
-$querydate = $repvars['querydate'];
-$querydate2 = $repvars['querydate2']; 
-$currentipaddress = $repvars['currentipaddress'];
-$currentipaddressid=$repvars['currentipaddressid'];
-$goodSitesList = $repvars['goodSitesList'];
-
-$sortcolumn = $repvars['sortcolumn'];
-$sortorder = $repvars['sortorder'];
-
-$datestart=strtotime($querydate);
-$dateend=strtotime($querydate2) + 86400;
-$querydate = $querydate." - ".$querydate2; 
-
-$numrow=0;
-
-$repheader= "<h2>".$this->lang['stONEIPADRESSTRAFFIC']." ".$currentipaddress." ".$this->lang['stFOR']." ".$querydate."</h2>";
-
-
-
- /////////// ONE IPADDRESS TRAFFIC REPORT
-$queryOneIpaddressTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
-	 FROM scsq_quicktraffic
+	$get = array(
+		'srv'  => $this->vars['connectionParams']['srv'],
+		'id' => $repvars['id'],
+		'ipaddressid' => $repvars['ipaddressid'],
+		'ipaddressname' => $repvars['ipaddressname'],
+		'typeid' => $repvars['typeid'],
+		'date' => $repvars['querydate'],
+		'date2' => $repvars['querydate2'],
+		'pdf' => '1',
+		'external' => '1'
+	);
 	 
-	 WHERE ipaddress=".$currentipaddressid."
-	   AND date>".$datestart." 
-	   AND date<".$dateend."
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
-	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) 
-	 ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-
-#postgre version
-if($this->vars['connectionParams']['dbtype']==1)
-$queryOneIpaddressTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s,
-	   ''
-	 FROM scsq_quicktraffic
-	 
-	 WHERE ipaddress=".$currentipaddressid." 
-	   AND date>".$datestart." 
-	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
-	AND par=1
-	 GROUP BY scsq_quicktraffic.site 
-	 ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-
-
-$colhtext[1]="#";
-$colhtext[2]=$this->lang['stSITE'];
-$colhtext[3]=$this->lang['stMEGABYTES'];
-$colhtext[4]=$this->lang['stCATEGORY'];
-
-$colftext[1]="";
-$colftext[2]=$this->lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="";
-
-//если потребуется включим. пока выключено (19.04.2020)
-//если есть модуль категорий то добавим столбец
-//if($category=="category")
-//$colh[0]=4;
-//else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=doFetchQuery($this->vars, $queryOneIpaddressTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-
-
-/////////// ONE IPADDRESS TRAFFIC REPORT END	 
-
-//}
-
-$totalmb=0;
-
-//PARSE SQL
-foreach ($result as $line) {
-#if($enableUseiconv==1)
-#$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=doConvertBytes($line[1], 'mbytes');
-
-$totalmb=$totalmb+$line[1];
-@$rows[$numrow]=implode(";;",$line);
-$numrow++;
-}
-
-//// GENERATE PDF FILE
-
-
-//PDF
-
-// set margins
-$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$this->pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-$this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-$this->pdf->SetHeaderData('','', '', 'powered by TCPDF');
-$this->pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', 8));
-
-// set font
-$this->pdf->SetFont('dejavusans', '', 10);
-
-$this->pdf->AddPage();
-
-//add header of report
-$this->pdf->writeHTML($repheader."<br>", true, false, true, false, 'L');
-
-if(($colh[0]==3)or($colh[0]==5))
-{
-	  $this->pdf->Cell(30, 6, $colhtext[1], 1, 0, 'L', 0);
-      $this->pdf->Cell(120, 6, $colhtext[2], 1, 0, 'L', 0);
-      $this->pdf->Cell(30, 6, $colhtext[3], 1, 0, 'R', 0);
-      $this->pdf->Ln();
-}
-
-$i=1;
-
-while ($i<$numrow) {
-$line=explode(';;',$rows[$i]);
-
-
-for($j=2;$j<=$colh[0];$j++){
-$resultcolr[$j]=$colr[$j];
-$resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line1/i", round($line[1],2), $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
-if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
-$resultcolr[$j]=$matches[2];
-//HTML array in $matches[1]
-}
-
-
-
-
-if(($colh[0]==3)or($colh[0]==5))
-{
-      $this->pdf->Cell(30, 6, $i, 1, 0, 'L', 0);
-      $this->pdf->Cell(120, 6, $resultcolr[2], 1, 0, 'L', 0);
-      $this->pdf->Cell(30, 6, $resultcolr[3], 1, 0, 'R', 0);
-      $this->pdf->Ln();
-}
-
-
-
-for($j=1;$j<=$colh[0];$j++)
-$resultcolr[$j]="";
-
-$i++;
-}
-
-for($i=1;$i<=$colh[0];$i++){
-if (preg_match("/totalmb/i", $colf[$i])) {
-preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=round($totalmb,2);
-}
-}
-
-
-if(($colh[0]==3)or($colh[0]==5))
-{
-	  $this->pdf->Cell(30, 6, $colftext[1], 1, 0, 'L', 0);
-      $this->pdf->Cell(120, 6, $colftext[2], 1, 0, 'L', 0);
-      $this->pdf->Cell(30, 6, $colftext[3], 1, 0, 'R', 0);
-      $this->pdf->Ln();
-}
-
-
-
-//Close and output PDF document
-
-$this->pdf->Output("output/TrafficIP_".$currentipaddress."_".$querydate.".pdf", 'F');
-
-
-//PDF END
-
-unset($this->pdf);
-
-//echo $pdff;
-
-/// GENERATE PDF FILE END
+	
+	$ch = curl_init($this->vars['root_http']."/reports/reports.php?" . http_build_query($get));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	$html = curl_exec($ch);
+	curl_close($ch);
 
 }
    
 function CreateLoginsCSV($repvars)
   {
 
-
-$querydate = $repvars['querydate'];
-$querydate2 = $repvars['querydate2']; 
-$currentlogin = $repvars['currentlogin'];
-$currentloginid=$repvars['currentloginid'];
-$goodSitesList = $repvars['goodSitesList'];
-
-$sortcolumn = $repvars['sortcolumn'];
-$sortorder = $repvars['sortorder'];
-
-$datestart=strtotime($querydate);
-$dateend=strtotime($querydate2) + 86400;
-$querydate = $querydate." - ".$querydate2; 
-
-$category = $this->vars['category'];
-
-$numrow=0;
-
-$repheader= "<h2>".$this->lang['stONELOGINTRAFFIC']." ".$currentlogin." ".$this->lang['stFOR']." ".$querydate."</h2>";
-
-
-
- /////////// ONE LOGIN TRAFFIC REPORT
- $queryOneLoginTraffic="
- SELECT 
-	scsq_quicktraffic.site,
-	SUM(sizeinbytes) AS s
-	".$category."
-  FROM scsq_quicktraffic
-  
-  WHERE login=".$currentloginid."
-	AND date>".$datestart." 
-	AND date<".$dateend."
-	AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
- AND par=1
-  GROUP BY CRC32(scsq_quicktraffic.site) ,site ".$category."
-  ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-
-#postgre version
-if($this->vars['connectionParams']['dbtype']==1)
-$queryOneLoginTraffic="
- SELECT 
-	scsq_quicktraffic.site,
-	SUM(sizeinbytes) AS s
-	".$category."
-  FROM scsq_quicktraffic
-  
-  WHERE login=".$currentloginid." 
-	AND date>".$datestart." 
-	AND date<".$dateend." 
-	AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
- AND par=1
-  GROUP BY scsq_quicktraffic.site ".$category."
-  ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-//if($id==8)
-///{
-$colhtext[1]="#";
-$colhtext[2]=$this->lang['stSITE'];
-$colhtext[3]=$this->lang['stMEGABYTES'];
-$colhtext[4]=$this->lang['stCATEGORY'];
-
-$colftext[1]="";
-$colftext[2]=$this->lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="";
-
-//если потребуется включим. пока выключено (19.04.2020)
-//если есть модуль категорий то добавим столбец
-//if($category=="category")
-//$colh[0]=4;
-//else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=doFetchQuery($this->vars, $queryOneLoginTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-
-
-/////////// ONE LOGIN TRAFFIC REPORT END	 
-
-//}
-
-$totalmb=0;
-
-//PARSE SQL
-foreach ($result as $line) {
-#if($enableUseiconv==1)
-#$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=doConvertBytes($line[1], 'mbytes');
-
-$totalmb=$totalmb+$line[1];
-@$rows[$numrow]=implode(";;",$line);
-$numrow++;
-}
-
-
-//generate CSV file
-
-if($colh[0]==4)
-{
-$csvfile[0][0] = $colhtext[1];
-$csvfile[0][1] = $colhtext[2];
-$csvfile[0][2] = $colhtext[3];
-$csvfile[0][3] = $colhtext[4];
-
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[0][0] = $colhtext[1];
-$csvfile[0][1] = $colhtext[2];
-$csvfile[0][2] = $colhtext[3];
-}
-
-$i=1;
-
-while ($i<$numrow) {
-$line=explode(';;',$rows[$i]);
-
-
-for($j=2;$j<=$colh[0];$j++){
-$resultcolr[$j]=$colr[$j];
-$resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line1/i", round($line[1],2), $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
-if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
-$resultcolr[$j]=$matches[2];
-
-
-}
-
-
-
-if($colh[0]==4)
-{
-$csvfile[$i][0] = $i;
-$csvfile[$i][1] = $resultcolr[2];
-$csvfile[$i][2] = $resultcolr[3];
-$csvfile[$i][3] = $resultcolr[4];
+	$get = array(
+		'srv'  => $this->vars['connectionParams']['srv'],
+		'id' => $repvars['id'],
+		'loginid' => $repvars['loginid'],
+		'loginname' => $repvars['loginname'],
+		'typeid' => $repvars['typeid'],
+		'date' => $repvars['querydate'],
+		'date2' => $repvars['querydate2'],
+		'csv' => '1',
+		'external' => '1'
+	);
+	 
 	
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[$i][0] = $i;
-$csvfile[$i][1] = $resultcolr[2];
-$csvfile[$i][2] = $resultcolr[3];
-}
-
-for($j=1;$j<=$colh[0];$j++)
-$resultcolr[$j]="";
-
-$i++;
-}
-
-for($i=1;$i<=$colh[0];$i++){
-if (preg_match("/totalmb/i", $colf[$i])) {
-preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=round($totalmb,2);
-}
-}
-
-
-$i = count($csvfile);
-
-if($colh[0]==4)
-{
-$csvfile[$i][0] = $colftext[1];
-$csvfile[$i][1] = $colftext[2];
-$csvfile[$i][2] = $colftext[3];
-$csvfile[$i][3] = $colftext[4];
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[$i][0] = $colftext[1];
-$csvfile[$i][1] = $colftext[2];
-$csvfile[$i][2] = $colftext[3];
-}
-
-
-	
-$output = fopen("output/TrafficLogin_".$currentlogin."_".$querydate.".csv",'w') or die("Can't open file to write");
-
-fprintf($output, "\xEF\xBB\xBF"); // UTF-8 BOM
-
-foreach($csvfile as $product) {
-    fputcsv($output, $product,';');
-}
-fclose($output) or die("Can't close file");
-
-
-//generate CSV end
+	$ch = curl_init($this->vars['root_http']."/reports/reports.php?" . http_build_query($get));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	$html = curl_exec($ch);
+	curl_close($ch);
 
   }   
    
@@ -681,212 +136,25 @@ fclose($output) or die("Can't close file");
 function CreateIpaddressCSV($repvars)
   {
 
-
-$querydate = $repvars['querydate'];
-$querydate2 = $repvars['querydate2']; 
-$currentipaddress = $repvars['currentipaddress'];
-$currentipaddressid=$repvars['currentipaddressid'];
-$goodSitesList = $repvars['goodSitesList'];
-
-$numrow=0;
-
-$sortcolumn = $repvars['sortcolumn'];
-$sortorder = $repvars['sortorder'];
-
-$datestart=strtotime($querydate);
-$dateend=strtotime($querydate2) + 86400;
-$querydate = $querydate." - ".$querydate2; 
-
-
-$repheader= "<h2>".$this->lang['stONEIPADRESSTRAFFIC']." ".$currentipaddress." ".$this->lang['stFOR']." ".$querydate."</h2>";
-
-
-
- /////////// ONE IPADDRESS TRAFFIC REPORT
-$queryOneIpaddressTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s
-	 FROM scsq_quicktraffic
+	$get = array(
+		'srv'  => $this->vars['connectionParams']['srv'],
+		'id' => $repvars['id'],
+		'ipaddressid' => $repvars['ipaddressid'],
+		'ipaddressname' => $repvars['ipaddressname'],
+		'typeid' => $repvars['typeid'],
+		'date' => $repvars['querydate'],
+		'date2' => $repvars['querydate2'],
+		'csv' => '1',
+		'external' => '1'
+	);
 	 
-	 WHERE ipaddress=".$currentipaddressid."
-	   AND date>".$datestart." 
-	   AND date<".$dateend."
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")  
-	AND par=1
-	 GROUP BY CRC32(scsq_quicktraffic.site) 
-	 ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-
-#postgre version
-if($this->vars['connectionParams']['dbtype']==1)
-$queryOneIpaddressTraffic="
-	SELECT 
-	   scsq_quicktraffic.site,
-	   SUM(sizeinbytes) AS s,
-	   ''
-	 FROM scsq_quicktraffic
-	 
-	 WHERE ipaddress=".$currentipaddressid." 
-	   AND date>".$datestart." 
-	   AND date<".$dateend." 
-	   AND scsq_quicktraffic.site NOT IN (".$goodSitesList.")   
-	AND par=1
-	 GROUP BY scsq_quicktraffic.site 
-	 ORDER BY ".$sortcolumn." ".$sortorder."
-;";
-
-
-
-$colhtext[1]="#";
-$colhtext[2]=$this->lang['stSITE'];
-$colhtext[3]=$this->lang['stMEGABYTES'];
-$colhtext[4]=$this->lang['stCATEGORY'];
-
-$colftext[1]="";
-$colftext[2]=$this->lang['stTOTAL'];
-$colftext[3]="totalmb";
-$colftext[4]="";
-
-//если потребуется включим. пока выключено (19.04.2020)
-//если есть модуль категорий то добавим столбец
-//if($category=="category")
-//$colh[0]=4;
-//else
-$colh[0]=3;
-
-$colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
-$colh[2]="<th>".$colhtext[2]."</th>";
-$colh[3]="<th>".$colhtext[3]."</th>";
-$colh[4]="<th>".$colhtext[4]."</th>";
-$result=doFetchQuery($this->vars, $queryOneIpaddressTraffic);
-
-$colr[1]="numrow";
-$colr[2]="line0";
-$colr[3]="line1";
-$colr[4]="line2";
-
-$colf[1]="<td>".$colftext[1]."</td>";
-$colf[2]="<td><b>".$colftext[2]."</b></td>";
-$colf[3]="<td><b>".$colftext[3]."</b></td>";
-$colf[4]="<td><b>".$colftext[4]."</b></td>";
-
-
-/////////// ONE IPADDRESS TRAFFIC REPORT END	 
-
-
-$totalmb=0;
-
-//PARSE SQL
-foreach ($result as $line) {
-#if($enableUseiconv==1)
-#$line[0]=iconv("CP1251","UTF-8",urldecode($line[0]));
-$line[1]=doConvertBytes($line[1],'mbytes');
-
-$totalmb=$totalmb+$line[1];
-@$rows[$numrow]=implode(";;",$line);
-$numrow++;
-}
-
-
-//generate CSV file
-
-if($colh[0]==4)
-{
-$csvfile[0][0] = $colhtext[1];
-$csvfile[0][1] = $colhtext[2];
-$csvfile[0][2] = $colhtext[3];
-$csvfile[0][3] = $colhtext[4];
-
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[0][0] = $colhtext[1];
-$csvfile[0][1] = $colhtext[2];
-$csvfile[0][2] = $colhtext[3];
-}
-
-$i=1;
-
-while ($i<$numrow) {
-$line=explode(';;',$rows[$i]);
-
-
-for($j=2;$j<=$colh[0];$j++){
-$resultcolr[$j]=$colr[$j];
-$resultcolr[$j]=preg_replace("/line0/i", $line[0], $resultcolr[$j]);
-$resultcolr[$j]=preg_replace("/line1/i", round($line[1],2), $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line2/i", $line[2], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line3/i", $line[3], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line4/i", $line[4], $resultcolr[$j]);
-//$resultcolr[$j]=preg_replace("/line5/i", $line[5], $resultcolr[$j]);
-if(preg_match('/<a(.+)>(.*?)<\/a>/s', $resultcolr[$j], $matches))
-$resultcolr[$j]=$matches[2];
-
-
-}
-
-
-
-if($colh[0]==4)
-{
-$csvfile[$i][0] = $i;
-$csvfile[$i][1] = $resultcolr[2];
-$csvfile[$i][2] = $resultcolr[3];
-$csvfile[$i][3] = $resultcolr[4];
 	
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[$i][0] = $i;
-$csvfile[$i][1] = $resultcolr[2];
-$csvfile[$i][2] = $resultcolr[3];
-}
-
-for($j=1;$j<=$colh[0];$j++)
-$resultcolr[$j]="";
-
-$i++;
-}
-
-for($i=1;$i<=$colh[0];$i++){
-if (preg_match("/totalmb/i", $colf[$i])) {
-preg_replace("/totalmb/i", $totalmb, $colf[$i]);
-$colftext[$i]=round($totalmb,2);
-}
-}
-
-
-$i = count($csvfile);
-
-if($colh[0]==4)
-{
-$csvfile[$i][0] = $colftext[1];
-$csvfile[$i][1] = $colftext[2];
-$csvfile[$i][2] = $colftext[3];
-$csvfile[$i][3] = $colftext[4];
-}
-if(($colh[0]==3)or($colh[0]==5))
-{
-$csvfile[$i][0] = $colftext[1];
-$csvfile[$i][1] = $colftext[2];
-$csvfile[$i][2] = $colftext[3];
-}
-
-
-	
-$output = fopen("output/TrafficLogin_".$currentipaddress."_".$querydate.".csv",'w') or die("Can't open file to write");
-
-fprintf($output, "\xEF\xBB\xBF"); // UTF-8 BOM
-
-foreach($csvfile as $product) {
-    fputcsv($output, $product,';');
-}
-fclose($output) or die("Can't close file");
-
-
-//generate CSV end
+	$ch = curl_init($this->vars['root_http']."/reports/reports.php?" . http_build_query($get));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	$html = curl_exec($ch);
+	curl_close($ch);
 
   } 
 
@@ -895,7 +163,11 @@ fclose($output) or die("Can't close file");
   function Install()
   {
 
-
+	#если модуль уже есть, то вернемся.
+	if(doQueryExistsModule($this->vars,'ExportRep')>0) {
+		echo "<script language=javascript>alert('Module already installed')</script>";
+		return;
+	}
 
 		$UpdateModules = "
 		INSERT INTO scsq_modules (name,link) VALUES ('ExportRep','modules/ExportRep/index.php');";
@@ -905,7 +177,7 @@ fclose($output) or die("Can't close file");
 
 
 
-		echo "".$this->lang['stINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stINSTALLED']."')</script>";
 	 }
   
  function Uninstall() #добавить LANG
@@ -916,7 +188,7 @@ fclose($output) or die("Can't close file");
 
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stUNINSTALLED']."')</script>";
 
   }
 

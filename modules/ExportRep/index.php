@@ -54,16 +54,15 @@ include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 #добавим себе время для исполнения скрипта. в секундах
 set_time_limit($timelimit);
 
-
+  #если есть дружеские логины, IP адреса или сайты. Соберём их.
+  $goodLoginsList=doCreateFriendList($globalSS,'logins');
+  $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
+  $goodSitesList = doCreateSitesList($globalSS);
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
 else
   $srv=0;
-
-
-
-
 
 
 $header='<html>
@@ -81,29 +80,9 @@ $header='<html>
 
 echo $header;
 
-$addr=$address[$srv];
-$usr=$user[$srv];
-$psw=$pass[$srv];
-$dbase=$db[$srv];
-$dbtype=$srvdbtype[$srv];
-
-$variableSet = array();
-$variableSet['addr']=$addr;
-$variableSet['usr']=$usr;
-$variableSet['psw']=$psw;
-$variableSet['dbase']=$dbase;
-$variableSet['dbtype']=$dbtype;
-
-$variableSet['language']=$language;
-
-$globalSS['connectionParams']=$variableSet;
 
 // Include the main TCPDF library (search for installation path).
 include("../../lib/tcpdf/tcpdf.php");
-
-
-//проверим, есть ли модуль категорий. Если есть показываем столбец с категориями
-$globalSS['category'] = doQueryExistsModuleCategory($globalSS);
 
 ///CALENDAR
 
@@ -171,7 +150,7 @@ else
 if(isset($_GET['date2']))
   $querydate2=$_GET['date2'];
 else
-  $querydate2=date("d-m-Y");
+  $querydate2="";
 
 
 $exportrep_ex = new ExportRep($globalSS);
@@ -182,12 +161,6 @@ if(!isset($_GET['id']))
 echo "<h2>".$_lang['stEXPORTREPMODULE']."</h2><br />";
 
 $start=microtime(true);
-
-
-  #если есть дружеские логины, IP адреса или сайты. Соберём их.
-  $goodLoginsList=doCreateFriendList($globalSS,'logins');
-  $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
-  $goodSitesList = doCreateSitesList($globalSS);
 
 
 //visual part
@@ -228,11 +201,11 @@ $start=microtime(true);
 
 
 //compute
-
+$repvars=array();
 $repvars['querydate'] = $querydate;
 $repvars['querydate2'] = $querydate2; 
-$repvars['goodSitesList'] = $goodSitesList;
 
+#надо подумать есть ли смысл
 $repvars['sortcolumn'] = $sortcolumn;
 $repvars['sortorder'] = $sortorder;
 
@@ -243,18 +216,26 @@ if(isset($_GET['actid'])){
 {
 		if($_GET['actid']==1) {//сформировать отчёты по логинам PDF
 
-		  $numrow=0;
+		  
+	   	  $numrow=0;
 		  $sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
 		  $result=doFetchQuery($globalSS, $sqlGetId);
-		  
+
+		  $repvars['id']="8";
+		  $repvars['typeid']="0";
+
+
+
 		  echo "proccess started<br />";
 		  foreach ($result as $line) {
-			$repvars['currentloginid'] = $line[0];
-			$repvars['currentlogin'] = $line[1];
+
+			$repvars['loginid']=$line[0];
+			$repvars['loginname']=$line[1];
 			
 			$exportrep_ex->CreateLoginsPDF($repvars);
 			$numrow++;
 		  }
+		  
 		 } //actid=1
 		  		  
 		if($_GET['actid']==2) {//сформировать отчёты по ip адресам PDF
@@ -262,45 +243,56 @@ if(isset($_GET['actid'])){
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
 		  $result=doFetchQuery($globalSS, $sqlGetId);
-		  
+
+		  $repvars['id']="11";
+		  $repvars['typeid']="1";
+
 		  echo "proccess started<br />";
 		  foreach ($result as $line) {
-			$repvars['currentipaddressid'] = $line[0];
-			$repvars['currentipaddress'] = $line[1];
+			$repvars['ipaddressid']=$line[0];
+			$repvars['ipaddressname']=$line[1];
 			$exportrep_ex->CreateIpaddressPDF($repvars);
 			$numrow++;
+
 		 }
 		} //actid=2
 		
-				if($_GET['actid']==3) {//сформировать отчёты по логинам CSV
+		if($_GET['actid']==3) {//сформировать отчёты по логинам CSV
+			$numrow=0;
+			$sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
+			$result=doFetchQuery($globalSS, $sqlGetId);
 
-		  $numrow=0;
-		  $sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
-		  $result=doFetchQuery($globalSS, $sqlGetId);
-		  
-		  echo "proccess started<br />";
-		  foreach ($result as $line) {
-			$repvars['currentloginid'] = $line[0];
-			$repvars['currentlogin'] = $line[1];
-			$exportrep_ex->CreateLoginsCSV($repvars);
-			$numrow++;
-		  }
+			$repvars['id']="8";
+			$repvars['typeid']="0";
+	  
+			echo "proccess started<br />";
+			foreach ($result as $line) {
+	  
+ 	 		  $repvars['loginid']=$line[0];
+			  $repvars['loginname']=$line[1];
+				  
+		 	  $exportrep_ex->CreateLoginsCSV($repvars);
+				$numrow++;
+				}
 		 } //actid=3
 		 
-		 		if($_GET['actid']==4) {//сформировать отчёты по ip адресам CSV
+ 		if($_GET['actid']==4) {//сформировать отчёты по ip адресам CSV
 
-		  $numrow=0;
-		  $sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
-		  $result=doFetchQuery($globalSS, $sqlGetId);
+			$numrow=0;
+			$sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
+			$result=doFetchQuery($globalSS, $sqlGetId);
 		  
-		  echo "proccess started<br />";
-		  foreach ($result as $line) {
-			$repvars['currentipaddressid'] = $line[0];
-			$repvars['currentipaddress'] = $line[1];
-			$exportrep_ex->CreateIpaddressCSV($repvars);
-			$numrow++;
-		  }
-		 } //actid=4
+			$repvars['id']="11";
+			$repvars['typeid']="1";
+		  
+			echo "proccess started<br />";
+			foreach ($result as $line) {
+			  $repvars['ipaddressid']=$line[0];
+			  $repvars['ipaddressname']=$line[1];
+			  $exportrep_ex->CreateIpaddressCSV($repvars);
+			  $numrow++;
+			}
+		} //actid=4
 		
 		
 		 
@@ -310,14 +302,6 @@ if(isset($_GET['actid'])){
 
 }
 
-
-
-
-
-
- 
-
-         
 
 
 
