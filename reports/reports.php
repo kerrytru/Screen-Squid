@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/10/19 22:24:59.598 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/29 22:47:04.818 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/08 23:14:40.446 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.15.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.15.1 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -121,7 +121,7 @@ $params['dbase']=$db[$srv];
 $params['idReport']=$id;
 $params['date']=$querydate;
 $params['date2']=$querydate2;
-$params['idLogin']=$currentloginid;   
+$params['idLogin']=$currentlogin;   
 $params['idIpaddress']=$currentipaddress; 
 
 $globalSS['currenthttpname']=$currenthttpname;
