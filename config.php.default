@@ -71,6 +71,7 @@ include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 include_once(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
 include_once(''.$globalSS['root_dir'].'/lib/functions/function.getreport.php');
 include_once(''.$globalSS['root_dir'].'/lib/functions/function.reportmisc.php');
+include_once(''.$globalSS['root_dir'].'/lib/functions/function.modules.php');
 
 if(isset($_GET['srv']))
   $srv=$_GET['srv'];
