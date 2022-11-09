@@ -190,6 +190,7 @@ echo "
 	reports.add(new WebFXTreeItem('".$_lang['stBIGFILES']."','javascript:GoPartlyReport(".$srv.",67)'));
 	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAY']."','javascript:GoPartlyReport(".$srv.",72)'));
 	reports.add(new WebFXTreeItem('".$_lang['stTRAFFICBYPERIODDAYNAME']."','javascript:GoPartlyReport(".$srv.",73)'));
+	reports.add(new WebFXTreeItem('".$_lang['stUNAUTHTRAFFIC']."','javascript:GoPartlyReport(".$srv.",74)'));
 
 	reports.add(new WebFXTreeItem('".$_lang['stBACK']."','mainmenu.php'));
 

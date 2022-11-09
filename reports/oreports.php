@@ -104,23 +104,7 @@ $start=microtime(true);
 // Javascripts
 ?>
 
-<script language=JavaScript>
-function FastDateSwitch(idReport, dom)
-{
-if(window.document.fastdateswitch_form.date_field.value=='')
-parent.right.location.href='reports.php?id='+idReport+'&date='+window.document.fastdateswitch_form.date_field_hidden.value+'&dom='+dom;
-else
-parent.right.location.href='reports.php?id='+idReport+'&date='+window.document.fastdateswitch_form.date_field.value+'&dom='+dom;
-}
 
-
-function UpdateLeftMenu(id)
-{
-parent.left.location.href='../left.php?id='+id;
-}
-
-
-</script>
 <script type="text/javascript" src="../javascript/sortable.js"></script>
 
 
@@ -129,35 +113,6 @@ parent.left.location.href='../left.php?id='+id;
 // Javascripts END
 
 
-///date
-
-if(isset($_GET['date']))
-$querydate=$_GET['date'];
-else
-$querydate=date("d-m-Y");
-
-list($day,$month,$year) = explode('[/.-]', $querydate);
-
-if(isset($_GET['dom']))
-$dayormonth=$_GET['dom'];
-else
-$dayormonth="day";
-
-
-if($dayormonth=="day")
-{
-$querydom="%d-%m-%Y";
-$datestart=strtotime($querydate);
-$dateend=strtotime($querydate) + 86400;
-}
-else
-{
-$querydom="%m-%Y";
-$querydate=$month."-".$year;
-$numdaysinmonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-$datestart=mktime(0,0,0,$month,1,$year);
-$dateend=$datestart + 86400*$numdaysinmonth;
-}
 
 
 
@@ -189,14 +144,10 @@ function doGetAliasNameByIP($globalSS,$ipname){
 	}
 	
 
-#create list of friends
-if($globalSS['enableNofriends']==1) {
-if($goodLogins!="")
-  $friendsLogin=implode("','",explode(" ", $globalSS['goodLogins']));
-if($goodIpaddress!="")
-  $friendsIpaddress=implode("','",explode(" ", $globalsSS['goodIpaddress']));
-}
-
+ #если есть дружеские логины, IP адреса или сайты. Соберём их.
+ $goodLoginsList=doCreateFriendList($globalSS,'logins');
+ $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
+ $goodSitesList = doCreateSitesList($globalSS);
 
 /*
 $queryActiveUsers1="select substring_index(ipaddress,':',1) as ipaddr,
@@ -237,8 +188,8 @@ from
 	) as table1
 
 	where 
-		table1.ipaddr not IN ('".$friendsIpaddress."') 
-	AND trim(table1.username) not IN ('".$friendsLogin."') 
+		table1.ipaddr not IN ('".$goodIpaddressList."') 
+	AND trim(table1.username) not IN ('".$goodLoginsList."') 
 	
 	group by table1.ipaddr,table1.username,table1.id,table1.aliasname ; 
 	
@@ -251,42 +202,13 @@ $queryActiveUsers="
  (select DISTINCT split_part(ipaddress,':',1) as ipaddr,sizeinbytes as sums, seconds, username, ipaddresstbl.id,aliastbl.name as aliasname from scsq_sqper_activerequests 
  LEFT OUTER JOIN (SELECT scsq_ipaddress.id,scsq_ipaddress.name,split_part(scsq_sqper_activerequests.ipaddress,':',1) as ipadr FROM scsq_ipaddress,scsq_sqper_activerequests ) as ipaddresstbl ON split_part(ipaddress,':',1)=ipaddresstbl.name 
  LEFT JOIN (SELECT scsq_alias.id,scsq_alias.name,scsq_alias.tableid FROM scsq_alias where typeid=1) as aliastbl ON ipaddresstbl.id=aliastbl.tableid ) as table1 
- where table1.ipaddr not IN ('".$friendsIpaddress."') AND trim(table1.username) not IN ('".$friendsLogin."') group by table1.ipaddr,table1.username,table1.id,table1.aliasname ; 
+ where table1.ipaddr not IN ('".$goodIpaddressList."') AND trim(table1.username) not IN ('".$goodLoginsList."') group by table1.ipaddr,table1.username,table1.id,table1.aliasname ; 
 
 ";
 
 //echo $queryActiveUsers;
 
 //querys for reports end
-
-
-///CALENDAR
-
-?>
-
-<form name=fastdateswitch_form onsubmit="return false;">
-<input type="hidden" name=date_field_hidden value="<?php echo $_GET['date']; ?>">
-<input type="hidden" name=dom_field_hidden value="<?php echo $dayormonth; ?>">
-<input type="hidden" name=loginname_field_hidden value="<?php echo $currentlogin; ?>">
-<input type="hidden" name=login_field_hidden value="<?php echo $currentloginid; ?>">
-<input type="hidden" name=ipname_field_hidden value="<?php echo $currentipaddress; ?>">
-<input type="hidden" name=ip_field_hidden value="<?php echo $currentipaddressid; ?>">
-<input type="hidden" name=site_field_hidden value="<?php echo $currentsite; ?>">
-<input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
-<input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
-<input type="hidden" name=typeid_field_hidden value="<?php echo $typeid; ?>">
-<input type="hidden" name=httpname_field_hidden value="<?php echo $currenthttpname; ?>">
-<input type="hidden" name=httpstatus_field_hidden value="<?php echo $currenthttpstatusid; ?>">
-<input type="hidden" name=loiid_field_hidden value="<?php echo $currentloiid; ?>">
-<input type="hidden" name=loiname_field_hidden value="<?php echo $currentloiname; ?>">
-
-</form>
-
-<script src="../javascript/calendar_ru.js" type="text/javascript"></script>
-
-
-<?php
- ///CALENDAR END
 
 
 
@@ -359,7 +281,7 @@ $tmp=fgets($fp,2048);
 $ptmp.=$tmp;
 }
 
-if(preg_match("/HTTP/1.0 200 OK/",$ptmp)){
+if(preg_match("/\/HTTP\/1.0 200 OK/",$ptmp)){
 echo "Error: No connection to Squid";
 $errCheck=1;
 }
@@ -395,7 +317,7 @@ $seconds=round($matchsec[1][$i],0);
 
 if($errCheck==0)
 {
-$getInspLines=$_GET['insp'];
+$getInspLines=isset($_GET['insp'])? $_GET['insp'] : "";
 ///add to inspect
 if(isset($_GET['iadd']))
 $getInspLines=$getInspLines.",".$_GET['iadd'];
@@ -408,7 +330,7 @@ $getInspLines=str_replace(",,", ",", $getInspLines);
 if(isset($_GET['insp']))
 $_GET['insp']=$getInspLines;
 //show inspect table if we had something to show
-if(($_GET['insp']!=",")&&(isset($_GET['insp']))&&(strlen($_GET['insp'])>0)){
+if((isset($_GET['insp'])&&($_GET['insp']!=","))&&(strlen($_GET['insp'])>0)){
 $showInspectTable=1;
 $inspLines=explode(",",$getInspLines);
 }
@@ -416,7 +338,7 @@ else
 $showInspectTable=0;
 
 
-echo "<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&norefresh=1>".$_lang['stSTOP']."</a>";
+echo "<a href=?srv=".$srv."&id=".$id."&insp=".$getInspLines."&norefresh=0>".$_lang['stSTART']."</a>&nbsp;<a href=?srv=".$srv."&id=".$id."&insp=".$getInspLines."&norefresh=1>".$_lang['stSTOP']."</a>";
 
 if($dbtype==0)#mysql version
 $result=doFetchOneQuery($globalSS, "select from_unixtime(date,'%d.%m.%Y %H:%i:%s') as d from scsq_sqper_activerequests");
@@ -519,73 +441,7 @@ echo "<br />";
 #inspect table end
 
 
-echo "
-<table id=report_table_id_10 class=datatable>
-<tr>
-    <th class=unsortable>
-    #
-    </th>
-    <th>
-    ".$_lang['stIPADDRESS']."
-    </th>
-    <th>
-    ".$_lang['stLOGIN']."
-    </th>
-    <th>
-    ".$_lang['stSPEED']."
-    </th>
-    <th>
-    ".$_lang['stINSPECT']."
-	</th>";
-if($globalSS['useIpaddressalias'] == 1)
-echo "<th>
-    ".$_lang['stALIAS']." (IP)
-	</th>";
-if($globalSS['useLoginalias'] == 1)
-	echo "<th>
-		".$_lang['stALIAS']." (LOGIN)
-		</th>";
-echo "</tr>";
 
-for($i=1;$i<$numrow;$i++) {
-
-$line=explode(';;',$rows[$i]);
-echo "<tr>";
-echo "<td>".$i."</td>";
-echo "<td>".$line[0]."</td>";
-echo "<td>".$line[2]."</td>"; //username
-if($line[1]!="")
-$line[1]=round($line[1],2);
-echo "<td>".$line[1]."</td>";
-echo "<td><a href=?srv=".$srv."&id=".$id."&date=".$querydate."&dom=day&insp=".$getInspLines."&iadd=".$line[0].">".$_lang['stADD']."</a></td>";
-if($globalSS['useIpaddressalias'] == 1)
-	echo "<td>".(doGetAliasNameByIP($globalSS,$line[0]))."</td>"; //alias
-if($globalSS['useLoginalias'] == 1)
-	echo "<td>".(doGetAliasNameByLogin($globalSS,$line[2]))."</td>"; //alias
-echo "</tr>";
-if($line[1]!="")
-$totalspeed+=$line[1];
-    }
-echo "<tr>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>".$_lang['stTOTAL']."</td>
-<td>".$totalspeed."</td>
-<td>&nbsp;</td>";
-if($globalSS['useIpaddressalias'] == 1)
-echo "<td>&nbsp;</td>";
-if($globalSS['useLoginalias'] == 1)
-echo "<td>&nbsp;</td>";
-echo "</tr>";
-
-echo "</table>";
-
-
-
-
-#trend totalspeed
-   $sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$totalspeed,1)";
-doQuery($globalSS, $sqltext);
 
 
 foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
@@ -624,6 +480,74 @@ echo $pathtoimage;
 
 
 ///pChart Graph END
+
+echo "
+<table id=report_table_id_10 class=datatable>
+<tr>
+    <th class=unsortable>
+    #
+    </th>
+    <th>
+    ".$_lang['stIPADDRESS']."
+    </th>
+    <th>
+    ".$_lang['stLOGIN']."
+    </th>
+    <th>
+    ".$_lang['stSPEED']."
+    </th>
+    <th>
+    ".$_lang['stINSPECT']."
+	</th>";
+if($globalSS['useIpaddressalias'] == 1)
+echo "<th>
+    ".$_lang['stALIAS']." (IP)
+	</th>";
+if($globalSS['useLoginalias'] == 1)
+	echo "<th>
+		".$_lang['stALIAS']." (LOGIN)
+		</th>";
+echo "</tr>";
+
+for($i=1;$i<$numrow;$i++) {
+
+$line=explode(';;',$rows[$i]);
+echo "<tr>";
+echo "<td>".$i."</td>";
+echo "<td>".$line[0]."</td>";
+echo "<td>".$line[2]."</td>"; //username
+if($line[1]!="")
+$line[1]=round($line[1],2);
+echo "<td>".$line[1]."</td>";
+echo "<td><a href=?srv=".$srv."&id=".$id."&insp=".$getInspLines."&iadd=".$line[0].">".$_lang['stADD']."</a></td>";
+if($globalSS['useIpaddressalias'] == 1)
+	echo "<td>".(doGetAliasNameByIP($globalSS,$line[0]))."</td>"; //alias
+if($globalSS['useLoginalias'] == 1)
+	echo "<td>".(doGetAliasNameByLogin($globalSS,$line[2]))."</td>"; //alias
+echo "</tr>";
+if($line[1]!="")
+$totalspeed+=$line[1];
+    }
+echo "<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>".$_lang['stTOTAL']."</td>
+<td>".$totalspeed."</td>
+<td>&nbsp;</td>";
+if($globalSS['useIpaddressalias'] == 1)
+echo "<td>&nbsp;</td>";
+if($globalSS['useLoginalias'] == 1)
+echo "<td>&nbsp;</td>";
+echo "</tr>";
+
+echo "</table>";
+
+
+#trend totalspeed
+$sqltext="INSERT INTO scsq_sqper_trend10 (date,value,par) VALUES ($nowtimestamp,$totalspeed,1)";
+doQuery($globalSS, $sqltext);
+
+
 } ///if no error. errCheck=0
 
 } // if(fp)
@@ -655,11 +579,24 @@ $count=0;
 #если будет ошибка при получении данных, установить в 1.
 $errCheck=0;
 
+//09.11.2022 TODO = что это за костыль?
+$uptime="";
+$cpuusage="";
+$basicqlength="";
+$basicavgsvc="";
+$negavgsvc="";
+$negqlength="";
+$digestavgsvc="";
+$digestqlength="";
+
  while(!feof($fp)) 
   { 
   $allsize=0;
 $tmp=fgets($fp,2048);
 ///echo $tmp;
+
+
+
 
 if(preg_match("/HTTP\/1.0 200 OK/",$tmp)){
 echo "Error: No connection to Squid";

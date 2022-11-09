@@ -248,5 +248,6 @@ $_lang['stINCOMEMEGABYTES']="Принятый трафик";
 
 //2.3
 $_lang['stDICTIONARY']="Справочники";
+$_lang['stUNAUTHTRAFFIC']="Неавторизованный трафик";
 
 ?>

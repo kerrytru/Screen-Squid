@@ -58,7 +58,14 @@ parent.right.location.href=frame2;
 function GoReport(srv,id)
 {
 
-parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date.value+'&date2='+parent.right.window.document.fastdateswitch_form.date2.value;
+//if !isset
+if (typeof parent.right.window.document.fastdateswitch_form !== 'undefined') {
+	parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date.value+'&date2='+parent.right.window.document.fastdateswitch_form.date2.value;
+}
+else
+{
+	parent.right.location.href='reports/reports.php?srv='+srv+'&id='+id;
+}
 
 
 }
@@ -81,7 +88,7 @@ function GoInternetLink(dest_link)
 
 function GoOnlineReport(srv,id)
 {
-parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id+'&date='+parent.right.window.document.fastdateswitch_form.date.value+'&date2='+parent.right.window.document.fastdateswitch_form.date2.value;
+parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id;
 }
 
 

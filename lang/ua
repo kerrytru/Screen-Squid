@@ -249,4 +249,6 @@ $_lang['stINCOMEMEGABYTES']="Accepted traffic";
 
 //2.3
 $_lang['stDICTIONARY']="Dictionaries";
+$_lang['stUNAUTHTRAFFIC']="Unauthorized traffic";
+
 ?>

@@ -4632,6 +4632,72 @@ $queryOneIpaddressTraffic="
 	 ORDER BY scsq_quicktraffic.site asc;";
 
 
+$queryOneIpaddressUnauthTraffic="
+	 SELECT 
+	   scsq_traffic.site AS st,
+	   sum(sizeinbytes) AS s
+	   , sumdenied.sum_denied
+	 FROM scsq_traffic 
+	LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
+			FROM scsq_traffic, scsq_httpstatus 
+			WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+			AND scsq_httpstatus.id=scsq_traffic.httpstatus 
+			AND date>".$datestart." 
+			AND date<".$dateend." 
+			AND scsq_traffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+			AND ipaddress=".$currentipaddressid."
+			AND scsq_traffic.login NOT IN (select id from scsq_logins t where t.name='-')
+			GROUP BY crc32(site) ,site
+	) as sumdenied ON scsq_traffic.site=sumdenied.site
+  
+	 WHERE ipaddress=".$currentipaddressid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend." 
+	   	   AND scsq_traffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 
+	   AND scsq_traffic.site NOT IN (".$goodSitesList.")
+	   ".$filterSite."
+	   AND scsq_traffic.login NOT IN (select id from scsq_logins t where t.name='-')
+	   
+	   
+	 GROUP BY CRC32(scsq_traffic.site),scsq_traffic.site, sumdenied.sum_denied	 
+	 ORDER BY scsq_traffic.site asc;";
+
+#postgre version
+if($dbtype==1)
+$queryOneIpaddressUnauthTraffic="
+	 SELECT 
+	   scsq_traffic.site AS st,
+	   sum(sizeinbytes) AS s
+	  
+	   ,sumdenied.sum_denied
+	 FROM scsq_traffic
+	 LEFT JOIN (SELECT site, SUM(sizeinbytes) as sum_denied 
+		FROM scsq_traffic, scsq_httpstatus 
+		WHERE scsq_httpstatus.name like '%TCP_DENIED%' 
+		AND scsq_httpstatus.id=scsq_traffic.httpstatus 
+		AND date>".$datestart." 
+		AND date<".$dateend." 
+				AND scsq_traffic.site NOT IN (".$goodSitesList.")
+		".$filterSite."
+		AND ipaddress=".$currentipaddressid."
+		AND scsq_traffic.login NOT IN (select id from scsq_logins t where t.name='-')  
+		GROUP BY site
+	) as sumdenied ON scsq_traffic.site=sumdenied.site
+	 
+
+	 WHERE ipaddress=".$currentipaddressid." 
+	   AND date>".$datestart." 
+	   AND date<".$dateend." 
+	   	   AND scsq_traffic.site NOT IN (".$goodSitesList.")  
+	   ".$filterSite." 
+	   AND scsq_traffic.login NOT IN (select id from scsq_logins t where t.name='-')
+	  
+	   
+	 GROUP BY scsq_traffic.site, sumdenied.sum_denied	 
+	 ORDER BY scsq_traffic.site asc;";
+
 $queryOneIpaddressTopSitesTraffic="
 	 SELECT 
 	   scsq_quicktraffic.site,
@@ -7259,6 +7325,10 @@ $repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAY']." <b>".$currentipaddress."</b>
 if($id==73)
 $repheader= "<h2>".$_lang['stTRAFFICBYPERIODDAYNAME']." <b>".$currentipaddress."</b> </h2>";
 
+if($id==74)
+$repheader= "<h2>".$_lang['stUNAUTHTRAFFIC']." ".$currentipaddress." ".$_lang['stFOR']." ".$querydate_str." ".$dayname."</h2>";
+
+
 if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 
 echo "<table width='100%'>";
@@ -8996,6 +9066,13 @@ if($id==72)
 if($id==73)
 {
 	$json_result=doGetReportData($globalSS,$queryOneIpaddressTrafficByPeriodDayname,'template24.php');
+	doPrintTable($globalSS,$json_result);
+
+}
+
+if($id==74)
+{
+	$json_result=doGetReportData($globalSS,$queryOneIpaddressUnauthTraffic,'template4.php');
 	doPrintTable($globalSS,$json_result);
 
 }
