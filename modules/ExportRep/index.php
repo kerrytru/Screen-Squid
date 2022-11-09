@@ -25,7 +25,6 @@
 
 
 
-include("config.php");
 include("../../config.php");
 
 #если нет авторизации, сразу выходим
@@ -50,7 +49,7 @@ include_once("../../lang/$language");
 include_once(''.$globalSS['root_dir'].'/lib/functions/function.misc.php');
 include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 		
-
+$timelimit = 600; 
 #добавим себе время для исполнения скрипта. в секундах
 set_time_limit($timelimit);
 
