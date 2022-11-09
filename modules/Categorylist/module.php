@@ -1,7 +1,26 @@
 <?php
 
-#Build date Thursday 7th of May 2020 18:37:27 PM
-#Build revision 1.2
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> module.php </#FN>                                                      
+*                         File Birth   > <!#FB> 2022/09/28 21:52:47.265 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/10/22 21:43:46.145 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
 
 class Categorylist
 {
@@ -30,6 +49,13 @@ function __construct($variables){ //
 
   function Install()
   {
+
+
+		#если модуль уже есть, то вернемся.
+		if(doQueryExistsModule($this->vars,'Categorylist')>0) {
+			echo "<script language=javascript>alert('Module already installed')</script>";
+			return;
+		}
 
 
 # Table structure for table `scsq_mod_categorylist`
@@ -79,7 +105,7 @@ function __construct($variables){ //
 		
 
 
-		echo "".$this->lang['stINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stINSTALLED']."')</script>";
  }
   
  function Uninstall() #добавить LANG
@@ -102,7 +128,7 @@ function __construct($variables){ //
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update modules");
 
 
-		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stUNINSTALLED']."')</script>";
 		
   }
 

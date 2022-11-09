@@ -1,7 +1,27 @@
 #!/usr/bin/perl
 
-#Build date Friday 24th of April 2020 09:26:33 AM
-#Build revision 1.1
+=cut
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> getcat.pl </#FN>                                                       
+*                         File Birth   > <!#FB> 2022/09/28 21:52:47.265 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/10/22 20:48:25.380 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+=cut
+
 
 use DBI; # DBI  Perl!!!
 #=======================CONFIGURATION BEGIN============================
@@ -94,7 +114,7 @@ $dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
 }
 
 if($dbtype==1){ #postgre
-$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
+$dbh = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
 }
 
 
