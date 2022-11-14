@@ -63,16 +63,16 @@ function __construct($variables){ //
   }
 
 
-  function Install()
-  {
 
-		echo "This is system module, its already installed<br /><br />";
+  function Install()
+  	{
+	echo "<script language=javascript>alert('This is system module, its already installed')</script>";
+
 	 }
   
  function Uninstall() 
   {
-
-		echo "This is system module, you cant uninstall it<br /><br />";
+	echo "<script language=javascript>alert('This is system module, you cant uninstall it')</script>";
 
   }
 
