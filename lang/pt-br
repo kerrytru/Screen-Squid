@@ -48,7 +48,7 @@ $_lang['stFASTDATESWITCH']="Data da Troca Rápida :";
 
 $_lang['stEXECUTIONTIME']="Pagina gerada em";
 $_lang['stSECONDS']="segundos";
-$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid created by <a href=http://break-people.ru>break-people.ru</a></font>";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid created by <a href=http://root1234.ru>root1234.ru</a></font>";
 
 $_lang['stLOGIN']="Login";
 $_lang['stLOGINS']="Logins";

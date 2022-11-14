@@ -48,7 +48,7 @@ $_lang['stFASTDATESWITCH']="Cambio r&aacute;pido de fecha:";
 
 $_lang['stEXECUTIONTIME']="P&aacute;gina generada en";
 $_lang['stSECONDS']="segundos";
-$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid creado por <a href=http://break-people.ru>break-people.ru</a></font>";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid creado por <a href=http://root1234.ru>root1234.ru</a></font>";
 
 $_lang['stLOGIN']="Sesi&oacute;n";
 $_lang['stLOGINS']="Sesiones";

@@ -51,7 +51,7 @@ $_lang['stFASTDATESWITCH']="Швидкий перехід по датах:";
 
 $_lang['stEXECUTIONTIME']="час генерації сторінки";
 $_lang['stSECONDS']="сек.";
-$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid створили <a href=http://break-people.ru>break-people.ru</a></font>";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid створили <a href=http://root1234.ru>root1234.ru</a></font>";
 
 $_lang['stLOGIN']="Логін";
 $_lang['stLOGINS']="Логіни";

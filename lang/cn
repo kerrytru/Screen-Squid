@@ -48,7 +48,7 @@ $_lang['stFASTDATESWITCH']="快速切换日期:";
 
 $_lang['stEXECUTIONTIME']="生成此页面所用时间为";
 $_lang['stSECONDS']="秒";
-$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid 开发者 <a href=http://break-people.ru>break-people.ru</a></font>";
+$_lang['stCREATORS']="<br /><font color=grey size=2>Screen Squid 开发者 <a href=http://root1234.ru>root1234.ru</a></font>";
 
 $_lang['stLOGIN']="用户";
 $_lang['stLOGINS']="用户";
