@@ -35,8 +35,8 @@ var $link;
 
 function __construct($variables){ // 
     $this->vars = $variables;
-     include("pChart/pChart/pData.class");
-	 include("pChart/pChart/pChart.class");	
+     include_once("pChart/pChart/pData.class");
+	 include_once("pChart/pChart/pChart.class");	
 	 
 
 	
