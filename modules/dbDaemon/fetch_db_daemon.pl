@@ -1,12 +1,34 @@
+
+
+
 #!/usr/bin/perl
 
-#Build date Friday 15th of May 2020 13:22:03 PM
-#Build revision 1.2
+
 
 
 use DBI; # DBI  Perl!!!
 
 =cut
+
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> fetch_db_daemon.pl </#FN>                                              
+*                         File Birth   > <!#FB> 2022/11/14 09:57:13.198 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/11/14 10:06:19.149 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
 
 To use this log daemon you need
 
@@ -95,7 +117,7 @@ while (<STDIN>) {
 	if($dbtype==1){ #postgre
 
        eval {                  # we catch db errors 
-			$dbh = DBI->connect_cached("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 0});
+			$dbh = DBI->connect_cached("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 0});
         
         };
 		if ($EVAL_ERROR) { #no connect then exit and dont crash squid. It is quiet mode
@@ -104,7 +126,7 @@ while (<STDIN>) {
 		}
 		else
 		{
-			$dbh = DBI->connect_cached("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 0}); #if you need log to cache.log set it to 1.
+			$dbh = DBI->connect_cached("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 0}); #if you need log to cache.log set it to 1.
 		}
 
 	}

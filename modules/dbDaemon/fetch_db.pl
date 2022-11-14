@@ -1,11 +1,33 @@
 #!/usr/bin/perl
 
-#Build date Saturday 18th of April 2020 20:27:52 PM
-#Build revision 1.4
+=cut
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> fetch_db.pl </#FN>                                                     
+*                         File Birth   > <!#FB> 2022/11/14 11:09:41.395 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/11/14 11:11:05.898 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+=cut
+
 
 use DBI; # DBI  Perl!!!
 
 #=======================CONFIGURATION BEGIN============================
+#Enable silent mode ( $silent_mode=1 means enabled ). This means, that you set script in production. No echoes you need
+$silent_mode = 0;
 
 $dbtype = "0"; #type of db - 0 - MySQL, 1 - PostGRESQL
 
@@ -17,7 +39,7 @@ $host = "localhost"; # host s DB
 $port = "3306"; # port DB
 $user = "mysql-user"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test5"; # name DB
+$db = "test11"; # name DB
 }
 #postgresql default config
 if($dbtype==1){
@@ -25,114 +47,354 @@ $host = "localhost"; # host s DB
 $port = "5432"; # port DB
 $user = "postgres"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "postgres"; # name DB
+$db = "test"; # name DB
 }
 #==========================================================
 #Count lines for one insert. You can change it, if its needed.
 #Kolichestvo strok, vstavliaemoe za odin INSERT. Mozhno pokrutit bolshe/menshe dlia skorosti
 #Количество строк, вставляемое за один INSERT. Можно покрутить больше/меньше для скорости.
-my $count_lines_for_one_insert=1000; #how much INSERT for one 'transaction'
+local $count_lines_for_one_insert=1000; #how much INSERT for one 'transaction'
+#my $enable_multicore = 0; #pseudo multi-core loading
+#my $n = 8; #how many workers will insert data. It depends on max connections your database!
+#==========================================================
+#Path to access.log. It could be full path, e.g. /var/log/squid/access.log
+#Put k access.log. Eto mozhet bit polnii put. Naprimer, /var/log/squid/access.log
+#Путь к файлу access.log(имя может другим). Это может быть и полный путь, например, /var/log/squid/access.log
+local $filetoparse="access.log";
 #==========================================================
 #Path to ssquid.log. Log fetch.pl. It could be full path, e.g /var/log/squid/ssquid.log
 #File kuda budet zapisivatsia resultat otrabotki skripta fetch.pl. Eto mozhet bit polnii put. Naprimer, /var/log/squid/ssquid.log
-my $filetolog="ssquid1.log";
+local $filetolog="ssquid1.log";
 #==========================================================
 #Enable delete old data.
 #Vkluchit udalenie starih dannih iz bazi
 #Включить удаление старых данных из базы
-my $enabledelete=0;
+local $enabledelete=0;
 
 #How older data must be deleted. In example, older than 100 days from max date.
 #Period, starshe kotorogo dannie budut udaliatsia. Ukazivaetsia v dniah.
 #Период, старше которого данные будут удаляться. Указывается в днях.
-my $deleteperiod=100; #days
+local $deleteperiod=100; #days
 #==========================================================
 #min bytes of traffic in one record to be parsed. By default parsed whole log.
 #Kolichestvo bait, menshe kotorogo dannie ne budut zapisivatsa v bazu. Ukazivaetsia v baitah. Mozhet ispolzovatsa, chtobi ne zapisivat v bazu dannie o bannerah.
 #Количество байт, меньше которого данные не будут записываться в базу. Указывается в байтах. Может использоваться, чтобы не записывать в базу данные о баннерах.
-my $minbytestoparse=-1; #bytes, default -1
+local $minbytestoparse=-1; #bytes, default -1
+
+#=====================================================================
+local $useLockFile=1; # 1 = create lock file when script is running, default 1 -enabled. 0 -disabled
+
+#контроль того, чтобы данные из логов не были старыми. Защита чтобы не загрузить повторно данные.
+#По умолчанию включен.
+local $flagNeverWriteOldData=1; # Prevent to write old data. default 1 - enabled. 0 - disabled. Be careful!
 
 #=======================CONFIGURATION END==============================
 
-
-my $count=0;
-my $lastdate=0;
-my $sqltext="";
-my $sql_getlastdate="";
-
-
-#open log file for writing
-#open(OUT, ">>$filetolog");
-
-#datetime when parse started
-print $now=localtime;
-$startnow=time;
-
-#print datetime when parsing started
-print OUT $now;
+local $sqltext="";
+local $lastdate="";
+local $lastday=0;
+local $count=0;
+local $countlines=0;
+local $countadded=0;
 
 
-#make conection to DB
-if($dbtype==0){ #mysql
-$dbh = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
-}
-
-if($dbtype==1){ #postgre
-$dbh = DBI->connect("dbi:Pg:dbname=$db","$user",$pass,{PrintError => 1});
-}
-
+sub doDeleteOldData {
 #delete data stored more than $deleteperiod days
-if($enabledelete==1){
-  $sql_getlastdate="select max(date) from scsq_traffic where numproxy=".$numproxy."";
-  $sth = $dbh->prepare($sql_getlastdate);
-  $sth->execute; #
-  @row=$sth->fetchrow_array;
+  my $sqlquery;
+  my $deldate;
+
+  $sqlquery="select max(date) from scsq_traffic where numproxy=".$numproxy."";
+  @row=doFetchQuery($sqlquery);
   $lastdate=$row[0];
+
   $deldate=$lastdate - $deleteperiod * 86400;
-  $sql_deleteperiod="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
-  $sth = $dbh->prepare($sql_deleteperiod);
-  $sth->execute; #
+  
+  
+  $sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
+  doQueryToDatabase($sqlquery);
+
+}
+#собираем строчки
+
+sub doAddString {
+
+  my $params = shift;
+  $sqltext=$sqltext."($params[0],'$params[2]','$params[3]','$params[4]','$params[6]','$params[7]','$params[5]','$params[9]',$numproxy),";
+
+}
+
+sub doFetchQuery {
+
+    my $sqlquery=shift;
+
+
+    if($dbtype==0){ #mysql
+    $dbh_child = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
+    }
+    
+      $sth = $dbh_child->prepare($sqlquery);
+      $sth->execute;
+      @row=$sth->fetchrow_array;
+      $sth->finish();
+      $dbh_child->disconnect();
+
+  return @row;
+
 }
 
 
+sub doFetchAllQuery {
+
+    my $sqlquery=shift;
+
+
+    if($dbtype==0){ #mysql
+    $dbh_child = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
+    }
+    
+      $sth = $dbh_child->prepare($sqlquery);
+      $sth->execute;
+      $row = $sth->fetchall_arrayref;
+      $sth->finish();
+      $dbh_child->disconnect();
+
+
+
+  return @{$row};
+
+}
+
+sub doQueryToDatabase {
+
+    my $sqlquery=shift;
+
+    if($dbtype==0){ #mysql
+    $dbh_child = DBI->connect("DBI:mysql:$db:$host:$port",$user,$pass);
+    }
+
+    if($dbtype==1){ #postgre
+    $dbh_child = DBI->connect("dbi:Pg:dbname=$db;host=$host","$user",$pass,{PrintError => 1});
+    }
+    
+      $sth = $dbh_child->prepare($sqlquery);
+      $sth->execute;
+      $sth->finish();
+      $dbh_child->disconnect();
+
+}
+
+sub doUpdateHttpstatus {
+    my $sqlquery="";
+    #adding httpstatus if it`s absent in table scsq_httpstatus
+    $sqlquery="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic$k_table) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
+
+    $sqlquery="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
+    doQueryToDatabase($sqlquery);
+
+}   
+
+sub doUpdateIpaddress {
+    my $sqlquery="";
+    #adding ipaddress if it`s absent in table scsq_ipaddress
+    $sqlquery="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic$k_table) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
+
+    $sqlquery="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
+    doQueryToDatabase($sqlquery);
+}
+
+sub doUpdateLogins {
+    my $sqlquery="";
+    #adding logins if it`s absent in table scsq_logins
+    $sqlquery="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic$k_table) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
+    $sqlquery="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
+    doQueryToDatabase($sqlquery);
+}
+
+
+#copy data from temptable to main table
+sub doCopyToMainTable {
+
+    my $sqlquery="";
+
+    if($dbtype==0){
+#    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
+#    LEFT JOIN (select id,name from scsq_ipaddress
+#    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
+#    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
+#    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
+#    WHERE numproxy=".$numproxy."
+#    ;";
+    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
+    LEFT JOIN (select id,name from scsq_ipaddress
+    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
+    LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
+    LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+    WHERE numproxy=".$numproxy."
+    ;";
+
+    }
+
+    if($dbtype==1){
+#    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
+#    LEFT JOIN (select id,name from scsq_ipaddress
+#    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
+#    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
+#    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
+#    WHERE numproxy=".$numproxy."
+#    ;";
+    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
+    LEFT JOIN (select id,name from scsq_ipaddress
+    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
+    LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
+    LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+    WHERE numproxy=".$numproxy."
+    ;";
+
+    }
+
+doQueryToDatabase($sqlquery);
+
+}
+
+sub doDeleteFutureDataQuickTraffic {
+
+my $sqlquery = "";
+#clear last date in table with data.
+
+$sqlquery="delete from scsq_quicktraffic where date>".$lastday." and numproxy=".$numproxy."";
+
+doQueryToDatabase($sqlquery);
+}
+
+sub doGetParameters {
+
+my $sqlquery="";
 #get last date in table with data. It used to prevent importing data from log which could be in table yet.
-$sql_getlastdate="select max(date) from scsq_traffic where numproxy=".$numproxy."";
-$sth = $dbh->prepare($sql_getlastdate);
-$sth->execute; #
-@row=$sth->fetchrow_array;
+$sqlquery="select max(date) from scsq_traffic where numproxy=".$numproxy."";
+@row=doFetchQuery($sqlquery);
 $lastdate=$row[0];
 
-
-#get last date in table with data. It used to prevent importing data from log which could be in table yet.
-
 if($dbtype==0){
-$sql_getlastdate="select unix_timestamp(from_unixtime(max(date),'%Y-%m-%d')) from scsq_quicktraffic where numproxy=".$numproxy."";
+$sqlquery="select unix_timestamp(from_unixtime(max(date),'%Y-%m-%d')) from scsq_quicktraffic where numproxy=".$numproxy."";
 }
 
 if($dbtype==1){
-$sql_getlastdate="select EXTRACT(epoch from timestamptz (to_char(TO_TIMESTAMP(max(date)),'YYYY-MM-DD'))) from scsq_quicktraffic where numproxy=".$numproxy."";
+$sqlquery="select EXTRACT(epoch from timestamptz (to_char(TO_TIMESTAMP(max(date)),'YYYY-MM-DD'))) from scsq_quicktraffic where numproxy=".$numproxy."";
 }
 
-$sth = $dbh->prepare($sql_getlastdate);
-$sth->execute; #
-@row=$sth->fetchrow_array;
+@row=doFetchQuery($sqlquery);
 $lastday=$row[0];
 
 if($lastday eq ""){
 $lastday=0;
 }
 
-#clear last date in table with data.
-$sql_clearlastday="delete from scsq_quicktraffic where date>".$lastday." and numproxy=".$numproxy."";
-$sth = $dbh->prepare($sql_clearlastday);
-$sth->execute; #
+}
+
+
+sub doFlushTempTable{
+    my $sqlquery="";
+    #truncate data to 
+    #    $sqlquery="TRUNCATE TABLE scsq_temptraffic$k_table;";
+    $sqlquery="TRUNCATE TABLE scsq_temptraffic;";
+
+    doQueryToDatabase($sqlquery);
+
+}
+
+sub doCopyToQuickTraffic {
+
+my $sqlquery="";
+
+if($dbtype==0){
+
+$sqlquery="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par, numproxy)
+SELECT 
+date,
+tmp2.login,
+tmp2.ipaddress,
+sum(tmp2.sizeinbytes),
+tmp2.st,
+tmp2.httpstatus,
+1,
+".$numproxy."
+
+FROM (SELECT 
+case
+
+	when left(substring_index(substring_index(site,'/',1),'.',-1),1) REGEXP '[0-9]' 
+		then SUBSTRING_INDEX(site,'/',1)
+		else SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2) 
+	end as st, 
+sizeinbytes,
+date,
+login,
+ipaddress,
+httpstatus
+FROM scsq_traffic
+where date>".$lastday." and numproxy=".$numproxy."
+ORDER BY id asc 
+) as tmp2
+
+GROUP BY tmp2.st,FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus,date
+;
+";
+}
 
 
 
-#clear temptable to be sure, that table have no strange data before import.
-#$sql_cleartemptable="delete from scsq_temptraffic where numproxy=".$numproxy."";
-#$sth = $dbh->prepare($sql_cleartemptable);
-#$sth->execute; #
+if($dbtype==1){
+
+$sqlquery="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par,numproxy)
+SELECT 
+date,
+tmp2.login,
+tmp2.ipaddress,
+sum(tmp2.sizeinbytes),
+tmp2.st,
+tmp2.httpstatus,
+1,
+".$numproxy."
+
+FROM (SELECT 
+case
+
+	when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]')  
+		then split_part(site,'/',1) 
+		else reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) 
+		
+	end as st, 
+sizeinbytes,
+date,
+login,
+ipaddress,
+httpstatus
+FROM scsq_traffic
+where date>".$lastday." and numproxy=".$numproxy."
+ORDER BY id asc
+) as tmp2
+
+GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,httpstatus,tmp2.date
+
+";
+}
+
+doQueryToDatabase($sqlquery);
+}
+
+
+
+
+sub doReadDaemonTable {
+    my $params = {};
 
 
 #compute startnow - 1 minute
@@ -141,69 +403,52 @@ $datebefore= $startnow - 60;
 
 #select from scsq_mod_dbDaemon raw data
 $sql_getrawdata="select id,lineitem from scsq_mod_dbDaemon where date<$datebefore and numproxy=$numproxy order by id asc";
-$sth = $dbh->prepare($sql_getrawdata);
-$sth->execute; #
-#@row=$sth->fetchrow_array;
-#$lastday=$row[0];
 
+$rows = doFetchAllQuery($sql_getrawdata);
 
-#$line_count = `wc -l < $filetoparse`;
-
-#open log file for reading
-#open(IN, "<$filetoparse"); 
-
-$countlines=0; 
-$countadded=0;
-
-$fetchedrows=$sth->rows();
-
-print "\n";
+$fetchedrows=length($rows) -1;
 
 #last id scsq_mod_dbDaemon to delete from
 $lastid=0;
 
-#loop for get strings from file one by one.
-while ((@line)=$sth->fetchrow_array) {
-	
-#count how much lines in file are parsed
+     
+
+{
+    @item = @{$r};
+    print $item[0]."\n";
+}
+
+    $count=0;
+
+    foreach $r (@{$row})
+
 $countlines=$countlines+1;
-#$completed=int(($countlines/$line_count)*100);
-
-#print $line;
-
 #split string into items.
   
-  @item = split " ", $line[1]; 
-
-  $lastid=$line[0];
-
-
-# if parsed date is in future, pass it
-  if($item[0]>time){
-      next
-    }
-  
+  my @item = @{$r}; 
 
 #check date before add to sqltext
-  
-  if(1==1) {
-  
-#  if($item[0]>$lastdate) {
-	
-	
+
+
+
+  if($item[0]>$lastdate+1 or $flagNeverWriteOldData == 0) {
+#  if($item[0]>0) {
+
     if($item[4]>$minbytestoparse) {
-		
-		  
+
       #count how much lines added
       $countadded=$countadded+1;
       #parse sitename from item
-      @matches=($item[6]=~ /^(http:\/\/(www\.)?)?([\S]+)/i);
-      #replace apostrophes to &quot; 
+      my @matches=($item[6]=~ /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?([\S]+)/i);
+      #Регулярка была изменена потому что не работала в режиме SSL BUMP. и чтобы дальше не менять воткнем костыль.
+	    #$matches[2] = $matches[1];
+	  
+	  #replace apostrophes to &quot; 
       $item[2]=~s|'|&()quot;|g; #ipaddress
       $item[3]=~s|'|&()quot;|g; #httpstatus
       $item[4]=~s|'|&()quot;|g; #size in bytes
       $item[5]=~s|'|&()quot;|g; #method
-      $matches[2]=~s|'|&()quot;|g; #sitename
+      $matches[1]=~s|'|&()quot;|g; #sitename
       $item[7]=~s|'|&()quot;|g; #login
       $item[9]=~s|'|&()quot;|g; #mime
 
@@ -211,267 +456,151 @@ $countlines=$countlines+1;
       $item[3]=~s|"|&()quot;|g; #httpstatus
       $item[4]=~s|"|&()quot;|g; #size in bytes
       $item[5]=~s|"|&()quot;|g; #method
-      $matches[2]=~s|"|&()quot;|g; #sitename
+      $matches[1]=~s|"|&()quot;|g; #sitename
       $item[7]=~s|"|&()quot;|g; #login
       $item[9]=~s|"|&()quot;|g; #mime
 
 
-      #collect an sql insert statement with data. 
-      if($count==0) {
-        $sqltext="INSERT INTO scsq_temptraffic (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES";
-      
-      }
+      #Чтобы не было разнородных переменных для вставки
+      $params[0]=$item[0];#date
+      $params[2]=$item[2];#ipaddress
+      $params[3]=$item[3]; #httpstatus
+      $params[4]=$item[4]; #size in bytes
+      $params[5]=$item[5]; #method
+      $params[6]=$matches[1]; #sitename
+      $params[7]=$item[7]; #login
+      $params[9]=$item[9]; #mime
+      doAddString($params);
+$count++;
+
+if($fetchedrows==$count or $count>=$count_lines_for_one_insert) 
+
+ 
+  #удаляем последнюю запятую в Insert
+  $sqltext="INSERT INTO scsq_temptraffic (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES ".$sqltext;
+  $sqltext = substr($sqltext, 0, length($sqltext)-1);
+  doQueryToDatabase($sqltext);
+
+  doUpdateHttpstatus;
+  doUpdateIpaddress;
+  doUpdateLogins;
+  doCopyToMainTable;
+  doFlushTempTable;
+
+$count=0;
+$sqltext="";
+
+}
+
+    }   
+
   
-      $count++;
-      if($fetchedrows==$count or $count>=$count_lines_for_one_insert) {
-        $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]',$numproxy)";
-        $count=0;
-      
-        $sth = $dbh->prepare($sqltext);
-        $sth->execute;
-        $sqltext="";
-
-$sqltext="";
-#adding httpstatus if it`s absent in table scsq_httpstatus
-$sqltext="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
-$sth = $dbh->prepare($sqltext);
-$sth->execute; #
-
-$sqltext="";
-#adding ipaddress if it`s absent in table scsq_ipaddress
-$sqltext="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
-
-$sqltext="";
-#adding logins if it`s absent in table scsq_logins
-$sqltext="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
-
-#copy data from temptable to main table
-
-if($dbtype==0){
-$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
-LEFT JOIN (select id,name from scsq_ipaddress
-RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
-LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
-LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
-WHERE numproxy=".$numproxy."
-;";
+  }
+}
+#when finish, close handler
+close(IN);  
 }
 
-if($dbtype==1){
-$sqltext="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
-LEFT JOIN (select id,name from scsq_ipaddress
-RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
-LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
-LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
-WHERE numproxy=".$numproxy."
-;";
+sub doWriteToLogFile {
+
+  my $logmessage = shift;
+  open(OUT, ">>$filetolog");
+print OUT $logmessage."\n";
+
+#close log file
+close(OUT);
+
 }
 
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
+sub doWriteToLogTable {
 
-#clear temptable.
-$sql_cleartemptable="delete from scsq_temptraffic where numproxy=".$numproxy."";
-$sth = $dbh->prepare($sql_cleartemptable);
-$sth->execute; #
+  my $logmessage = shift;
 
-$sqltext="";
+  my $sqlquery="insert into scsq_logtable (datestart,dateend,message) VALUES ('$startnow','$endnow','$logmessage');";
+
+  doQueryToDatabase($sqlquery);
+
+}
+
+sub doSetLockFile {
+
+#check if script already launched (cause cron), then exit.
+#else create lock file
+if (-e "fetch.lock") {
+
+#cause this lock file may be somewhere, try to say it to admin
+#open it in regular way and try to get path from filehandle
+  open(OUT, ">>fetch.lock");
+ 
+  $fileno=fileno(OUT);
+  $qfn = readlink("/proc/$$/fd/$fileno");
+  
+  doWriteToLogFile("Cant start script cause fetch.lock is found in $qfn");
+  doWriteToLogTable("FETCH PROBLEM: Cant start script cause fetch.lock is found in $qfn");
+  exit;
+}
+else
+{
+  
+  open(OUT, ">>fetch.lock");
+  close(OUT);
+}
 
 
-      }
+}
 
-      if($count<$count_lines_for_one_insert and $count>0) {
-        $sqltext=$sqltext."($item[0],'$item[2]','$item[3]','$item[4]','$matches[2]','$item[7]','$item[5]','$item[9]',$numproxy),";
-      }
-    }
+sub doWriteToTerminal {
+  my $msg = shift;
+
+  if($silent_mode==0){
+    print $msg."\n";
   }
 }
 
-#close log file
 
-#clear scsq_tmp
-$sqltext="";
-$sqltext="delete from  scsq_mod_dbDaemon where id<=".$lastid." and numproxy=$numproxy;";
-print $sqltext;
+#main program 
+$now1=localtime;
 
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
 
-print "\nStarting update scsq_quicktraffic\r";
-break;
-print "\n";
+doWriteToTerminal($now1);
 
-#update scsq_quicktraffic
+$startnow=time;
+$endnow=$startnow;
 
-$sqltext="";
-
-if($dbtype==0){
-
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par, numproxy)
-SELECT 
-date,
-tmp2.login,
-tmp2.ipaddress,
-sum(tmp2.sizeinbytes),
-tmp2.st,
-tmp2.httpstatus,
-1,
-".$numproxy."
-
-FROM (SELECT 
-IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
-sizeinbytes,
-date,
-login,
-ipaddress,
-httpstatus
-FROM scsq_traffic
-where date>".$lastday." and numproxy=".$numproxy."
-
-) as tmp2
-
-GROUP BY CRC32(tmp2.st),FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus
-ORDER BY null;
-";
+if($useLockFile == 1){
+doSetLockFile;
 }
 
-
-
-if($dbtype==1){
-
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par,numproxy)
-SELECT 
-date,
-tmp2.login,
-tmp2.ipaddress,
-sum(tmp2.sizeinbytes),
-tmp2.st,
-tmp2.httpstatus,
-1,
-".$numproxy."
-
-FROM (SELECT 
-case
-
-	when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]')  
-		then split_part(site,'/',1) 
-		else reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) 
-		
-	end as st, 
-sizeinbytes,
-date,
-login,
-ipaddress,
-httpstatus
-FROM scsq_traffic
-where date>".$lastday." and numproxy=".$numproxy."
-
-) as tmp2
-
-GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,httpstatus,tmp2.date
-";
+#удалим  старые данные данные если надо
+if($enabledelete==1){
+  doDeleteOldData;
 }
 
-print $sqltext;
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
+doGetParameters;
+doFlushTempTable;
+doReadSquidLogFile;
 
+doWriteToTerminal("Starting update scsq_quicktraffic");
 
-#update2 scsq_quicktraffic
-$sqltext="";
-
-if($dbtype==0) {
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par, numproxy)
-SELECT 
-tmp2.date,
-'0',
-'0',
-tmp2.sums,
-tmp2.st,
-2,
-".$numproxy."
-
-FROM (SELECT 
-IF(concat('',(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)) * 1)=(LEFT(RIGHT(SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-1),10),1)),SUBSTRING_INDEX(site,'/',1),SUBSTRING_INDEX(SUBSTRING_INDEX(site,'/',1),'.',-2)) as st, 
-sum(sizeinbytes) as sums,
-date
-FROM scsq_traffic
-where date>".$lastday." and numproxy=".$numproxy."
-GROUP BY FROM_UNIXTIME(date,'%Y-%m-%d-%H'),crc32(st)
-
-) as tmp2
-
-
-ORDER BY null;
-";
+#нет смысла обновлять таблицу если не было добавлено ни одной записи
+if($countadded > 0) {
+doDeleteFutureDataQuickTraffic;
+doCopyToQuickTraffic;
 }
 
-if($dbtype==1){
-
-$sqltext="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,par,numproxy)
-SELECT 
-tmp2.date,
-'0',
-'0',
-tmp2.sums,
-tmp2.st,
-2,
-".$numproxy."
-
-FROM (SELECT 
-case
-
-	when (left(reverse(split_part(reverse(split_part(site,'/',1)),'.',1)),1) ~ '[0-9]')  
-		then split_part(site,'/',1) 
-		else reverse(split_part(reverse(split_part(site,'/',1)),'.',1) ||'.'|| split_part(reverse(split_part(site,'/',1)),'.',2)) 
-		
-	end as st, 
-
-sum(sizeinbytes) as sums,
-date
-FROM scsq_traffic
-where date>".$lastday." and numproxy=".$numproxy."
-GROUP BY to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),st,date
-
-) as tmp2
-
-";
-}
-
-print $sqltext;
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
-
-
-
-
-
-#print datetime when import ended
-print "\n";
-print $now=localtime;
 $endnow=time;
+$now2=localtime;
 
-#print datetime when parsing ended
-#print OUT " ====> ";
-#print OUT $now;
-#print OUT "    records counted ";
-#print OUT $countlines;
-#print OUT "  records added ";
-#print OUT $countadded;
-#print OUT "\n";
+doWriteToTerminal($now2);
 
-#fill scsq_logtable
-$sqltext="";
-$sqltext="insert into scsq_logtable (datestart,dateend,message) VALUES ('$startnow','$endnow','$countlines records counted, $countadded records added');";
-$sth = $dbh->prepare($sqltext);
-$sth->execute;
+doWriteToLogFile("$now1 ===> $now2     records counted $countlines,   records added $countadded");
+doWriteToLogTable("FETCH OK: $countlines records counted , $countadded records added ");
 
-#close log file
-#close(OUT);
+#если посчитано 0 записей, то с логом что-то не так.
+if($countlines==0) {
+doWriteToLogTable("FETCH PROBLEM: Something going wrong. Check manual, that your log file located in $filetoparse");
+}
 
-#disconnecting from DB
-$rc = $dbh->disconnect;
+
+#delete lock file
+unlink("fetch.lock");

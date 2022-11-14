@@ -1,7 +1,29 @@
 <?php
 
-#Build date Friday 15th of May 2020 13:18:35 PM
-#Build revision 1.3
+/*
+<!#CR>
+************************************************************************************************************************
+*                                                    Copyrigths ©                                                      *
+* -------------------------------------------------------------------------------------------------------------------- *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                                           File and License Informations                                              *
+* -------------------------------------------------------------------------------------------------------------------- *
+*                         File Name    > <!#FN> module.php </#FN>                                                      
+*                         File Birth   > <!#FB> 2022/11/14 11:43:49.123 </#FB>                                         *
+*                         File Mod     > <!#FT> 2022/11/14 11:45:17.187 </#FT>                                         *
+*                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
+*                                        <!#LU>  </#LU>                                                                
+*                                        <!#LD> MIT License                                                            
+*                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                                                                                                                      *
+</#CR>
+*/
+
+
+
+
+
 
 class dbDaemon
 {
@@ -27,6 +49,12 @@ function __construct($variables){ //
 
   function Install()
   {
+
+	#если модуль уже есть, то вернемся.
+	if(doQueryExistsModule($this->vars,'dbDaemon')>0) {
+		echo "<script language=javascript>alert('Module already installed')</script>";
+		return;
+	}
 
 # Table structure for table `scsq_mod_dbDaemon`
 
@@ -63,7 +91,8 @@ function __construct($variables){ //
 		doQuery($this->vars, $CreateTable) or die ("Can`t install module!");
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
-		echo "".$this->lang['stINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stINSTALLED']."')</script>";
+
 	 }
   
  function Uninstall() #добавить LANG
@@ -81,7 +110,7 @@ function __construct($variables){ //
 		doQuery($this->vars, $UpdateModules) or die ("Can`t update module table");
 
 
-		echo "".$this->lang['stUNINSTALLED']."<br /><br />";
+		echo "<script language=javascript>alert('".$this->lang['stUNINSTALLED']."')</script>";
 
   }
 
