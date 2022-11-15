@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/07 21:57:18.422 </#FT>                                         *
+*                         File Mod     > <!#FT> 2022/11/15 12:25:25.748 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.10.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.10.1 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -731,7 +731,7 @@ if(isset($_GET['actid']))
 		
 	$num = 1; //
 	
-	echo '<form name=configphp_form action="right.php?srv='.$srv.'&id=6&actid=3" method="post">';
+	echo '<form name=configphp_form action="right.php?srv='.$globalSS['connectionParams']['srv'].'&id=6&actid=3" method="post">';
   
   foreach ($globalSS['gParams'] as $key => $param) {
     $checked="";
