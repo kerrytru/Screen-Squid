@@ -41,7 +41,7 @@ if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0))
 $language=$globalSS['language'];
 
 
-include("config.php");
+
 include("module.php");
 include("../../lang/$language");
 	if (file_exists("langs/".$language))
