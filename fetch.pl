@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/17 22:33:56.199 </#FT>                                         *
+*                         File Mod     > <!#FT> 2023/02/26 13:10:29.502 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -37,7 +37,7 @@ $host = "localhost"; # host s DB
 $port = "3306"; # port DB
 $user = "mysql-user"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test11"; # name DB
+$db = "test10"; # name DB
 }
 #postgresql default config
 if($dbtype==1){
@@ -45,7 +45,7 @@ $host = "localhost"; # host s DB
 $port = "5432"; # port DB
 $user = "postgres"; # username k DB
 $pass = "pass"; # pasword k DB
-$db = "test"; # name DB
+$db = "test11"; # name DB
 }
 #==========================================================
 #Count lines for one insert. You can change it, if its needed.
@@ -173,6 +173,19 @@ sub doUpdateHttpstatus {
 
 }   
 
+
+#удалим данные из основной таблицы начиная с последней секунды (потому что сквид может логгировать много событий в одну секунду)
+sub doDeleteFutureDataTraffic {
+
+my $sqlquery = "";
+#clear last date in table with data.
+
+$sqlquery="delete from scsq_traffic where date>".$lastdate."-1 and numproxy=".$numproxy."";
+doWriteToTerminal($sqlquery);
+
+doQueryToDatabase($sqlquery);
+}
+
 sub doUpdateIpaddress {
     my $sqlquery="";
     #adding ipaddress if it`s absent in table scsq_ipaddress
@@ -253,6 +266,10 @@ my $sqlquery="";
 $sqlquery="select max(date) from scsq_traffic where numproxy=".$numproxy."";
 @row=doFetchQuery($sqlquery);
 $lastdate=$row[0];
+
+if($lastdate eq ""){
+$lastdate=0;
+}
 
 if($dbtype==0){
 $sqlquery="select unix_timestamp(from_unixtime(max(date),'%Y-%m-%d')) from scsq_quicktraffic where numproxy=".$numproxy."";
@@ -382,7 +399,7 @@ $countlines=$countlines+1;
 
 
 
-  if($item[0]>$lastdate+1 or $flagNeverWriteOldData == 0) {
+  if($item[0]>=$lastdate or $flagNeverWriteOldData == 0) {
 #  if($item[0]>0) {
 
     if($item[4]>$minbytestoparse) {
@@ -413,7 +430,7 @@ $countlines=$countlines+1;
 
 
       #Чтобы не было разнородных переменных для вставки
-      $params[0]=$item[0];#date
+      $params[0]=int($item[0]*1000/1000);#date (round в perl=)
       $params[2]=$item[2];#ipaddress
       $params[3]=$item[3]; #httpstatus
       $params[4]=$item[4]; #size in bytes
@@ -528,6 +545,7 @@ if($enabledelete==1){
 }
 
 doGetParameters;
+doDeleteFutureDataTraffic;
 doFlushTempTable;
 doReadSquidLogFile;
 
