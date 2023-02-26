@@ -181,7 +181,6 @@ my $sqlquery = "";
 #clear last date in table with data.
 
 $sqlquery="delete from scsq_traffic where date>".$lastdate."-1 and numproxy=".$numproxy."";
-doWriteToTerminal($sqlquery);
 
 doQueryToDatabase($sqlquery);
 }
