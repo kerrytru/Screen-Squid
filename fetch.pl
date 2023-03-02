@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2023/02/26 13:10:29.502 </#FT>                                         *
+*                         File Mod     > <!#FT> 2023/03/02 21:26:16.431 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.6.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.7.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -86,6 +86,17 @@ local $useLockFile=1; # 1 = create lock file when script is running, default 1 -
 #По умолчанию включен.
 local $flagNeverWriteOldData=1; # Prevent to write old data. default 1 - enabled. 0 - disabled. Be careful!
 
+#Enable delete old data from log table.
+#Vkluchit udalenie starih dannih iz log table
+#Включить удаление старых данных из таблицы лога работы SS
+local $enableDelFromLog=0;
+
+#How older data must be deleted. In example, older than 100 days from max date.
+#Period, starshe kotorogo dannie budut udaliatsia. Ukazivaetsia v dniah.
+#Период, старше которого данные будут удаляться. Указывается в днях.
+local $logDeletePeriod=10; #days
+
+
 #=======================CONFIGURATION END==============================
 
 local $sqltext="";
@@ -109,6 +120,23 @@ sub doDeleteOldData {
   
   
   $sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
+  doQueryToDatabase($sqlquery);
+
+}
+
+sub doDeleteOldLogData {
+#delete data stored more than $deleteperiod days
+  my $sqlquery;
+  my $deldate;
+
+  $sqlquery="select max(datestart) from scsq_logtable";
+  @row=doFetchQuery($sqlquery);
+  $lastdate=$row[0];
+
+  $deldate=$lastdate - $logDeletePeriod * 86400;
+  
+  
+  $sqlquery="delete from scsq_logtable where datestart<$deldate ";
   doQueryToDatabase($sqlquery);
 
 }
@@ -538,9 +566,14 @@ if($useLockFile == 1){
 doSetLockFile;
 }
 
-#удалим  старые данные данные если надо
+#удалим  старые данные  если надо
 if($enabledelete==1){
   doDeleteOldData;
+}
+
+#удалим  старые данные из логаесли надо
+if($enableDelFromLog==1){
+  doDeleteOldLogData;
 }
 
 doGetParameters;
