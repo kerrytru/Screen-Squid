@@ -42,6 +42,9 @@ function __construct($variables){ //
 	
 	$this->chartlib = doGetParam($this->vars,'Chart','chartlib');
 	
+	#если не удалось достать из базы (мало ли), по умолчанию используем pChart
+	if($this->chartlib=="") {$this->chartlib="pChart";}
+
 	#clean directory for svg
 	foreach (glob($this->vars['root_dir']."/pictures/*.svg") as $filename) {
 	    unlink($filename);

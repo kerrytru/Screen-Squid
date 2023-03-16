@@ -137,7 +137,7 @@ function doGetAliasNameByIP($globalSS,$ipname){
 	include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 	$queryGetAlias="select sa.name from scsq_alias sa, scsq_ipaddress si  where si.id=sa.tableid and sa.typeid=1 and si.name='".$ipname."';";
-	
+
 		$row=doFetchOneQuery($globalSS,$queryGetAlias);	
 		
 	return $row[0];
@@ -364,7 +364,7 @@ $line[0]="::1";
 $numrow++;
 }
 
-echo "<p>".$_lang['stREFRESHED']." ".$lastUpdateDate[0]."</p><br />";
+echo "<p>".$_lang['stREFRESHED']." ".$lastUpdateDate."</p><br />";
 
 #inspect table
 
@@ -462,6 +462,15 @@ foreach ($result as $line) {
 $arrValues[$countValues]=$line[0];
 $countValues++;
 }
+
+if($countValues<2)
+{
+	$arrValues[$countValues]=0;
+	$arrValues[$countValues+1]=0;
+}
+
+
+
 //pChart Graph 
 
 #соберем данные для графика
