@@ -1,3 +1,6 @@
+
+
+
 #!/usr/bin/perl
 
 =cut
@@ -8,14 +11,14 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                                           File and License Informations                                              *
 * -------------------------------------------------------------------------------------------------------------------- *
-*                         File Name    > <!#FN> fetch.pl </#FN>                                                        
-*                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2023/03/02 21:26:16.431 </#FT>                                         *
+*                         File Name    > <!#FN> fetch_multi.pl </#FN>                                                  
+*                         File Birth   > <!#FB> 2023/03/21 21:11:57.573 </#FB>                                         *
+*                         File Mod     > <!#FT> 2023/03/21 21:19:12.040 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.7.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -52,8 +55,8 @@ $db = "test11"; # name DB
 #Kolichestvo strok, vstavliaemoe za odin INSERT. Mozhno pokrutit bolshe/menshe dlia skorosti
 #Количество строк, вставляемое за один INSERT. Можно покрутить больше/меньше для скорости.
 local $count_lines_for_one_insert=1000; #how much INSERT for one 'transaction'
-#my $enable_multicore = 0; #pseudo multi-core loading
-#my $n = 8; #how many workers will insert data. It depends on max connections your database!
+
+my $n = 16; #how many workers will insert data. It depends on max connections your database! Minimal 1
 #==========================================================
 #Path to access.log. It could be full path, e.g. /var/log/squid/access.log
 #Put k access.log. Eto mozhet bit polnii put. Naprimer, /var/log/squid/access.log
@@ -105,7 +108,11 @@ local $lastday=0;
 local $count=0;
 local $countlines=0;
 local $countadded=0;
+local $k_table=1;
+local @children_pids_p1;
+local @children_pids_p1_tmp;
 
+$k_table=1;
 
 sub doDeleteOldData {
 #delete data stored more than $deleteperiod days
@@ -121,6 +128,124 @@ sub doDeleteOldData {
   
   $sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
   doQueryToDatabase($sqlquery);
+
+}
+
+sub doBeforeProcessPrepareTempTables {
+
+  my $sqlquery;
+
+my $k = 0;
+
+#Удалим таблицы если они вдруг остались
+    while ($k < $n) {
+    $k++;   
+     $sqlquery="";
+  
+    $sqlquery="DROP TABLE IF EXISTS scsq_temptraffic$k;";
+    doQueryToDatabase($sqlquery);
+  }
+
+my $k = 0;
+
+#Создадим таблицы если они вдруг по количеству воркеров
+
+    while ($k < $n) {
+    $k++;  
+     $sqlquery="";
+    #copy data to child proccess
+    if($dbtype==0){
+      $sqlquery="CREATE TABLE scsq_temptraffic$k  (SELECT * FROM scsq_temptraffic);";
+    }
+
+    if($dbtype==1){
+      $sqlquery="CREATE TABLE scsq_temptraffic$k as (SELECT * FROM scsq_temptraffic);";
+    }
+
+    doQueryToDatabase($sqlquery);
+    
+  }
+
+}
+
+
+sub doAfterProcessTempTables {
+
+  my $sqlquery;
+
+my $k = 0;
+
+#Удалим таблицы если они вдруг остались
+    while ($k < $n) {
+    $k++;   
+     $sqlquery="";
+  
+    $sqlquery="DROP TABLE IF EXISTS scsq_temptraffic$k;";
+    doQueryToDatabase($sqlquery);
+  }
+
+
+}
+
+sub doBeforeProcessPrepareQuickTables {
+
+  my $sqlquery = "";
+
+
+my $k = 0;
+
+
+
+#Удалим таблицы если они вдруг остались
+    while ($k < $n) {
+    $k++;   
+     $sqlquery="";
+  
+    $sqlquery="DROP TABLE IF EXISTS scsq_quicktraffic$k;";
+    doQueryToDatabase($sqlquery);
+  }
+
+my $k = 0;
+
+#Создадим таблицы если они вдруг по количеству воркеров
+
+    while ($k < $n) {
+    $k++;  
+     $sqlquery="";
+    #copy data to child proccess
+    if($dbtype==0){
+      $sqlquery="CREATE TABLE scsq_quicktraffic$k  (SELECT * FROM scsq_quicktraffic);";
+    }
+
+    if($dbtype==1){
+      $sqlquery="CREATE TABLE scsq_quicktraffic$k as (SELECT * FROM scsq_quicktraffic);";
+    }
+
+    doQueryToDatabase($sqlquery);
+    
+  }
+
+}
+
+sub doAfterProcessQuickTables {
+
+$k=0;
+
+#drop quicktraffic tables
+    while ($k < $n) {
+    $k++;  
+     $sqlquery="";
+    #copy data to child proccess
+    $sqlquery="INSERT INTO scsq_quicktraffic (date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy) (select date,login,ipaddress,site,sizeinbytes,httpstatus,par,numproxy from scsq_quicktraffic$k)";
+    doQueryToDatabase($sqlquery);
+
+     $sqlquery="";
+    #copy data to child proccess
+    $sqlquery="DROP TABLE scsq_quicktraffic$k";
+    doQueryToDatabase($sqlquery);
+  }
+
+
 
 }
 
@@ -191,17 +316,6 @@ sub doQueryToDatabase {
 
 }
 
-sub doUpdateHttpstatus {
-    my $sqlquery="";
-    #adding httpstatus if it`s absent in table scsq_httpstatus
-    $sqlquery="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic$k_table) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
-
-    $sqlquery="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
-    doQueryToDatabase($sqlquery);
-
-}   
-
-
 #удалим данные из основной таблицы начиная с последней секунды (потому что сквид может логгировать много событий в одну секунду)
 sub doDeleteFutureDataTraffic {
 
@@ -213,12 +327,23 @@ $sqlquery="delete from scsq_traffic where date>".$lastdate."-1 and numproxy=".$n
 doQueryToDatabase($sqlquery);
 }
 
+sub doUpdateHttpstatus {
+    my $sqlquery="";
+    #adding httpstatus if it`s absent in table scsq_httpstatus
+    $sqlquery="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic$k_table) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
+
+ #   $sqlquery="insert into scsq_httpstatus (name) (select tmp.httpstatus from (select distinct httpstatus from scsq_temptraffic) as tmp left outer join scsq_httpstatus on tmp.httpstatus=scsq_httpstatus.name where scsq_httpstatus.name is null);";
+    doQueryToDatabase($sqlquery);
+
+}   
+
+
 sub doUpdateIpaddress {
     my $sqlquery="";
     #adding ipaddress if it`s absent in table scsq_ipaddress
     $sqlquery="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic$k_table) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
 
-    $sqlquery="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
+ #   $sqlquery="insert into scsq_ipaddress (name) (select tmp.ipaddress from (select distinct ipaddress from scsq_temptraffic) as tmp left outer join scsq_ipaddress on tmp.ipaddress=scsq_ipaddress.name where scsq_ipaddress.name is null);";
     doQueryToDatabase($sqlquery);
 }
 
@@ -226,7 +351,7 @@ sub doUpdateLogins {
     my $sqlquery="";
     #adding logins if it`s absent in table scsq_logins
     $sqlquery="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic$k_table) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
-    $sqlquery="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
+  #  $sqlquery="insert into scsq_logins (name) (select tmp.login from (select distinct login from scsq_temptraffic) as tmp left outer join scsq_logins on tmp.login=scsq_logins.name where scsq_logins.name is null);";
     doQueryToDatabase($sqlquery);
 }
 
@@ -237,38 +362,38 @@ sub doCopyToMainTable {
     my $sqlquery="";
 
     if($dbtype==0){
-#    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
-#    LEFT JOIN (select id,name from scsq_ipaddress
-#    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
-#    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
-#    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
-#    WHERE numproxy=".$numproxy."
-#    ;";
-    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
+    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
     LEFT JOIN (select id,name from scsq_ipaddress
-    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
-    LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
-    LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
+    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
+    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
     WHERE numproxy=".$numproxy."
     ;";
+#    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select date,tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
+#    LEFT JOIN (select id,name from scsq_ipaddress
+#    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
+#    LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
+#    LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+#    WHERE numproxy=".$numproxy."
+#    ;";
 
     }
 
     if($dbtype==1){
-#    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
-#    LEFT JOIN (select id,name from scsq_ipaddress
-#    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
-#    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
-#    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
-#    WHERE numproxy=".$numproxy."
-#    ;";
-    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
+    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic$k_table
     LEFT JOIN (select id,name from scsq_ipaddress
-    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
-    LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
-    LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic$k_table) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic$k_table.ipaddress=tmp.name
+    LEFT JOIN scsq_logins ON scsq_temptraffic$k_table.login=scsq_logins.name
+    LEFT JOIN scsq_httpstatus ON scsq_temptraffic$k_table.httpstatus=scsq_httpstatus.name
     WHERE numproxy=".$numproxy."
     ;";
+#    $sqlquery="insert into scsq_traffic (date,ipaddress,login,httpstatus,sizeinbytes,site,method,mime,numproxy) select CAST(date as numeric),tmp.id,scsq_logins.id,scsq_httpstatus.id,sizeinbytes,site,method,mime,numproxy from scsq_temptraffic
+#    LEFT JOIN (select id,name from scsq_ipaddress
+#    RIGHT JOIN (select distinct ipaddress from scsq_temptraffic) as tt ON scsq_ipaddress.name=tt.ipaddress) as tmp ON scsq_temptraffic.ipaddress=tmp.name
+#    LEFT JOIN scsq_logins ON scsq_temptraffic.login=scsq_logins.name
+#    LEFT JOIN scsq_httpstatus ON scsq_temptraffic.httpstatus=scsq_httpstatus.name
+#    WHERE numproxy=".$numproxy."
+#    ;";
 
     }
 
@@ -320,7 +445,7 @@ sub doFlushTempTable{
     my $sqlquery="";
     #truncate data to 
     #    $sqlquery="TRUNCATE TABLE scsq_temptraffic$k_table;";
-    $sqlquery="TRUNCATE TABLE scsq_temptraffic;";
+    $sqlquery="TRUNCATE TABLE scsq_temptraffic$k_table;";
 
     doQueryToDatabase($sqlquery);
 
@@ -330,9 +455,70 @@ sub doCopyToQuickTraffic {
 
 my $sqlquery="";
 
+#Get total rows to update
+$sqlquery="SELECT count(1) FROM scsq_traffic
+where date>".$lastday." and numproxy=".$numproxy."";
+
+
+@row=doFetchQuery($sqlquery);
+
+#так быстрее
+#это пока жестко задано. По сколько записей толкать в quicktraffic.
+if($n == 1) {
+$count_lines_for_one_insert=1000000;
+
+}
+else
+{
+$count_lines_for_one_insert=$count_lines_for_one_insert*10;
+}
+
+#row line for offset
+$row_line=0;
+
+$k_table=1;
+
+
+my @children_pids;
+my @children_pids_tmp;
+
+#update scsq_quicktraffic
+while($row_line<=$row[0]){
+
+$k=scalar(@children_pids);
+
+#if maximum child in progress, wait
+if($k >= $n){
+$j=0;
+
+@children_pids_tmp =@children_pids;
+for($j=0;$j<$n/4;$j++){
+
+waitpid $children_pids[$j], 0;
+shift(@children_pids_tmp);
+}
+
+  #$k=scalar;
+  @children_pids=@children_pids_tmp;
+}
+
+#doWriteToTerminal("parent $$");
+
+#$k++;
+#print "\n".scalar(@children_pids);
+
+  my $pid = fork;
+#doWriteToTerminal("child $pid");
+
+  push @children_pids,$pid;
+  if (not $pid) {
+
+#doWriteToTerminal("work $$");
+
+
 if($dbtype==0){
 
-$sqlquery="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par, numproxy)
+$sqlquery="insert into scsq_quicktraffic$k_table (date,login,ipaddress,sizeinbytes,site,httpstatus,par, numproxy)
 SELECT 
 date,
 tmp2.login,
@@ -358,6 +544,7 @@ httpstatus
 FROM scsq_traffic
 where date>".$lastday." and numproxy=".$numproxy."
 ORDER BY id asc 
+LIMIT ".$row_line.",".$count_lines_for_one_insert."
 ) as tmp2
 
 GROUP BY tmp2.st,FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus,date
@@ -369,7 +556,7 @@ GROUP BY tmp2.st,FROM_UNIXTIME(date,'%Y-%m-%d-%H'),login,ipaddress,httpstatus,da
 
 if($dbtype==1){
 
-$sqlquery="insert into scsq_quicktraffic (date,login,ipaddress,sizeinbytes,site,httpstatus,par,numproxy)
+$sqlquery="insert into scsq_quicktraffic$k_table (date,login,ipaddress,sizeinbytes,site,httpstatus,par,numproxy)
 SELECT 
 date,
 tmp2.login,
@@ -396,6 +583,7 @@ httpstatus
 FROM scsq_traffic
 where date>".$lastday." and numproxy=".$numproxy."
 ORDER BY id asc
+LIMIT ".$count_lines_for_one_insert." OFFSET ".$row_line."
 ) as tmp2
 
 GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,httpstatus,tmp2.date
@@ -404,6 +592,24 @@ GROUP BY tmp2.st,to_char(to_timestamp(date),'YYYY-MM-DD-HH24'),login,ipaddress,h
 }
 
 doQueryToDatabase($sqlquery);
+
+#doWriteToTerminal("end $$");
+
+exit;
+} #if not pid
+
+$k_table++;
+$row_line = $row_line+$count_lines_for_one_insert;
+if($k_table>$n) {
+  $k_table=1;
+}
+} #while
+
+#when adding is done wait
+    for (1 .. $n) {
+    wait();
+  }
+
 }
 
 
@@ -424,7 +630,7 @@ $countlines=$countlines+1;
 
 #check date before add to sqltext
 
-
+if($item[0] != $item[0]+0) { next;}
 
   if($item[0]>=$lastdate or $flagNeverWriteOldData == 0) {
 #  if($item[0]>0) {
@@ -470,10 +676,45 @@ $count++;
 
 if ($count==$count_lines_for_one_insert or eof) {
 
+$k=scalar(@children_pids_p1);
+
+#if maximum child in progress, wait
+if($k >= $n){
+$j=0;
+
+@children_pids_p1_tmp =@children_pids_p1;
+for($j=0;$j<$n/4;$j++){
+
+waitpid $children_pids_p1[$j], 0;
+shift(@children_pids_p1_tmp);
+}
+
+  #$k=scalar;
+  @children_pids_p1=@children_pids_p1_tmp;
+}
+
+
  
   #удаляем последнюю запятую в Insert
-  $sqltext="INSERT INTO scsq_temptraffic (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES ".$sqltext;
+ # $sqltext="INSERT INTO scsq_temptraffic (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES ".$sqltext;
+ 
+  $sqltext="INSERT INTO scsq_temptraffic$k_table (date,ipaddress,httpstatus,sizeinbytes,site,login,method,mime, numproxy) VALUES ".$sqltext;
   $sqltext = substr($sqltext, 0, length($sqltext)-1);
+
+#doWriteToTerminal("parent $$");
+
+  my $pid = fork;
+
+
+#doWriteToTerminal("start $pid");
+
+  push @children_pids_p1,$pid;
+  if (not $pid) {
+
+#doWriteToTerminal("work $$");
+
+
+
   doQueryToDatabase($sqltext);
 
   doUpdateHttpstatus;
@@ -481,6 +722,21 @@ if ($count==$count_lines_for_one_insert or eof) {
   doUpdateLogins;
   doCopyToMainTable;
   doFlushTempTable;
+  #doWriteToTerminal("end $$");
+
+  exit;
+
+  }
+
+
+
+
+$k_table++;
+
+if($k_table>$n) {
+  $k_table=1;
+}
+
 
 $count=0;
 $sqltext="";
@@ -494,6 +750,12 @@ $sqltext="";
 }
 #when finish, close handler
 close(IN);  
+
+#when adding is done wait
+    for (1 .. $n) {
+    wait();
+  }
+
 }
 
 sub doWriteToLogFile {
@@ -576,6 +838,8 @@ if($enableDelFromLog==1){
   doDeleteOldLogData;
 }
 
+doBeforeProcessPrepareTempTables;
+
 doGetParameters;
 doDeleteFutureDataTraffic;
 doFlushTempTable;
@@ -586,9 +850,11 @@ doWriteToTerminal("Starting update scsq_quicktraffic");
 #нет смысла обновлять таблицу если не было добавлено ни одной записи
 if($countadded > 0) {
 doDeleteFutureDataQuickTraffic;
+doBeforeProcessPrepareQuickTables;
 doCopyToQuickTraffic;
+doAfterProcessQuickTables;
 }
-
+doAfterProcessTempTables
 $endnow=time;
 $now2=localtime;
 
