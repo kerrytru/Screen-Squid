@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> module.php </#FN>                                                      
 *                         File Birth   > <!#FB> 2022/09/28 21:52:47.264 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/25 22:39:51.107 </#FT>                                         *
+*                         File Mod     > <!#FT> 2023/03/24 21:55:39.736 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.1 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -123,12 +123,12 @@ function __construct($variables){ //
   {
 	  //Тут просто. В зависимости от типа графика запускаем скрипт рисования. Возвращаем результат эхом.
 	  if($userData['charttype']=="line"){
-			echo passthru("python ".$this->vars['root_dir']."/modules/Chart/pygal/line.py ".$userData['chartname']."");
+			echo passthru("python3 ".$this->vars['root_dir']."/modules/Chart/pygal/line.py ".$userData['chartname']."");
 			echo file_get_contents($this->vars['root_dir'].'/modules/Chart/pictures/'.$userData['chartname'].'.svg');
 	  }
 
 	  if($userData['charttype']=="pie"){
-			echo passthru("python ".$this->vars['root_dir']."/modules/Chart/pygal/pie.py ".$userData['chartname']."");
+			echo passthru("python3 ".$this->vars['root_dir']."/modules/Chart/pygal/pie.py ".$userData['chartname']."");
 			echo file_get_contents($this->vars['root_dir'].'/modules/Chart/pictures/'.$userData['chartname'].'.svg');
 	  }
 
