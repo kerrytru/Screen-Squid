@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/28 22:24:48.785 </#FT>                                         *
+*                         File Mod     > <!#FT> 2023/03/24 21:35:39.087 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -274,6 +274,20 @@ echo "rootproxy.add(new WebFXTreeItem('".$_lang['stCONFIG']."','javascript:GoRig
 ";
 echo "rootproxy.add(modulemanager);";
 
+//При включенном дебаге покажем страницу теста для диагностики подключения к кэшменеджеру например.
+if($globalSS['debug']==1) {
+	echo "
+	var debugtree = new WebFXTreeItem('Debug');
+	
+	debugtree.add(new WebFXTreeItem('phpinfo','javascript:GoRightReport(0,9)'));
+	debugtree.add(new WebFXTreeItem('Test connection page','javascript:GoRightReport(".$srv.",999)'));
+
+	rootproxy.add(debugtree);
+	";
+	
+	}
+
+
 $srv++;
 
 }
@@ -289,7 +303,8 @@ echo "
 	
 
 	";
-	
+
+
 $srv++;
 continue;
 
@@ -309,16 +324,7 @@ echo "tree.add(new WebFXTreeItem('Logout','javascript:GoLink(\'".$globalSS['root
 }
 
 
-if($globalSS['debug']==1) {
-	echo "
-	var debugtree = new WebFXTreeItem('Debug');
-	
-	debugtree.add(new WebFXTreeItem('phpinfo','javascript:GoRightReport(0,9)'));
-	
-	tree.add(debugtree);
-	";
-	
-	}
+
 
 echo "
 document.write(tree);
