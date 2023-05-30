@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/11/01 22:07:09.322 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/01 22:09:51.577 </#FT>                                         *
+*                         File Mod     > <!#FT> 2023/05/30 21:05:22.799 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -86,11 +86,15 @@ $start=microtime(true);
     if(isset($_POST['submit'])){
 		doSetParam($globalSS,'IP2NAME','ip2name_file',$_POST['ip2name_file']);
 		doSetParam($globalSS,'IP2NAME','ip2name_separator',$_POST['ip2name_separator']);
-	  
+		doSetParam($globalSS,'IP2NAME','ip2name_table',$_POST['ip2name_table']);
 	  }
   
 	  $ip2name_file=doGetParam($globalSS,'IP2NAME','ip2name_file');
 	  $ip2name_separator=doGetParam($globalSS,'IP2NAME','ip2name_separator');
+	  $ip2name_table=doGetParam($globalSS,'IP2NAME','ip2name_table');
+
+
+	  $ip2name_table_chk = ($ip2name_table == 'on') ? 'checked' : '';
 
   echo "<h3>Config module</h3>";
   
@@ -111,6 +115,15 @@ echo '</td>
   <td>ip2name_separator</td>
   <td>
   <input type="text" name="ip2name_separator" value="'.$ip2name_separator.'">
+  </td>
+ <td>
+ &nbsp;
+   </td>
+  </tr>
+  <tr>
+  <td>ip2name_table (off - ipaddress, on - logins)</td>
+  <td>
+  <input type="checkbox" name="ip2name_table" '.$ip2name_table_chk.'>
   </td>
  <td>
  &nbsp;
@@ -146,47 +159,83 @@ echo '</td>
 			$numrow = 0;
 			$numerror = 0;
 			echo "<h4>LOG OPERATION:</h4>";
+
+
 			while($str = fgets($openfile))
 			{
 				
-					$ipaddress_str = explode($ip2name_separator,$str);
+					$param_str = explode($ip2name_separator,$str);
 
 					
 
 					$aliasname="";
+
+			if($ip2name_table==""){ 
+
 			  #запросим у БД есть ли такой IP. И если есть то возьмём его id
-			  $ipaddress_id=GetIdByIpaddress($globalSS, $ipaddress_str[0]);
+			  $ipaddress_id=GetIdByIpaddress($globalSS, $param_str[0]);
 
 
 			  #ip адрес не найден
 			  if($ipaddress_id == "") {
-				echo "ERROR: $ipaddress_str[0] did not match to any ip in scsq_ipaddress table<br>";
+				echo "ERROR: $param_str[0] did not match to any ip in scsq_ipaddress table<br>";
 				$numerror++;
 				continue;
 			  }
+
+				}
+		
+				if($ip2name_table=="on"){ 
+
+					#запросим у БД есть ли такой Login. И если есть то возьмём его id
+					$login_id=GetIdByLogin($globalSS, $param_str[0]);
+	  
+	  
+					#ip адрес не найден
+					if($login_id == "") {
+					  echo "ERROR: $param_str[0] did not match to any ip in scsq_login table<br>";
+					  $numerror++;
+					  continue;
+					}
+	  
+			  }
 			  
+
+				
 			  $alias_params=array();
 			  
 			  #спецсигнал. сообщим функции, что мы используем её извне.
- 	 	  	  $alias_params['external']=1;
-			  $alias_params['name']=$ipaddress_str[1];
-			  $alias_params['typeid']=1;
-			  $alias_params['tableid']=$ipaddress_id;
+			  $alias_params['external']=1;
 
-			  $alias_params['activeauth']=0;
-			  $alias_params['changepassword']=0;
+			  $alias_params['name']=$param_str[2];
+			  $alias_params['typeid']=($ip2name_table=="")? "1":"0";
+			  $alias_params['tableid']=($ip2name_table=="")? $ipaddress_id:$login_id;
 
+			  $alias_params['activeauth']=$param_str[3];
+			  $alias_params['changepassword']=1;
+			  $alias_params['userlogin'] = $param_str[0];
+			  $alias_params['userpassword'] = $param_str[1];
+			 
 
 			  #запросим у БД есть ли такой алиас
-			  $aliasid = $ipaddress_id != "" ? GetAliasIdByIpaddressId($globalSS, $ipaddress_id) : "";
 
-			  $alias_params['aliasid']=$aliasid; 
+
+		if($ip2name_table==""){ 
+			  $aliasid = $ipaddress_id != "" ? GetAliasIdByIpaddressId($globalSS, $ipaddress_id) : "";
+		}
+
+		if($ip2name_table=="on"){ 
+			$aliasid = $login_id != "" ? GetAliasIdByLoginId($globalSS, $login_id) : "";
+	  }
+
+
+		$alias_params['aliasid']=$aliasid; 
 
 			  $aliasid == "" ? doAliasAdd($globalSS,$alias_params) : doAliasSave($globalSS,$alias_params); 
 
-			  if ($aliasid == "") echo "ADDED: $ipaddress_str[0], $ipaddress_str[1]<br>";  
+			  if ($aliasid == "") echo "ADDED: $param_str[0], $param_str[1]<br>";  
 			  
-			  else echo "UPDATED: $ipaddress_str[0], $ipaddress_str[1] (aliasid = $aliasid)<br>";
+			  else echo "UPDATED: $param_str[0], $param_str[1] (aliasid = $aliasid)<br>";
 
 
 			  $numrow++;

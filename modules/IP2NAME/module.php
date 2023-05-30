@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> module.php </#FN>                                                      
 *                         File Birth   > <!#FB> 2022/11/01 22:02:38.065 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/01 22:10:08.717 </#FT>                                         *
+*                         File Mod     > <!#FT> 2023/05/30 21:05:38.382 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -64,7 +64,8 @@ function __construct($variables){ //
 
 	$UpdateParameters="INSERT INTO scsq_modules_param (id, module, param, val, switch, comment) VALUES
 		(2000,'IP2NAME', 'ip2name_file', 'ip2name_example.csv', 0, 'File to parse'),
-		(2001,'IP2NAME', 'ip2name_separator', ';', 0, 'Field separator')";
+		(2001,'IP2NAME', 'ip2name_separator', ';', 0, 'Field separator'),
+		(2002,'IP2NAME', 'ip2name_table', '0', 1, '0 - ipaddress table, 1 - logins')";
 
 
 
