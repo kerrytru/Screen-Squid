@@ -8302,7 +8302,7 @@ $arrLine1=doGetArrayData($globalSS,$json_result,2);
 $numrow=1;
 while ($numrow<$globalSS['countTopSitesLimit'])
 {
-	if ($arrLine0[$numrow-1]=="") {
+	if ((isset($arrLine0[$numrow-1])) and ($arrLine0[$numrow-1]=="")) {
 		$arrLine0[$numrow-1]="NO DATA";
 		$arrLine1[$numrow-1]=0;
 	}
