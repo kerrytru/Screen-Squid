@@ -454,12 +454,20 @@ foreach (glob("../lib/pChart/pictures/*.png") as $filename) {
    $sqltext="delete from scsq_sqper_trend10 where date<($nowtimestamp-400)";
 doQuery($globalSS, $sqltext);
 
-   $sqltext="select value from (select value,date from scsq_sqper_trend10 where par=1 order by date desc limit 30) as tmp order by date asc";
+if($dbtype==0)#mysql version
+$sqltext="select value,from_unixtime(date,'%H:%i:%s') from (select value,date from scsq_sqper_trend10 where par=1 order by date desc limit 30) as tmp order by date asc";
+
+if($dbtype==1)#postgre version
+$sqltext="select value,to_char(to_timestamp(date),'HH24:MI:SS') from (select value,date from scsq_sqper_trend10 where par=1 order by date desc limit 30) as tmp order by date asc";
+
+
+
 $result=doFetchQuery($globalSS, $sqltext);
 
 $countValues=0;
 foreach ($result as $line) {
 $arrValues[$countValues]=$line[0];
+$arrValues2[$countValues]="$line[1]";
 $countValues++;
 }
 
@@ -475,10 +483,10 @@ if($countValues<2)
 
 #соберем данные для графика
 $userData['charttype']="line";
-$userData['chartname']="trafficbyhours";
+$userData['chartname']="ActiveOnline";
 $userData['charttitle']="";
 $userData['arrSerie1']=$arrValues;
-$userData['arrSerie2']="";
+$userData['arrSerie2']=$arrValues2;
 
 
 //create chart

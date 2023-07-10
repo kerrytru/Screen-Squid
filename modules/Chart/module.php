@@ -74,7 +74,7 @@ function __construct($variables){ //
 
   function writeArraysToFile($userData) #write point arrays to file for external libs
   {
-	  if($userData['charttype']=="line") {
+	  if(($userData['charttype']=="line")&& ($userData['chartname']!="ActiveOnline")) {
 	  #prevent bug with all zeros
 	  #Добавим первый незначащий элемент. Костыль для того, чтобы сдвинуть точку на одну вперёд. Иначе рисует не очень понятно.
 	  array_splice($userData['arrSerie1'],0,0,'0');
@@ -183,10 +183,12 @@ if($graphtype['trafficbyhours']==1)
  
  $DataSet = new pData;
  $DataSet->AddPoint($userData['arrSerie1'],"Serie1");
- $DataSet->AddAllSeries();
- $DataSet->SetAbsciseLabelSerie();
- $DataSet->SetSerieName("Traffic","Serie1");
+ $DataSet->AddPoint($userData['arrSerie2'],"Period");
 
+ $DataSet->AddAllSeries();
+ $DataSet->SetAbsciseLabelSerie("Period");
+ $DataSet->SetSerieName("Traffic","Serie1");
+ 
  // Initialise the graph
  $graphPchart = new pChart(700,230);
  $graphPchart->setFontProperties($this->vars['root_dir']."/modules/Chart/pChart/Fonts/tahoma.ttf",8);
