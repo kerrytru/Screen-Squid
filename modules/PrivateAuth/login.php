@@ -86,7 +86,7 @@ if($pass == md5(md5($_POST['password'])))
 			setcookie("loggedAdm", 1, time()+3600, '/');
 			
 
-			header("Location: ".$globalSS['root_http']."index.php"); exit();
+			header("Location: ".$globalSS['root_http']."/index.php"); exit();
 				
 			}
 

@@ -320,7 +320,7 @@ echo "
 ";
 if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==1)) and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) )
 {
-echo "tree.add(new WebFXTreeItem('Logout','javascript:GoLink(\'".$globalSS['root_http']."modules/PrivateAuth/logout.php\')','','',''));";
+echo "tree.add(new WebFXTreeItem('Logout','javascript:GoLink(\'".$globalSS['root_http']."/modules/PrivateAuth/logout.php\')','','',''));";
 }
 
 

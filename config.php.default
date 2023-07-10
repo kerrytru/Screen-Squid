@@ -136,7 +136,7 @@ function pathUrl($dir = __DIR__){
         $root .= substr($dir, strlen($_SERVER[ 'DOCUMENT_ROOT' ]));
     }
 
-    $root .= '/';
+    #$root .= '/';
 
     return $root;
 }

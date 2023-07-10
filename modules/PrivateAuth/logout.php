@@ -31,5 +31,5 @@ unlink('hash');
 ?>
 
 <script type="text/javascript">
-<?php  echo "window.open('".$globalSS['root_http']."index.php','_parent');";?>
+<?php  echo "window.open('".$globalSS['root_http']."/index.php','_parent');";?>
 </script>
