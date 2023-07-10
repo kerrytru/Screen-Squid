@@ -323,7 +323,7 @@
 				if($passlb==1)
 					echo '<img src="images/true.gif" alt="Success" title="Success" />';
 				else
-					echo '<img src="images/yellow.gif" alt="Failed" title="Failed" />';
+					echo '<img src="images/yellow.gif" alt="Attention" title="Attention" />';
 				
 				?>
 			</td>
