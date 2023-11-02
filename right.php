@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/15 12:25:25.748 </#FT>                                         *
+*                         File Mod     > <!#FT> 2023/11/02 21:48:23.955 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.10.1 </#FV>                                                           
+*                         File Version > <!#FV> 1.11.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -389,7 +389,7 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
 ///SQL querys
 
               if($typeid==0)
-                $queryForFindstr="select name,id from (select name,id from scsq_logins where name like '%".$findstr."%') as tmp where tmp.id NOT IN (".$globalSS['goodLoginsList'].") order by name asc;";
+                $queryForFindstr="select name,id from (select name,id from scsq_logins where lower(name) like lower('%".$findstr."%')) as tmp where tmp.id NOT IN (".$globalSS['goodLoginsList'].") order by name asc;";
               
               if($typeid==1)
                 $queryForFindstr="select name,id from (select name,id from scsq_ipaddress where name like '%".$findstr."%') as tmp where tmp.id NOT IN (".$globalSS['goodIpaddressList'].") order by name asc;";
