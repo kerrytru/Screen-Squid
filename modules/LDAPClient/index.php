@@ -110,6 +110,8 @@ $goodLoginsList=doCreateFriendList($globalSS,'logins');
 $goodIpaddressList=doCreateFriendList($globalSS,'ipaddress');
 $goodSitesList = doCreateSitesList($globalSS);
 
+
+
 echo "<h3>Config module</h3>";
 
 
@@ -171,6 +173,11 @@ echo '</td>
 
         $queryAllLogins="select id,name from scsq_logins  where id NOT IN ('".$goodLoginsList."') order by name asc;";
  
+		#fix for goodLoginsList - delete ' from list (very strange bug)
+
+		$queryAllLogins = str_replace("'","", $queryAllLogins);
+
+
 
 
             if(!isset($_GET['actid'])) {
