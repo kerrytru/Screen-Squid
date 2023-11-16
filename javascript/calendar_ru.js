@@ -87,7 +87,7 @@ function Top(obj)
 
 
 
-    document.write('<table id="fc" style="position:absolute;border-collapse:collapse;background:#FFFFFF;border:1px solid #FFD088;display:none;-moz-user-select:none;-khtml-user-select:none;user-select:none;" cellpadding="2">');
+    document.write('<table id="fc" style="z-index:5;position:absolute;border-collapse:collapse;background:#FFFFFF;border:1px solid #FFD088;display:none;-moz-user-select:none;-khtml-user-select:none;user-select:none;" cellpadding="2">');
     document.write('<tr style="font:bold 13px Arial" onselectstart="return false"><td style="cursor:pointer;font-size:15px" onclick="upmonth(-1)">&laquo;</td><td colspan="5" id="mns" align="center"></td><td align="right" style="cursor:pointer;font-size:15px" onclick="upmonth(1)">&raquo;</td></tr>');
     document.write('<tr style="background:#FF9900;font:12px Arial;color:#FFFFFF"><td align=center>'+a_dayname[0]+'</td><td align=center>'+a_dayname[1]+'</td><td align=center>'+a_dayname[2]+'</td><td align=center>'+a_dayname[3]+'</td><td align=center>'+a_dayname[4]+'</td><td align=center>'+a_dayname[5]+'</td><td align=center>'+a_dayname[6]+'</td></tr>');
     for(var kk=1;kk<=6;kk++) {
