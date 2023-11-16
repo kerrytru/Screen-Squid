@@ -179,6 +179,10 @@ if($graphtype['trafficbyhours']==1)
 //pChart Graph 
  // Dataset definition 
  
+ if($userData['arrSerie2'] == "")
+ $userData['arrSerie2'] = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23);
+
+
  if($userData['charttype']=="line"){
  
  $DataSet = new pData;
@@ -188,7 +192,8 @@ if($graphtype['trafficbyhours']==1)
  $DataSet->AddAllSeries();
  $DataSet->SetAbsciseLabelSerie("Period");
  $DataSet->SetSerieName("Traffic","Serie1");
- 
+ $DataSet->RemoveSerie("Period");
+
  // Initialise the graph
  $graphPchart = new pChart(700,230);
  $graphPchart->setFontProperties($this->vars['root_dir']."/modules/Chart/pChart/Fonts/tahoma.ttf",8);
