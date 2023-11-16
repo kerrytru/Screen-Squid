@@ -62,6 +62,7 @@ $colftext[25]="total_column_byte";
 $colftext[26]="total_column_byte";
 
 
+
 $colh[0]=26;
 $colh[1]="<th class=unsortable>".$colhtext[1]."</th>";
 $colh[2]="<th>".$colhtext[2]."</th>";
@@ -89,6 +90,7 @@ $colh[23]="<th>".$colhtext[23]."</th>";
 $colh[24]="<th>".$colhtext[24]."</th>";
 $colh[25]="<th>".$colhtext[25]."</th>";
 $colh[26]="<th>".$colhtext[26]."</th>";
+
 
 
 $colr[1]="<td>numrow</td>";
@@ -120,10 +122,10 @@ $colr[20]="<td>line19</td>";
 $colr[21]="<td>line20</td>";
 $colr[22]="<td>line21</td>";
 $colr[23]="<td>line22</td>";
-$colr[23]="<td>line23</td>";
-$colr[24]="<td>line24</td>";
-$colr[25]="<td>line25</td>";
-$colr[26]="<td>line26</td>";
+$colr[24]="<td>line23</td>";
+$colr[25]="<td>line24</td>";
+$colr[26]="<td>line25</td>";
+
 
 $colf[1]="<td>".$colftext[1]."</td>";
 $colf[2]="<td><b>".$colftext[2]."</b></td>";
@@ -151,5 +153,6 @@ $colf[23]="<td><b>".$colftext[23]."</b></td>";
 $colf[24]="<td><b>".$colftext[24]."</b></td>";
 $colf[25]="<td><b>".$colftext[25]."</b></td>";
 $colf[26]="<td><b>".$colftext[26]."</b></td>";
+
 
 ?>

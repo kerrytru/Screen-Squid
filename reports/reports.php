@@ -78,6 +78,8 @@ if(isset($_REQUEST['date2'])) $querydate2=$_REQUEST['date2']; else $querydate2="
 list($day,$month,$year) = preg_split('/[\/\.-]+/', $querydate);
 
 
+
+
 //id типа сайта 1 - 10.102.10.22, 2 - www.yandex.ru
   if(isset($_GET['sitetypeid']))	$currentsitetypeid=$_GET['sitetypeid']; else $currentsitetypeid="";
 
@@ -198,6 +200,12 @@ if(!isset($_GET['pdf']) && !isset($_GET['csv'])) {
 
 <script language=JavaScript>
 
+function changeDate(date){
+	
+	document.getElementById("date").value = date;
+
+	document.getElementById('dateSubmit').click();
+}
 
 
 //переход к частным отчетам по логину, IP адресу или ещё чему
@@ -7078,9 +7086,12 @@ echo '<form name=fastdateswitch_form action="reports.php?'.$dfltAction.'" method
 <tr>
 	<td><?php echo $_lang['stFASTDATESWITCH']?></td>
 	<td>
-<input type="text" name=date value="<?php echo $querydate;?>"  onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">
-<input type="text" name=date2 value="<?php echo $querydate2;?>" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;&nbsp;
-<input type="submit" value="GO">&nbsp;&nbsp;
+<input type="text" id="date" name="date" value="<?php echo $querydate;?>"  onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">
+<input type="text" id="date2" name="date2" value="<?php echo $querydate2;?>" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;&nbsp;
+<input id="dateSubmit" type="submit" value="GO">&nbsp;&nbsp;
+<button type="button" id="dateBackward"  onclick="changeDate('<?php echo date("d-m-Y",strtotime($querydate. " - 1 day")); ?>');" ><<</button>
+<button type="button" id="dateForward"  onclick="changeDate('<?php echo date("d-m-Y",strtotime($querydate. " + 1 day")); ?>');" >>></button>
+            
 
 	&nbsp;&nbsp;
 
