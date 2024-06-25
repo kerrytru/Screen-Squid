@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.misc.php </#FN>                                               
 *                         File Birth   > <!#FB> 2021/12/06 23:17:52.156 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/01 22:11:32.695 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 22:16:38.090 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.8.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.9.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -1103,6 +1103,29 @@ function GetAliasIdByLoginId($globalSS,$login_id) #по login_id получае�
 	  return isset($result[0]) ? $result[0] : "" ;
 
 
+}
+
+
+function GetDirectorySize($path){
+  $bytestotal = 0;
+  $path = realpath($path);
+  if($path!==false && $path!='' && file_exists($path)){
+      foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)) as $object){
+          $bytestotal += $object->getSize();
+      }
+  }
+  return $bytestotal;
+}
+
+function DeleteAllFilesFromDirectory($path){
+ 
+  $path = realpath($path);
+  $files = glob($path.'/*'); // get all file names
+  foreach($files as $file){ // iterate files
+    if(is_file($file)) {
+      unlink($file); // delete file
+    }
+  }
 }
 
 

@@ -70,7 +70,15 @@ if(isset($_GET['act_id']))
       doSetParam($globalSS,'Cache','enabled',$_POST['param_enabled']);
     }
 
+    if($_GET['act_id']==5) 
+    {
+     
+      DeleteAllFilesFromDirectory($globalSS['root_dir']."/modules/Cache/data/");
+    }
+
+
 }
+
 
 
 $start=microtime(true);
@@ -91,6 +99,14 @@ echo '<tr><td>1</td><td>Enabled</td><td><input class=toggle-button type=checkbox
 echo '<tr><td colspan=3><input type=submit value=Save></td></tr>';
 echo '</table>';
 echo '</form>';
+
+echo '<br>';
+
+echo 'Cached content (bytes): ';
+echo GetDirectorySize($globalSS['root_dir']."/modules/Cache/data/");
+echo '<br><br><a href=?act_id=5>Clear cache</a>';
+
+
 
 
 $end=microtime(true);
