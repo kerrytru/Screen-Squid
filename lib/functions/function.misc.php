@@ -130,6 +130,7 @@ function doCreateGetArray($globalSS){
     #дату не будем записывать предварительно
     if($val=="date") continue;
     if($val=="date2") continue;
+    if($val=="clearcache") continue;
 
     $retarray[$i]=$val."=".$key;
     $i++;

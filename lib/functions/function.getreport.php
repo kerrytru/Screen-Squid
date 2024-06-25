@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.getreport.php </#FN>                                          
 *                         File Birth   > <!#FB> 2021/12/06 22:19:13.464 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/11/08 23:15:31.369 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 22:16:25.416 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -81,9 +81,32 @@ if(!file_exists ("".$globalSS['root_dir']."/modules/Cache/data/".$report_file_na
     #Запишем данные в файл, если включен модуль кэширования.
     if(doGetParam($globalSS,'Cache','enabled') == 'on')
         doWriteJsonToFile($globalSS,$result_data_json,$report_file_name);
+
+    echo "".$globalSS['root_dir']."/modules/Cache/data/".$report_file_name;
 }
 else
 {
+
+    #если данные уже были в кэше, а обновлений лога не было - то вряд ли что-то поменялось. Иначе переформируем файл.
+    $lastFetchDate=doFetchOneQuery($globalSS,"select max(datestart) from scsq_logtable where message like '%records_counted%';");
+
+
+
+ 
+    if((filemtime("".$globalSS['root_dir']."/modules/Cache/data/".$report_file_name)<$lastFetchDate[0])
+    and (strtotime(date($globalSS['params']['date'])) >= strtotime(date('Y-m-d'))))
+ 
+        {    $json_result=json_encode(doFetchQuery($globalSS,$query));
+    
+            #Преобразуем данные в таблицу
+            $result_data_json=doPrepareTable($globalSS,$json_result,$colh,$colr,$colf);
+            
+            #Запишем данные в файл, если включен модуль кэширования.
+            if(doGetParam($globalSS,'Cache','enabled') == 'on')
+                doWriteJsonToFile($globalSS,$result_data_json,$report_file_name);
+        }
+    else
+
     #если данные уже есть в кэше, то просто считаем их.
     $result_data_json=file_get_contents("".$globalSS['root_dir']."/modules/Cache/data/".$report_file_name);
 }
