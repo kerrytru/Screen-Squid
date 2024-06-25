@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/09/28 22:01:17.324 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/10 22:00:41.088 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 20:57:55.060 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -32,10 +32,7 @@ else
 include("../../config.php");
 
 #если нет авторизации, сразу выходим
-if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) 
-	and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) 
-	and (!file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/hash"))
-	)
+if (!isAuth()) 
 {
 	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
 }

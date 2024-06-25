@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/04/11 23:57:47.370 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/22 21:41:06.860 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 20:56:41.440 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.0.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -27,20 +27,17 @@ if(isset($_GET['srv']))
 else
   $srv=0;
 
-include("../../config.php");
+include_once("../../config.php");
 
-#если нет авторизации, сразу выходим
-if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) 
-	and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) 
-	and (!file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/hash"))
-	)
-{
-	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
-}
+	#если нет авторизации, сразу выходим
+  if (!isAuth())
+  {
+    header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
+  }
+
 
 $language=$globalSS['language'];
 
-include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
 
 include("module.php");
 include_once("../../lang/$language");
@@ -120,7 +117,7 @@ $newdate=date("d-m-Y",$newdate);
 
 ?>
 <form name=fastdateswitch_form>
-    <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
+   
 
     </form>
 </body>

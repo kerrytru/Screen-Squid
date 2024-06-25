@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> login.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/11/02 23:11:12.035 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/18 22:15:55.249 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 20:56:59.847 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.0.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -42,7 +42,7 @@ function generateCode($length=6) {
 }
 
 
-include("../../config.php");
+include_once("../../config.php");
 
 $start=microtime(true);
 
@@ -65,7 +65,11 @@ if(isset($_POST['submit']))
 
 {
 
-$pass=file_get_contents("".$globalSS['root_dir']."/modules/PrivateAuth/pass");
+	$query = "SELECT id, login, pass FROM scsq_users WHERE login='".$_POST['userlogin']."' LIMIT 1";
+	
+	
+	$row=doFetchOneQuery($globalSS, $query);
+$pass=$row[2];
 
 //if($pass == md5(md5($_POST['password'])) && $row[2] == 1 && $row[0]>0)
 
@@ -76,17 +80,28 @@ if($pass == md5(md5($_POST['password'])))
 			$hash = md5(generateCode(10));	
 			# set cookie
 
-			$message['message']="PRIVATEAUTH INFO: Client IP = ".$_SERVER['REMOTE_ADDR']." succesfully auth.";
+			$message['message']="PRIVATEAUTH INFO: Client IP = ".$_SERVER['REMOTE_ADDR']." succesfully auth LOGIN ".$_POST['userlogin'].".";
 			doWriteToLogTable($globalSS,$message);
 
+			$session_data = array();
 
+			$session_data['hash']=$hash;
+			$session_data['user_login']=$row[1];
+			$session_data['client_address']=$_SERVER['REMOTE_ADDR'];
+			$session_data['session_start']=microtime(true);
+
+			$json_session_data=json_encode($session_data);
 			#запишем хэш в файл.
-			file_put_contents('hash',$hash);
+			file_put_contents('hash/'.$hash,$json_session_data);
 
-			setcookie("loggedAdm", 1, time()+3600, '/');
-			
+			$_SESSION['user_id']=$row[0];
+			$_SESSION['user_login']=$row[1];
+			$_SESSION['scsq_hash']=$hash;
 
-			header("Location: ".$globalSS['root_http']."/index.php"); exit();
+
+		
+
+			header("Location: ".$globalSS['root_http']."index.php"); exit();
 				
 			}
 
@@ -96,7 +111,7 @@ if($pass == md5(md5($_POST['password'])))
 
 		    {
 			//wrong password
-			$message['message']="PRIVATEAUTH INFO: Client IP = ".$_SERVER['REMOTE_ADDR']." ERROR AUTH.";
+			$message['message']="PRIVATEAUTH INFO: Client IP = ".$_SERVER['REMOTE_ADDR']." ERROR AUTH LOGIN ".$_POST['userlogin'].".";
 			doWriteToLogTable($globalSS,$message);
 			echo "<script> alert('".$_lang['stAUTHFAIL']."')</script>";
 			
@@ -121,7 +136,7 @@ if($pass == md5(md5($_POST['password'])))
 
 	
 			<header align="center">
-				<div id="logo"><img src="img/logo.png" style="width: 116px; height: auto;" align="left"></div>
+				
 				
 				<h1>
 					<?php echo $_lang['stLOGINTOADMIN'];?>
@@ -142,6 +157,9 @@ if($pass == md5(md5($_POST['password'])))
 			<div id="login" align="center">
 			<form action="login.php" id="form_login" name="form_login" method="POST">
 				<fieldset>
+			
+					<p><input type="hidden" name="userlogin" id="email" value="admin" onblur="if(this.value=='')this.value='<?php echo $_lang['stUSERLOGIN'];?>'" onfocus="if(this.value=='<?php echo $_lang['stUSERLOGIN'];?>')this.value=''"></p>
+
 					<p><label for="password"><?php echo $_lang['stUSERPASSWORD'];?>:</label></p>
 					<p><input type="password" id="password" name="password" value="<?php echo $_lang['stUSERPASSWORD'];?>" onblur="if(this.value=='')this.value='<?php echo $_lang['stUSERPASSWORD'];?>'" onfocus="if(this.value=='<?php echo $_lang['stUSERPASSWORD'];?>')this.value=''"></p> 
 					<br>

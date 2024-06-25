@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> module.php </#FN>                                                      
 *                         File Birth   > <!#FB> 2022/04/11 23:57:47.356 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/09/20 21:26:18.829 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 19:40:39.564 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.0.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -30,7 +30,7 @@ function __construct($variables){ //
     $this->vars = $variables;
     	
 	include_once(''.$this->vars['root_dir'].'/lib/functions/function.database.php');
-	include_once(''.$this->vars['root_dir'].'/lib/functions/function.modules.php');
+
 
 	if (file_exists("langs/".$this->vars['language']))
 		include("langs/".$this->vars['language']);  #подтянем файл языка если это возможно
@@ -51,14 +51,20 @@ function __construct($variables){ //
   function SetPassword($password){
 	$passhash=md5(md5($password));
 
-	if(file_put_contents('pass',$passhash)) echo "<script language=javascript>alert('Password is setted')</script>";
+	$queryUpdate="UPDATE scsq_users SET pass='".$passhash."' WHERE login='admin'";
+
+	if(doQuery($this->vars,$queryUpdate)) echo "<script language=javascript>alert('Password is setted')</script>";
 		else
 			echo "<script language=javascript>alert('Password not setted')</script>";
   }
 
   #Функция сброса пароля
   function ClearPassword(){
-	if(unlink('pass')) echo "<script language=javascript>alert('Password cleared')</script>";
+	$passhash=md5(md5("admin"));
+
+	$queryUpdate="UPDATE scsq_users SET pass='".$passhash."' where login='admin'";
+
+	if(doQuery($this->vars,$queryUpdate)) echo "<script language=javascript>alert('Password cleared')</script>";
 		else echo "<script language=javascript>alert('Password not cleared')</script>";
   }
 
@@ -66,13 +72,16 @@ function __construct($variables){ //
 
   function Install()
   	{
-	echo "<script language=javascript>alert('This is system module, its already installed')</script>";
+		file_put_contents(__DIR__.'/enabled','1');
+		
+	echo "<script language=javascript>alert('Installed')</script>";
 
 	 }
   
  function Uninstall() 
   {
-	echo "<script language=javascript>alert('This is system module, you cant uninstall it')</script>";
+	unlink(__DIR__.'/enabled');
+	echo "<script language=javascript>alert('Uninstalled')</script>";
 
   }
 

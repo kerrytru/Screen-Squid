@@ -222,6 +222,21 @@ CREATE TABLE IF NOT EXISTS `scsq_modules_param` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+
+CREATE TABLE IF NOT EXISTS `scsq_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `login` varchar(100) DEFAULT NULL,
+  `pass` varchar(100) DEFAULT NULL,
+  `active` int(11) NOT NULL DEFAULT 0,
+  `email` varchar(200) DEFAULT NULL,
+  `hash` varchar(100) DEFAULT NULL,
+  `comment` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `scsq_users` (`id`, `login`, `pass`, `active`, `email`, `hash`, `comment`) VALUES
+(1, 'admin', 'c3284d0f94606de1fd2af172aba15bf3', 1, NULL, NULL, NULL);
+
 --
 -- Dumping data for table `scsq_modules_param`
 --

@@ -293,6 +293,25 @@ WITH (
 ALTER TABLE scsq_sqper_trend10
   OWNER TO postgres;
 
+
+
+CREATE TABLE IF NOT EXISTS scsq_users (
+  id serial NOT NULL,
+  login varchar(100) DEFAULT NULL,
+  pass varchar(100) DEFAULT NULL,
+  active int(11) NOT NULL DEFAULT 0,
+  email varchar(200) DEFAULT NULL,
+  hash varchar(100) DEFAULT NULL,
+  comment varchar(200) DEFAULT NULL,
+  CONSTRAINT scsq_users_pkey PRIMARY KEY (id)
+) 
+
+ALTER TABLE scsq_users
+  OWNER TO postgres;
+
+INSERT INTO `scsq_users` (`id`, `login`, `pass`, `active`, `email`, `hash`, `comment`) VALUES
+(1, 'admin', 'c3284d0f94606de1fd2af172aba15bf3', 1, NULL, NULL, NULL);
+
 --
 -- Table structure for table scsq_modules_param
 --

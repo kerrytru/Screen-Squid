@@ -6,6 +6,8 @@ $_lang['stMODULEDESC'] = "Модуль авторизации";
 
 $_lang['stLOGINTOADMIN'] = "Войти";
 
+
+
 $_lang['stINSTALLED']="Установлено";
 $_lang['stUNINSTALLED']="Удалено";
 
