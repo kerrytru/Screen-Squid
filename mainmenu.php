@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
-*                         File Mod     > <!#FT> 2023/03/24 21:35:39.087 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 20:54:00.398 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.7.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -26,10 +26,7 @@
 include("config.php");
 
 #если нет авторизации, сразу выходим
-if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) 
-	and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) 
-	and (!file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/hash"))
-	)
+if (!isAuth()) 
 {
 	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
 }
@@ -274,6 +271,8 @@ echo "rootproxy.add(new WebFXTreeItem('".$_lang['stCONFIG']."','javascript:GoRig
 ";
 echo "rootproxy.add(modulemanager);";
 
+
+
 //При включенном дебаге покажем страницу теста для диагностики подключения к кэшменеджеру например.
 if($globalSS['debug']==1) {
 	echo "
@@ -318,7 +317,7 @@ echo "
     tree.add(new WebFXTreeItem('DONATE','javascript:GoInternetLink(\'https://sobe.ru/na/na_novuyu_versiyu_screen_squid\')','','',''));
     tree.add(new WebFXTreeItem('Wiki','javascript:GoInternetLink(\'https://sourceforge.net/p/screen-squid/wiki/Home/\')','','',''));
 ";
-if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==1)) and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) )
+if ((file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/enabled")) )
 {
 echo "tree.add(new WebFXTreeItem('Logout','javascript:GoLink(\'".$globalSS['root_http']."/modules/PrivateAuth/logout.php\')','','',''));";
 }

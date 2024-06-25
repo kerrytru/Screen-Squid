@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2023/11/02 21:48:23.955 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 20:54:08.894 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.11.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.12.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -23,11 +23,8 @@
   
   include("config.php");
 
-  #если нет авторизации, сразу выходим
-  if ((!isset($_COOKIE['loggedAdm'])or($_COOKIE['loggedAdm']==0)) 
-	and (file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/pass")) 
-	and (!file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/hash"))
-	)
+ #если нет авторизации, сразу выходим
+if (!isAuth()) 
 {
 	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
 }
