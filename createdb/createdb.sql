@@ -242,7 +242,7 @@ INSERT INTO `scsq_users` (`id`, `login`, `pass`, `active`, `email`, `hash`, `com
 --
 
 INSERT INTO `scsq_modules_param` (`id`, `module`, `param`, `val`, `switch`, `comment`) VALUES
-(1, 'Cache', 'enabled', '', 1, 'Enable module'),
+(1, 'Cache', 'enabled', 'on', 1, 'Enable module'),
 (2, 'Global', 'language', 'en', 0, 'Global language'),
 (3, 'Global', 'useLoginalias', '', 1, 'Use login alias'),
 (4, 'Global', 'useIpaddressalias', 'on', 1, 'Use ip address alias'),
