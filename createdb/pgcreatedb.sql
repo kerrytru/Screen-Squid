@@ -1,7 +1,7 @@
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_alias`
+-- Table structure for table scsq_alias
 --
 
 CREATE TABLE IF NOT EXISTS scsq_alias
@@ -25,7 +25,7 @@ ALTER TABLE scsq_alias
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_aliasingroups`
+-- Table structure for table scsq_aliasingroups
 --
 
 CREATE TABLE IF NOT EXISTS scsq_aliasingroups
@@ -44,7 +44,7 @@ ALTER TABLE scsq_aliasingroups
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_groups`
+-- Table structure for table scsq_groups
 --
 
 CREATE TABLE IF NOT EXISTS scsq_groups
@@ -69,7 +69,7 @@ ALTER TABLE scsq_groups
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_httpstatus`
+-- Table structure for table scsq_httpstatus
 --
 
 CREATE TABLE IF NOT EXISTS scsq_httpstatus
@@ -87,7 +87,7 @@ ALTER TABLE scsq_httpstatus
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_ipaddress`
+-- Table structure for table scsq_ipaddress
 --
 
 CREATE TABLE IF NOT EXISTS scsq_ipaddress
@@ -105,7 +105,7 @@ ALTER TABLE scsq_ipaddress
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_logins`
+-- Table structure for table scsq_logins
 --
 
 CREATE TABLE IF NOT EXISTS scsq_logins
@@ -123,7 +123,7 @@ ALTER TABLE scsq_logins
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_logtable`
+-- Table structure for table scsq_logtable
 --
 
 CREATE TABLE IF NOT EXISTS scsq_logtable
@@ -143,7 +143,7 @@ ALTER TABLE scsq_logtable
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_quicktraffic`
+-- Table structure for table scsq_quicktraffic
 --
 
 CREATE TABLE IF NOT EXISTS scsq_quicktraffic
@@ -173,7 +173,7 @@ CREATE INDEX scsq_quicktraffic_date_idx
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_temptraffic`
+-- Table structure for table scsq_temptraffic
 --
 
 CREATE TABLE IF NOT EXISTS scsq_temptraffic
@@ -199,7 +199,7 @@ ALTER TABLE scsq_temptraffic
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scsq_traffic`
+-- Table structure for table scsq_traffic
 --
 
 CREATE TABLE IF NOT EXISTS scsq_traffic
@@ -231,7 +231,7 @@ CREATE INDEX scsq_traffic_date_idx
 
 -- --------------------------------------------------------
 --
--- Table structure for table `scsq_modules`
+-- Table structure for table scsq_modules
 --
 
 CREATE TABLE IF NOT EXISTS scsq_modules
@@ -297,19 +297,19 @@ ALTER TABLE scsq_sqper_trend10
 
 CREATE TABLE IF NOT EXISTS scsq_users (
   id serial NOT NULL,
-  login varchar(100) DEFAULT NULL,
-  pass varchar(100) DEFAULT NULL,
-  active int(11) NOT NULL DEFAULT 0,
-  email varchar(200) DEFAULT NULL,
-  hash varchar(100) DEFAULT NULL,
-  comment varchar(200) DEFAULT NULL,
+  login text DEFAULT NULL,
+  pass text DEFAULT NULL,
+  active integer NOT NULL DEFAULT 0,
+  email text DEFAULT NULL,
+  hash text DEFAULT NULL,
+  comment text DEFAULT NULL,
   CONSTRAINT scsq_users_pkey PRIMARY KEY (id)
-) 
+) ;
 
 ALTER TABLE scsq_users
   OWNER TO postgres;
 
-INSERT INTO `scsq_users` (`id`, `login`, `pass`, `active`, `email`, `hash`, `comment`) VALUES
+INSERT INTO scsq_users (id, login, pass, active, email, hash, comment) VALUES
 (1, 'admin', 'c3284d0f94606de1fd2af172aba15bf3', 1, NULL, NULL, NULL);
 
 --
