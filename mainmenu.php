@@ -50,7 +50,7 @@ function TwoByOne(frame1, frame2)
 parent.left.location.href=frame1;
 parent.right.location.href=frame2;
 }
-
+//надо добавить опциональный переход по actid
 //Функция перехода по меню
 function GoReport(srv,id)
 {
@@ -68,9 +68,14 @@ else
 }
 
 
-function GoRightReport(srv,id)
+function GoRightReport(srv,id, actid=0)
 {
-parent.right.location.href='right.php?srv='+srv+'&id='+id;
+
+	if(actid==0)
+		parent.right.location.href='right.php?srv='+srv+'&id='+id;
+	else
+		parent.right.location.href='right.php?srv='+srv+'&id='+id+'&actid='+actid;
+
 }
 
 function GoLink(dest_link,dest_target)
@@ -88,7 +93,10 @@ function GoOnlineReport(srv,id)
 parent.right.location.href='reports/oreports.php?srv='+srv+'&id='+id;
 }
 
-
+function GoDicts(srv,id,dname)
+{
+parent.right.location.href='right.php?srv='+srv+'&id='+id+'&dname='+dname;
+}
 
 
 </script>
@@ -235,9 +243,19 @@ echo "
 
 //Misc
 //internal module
-var dictmodule = new WebFXTreeItem('".$_lang['stDICTIONARY']."');
-dictmodule.add(new WebFXTreeItem('".$_lang['stLOGINS']."','javascript:GoLink(\'modules/dictionary/index.php?srv=".$srv."&id=1\',\'right\')','','img/themes/default/User.png','img/themes/default/User.png'));
-dictmodule.add(new WebFXTreeItem('".$_lang['stIPADDRESS']."','javascript:GoLink(\'modules/dictionary/index.php?srv=".$srv."&id=2\',\'right\')','','img/themes/default/User.png','img/themes/default/User.png'));
+
+var dictmodule = new WebFXTreeItem('".$_lang['stDICTIONARY']."','javascript:GoRightReport(".$srv.",10,10)','','img/themes/default/Nodes.png','img/themes/default/Nodes.png');
+";
+$sqlquery="select field_dictrealname, field_dictname from scsq_dicts";
+$result=doFetchQuery($globalSS,$sqlquery);
+
+foreach($result as $line)
+echo "dictmodule.add(new WebFXTreeItem('".$_lang[$line[1]]."','javascript:GoDicts(".$srv.",10,\'".$line[1]."\')','','img/themes/default/User.png','img/themes/default/User.png'));";
+
+//echo "dictmodule.add(new WebFXTreeItem('".$line[0]."','javascript:GoDicts(".$srv.",10,'".$line[1]."')','','img/themes/default/User.png','img/themes/default/User.png'));";
+
+
+echo "
 
 dictmodule.add(new WebFXTreeItem('".$_lang['stALIASES']."','javascript:GoRightReport(".$srv.",2)','','img/themes/default/Users.png','img/themes/default/Users.png'));
 dictmodule.add(new WebFXTreeItem('".$_lang['stGROUPS']."','javascript:GoRightReport(".$srv.",3)','','img/themes/default/UserGroups.png','img/themes/default/UserGroups.png'));

@@ -82,7 +82,7 @@ if(!file_exists ("".$globalSS['root_dir']."/modules/Cache/data/".$report_file_na
     if(doGetParam($globalSS,'Cache','enabled') == 'on')
         doWriteJsonToFile($globalSS,$result_data_json,$report_file_name);
 
-    echo "".$globalSS['root_dir']."/modules/Cache/data/".$report_file_name;
+//    echo "".$globalSS['root_dir']."/modules/Cache/data/".$report_file_name;
 }
 else
 {
@@ -270,6 +270,63 @@ function doMakeCSV($globalSS, $json_result) {
 
 }
 
+function doMakeCSV2($globalSS, $json_result) {
+
+    $json = json_decode($json_result);
+
+    
+    //Так как данные уже готовы, то мы просто чистим от тэгов и заполняем файл заголовки, обозначаем, 
+    //что сейчас будет строка и пишем как есть.
+
+/// GENERATE CSV FILE
+
+   $row_line_arr = array();    
+
+
+    if(!isset($_REQUEST['external'])) {
+        header("Content-Type:application/csv"); 
+        header("Content-Disposition:attachment;filename=report.csv"); 
+        echo "\xEF\xBB\xBF"; // UTF-8 BOM
+    
+      $fp = fopen("php://output",'w') or die("Can't open php://output");
+    }
+    else
+    {
+         $fp = fopen("".$globalSS['root_dir']."/modules/ExportRep/output/".$report_file_name.".csv",'w') or die("Can't open new file");
+         fprintf($fp, "\xEF\xBB\xBF"); // UTF-8 BOM
+    }    
+    $numrow=1;
+    foreach ($json as $row)
+    {
+        $j=0;
+        $k=0;
+       
+        #   
+        foreach ($row as $row_item) {
+        
+            if($j==0) 
+                $row_line_arr[$j]=$numrow;    
+            
+            else {
+            $row_line_arr[$j]=strip_tags($row_item);
+            if(is_numeric($row_line_arr[$j])) { 
+                $row_line_arr[$j]= str_replace('.',$globalSS['csv_decimalSymbol'],$row_line_arr[$j]);
+                $row_line_arr[$j]= str_replace(',',$globalSS['csv_decimalSymbol'],$row_line_arr[$j]); 
+                }
+            }
+            $j++;
+            
+            
+            
+        }
+        $numrow++;
+        fputcsv($fp, $row_line_arr);
+    }
+    fclose($fp) or die("Can't close php://output");
+    return;
+
+}
+
 function doMakePDF($globalSS,$json_result) {
 
     $json = json_decode($json_result);
@@ -374,7 +431,8 @@ function doGetStatistics($globalSS) {
     if($globalSS['connectionParams']['dbtype']==1) #postgres 
     $queryMinMaxDateTraffic="select to_char(to_timestamp(t.mindate),'DD-MM-YYYY HH24:MI:SS'),to_char(to_timestamp(t.maxdate),'DD-MM-YYYY HH24:MI:SS') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
     
-    
+    $queryCountRowsTraffic="
+SELECT reltuples::bigint FROM pg_class WHERE relname = 'scsq_traffic';";
     $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic where par=1";
     $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
     $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
