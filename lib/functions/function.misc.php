@@ -106,6 +106,27 @@ if($whatTable == "traffic")
 
 }
 
+#составим список  учитываемых сайтов
+function doCreateFilterGoodSitesList($globalSS,$whatTable){
+
+  if($globalSS['enableNoSites'] == "0") return "";
+
+  if($globalSS['goodSites'] == "") return "";
+
+
+  $sitesTmp=implode("','",explode(" ", $globalSS['goodSites']));
+  $sitesTmp="'".$sitesTmp."'";
+
+if($whatTable == "quick")
+  $sitesTmp = "AND scsq_quicktraffic.site not in (".$sitesTmp.")";
+if($whatTable == "traffic")
+  $sitesTmp = "AND scsq_traffic.site not in (".$sitesTmp.")";
+
+
+  return $sitesTmp;
+
+}
+
 #составим фильтр по размеру учитываемого трафика
 function doCreateFilterSizeinbytes($globalSS){
 
@@ -131,6 +152,7 @@ function doCreateGetArray($globalSS){
     if($val=="date") continue;
     if($val=="date2") continue;
     if($val=="clearcache") continue;
+    if($val=="csv") continue;
 
     $retarray[$i]=$val."=".$key;
     $i++;
