@@ -501,4 +501,13 @@ body {
   padding-bottom: 90vh;
 }
 
+
+table.datatable tr.shown, tr.hidden {
+  background-color: #eee;
+  display: table-row;
+}
+
+table.datatable tr.hidden {
+  display: none;
+}
 /*приклеим header таблицы при промотке end*/

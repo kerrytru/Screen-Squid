@@ -35,7 +35,11 @@ if (!isAuth())
   $globalSS['goodSitesList'] = doCreateSitesList($globalSS);
 
   $dbtype = $globalSS['connectionParams']['dbtype'];
+
+  if(!isset($_GET['csv'])) {
+
 ?>
+
 
 <html>
 <head>
@@ -48,6 +52,7 @@ if (!isAuth())
 <body>
 
 <script type="text/javascript" src="javascript/sortable.js"></script>
+<script type="text/javascript" src="javascript/misc.js"></script>
 <script language=javascript>
 
 function switchTables()
@@ -91,49 +96,12 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&'+ret;
 }
 
 
-function QuickFinder(v_type) {
-  // Объявить переменные
-  var input, filter, table, tr, td, i, txtValue;
-  input = document.getElementById("QInput");
-  filter = input.value.toUpperCase();
-
-  if(v_type=="alias") {
-    if (document.getElementById("loginsTable").style.display == "table" ) {
-    table = document.getElementById("loginsTable");
-  }
-  
-  if (document.getElementById("ipaddressTable").style.display == "table" ) {
-    table = document.getElementById("ipaddressTable");
-  }
-
-}
-
-if(v_type=="group") {
-    table = document.getElementById("aliasTable");
-}
-  
-    
-  tr = table.getElementsByTagName("tr");
-
-  // Перебирайте все строки таблицы и скрывайте тех, кто не соответствует поисковому запросу
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName("td")[1];
-    if (td) {
-      txtValue = td.textContent || td.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
-    }
-  }
-}
-
 </script>
 
 
 <?php
 
+} //if isset($_GET['csv'])
 
 
 if(!isset($_GET['id'])) {
@@ -607,6 +575,83 @@ echo "	</table>
     }  //end GET[id]=7
 
 
+
+    if($_GET['id']==10) {  //dicts
+
+      if(isset($_GET['actid'])) //action ID.
+        $actid=$_GET['actid'];
+      else
+        $actid=0;
+    
+    
+    
+    ///надо добавить обработку ошибки подключения к БД
+    
+      if(!isset($_GET['actid'])) {
+        doPrintAllItems($globalSS,$_GET['dname']);
+    
+      } // end if(!isset...
+    
+    
+      if($actid==1) {
+        doPrintFormAddItem($globalSS,$_GET['dname']);
+      }  //end if($actid==1..
+    
+      if($actid==2) {  //добавление 
+        doAddItem($globalSS);
+      }
+    
+      if($actid==3) { ///Редактирование 
+        doPrintFormEditItem($globalSS,$_GET['dname']);
+    
+      }
+      if($actid==4) { //сохранение изменений UPDATE
+        doSaveItem($globalSS);
+    
+      }
+    
+      if($actid==5) { //удаление DELETE
+        doDeleteItem($globalSS);
+    
+      } //удаление
+  
+    
+      if($actid==10) {
+        doPrintAllDicts($globalSS);
+    
+        } // end if(!isset...
+      
+    
+        if($actid==11) {
+        doPrintFormAddDict($globalSS);
+        }  //end if($actid==1..
+    
+        if($actid==12) {  //добавление 
+        doAddDict($globalSS);
+        }
+    
+        if($actid==13) { ///Редактирование 
+        doPrintFormEditDict($globalSS);
+    
+        }
+        if($actid==14) { //сохранение изменений UPDATE
+        doSaveDict($globalSS);
+    
+        }
+    
+        if($actid==15) { //удаление DELETE
+        doDeleteDict($globalSS);
+    
+        } //удаление
+    
+       
+  
+  
+  
+  
+      } ///end if($_GET['id']==10
+
+
     if($_GET['id']==999) {
    	//тестовая страница
      echo "Test page<br /><br />";
@@ -976,6 +1021,8 @@ $end=microtime(true);
 
 $runtime=$end - $start;
 
+if(!isset($_GET['csv']) and $_GET['csv']!=1) {
+
 echo "<br /><br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)." ".$_lang['stSECONDS']."</font><br />";
 
 echo $_lang['stCREATORS'];
@@ -997,3 +1044,5 @@ $newdate=date("d-m-Y",$newdate);
     </form>
 </body>
 </html>
+
+<?php } ?>
