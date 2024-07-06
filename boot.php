@@ -54,6 +54,9 @@ if($config['enabled']!=0)
    $pass[$i]=$config['pass'];
    $address[$i]=$config['address'];
    $srvdbtype[$i]=$config['srvdbtype'];
+   $cfgsquidhost[$i]=$config['cfgsquidhost'];
+   $cfgsquidport[$i]=$config['cfgsquidport'];
+   $cfgcachemgr_passwd[$i]=$config['cfgcachemgr_passwd'];
    $globalSS['config'][$i]=$config;
    $i++;
    
