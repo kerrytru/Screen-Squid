@@ -332,7 +332,7 @@ continue;
 //Пункт для добавления удаления БД
 echo "
     tree.add(new WebFXTreeItem('".$_lang['stADDREMOVE']."','javascript:GoRightReport(0,8)','','img/themes/default/Processes.png','img/themes/default/Processes.png'));
-    tree.add(new WebFXTreeItem('DONATE','javascript:GoInternetLink(\'https://sobe.ru/na/na_novuyu_versiyu_screen_squid\')','','',''));
+    tree.add(new WebFXTreeItem('DONATE','javascript:GoInternetLink(\'https://yoomoney.ru/fundraise/oKUtNAI3bP8.231009\')','','',''));
     tree.add(new WebFXTreeItem('Wiki','javascript:GoInternetLink(\'https://sourceforge.net/p/screen-squid/wiki/Home/\')','','',''));
 ";
 if ((file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/enabled")) )
