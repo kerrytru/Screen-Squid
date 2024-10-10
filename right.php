@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/06/25 20:54:08.894 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/10 21:56:43.340 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.12.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.13.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -199,24 +199,9 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
 
         if($actid==2) {  //добавление алиаса
           
-          #соберем параметры в массив и отправим. Удобно будет потом отовсюду пользоватся.
-          $alias_params = array();
-          
-          $alias_params['name']=$_POST['name'];
 
-          if(!isset($_POST['typeid'])) $alias_params['typeid']=0;  else  $alias_params['typeid']=1;
-          if(!isset($_POST['activeauth'])) $alias_params['activeauth']=0; else $alias_params['activeauth']=1;
       
-          #если не выбран ни один логин или IP адрес, вернём ошибку. 
-          #По хорошему, нужно напиать валидатор формы, чтобы JS не давал пройти дальше.
-         # echo "tableid=".$_POST['tableid'];
-          if($_POST['tableid']=="") die ('Error: No login or ipaddress choosed! Alias cant be added');
-      
-          $alias_params['tableid']=$_POST['tableid'];
-          $alias_params['userlogin']=$_POST['userlogin'];
-          $alias_params['userpassword']=md5(md5(trim($_POST['userpassword'])));
-      
-          doAliasAdd($globalSS,$alias_params);
+          doAliasAdd($globalSS);
         }
 
         if($actid==3) { ///Редактирование алиаса
@@ -225,31 +210,15 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
         }
         if($actid==4) { //сохранение изменений UPDATE
 
-         #соберем параметры в массив и отправим. Удобно будет потом отовсюду пользоватся.
-         $alias_params = array();
 
-         $alias_params['name']=$_POST['name'];
-         $alias_params['aliasid'] = $_GET['aliasid'];
 
-         if(isset($_POST['changepassword'])) // признак. Если установлено - изменить пароль
-         $alias_params['changepassword']=1;
-         else
-         $alias_params['changepassword']=0;
-
-         if(!isset($_POST['typeid'])) $alias_params['typeid']=0;  else  $alias_params['typeid']=1;
-         if(!isset($_POST['activeauth'])) $alias_params['activeauth']=0; else $alias_params['activeauth']=1;
-     
-         $alias_params['tableid']=$_POST['tableid'];
-         $alias_params['userlogin']=$_POST['userlogin'];
-         $alias_params['userpassword']=md5(md5(trim($_POST['userpassword'])));
-
-          doAliasSave($globalSS,$alias_params);
+          doAliasSave($globalSS);
  
         }
 
         if($actid==5) { //удаление DELETE
-          $aliasid = $_GET['aliasid'];
-          doAliasDelete($globalSS,$aliasid);
+          
+          doAliasDelete($globalSS);
 
         } //удаление
       } ///end if($_GET['id']==2

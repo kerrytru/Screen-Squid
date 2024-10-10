@@ -9,16 +9,21 @@
 *                                           File and License Informations                                              *
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.dictionaries.php </#FN>                                       
-*                         File Birth   > <!#FB> 2023/08/17 21:05:53.558 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/02/25 15:32:33.503 </#FT>                                         *
+*                         File Birth   > <!#FB> 2024/10/10 19:32:31.139 </#FB>                                         *
+*                         File Mod     > <!#FT> 2024/10/10 21:58:12.248 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 3.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
+
+
+
+
+
 
 
 
@@ -85,7 +90,7 @@ $dictnames = doGetDictnames($globalSS,$dictname);
     echo '<br><br><input type="text" id="QInput" onkeyup="QuickFinder(\'dtg\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
     echo '<button id="ClearFilterBtn" type="button" onclick="ClearFilter(\'dtg\');">'.$_lang['stCLEARFILTER'].'</button>';
 
-    // echo " <a href=?".$dfltAction."&csv=1><img src='img/csvicon.png' width=32 height=32 alt=Image title='Generate CSV'></a>";
+    echo "<br><br> <a href=?".$dfltAction."&csv=1><img src='img/csvicon.png' width=32 height=32 alt=Image title='Generate CSV'></a>";
 
     echo "<br /><br />";
 
