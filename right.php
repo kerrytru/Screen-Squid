@@ -51,6 +51,9 @@ if (!isAuth())
 </head>
 <body>
 
+<div id="toast_success"><div id="desc">Success!</div></div>
+
+
 <script type="text/javascript" src="javascript/sortable.js"></script>
 <script type="text/javascript" src="javascript/misc.js"></script>
 <script language=javascript>
@@ -1005,8 +1008,16 @@ else
 
 $newdate=date("d-m-Y",$newdate);
 
+if(isset($_GET['status']))
+
+if($_GET['status']=='success')
+echo "<script language=javascript>launch_toast('toast_success')</script>";
+
 
 ?>
+
+
+
 <form name=fastdateswitch_form>
     <input type="hidden" name=date value="<?php echo $newdate; ?>">
     <input type="hidden" name=date2 value="">

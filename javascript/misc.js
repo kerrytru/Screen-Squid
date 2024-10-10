@@ -36,3 +36,18 @@ function QuickFinder(tablename) {
 	document.getElementById("QInput").value = "";
 	QuickFinder(tablename);
 }
+
+function launch_toast(msg_element) {
+	var x = document.getElementById(msg_element)
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+}
+
+function UpdatePage(srv,id,actid,status)
+{
+	if(actid>0)
+	parent.right.location.href='?srv='+srv+'&id='+id+'&actid='+actid+'';
+else
+parent.right.location.href='?srv='+srv+'&id='+id+'&status='+status+'';
+
+}

@@ -373,10 +373,14 @@ function doAliasAdd($globalSS){
 if (!isset($globalSS['externalAlias'])) {
 
 
-    echo "".$_lang['stALIASADDED']."<br /><br />";
-  if(!isset($_GET['modal']))
-    echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";          
-  else
+ //   echo "".$_lang['stALIASADDED']."<br /><br />";
+  if(!isset($_GET['modal'])){
+  
+ echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'success')</script>"; 
+
+//    echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";          
+  }
+    else
     echo "Please, close this window";  
   
 }
@@ -536,7 +540,9 @@ if (!isset($globalSS['externalAlias'])) {
   echo "".$_lang['stALIASUPDATED']."<br /><br />";
 
   if(!isset($_GET['modal']))
-  echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
+  echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'success')</script>"; 
+
+  // echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
 else
   echo "Please, close this window"; 
 }
@@ -563,8 +569,10 @@ function doAliasDelete($globalSS){
     die('Error1: Cant delete 1 alias from group');
   }
   
-echo "".$_lang['stALIASDELETED']."<br /><br />";
-  echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
+//echo "".$_lang['stALIASDELETED']."<br /><br />";
+echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'success')</script>"; 
+
+//  echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
 
 
 }
