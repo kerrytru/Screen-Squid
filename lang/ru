@@ -249,5 +249,12 @@ $_lang['stINCOMEMEGABYTES']="Принятый трафик";
 //2.3
 $_lang['stDICTIONARY']="Справочники";
 $_lang['stUNAUTHTRAFFIC']="Неавторизованный трафик";
+$_lang['stCLEARFILTER']="Сбросить";
+
+//2.4
+
+$_lang['stITEMADDED']="1 элемент добавлен";
+$_lang['stITEMUPDATED']="1 элемент обновлен";
+$_lang['stITEMDELETED']="1 элемент удален";
 
 ?>

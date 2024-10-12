@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.alias.php </#FN>                                              
 *                         File Birth   > <!#FB> 2024/10/10 21:47:48.413 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/10/10 21:57:34.513 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/12 22:26:33.828 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -376,7 +376,7 @@ if (!isset($globalSS['externalAlias'])) {
  //   echo "".$_lang['stALIASADDED']."<br /><br />";
   if(!isset($_GET['modal'])){
   
- echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'success')</script>"; 
+ echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'1aliasadded')</script>"; 
 
 //    echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";          
   }
@@ -540,7 +540,7 @@ if (!isset($globalSS['externalAlias'])) {
   echo "".$_lang['stALIASUPDATED']."<br /><br />";
 
   if(!isset($_GET['modal']))
-  echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'success')</script>"; 
+  echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'1aliasupdated')</script>"; 
 
   // echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
 else
@@ -570,7 +570,7 @@ function doAliasDelete($globalSS){
   }
   
 //echo "".$_lang['stALIASDELETED']."<br /><br />";
-echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'success')</script>"; 
+echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",2,0,'1aliasdeleted')</script>"; 
 
 //  echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=2 target=right>".$_lang['stBACK']."</a>";
 

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/10/10 21:56:43.340 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/12 22:26:15.536 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.13.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.14.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -51,7 +51,6 @@ if (!isAuth())
 </head>
 <body>
 
-<div id="toast_success"><div id="desc">Success!</div></div>
 
 
 <script type="text/javascript" src="javascript/sortable.js"></script>
@@ -105,6 +104,32 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&'+ret;
 <?php
 
 } //if isset($_GET['csv'])
+
+
+///<!-- The toasts -->
+if(isset($_GET['status']))
+{
+if($_GET['status']=='1aliasadded')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stALIASADDED'].'</div></div>';
+if($_GET['status']=='1aliasupdated')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stALIASUPDATED'].'</div></div>';
+if($_GET['status']=='1aliasdeleted')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stALIASDELETED'].'</div></div>';
+if($_GET['status']=='1groupadded')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stGROUPADDED'].'</div></div>';
+if($_GET['status']=='1groupupdated')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stGROUPUPDATED'].'</div></div>';
+if($_GET['status']=='1groupdeleted')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stGROUPDELETED'].'</div></div>';
+
+if($_GET['status']=='1itemadded')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stITEMADDED'].'</div></div>';
+if($_GET['status']=='1itemupdated')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stITEMUPDATED'].'</div></div>';
+if($_GET['status']=='1itemdeleted')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stITEMDELETED'].'</div></div>';
+
+}
 
 
 if(!isset($_GET['id'])) {
@@ -1008,9 +1033,9 @@ else
 
 $newdate=date("d-m-Y",$newdate);
 
-if(isset($_GET['status']))
 
-if($_GET['status']=='success')
+//если пришел какой-то статус - отобразим это во всплывающем сообщении
+if(isset($_GET['status']))
 echo "<script language=javascript>launch_toast('toast_success')</script>";
 
 

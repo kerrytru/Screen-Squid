@@ -51,3 +51,9 @@ else
 parent.right.location.href='?srv='+srv+'&id='+id+'&status='+status+'';
 
 }
+
+function UpdatePageDict(srv,id,dict,status)
+{
+		parent.right.location.href='?srv='+srv+'&id='+id+'&dname='+dict+'&status='+status+'';
+
+}

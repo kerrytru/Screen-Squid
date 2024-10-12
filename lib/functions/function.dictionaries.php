@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.dictionaries.php </#FN>                                       
 *                         File Birth   > <!#FB> 2024/10/10 19:32:31.139 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/10/10 21:58:12.248 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/12 22:26:41.687 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -377,13 +377,14 @@ echo '
          die('Error: Can`t insert new item');
         }
 
-         echo "".$_lang['stADDED']."<br /><br />";
+//         echo "".$_lang['stADDED']."<br /><br />";
+echo "<script language='javascript'>UpdatePageDict(".$globalSS['connectionParams']['srv'].",10,'".$dictname."','1itemadded')</script>"; 
 
 //         if(isset($_POST['field_ismodal']))
   //       echo "Закройте это окно и продолжите работу.";
     //     else 
 
-         echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&dname=".$dictname." >".$_lang['stBACK']."</a>";
+  //       echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&dname=".$dictname." >".$_lang['stBACK']."</a>";
  
        }
        
@@ -567,9 +568,10 @@ echo '
        if (!doQuery($globalSS, $queryUpdateOne)) {
          die('Error: Cant update one');
        }
-       
-       echo "".$_lang['stUPDATED']."<br /><br />";
-       echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&dname=".$dictname." >".$_lang['stBACK']."</a>";
+       echo "<script language='javascript'>UpdatePageDict(".$globalSS['connectionParams']['srv'].",10,'".$dictname."','1itemupdated')</script>"; 
+      
+//       echo "".$_lang['stUPDATED']."<br /><br />";
+  //     echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&dname=".$dictname." >".$_lang['stBACK']."</a>";
        
        
        
@@ -603,8 +605,10 @@ echo '
        die('Error: Cant delete one item');
        }
        
-       echo "".$_lang['stDELETED']."<br /><br />";
-       echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&dname=".$dictname." >".$_lang['stBACK']."</a><br />";
+     //  echo "".$_lang['stDELETED']."<br /><br />";
+     echo "<script language='javascript'>UpdatePageDict(".$globalSS['connectionParams']['srv'].",10,'".$dictname."','1itemdeleted')</script>"; 
+
+   //  echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&dname=".$dictname." >".$_lang['stBACK']."</a><br />";
        
        
        }

@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.group.php </#FN>                                              
 *                         File Birth   > <!#FB> 2024/10/10 21:51:26.179 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/10/10 21:58:29.398 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/12 22:26:47.756 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.0.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -201,9 +201,10 @@ function doPrintAllGroups($globalSS){
    
     doQuery($globalSS, $sql);
   
-    echo "".$_lang['stGROUPADDED']."<br /><br />";
-    echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3 target=right>".$_lang['stBACK']."</a>";
-  
+//    echo "".$_lang['stGROUPADDED']."<br /><br />";
+ //   echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3 target=right>".$_lang['stBACK']."</a>";
+ echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",3,0,'1groupadded')</script>"; 
+
   
   
     
@@ -335,9 +336,10 @@ function doPrintAllGroups($globalSS){
   
     doQuery($globalSS, $sql);
   
-    echo "".$_lang['stGROUPUPDATED']."<br /><br />";
-    echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3 target=right>".$_lang['stBACK']."</a>";
-  
+ //   echo "".$_lang['stGROUPUPDATED']."<br /><br />";
+ //   echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3 target=right>".$_lang['stBACK']."</a>";
+ echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",3,0,'1groupupdated')</script>"; 
+
   
   
   }
@@ -359,9 +361,10 @@ function doPrintAllGroups($globalSS){
   
   doQuery($globalSS, $sql) or die();
   
-  echo "".$_lang['stGROUPDELETED']."<br /><br />";
-  echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3 target=right>".$_lang['stBACK']."</a><br />";
-  
+  //echo "".$_lang['stGROUPDELETED']."<br /><br />";
+  //echo "<a href=right.php?srv=".$globalSS['connectionParams']['srv']."&id=3 target=right>".$_lang['stBACK']."</a><br />";
+  echo "<script language='javascript'>UpdatePage(".$globalSS['connectionParams']['srv'].",3,0,'1groupdeleted')</script>"; 
+
   
   }
   
