@@ -2,11 +2,18 @@
 
 
 // Javascripts END
-function QuickFinder(tablename) {
+function QuickFinder() {
 	var input, filter, found, table, tr, td, i, j;
+
+	
+	
+	for (var ii = 0; ii < arguments.length; ii=ii+1) {
+
+	
+
   input = document.getElementById("QInput");
   filter = input.value.toUpperCase();
-	table = document.getElementById(tablename);
+	table = document.getElementById(arguments[ii]);
 	
 	tr = table.getElementsByTagName("tr");
 	for (i = 1; i < tr.length; i++) {
@@ -26,7 +33,7 @@ function QuickFinder(tablename) {
 
 		}
 	}
-  
+   }
 
   
   }

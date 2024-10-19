@@ -57,6 +57,7 @@ $header=$header.'
 </div>
 
 
+
 ';
 
 
@@ -8306,11 +8307,19 @@ echo $pathtoimage;
 $globalSS['params']['idReport']=4;
 $json_result=doGetReportData($globalSS,$queryTopSitesTraffic,'template3.php');
 
+$json_array  = json_decode($json_result, true);
+$elementCount  = count($json_array);
+
+echo "elementcount=".$elementCount;
+
+if($elementCount>2){
+
 $arrLine0 = array(); //sites
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
 
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
+}
 
 $numrow=1;
 while ($numrow<$globalSS['countTopSitesLimit'])
@@ -8346,11 +8355,17 @@ echo $pathtoimage;
 $globalSS['params']['idReport']=17;
 $json_result=doGetReportData($globalSS,$queryPopularSites,'template5.php');
 
+$json_array  = json_decode($json_result, true);
+$elementCount  = count($json_array);
+
+if($elementCount>0){
 $arrLine0 = array(); //sites
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
 
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
+
+}
 
 $numrow=1;
 while ($numrow<$globalSS['countPopularSitesLimit'])
