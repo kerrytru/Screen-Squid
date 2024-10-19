@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> right.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2021/10/19 22:32:00.052 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/10/12 22:26:15.536 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/19 21:32:14.955 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.14.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.14.1 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -107,7 +107,7 @@ parent.right.location.href='reports/reports.php?srv=<?php echo $srv ?>&'+ret;
 
 
 ///<!-- The toasts -->
-if(isset($_GET['status']))
+if(isset($_GET['status']) and !isset($_GET['csv']))
 {
 if($_GET['status']=='1aliasadded')
 echo '<div id="toast_success"><div id="desc">'.$_lang['stALIASADDED'].'</div></div>';
@@ -374,7 +374,7 @@ if(!isset($_GET['id'])) {echo "OK";  $_GET['id'] = 0;}//удалить надо
 
               if($actid==1) { ///результаты поиска
 
-                echo $_lang['stSEARCHFORM'];
+                echo "<h2>".$_lang['stSEARCHFORM']."</h2>";
                 echo '
                   <form action="right.php?srv='.$srv.'&id=4&actid=1" method="post">
                  		<table class=datatable>
@@ -1018,7 +1018,7 @@ $end=microtime(true);
 
 $runtime=$end - $start;
 
-if(!isset($_GET['csv']) and $_GET['csv']!=1) {
+if(!isset($_GET['csv'])) {
 
 echo "<br /><br /><font size=2>".$_lang['stEXECUTIONTIME']." ".round($runtime,3)." ".$_lang['stSECONDS']."</font><br />";
 
