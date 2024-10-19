@@ -257,4 +257,7 @@ $_lang['stITEMADDED']="1 элемент добавлен";
 $_lang['stITEMUPDATED']="1 элемент обновлен";
 $_lang['stITEMDELETED']="1 элемент удален";
 
+$_lang['stEDIT']="Редактирование";
+$_lang['stADD']="Добавить";
+
 ?>

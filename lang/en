@@ -255,4 +255,7 @@ $_lang['stITEMADDED']="1 item added";
 $_lang['stITEMUPDATED']="1 item updated";
 $_lang['stITEMDELETED']="1 item deleted";
 
+$_lang['stEDIT']="Edit";
+$_lang['stADD']="Add";
+
 ?>

@@ -114,11 +114,8 @@ $newdate=date("d-m-Y",$newdate);
 
 ?>
 <form name=fastdateswitch_form>
-    <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
-    <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value=0>
-    <input type="hidden" name=groupname_field_hidden value=0>
-    <input type="hidden" name=typeid_field_hidden value=0>
+    <input type="hidden" name=date value="<?php echo $newdate; ?>">
+    <input type="hidden" name=date2 value="">
     </form>
 </body>
 </html>
