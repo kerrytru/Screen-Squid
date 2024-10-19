@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/09/28 22:01:45.780 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/06/25 20:55:38.679 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/19 22:59:26.045 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.0.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -27,12 +27,20 @@
 
 include("../../config.php");
 
+#если есть управляющий сигнал сверху
+if (isset($_GET['external']) and $_SERVER['REMOTE_ADDR']=='127.0.0.1') 
+{
+	#проходим дальше
+}
+else {
 
 #если нет авторизации, сразу выходим
 if (!isAuth()) 
 {
 	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
 }
+}
+
 
 $language=$globalSS['language'];
 
@@ -163,14 +171,17 @@ $start=microtime(true);
 //visual part
 ?>
 
-<form name=checkdate_form onsubmit="return false;">
+<form name=checkdate_form onsubmit="index.php" method="GET">
 <p><?php echo $_lang['stSETDATEPERIOD']?><p>
-<input type="text" name=date_field onfocus="this.select();lcs(this)"
+<input type="text" name=date onfocus="this.select();lcs(this)"
     onclick="event.cancelBubble=true;this.select();lcs(this)">
 <br /><br />
-<input type="text" name=date2_field onfocus="this.select();lcs(this)"
+<input type="text" name=date2  onfocus="this.select();lcs(this)"
     onclick="event.cancelBubble=true;this.select();lcs(this)">&nbsp;
- <br /><br />
+	<br><br>
+<input type="submit" value="Set">
+	</form>
+ <?php echo "<h3>Reports from ".$querydate." to ".$querydate2."</h3>"?>
 		<table class=datatable>
 		<tr>
 			<th>#</th>
@@ -181,17 +192,131 @@ $start=microtime(true);
     	<tr>
 			<td>1</td>
 			<td><?php echo $_lang['stONELOGINTRAFFIC']; ?></td>
-			<td><a href="Javascript:CreateDoc(1)">PDF</a></td>
-			<td><a href="Javascript:CreateDoc(3)">CSV</a></td>
+			<?php echo '<td><a href="index.php?actid=8&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=8&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
 		</tr>	
     	<tr>
 			<td>2</td>
-			<td><?php echo $_lang['stONEIPADRESSTRAFFIC']; ?></td>
-			<td><a href="Javascript:CreateDoc(2)">PDF</a></td>
-			<td><a href="Javascript:CreateDoc(4)">CSV</a></td>
+			<td><?php echo $_lang['stONELOGINTOPSITESTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=9&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=9&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
 		</tr>	
+    	<tr>
+			<td>3</td>
+			<td><?php echo $_lang['stONELOGINTRAFFICBYHOURS']; ?></td>
+			<?php echo '<td><a href="index.php?actid=10&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=10&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+		</tr>	
+    	<tr>
+			<td>4</td>
+			<td><?php echo $_lang['stONELOGINIPTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=35&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=35&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+		</tr>	
+    	<tr>
+			<td>5</td>
+			<td><?php echo $_lang['stMIMETYPESTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=46&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=46&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+		</tr>	
+    	<tr>
+			<td>6</td>
+			<td><?php echo $_lang['stPOPULARSITES']; ?></td>
+			<?php echo '<td><a href="index.php?actid=56&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=56&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+		</tr>	
+    	<tr>
+			<td>7</td>
+			<td><?php echo $_lang['stLOGINBIGFILES']; ?></td>
+			<?php echo '<td><a href="index.php?actid=66&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=66&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+		</tr>	
+    	<tr>
+			<td>8</td>
+			<td><?php echo $_lang['stTRAFFICBYPERIODDAY']; ?></td>
+			<?php echo '<td><a href="index.php?actid=70&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=70&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+		</tr>	
+    	<tr>
+			<td>9</td>
+			<td><?php echo $_lang['stTRAFFICBYPERIODDAYNAME']; ?></td>
+			<?php echo '<td><a href="index.php?actid=71&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=71&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+		</tr>	
+
+    	<tr>
+			<td>10</td>
+			<td><?php echo $_lang['stONEIPADRESSTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=11&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=11&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>	
+		<tr>
+			<td>11</td>
+			<td><?php echo $_lang['stONEIPADDRESSTOPSITESTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=12&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=12&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>12</td>
+			<td><?php echo $_lang['stONEIPADDRESSTRAFFICBYHOURS']; ?></td>
+			<?php echo '<td><a href="index.php?actid=13&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=13&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>13</td>
+			<td><?php echo $_lang['stONEIPADDRESSLOGINSTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=36&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=36&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>14</td>
+			<td><?php echo $_lang['stMIMETYPESTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=47&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=47&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>15</td>
+			<td><?php echo $_lang['stPOPULARSITES']; ?></td>
+			<?php echo '<td><a href="index.php?actid=57&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=57&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>16</td>
+			<td><?php echo $_lang['stIPADDRESSBIGFILES']; ?></td>
+			<?php echo '<td><a href="index.php?actid=67&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=67&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>17</td>
+			<td><?php echo $_lang['stTRAFFICBYPERIODDAY']; ?></td>
+			<?php echo '<td><a href="index.php?actid=72&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=72&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>18</td>
+			<td><?php echo $_lang['stTRAFFICBYPERIODDAYNAME']; ?></td>
+			<?php echo '<td><a href="index.php?actid=73&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=73&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+		<tr>
+			<td>19</td>
+			<td><?php echo $_lang['stUNAUTHTRAFFIC']; ?></td>
+			<?php echo '<td><a href="index.php?actid=74&pdf=1&date='.$querydate.'&date2='.$querydate2.'">PDF</a></td>' ?>
+			<?php echo '<td><a href="index.php?actid=74&csv=1&date='.$querydate.'&date2='.$querydate2.'">CSV</a></td>' ?>
+
+		</tr>
+	
 	</table>
-</form>
+
 
 <?php
 
@@ -206,19 +331,21 @@ $repvars['querydate2'] = $querydate2;
 $repvars['sortcolumn'] = $sortcolumn;
 $repvars['sortorder'] = $sortorder;
 
+$loginReports=array(8, 9, 10, 35, 46, 56, 66, 70, 71);
 
+$ipaddressReports=array(11, 12, 13, 36, 47, 57, 67, 72, 73, 74);
 
 
 if(isset($_GET['actid'])){
 {
-		if($_GET['actid']==1) {//сформировать отчёты по логинам PDF
+		if(in_array($_GET['actid'],$loginReports)) {//сформировать отчёты по логинам 
 
 		  
 	   	  $numrow=0;
 		  $sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
 		  $result=doFetchQuery($globalSS, $sqlGetId);
 
-		  $repvars['id']="8";
+		  $repvars['id']=$_GET['actid'];
 		  $repvars['typeid']="0";
 
 
@@ -229,67 +356,42 @@ if(isset($_GET['actid'])){
 			$repvars['loginid']=$line[0];
 			$repvars['loginname']=$line[1];
 			
-			$exportrep_ex->CreateLoginsPDF($repvars);
+			if($_GET['pdf']==1)
+				$exportrep_ex->CreateLoginsPDF($repvars);
+
+			if($_GET['csv']==1)
+				$exportrep_ex->CreateLoginsCSV($repvars);
+			
 			$numrow++;
 		  }
 		  
 		 } //actid=1
 		  		  
-		if($_GET['actid']==2) {//сформировать отчёты по ip адресам PDF
+		 if(in_array($_GET['actid'],$ipaddressReports)) {//сформировать отчёты по ip адресам PDF
 
 		  $numrow=0;
 		  $sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
 		  $result=doFetchQuery($globalSS, $sqlGetId);
 
-		  $repvars['id']="11";
+		  $repvars['id']=$_GET['actid'];
 		  $repvars['typeid']="1";
 
 		  echo "proccess started<br />";
 		  foreach ($result as $line) {
 			$repvars['ipaddressid']=$line[0];
 			$repvars['ipaddressname']=$line[1];
+
+			if($_GET['pdf']==1)
 			$exportrep_ex->CreateIpaddressPDF($repvars);
+
+		if($_GET['csv']==1)
+			$exportrep_ex->CreateIpaddressCSV($repvars);
+
+		
 			$numrow++;
 
 		 }
 		} //actid=2
-		
-		if($_GET['actid']==3) {//сформировать отчёты по логинам CSV
-			$numrow=0;
-			$sqlGetId="select id,name from scsq_logins where id not in (".$goodLoginsList.")";
-			$result=doFetchQuery($globalSS, $sqlGetId);
-
-			$repvars['id']="8";
-			$repvars['typeid']="0";
-	  
-			echo "proccess started<br />";
-			foreach ($result as $line) {
-	  
- 	 		  $repvars['loginid']=$line[0];
-			  $repvars['loginname']=$line[1];
-				  
-		 	  $exportrep_ex->CreateLoginsCSV($repvars);
-				$numrow++;
-				}
-		 } //actid=3
-		 
- 		if($_GET['actid']==4) {//сформировать отчёты по ip адресам CSV
-
-			$numrow=0;
-			$sqlGetId="select id,name from scsq_ipaddress where id not in (".$goodIpaddressList.")";
-			$result=doFetchQuery($globalSS, $sqlGetId);
-		  
-			$repvars['id']="11";
-			$repvars['typeid']="1";
-		  
-			echo "proccess started<br />";
-			foreach ($result as $line) {
-			  $repvars['ipaddressid']=$line[0];
-			  $repvars['ipaddressname']=$line[1];
-			  $exportrep_ex->CreateIpaddressCSV($repvars);
-			  $numrow++;
-			}
-		} //actid=4
 		
 		
 		 

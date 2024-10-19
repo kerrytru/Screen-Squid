@@ -23,10 +23,20 @@
 
 include("../config.php");
 
+#если есть управляющий сигнал сверху
+if (isset($_GET['external']) and $_SERVER['REMOTE_ADDR']=='127.0.0.1') 
+{
+	#проходим дальше
+}
+else {
 #если нет авторизации, сразу выходим
 if (!isAuth()) 
 {
+	
+
 	header("Location: ".$globalSS['root_http']."/modules/PrivateAuth/login.php"); exit();
+}
+
 }
 
 $header='<html>
@@ -8310,7 +8320,6 @@ $json_result=doGetReportData($globalSS,$queryTopSitesTraffic,'template3.php');
 $json_array  = json_decode($json_result, true);
 $elementCount  = count($json_array);
 
-echo "elementcount=".$elementCount;
 
 if($elementCount>2){
 
@@ -8671,11 +8680,19 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $globalSS['params']['idReport']=56;
  $json_result=doGetReportData($globalSS,$queryOneLoginPopularSites,'template5.php');
  
+ $json_array  = json_decode($json_result, true);
+ $elementCount  = count($json_array);
+ 
+ 
+ if($elementCount>2){
+
  $arrLine0 = array(); //sites
  $arrLine0=doGetArrayData($globalSS,$json_result,1);
  
  $arrLine1 = array(); //megabytes
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
+
+ }
 
  $numrow=1;
  while ($numrow<$globalSS['countPopularSitesLimit'])
@@ -8799,12 +8816,18 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $globalSS['params']['idReport']=57;
  $json_result=doGetReportData($globalSS,$queryOneIpaddressPopularSites,'template5.php');
  
+ $json_array  = json_decode($json_result, true);
+ $elementCount  = count($json_array);
+ 
+ 
+ if($elementCount>2){
+
  $arrLine0 = array(); //sites
  $arrLine0=doGetArrayData($globalSS,$json_result,1);
  
  $arrLine1 = array(); //megabytes
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
-
+ }
  $numrow=1;
  while ($numrow<$globalSS['countPopularSitesLimit'])
  {
@@ -8929,12 +8952,19 @@ foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
  $globalSS['params']['idReport']=55;
  $json_result=doGetReportData($globalSS,$queryOneGroupPopularSites,'template5.php');
  
+ $json_array  = json_decode($json_result, true);
+ $elementCount  = count($json_array);
+ 
+ 
+ if($elementCount>2){
+
  $arrLine0 = array(); //sites
  $arrLine0=doGetArrayData($globalSS,$json_result,1);
  
  $arrLine1 = array(); //megabytes
  $arrLine1=doGetArrayData($globalSS,$json_result,2);
-
+ }
+ 
  $numrow=1;
  while ($numrow<$globalSS['countPopularSitesLimit'])
  {
