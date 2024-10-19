@@ -253,7 +253,7 @@ function doPrintFormAddAlias($globalSS){
         $numrow=1;
 
 
-    echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'alias\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
+        echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'loginsTable\',\'ipaddressTable\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
 
     #Если в модальном окне передали тип, то сразу покажем нужную таблицу иначе - действуем как обычно.
     
@@ -343,7 +343,20 @@ function doAliasAdd($globalSS){
       
     $_lang = $globalSS['lang'];
 
-     
+
+    if (isset($globalSS['alias_params']['externalAlias'])) {
+     if(!isset($globalSS['alias_params']['typeid'])) $typeid=0;  else  $typeid=$globalSS['alias_params']['typeid'];
+     if(!isset($globalSS['alias_params']['name'])) $name="";  else  $name=$globalSS['alias_params']['name'];
+     if(!isset($globalSS['alias_params']['activeauth'])) $activeauth=0;  else  $activeauth=$globalSS['alias_params']['activeauth'];
+     if(!isset($globalSS['alias_params']['tableid'])) $tableid="";  else  $tableid=$globalSS['alias_params']['tableid'];
+     if(!isset($globalSS['alias_params']['userlogin'])) $userlogin="";  else  $userlogin=$globalSS['alias_params']['userlogin'];
+     if(!isset($globalSS['alias_params']['userpassword'])) $userpassword="";  else  $userpassword=md5(md5($globalSS['alias_params']['tableid']));
+
+
+ 
+    }
+    else
+    {
  
           if(!isset($_POST['typeid'])) $typeid=0;  else  $typeid=1;
           if(!isset($_POST['activeauth'])) $activeauth=0; else $activeauth=1;
@@ -355,13 +368,10 @@ function doAliasAdd($globalSS){
       
           $tableid=$_POST['tableid'];
           $userlogin=$_POST['userlogin'];
-          $alias_params['userpassword']=md5(md5(trim($_POST['userpassword'])));
-
-
-    $name = $_POST['name'];
-    $userlogin = isset($_POST['userlogin']) ? $_POST['userlogin'] : '';
-    $userpassword = isset($_POST['userpassword']) ? md5(md5(trim($_POST['userpassword']))) : '';
-   
+          $name = $_POST['name'];
+          $userlogin = isset($_POST['userlogin']) ? $_POST['userlogin'] : '';
+          $userpassword = isset($_POST['userpassword']) ? md5(md5(trim($_POST['userpassword']))) : '';
+    }
 
     $sql="INSERT INTO scsq_alias (name, typeid,tableid,userlogin,password,active) VALUES ('$name', '$typeid','$tableid','$userlogin','$userpassword','$activeauth')";
 
@@ -370,7 +380,7 @@ function doAliasAdd($globalSS){
     }
 
       #если передаем спец сигнал external, то значит действуем из какого-нибудь модуля.
-if (!isset($globalSS['externalAlias'])) {
+if (!isset($globalSS['alias_params']['externalAlias'])) {
 
 
  //   echo "".$_lang['stALIASADDED']."<br /><br />";
@@ -435,15 +445,16 @@ if (!isset($globalSS['externalAlias'])) {
            <br />
                 ';
 
-      $result=doFetchQuery($globalSS,$queryAllLogins);
+                echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'loginsTable\',\'ipaddressTable\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
+     $result=doFetchQuery($globalSS,$queryAllLogins);
           $numrow=1;
-          echo '<input type="text" id="QInput" onkeyup="QuickFinder(\'alias\')" placeholder="'.$_lang['stFASTSEARCH'].'">';
 
           if($isChecked=="checked")
             echo "<table id='loginsTable' class=datatable style='display:none;'>";
           else
             echo "<table id='loginsTable' class=datatable style='display:table;'>";
-	  echo "<tr>";
+
+            echo "<tr>";
 	  echo "    <th class=unsortable>#</th>
 		    <th>".$_lang['stLOGIN']."</th>
 		    <th class=unsortable>".$_lang['stINCLUDE']."</th>
@@ -469,7 +480,7 @@ if (!isset($globalSS['externalAlias'])) {
             echo "<table id='ipaddressTable' class=datatable style='display:table;'>";
           else
             echo "<table id='ipaddressTable' class=datatable style='display:none;'>";
-   
+
            echo "<tr>";
 	         echo "    <th class=unsortable>#</th>
 		                 <th>".$_lang['stIPADDRESS']."</th>
@@ -511,8 +522,21 @@ if (!isset($globalSS['externalAlias'])) {
       
     $_lang = $globalSS['lang'];
   
-  
+    if (isset($globalSS['alias_params']['externalAlias'])) {
+      if(!isset($globalSS['alias_params']['aliasid'])) $aliasid=0;  else  $aliasid=$globalSS['alias_params']['aliasid'];
+      if(!isset($globalSS['alias_params']['name'])) $name="";  else  $name=$globalSS['alias_params']['name'];
 
+      if(!isset($globalSS['alias_params']['typeid'])) $typeid=0;  else  $typeid=$globalSS['alias_params']['typeid'];
+      if(!isset($globalSS['alias_params']['activeauth'])) $activeauth=0;  else  $activeauth=$globalSS['alias_params']['activeauth'];
+      if(!isset($globalSS['alias_params']['tableid'])) $tableid="";  else  $tableid=$globalSS['alias_params']['tableid'];
+      if(!isset($globalSS['alias_params']['userlogin'])) $userlogin="";  else  $userlogin=$globalSS['alias_params']['userlogin'];
+      if(!isset($globalSS['alias_params']['userpassword'])) $userpassword="";  else  $userpassword=md5(md5($globalSS['alias_params']['tableid']));
+      #если загружаем извне - всегда меняем пароли
+      $changepassword=1;
+ 
+  
+     }
+else{
     $aliasid = $_GET['aliasid'];
   
     $name = isset($_POST['name']) ? $_POST['name'] : "";
@@ -522,12 +546,13 @@ if (!isset($globalSS['externalAlias'])) {
     $userpassword = isset($_POST['userpassword']) ? md5(md5($_POST['userpassword'])) : "";
     $activeauth = isset($_POST['activeauth']) ? 1 : 0;
     $changepassword =isset($_POST['changepassword']) ? 1 : 0; 
-
+}
 
     if($changepassword==1)        
     $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',userlogin='".$userlogin."',password='".$userpassword."',active='".$activeauth."' where id='".$aliasid."'";
     else
     $queryUpdateOneAlias="update scsq_alias set name='".$name."',typeid='".$typeid."',tableid='".$tableid."',userlogin='".$userlogin."',active='".$activeauth."' where id='".$aliasid."'";
+    
     
 
     if (!doQuery($globalSS, $queryUpdateOneAlias)) {

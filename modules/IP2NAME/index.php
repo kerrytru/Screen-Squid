@@ -141,9 +141,9 @@ echo '</td>
 
 
 
-            if(!isset($_GET['actid'])) {
+     //       if(!isset($_GET['actid'])) {
 				echo "<a href=index.php?srv=".$srv."&actid=1 target=right>".$_lang['stIP2NAMESYNCHRONIZE']."</a><br />";
-			}
+		//	}
 			
 		if(isset($_GET['actid']))
           if($_GET['actid']==1) {
@@ -203,7 +203,7 @@ echo '</td>
 			  $alias_params=array();
 			  
 			  #спецсигнал. сообщим функции, что мы используем её извне.
-			  $alias_params['external']=1;
+			  $alias_params['externalAlias']=1;
 
 			  $alias_params['name']=$param_str[2];
 			  $alias_params['typeid']=($ip2name_table=="")? "1":"0";
@@ -229,7 +229,9 @@ echo '</td>
 
 		$alias_params['aliasid']=$aliasid; 
 
-			  $aliasid == "" ? doAliasAdd($globalSS,$alias_params) : doAliasSave($globalSS,$alias_params); 
+	  	$globalSS['alias_params']=$alias_params;
+
+			  $aliasid == "" ? doAliasAdd($globalSS) : doAliasSave($globalSS); 
 
 			  if ($aliasid == "") echo "ADDED: $param_str[0], $param_str[1]<br>";  
 			  
@@ -248,8 +250,7 @@ echo '</td>
 
 
 			  
-          echo "<br><br><br><a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
-			  
+  			  
 			
 
 		  
@@ -273,11 +274,8 @@ $newdate=date("d-m-Y",$newdate);
 
 ?>
 <form name=fastdateswitch_form>
-    <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
-    <input type="hidden" name=dom_field_hidden value="<?php echo 'day'; ?>">
-    <input type="hidden" name=group_field_hidden value="<?php echo $currentgroupid; ?>">
-    <input type="hidden" name=groupname_field_hidden value="<?php echo $currentgroup; ?>">
-    <input type="hidden" name=typeid_field_hidden value="<?php echo $typeid; ?>">
+    <input type="hidden" name=date value="<?php echo $newdate; ?>">
+    <input type="hidden" name=date2 value="">
     </form>
 </body>
 </html>
