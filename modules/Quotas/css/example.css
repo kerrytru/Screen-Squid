@@ -10,3 +10,70 @@ table.datatable td.quotaAlm2 {  /* превышение месячной кво�
 	background: #FA8072;
 	
 }
+
+
+#toast_success {
+    visibility: hidden;
+    max-width: 400px;
+    height: 50px;
+    /*margin-left: -125px;*/
+    margin: auto;
+    background: #95eab8;
+    
+    text-align: center;
+    border-radius: 2px;
+
+    position: fixed;
+    z-index: 5;
+    top: 0;
+    right: 0;
+    font-size: 17px;
+    white-space: nowrap;
+}
+
+#toast_success #desc{
+
+    
+    color: #000;
+   
+    padding: 16px;
+    
+    overflow: hidden;
+	white-space: nowrap;
+}
+
+#toast_success.show {
+    visibility: visible;
+    -webkit-animation: slideInRight 1.5s, stay 5s 1s,  slideOutRight 0.5s 2.5s;
+    animation: slideInRight 1.5s, stay 3s 1s, slideOutRight 0.5s 4.5s;
+}
+
+
+@keyframes slideInRight {
+    0% {
+        transform: translateX(110%);
+    }
+
+    75% {
+        transform: translateX(-10%);
+    }
+
+    100% {
+        transform: translateX(0%);
+    }
+}
+
+@keyframes slideOutRight {
+    0% {
+        transform: translateX(0%);
+    }
+
+    25% {
+        transform: translateX(-10%);
+    }
+
+    100% {
+        transform: translateX(110%);
+    }
+}
+

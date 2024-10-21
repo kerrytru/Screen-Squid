@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> index.php </#FN>                                                       
 *                         File Birth   > <!#FB> 2022/09/28 22:01:17.324 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/06/25 20:57:55.060 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/21 22:55:39.203 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.3.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.4.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -81,7 +81,17 @@ document.getElementById("ipaddressTable").style.display="table";
 
 }
 
+function UpdatePageModule(srv,id,status)
+{
+		parent.right.location.href='?srv='+srv+'&status='+status+'';
 
+}
+
+function launch_toast(msg_element) {
+	var x = document.getElementById(msg_element)
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+}
 
 </script>
 
@@ -91,7 +101,18 @@ document.getElementById("ipaddressTable").style.display="table";
 
 $quotaex = new Quotas($globalSS);
 
+///<!-- The toasts -->
+if(isset($_GET['status']) )
+{
+if($_GET['status']=='1quotasadded')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stQUOTASADDED'].'</div></div>';
+if($_GET['status']=='1quotasupdated')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stQUOTASUPDATED'].'</div></div>';
+if($_GET['status']=='1quotasdeleted')
+echo '<div id="toast_success"><div id="desc">'.$_lang['stQUOTASDELETED'].'</div></div>';
 
+
+}
 	
 
 if(!isset($_GET['id']))
@@ -151,10 +172,8 @@ $paramsQuota['datestart']=$datestart;
 
               $quotaex->doAdd($globalSS,$paramsQuota);
 
-
-              echo "".$_lang['stQUOTASADDED']."<br /><br />";
-              echo "<a href=index.php?srv=".$globalSS['connectionParams']['srv']." target=right>".$_lang['stBACK']."</a>";
-            }
+              echo "<script language='javascript'>UpdatePageModule(".$globalSS['connectionParams']['srv'].",0,'1quotasadded')</script>"; 
+             }
 
             if($actid==3) { ///Редактирование 
               $quotaex->doEdit($globalSS,$paramsQuota);
@@ -163,16 +182,14 @@ $paramsQuota['datestart']=$datestart;
             if($actid==4) { //сохранение изменений UPDATE
               $quotaex->doSave($globalSS,$paramsQuota);
 
-              echo "".$_lang['stQUOTASUPDATED']."<br /><br />";
-              echo "<a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a>";
+              echo "<script language='javascript'>UpdatePageModule(".$globalSS['connectionParams']['srv'].",0,'1quotasupdated')</script>"; 
             } //end actid=4
 
             if($actid==5) {//удаление DELETE
               $quotaex->doDelete($globalSS,$paramsQuota);
 
        
-              echo "".$_lang['stQUOTASDELETED']."<br /><br />";
-              echo "<a href=index.php?srv=".$srv." target=right>".$_lang['stBACK']."</a><br />";
+              echo "<script language='javascript'>UpdatePageModule(".$globalSS['connectionParams']['srv'].",0,'1quotasdeleted')</script>"; 
 
             } //end actid=5
 
@@ -189,7 +206,9 @@ $newdate=strtotime(date("d-m-Y"))-86400;
 $newdate=date("d-m-Y",$newdate);
 
 
-
+//если пришел какой-то статус - отобразим это во всплывающем сообщении
+if(isset($_GET['status']))
+echo "<script language=javascript>launch_toast('toast_success')</script>";
 ?>
 <form name=fastdateswitch_form>
     <input type="hidden" name=date_field_hidden value="<?php echo $newdate; ?>">
