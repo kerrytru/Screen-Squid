@@ -119,7 +119,16 @@ sub doDeleteOldData {
   $deldate=$lastdate - $deleteperiod * 86400;
   
   
-  $sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
+  #$sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
+
+#delete 1 day for one launch
+$sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy." id IN
+ (
+    SELECT id FROM (
+        SELECT id  FROM scsq_traffic where date< (select min(date)+86400*1 from scsq_traffic)
+    ) AS p
+);";
+
   doQueryToDatabase($sqlquery);
 
 }
