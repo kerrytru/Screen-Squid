@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> reports.php </#FN>                                                     
 *                         File Birth   > <!#FB> 2021/09/11 17:04:26.556 </#FB>                                         *
-*                         File Mod     > <!#FT> 2022/10/20 21:37:26.448 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/24 22:44:54.626 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.1 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -8269,11 +8269,17 @@ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
 $globalSS['params']['idReport']=9;
 $json_result=doGetReportData($globalSS,$queryOneLoginTopSitesTraffic,'template3.php');
 
+
+$elementCount  = count($json_array);
+
+if($elementCount>0){
 $arrLine0 = array(); //sites
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
 
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
+
+}
 
 $numrow=1;
 while ($numrow<$globalSS['countTopSitesLimit'])
@@ -8309,11 +8315,16 @@ echo $pathtoimage;
 $globalSS['params']['idReport']=56;
 $json_result=doGetReportData($globalSS,$queryOneLoginPopularSites,'template5.php');
 
+$elementCount  = count($json_array);
+
+if($elementCount>0){
 $arrLine0 = array(); //sites
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
 
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
+
+}
 
 $numrow=1;
 while ($numrow<$globalSS['countPopularSitesLimit'])
@@ -8359,7 +8370,7 @@ if($id==62)
 
 //delete graph if exists
 
-foreach (glob("../modules/Chart/pictures/*.png") as $filename) {
+foreach (glob("../../modules/Chart/pictures/*.png") as $filename) {
   unlink($filename);
 }
 
@@ -8397,11 +8408,17 @@ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
 $globalSS['params']['idReport']=12;
 $json_result=doGetReportData($globalSS,$queryOneIpaddressTopSitesTraffic,'template3.php');
 
+$json_array  = json_decode($json_result, true);
+$elementCount  = count($json_array);
+
+if($elementCount>2){
 $arrLine0 = array(); //sites
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
 
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
+
+}
 
 $numrow=1;
 while ($numrow<$globalSS['countTopSitesLimit'])
@@ -8437,11 +8454,17 @@ echo $pathtoimage;
 $globalSS['params']['idReport']=57;
 $json_result=doGetReportData($globalSS,$queryOneIpaddressPopularSites,'template5.php');
 
+$json_array  = json_decode($json_result, true);
+$elementCount  = count($json_array);
+
+if($elementCount>2){
 $arrLine0 = array(); //sites
 $arrLine0=doGetArrayData($globalSS,$json_result,1);
 
 $arrLine1 = array(); //megabytes
 $arrLine1=doGetArrayData($globalSS,$json_result,2);
+
+}
 
 $numrow=1;
 while ($numrow<$globalSS['countPopularSitesLimit'])
@@ -8689,6 +8712,12 @@ if($id==69)
 /////////////// TOP IPADDRESS TRAFFIC WORKING HOURS REPORT END
 
 if(!isset($_GET['pdf'])&& !isset($_GET['csv'])) {
+
+	echo "<script>
+	window.onload = function () {
+	  document.body.classList.add('loaded');
+	}
+	</script>";
 
 	$end=microtime(true);
 	
