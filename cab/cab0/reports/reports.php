@@ -96,10 +96,7 @@ echo $query;
 $row=doFetchOneQuery($globalSS, $query);
   
 
-echo "row1=".$row[1]."<br>"; 
-echo "hash=".$_COOKIE['hash']."<br>"; 
-echo "row0=".$row[0]."<br>"; 
-echo "idalias=".$_COOKIE['idalias']."<br>"; 
+
 
 #    if(($row['hash'] !== $_COOKIE['hash']) or ($row['id'] !== $_COOKIE['id']))
     if((trim($row[1]) !== trim($_COOKIE['hash'])) or (trim($row[0]) !== trim($_COOKIE['idalias'])))
