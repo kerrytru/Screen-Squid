@@ -86,10 +86,8 @@ $linkto=str_replace('install/','',$linkto);
 						
 						echo "Error: Cant execute query." . PHP_EOL;
 						
-						else 				
+									
 						
-						file_put_contents('../conf/db'.$start.'.php', '<?php return '. var_export($config, true) . ';?>');
-
 						
 					
 					}
@@ -118,16 +116,16 @@ $linkto=str_replace('install/','',$linkto);
 						if(!pg_query($con,$query))
 						
 						echo "Error: Cant execute query." . PHP_EOL;
-						
-						else
-
-						file_put_contents('../conf/db'.$start.'.php', '<?php return '. var_export($config, true) . ';?>');
-
+				
 						
 					
 					}
 					
 		}
+
+		file_put_contents('../conf/db'.$start.'.php', '<?php return '. var_export($config, true) . ';?>');
+
+
 
 if ($_SERVER['SERVER_PORT'] == '80') {
 	$referer = 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
