@@ -8269,7 +8269,7 @@ $arrHourMb=doGetArrayData($globalSS,$json_result,1);
 $globalSS['params']['idReport']=9;
 $json_result=doGetReportData($globalSS,$queryOneLoginTopSitesTraffic,'template3.php');
 
-
+$json_array  = json_decode($json_result, true);
 $elementCount  = count($json_array);
 
 if($elementCount>0){
@@ -8314,7 +8314,7 @@ echo $pathtoimage;
 ///top popular
 $globalSS['params']['idReport']=56;
 $json_result=doGetReportData($globalSS,$queryOneLoginPopularSites,'template5.php');
-
+$json_array  = json_decode($json_result, true);
 $elementCount  = count($json_array);
 
 if($elementCount>0){
