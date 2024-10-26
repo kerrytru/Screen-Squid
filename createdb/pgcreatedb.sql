@@ -351,7 +351,7 @@ INSERT INTO scsq_dicts (id, field_dictname, field_dictrealname, field_dicttable,
 (2, 'stIPADDRESS', 'stIPADDRESS', 'scsq_ipaddress', 'name;IP address;text', 'name asc');
 
 INSERT INTO scsq_modules_param (id, module, param, val, switch, comment) VALUES
-(1, 'Cache', 'enabled', 'on', 0, 'Enable module'),
+(1, 'Cache', 'enabled', '', 1, 'Enable module'),
 (2, 'Global', 'language', 'en', 0, 'Global language'),
 (3, 'Global', 'useLoginalias', '', 1, 'Use login alias'),
 (4, 'Global', 'useIpaddressalias', 'on', 1, 'Use ip address alias'),
