@@ -697,7 +697,7 @@ function doPrintAllDicts($globalSS){
             <tr>
               <th ><b>#</b></th>";
                 echo "<th><b>".$_lang['stDICTNAME']."</b></th>"; 
-                echo "<th><b>".$_lang['stDICTNAMEUSER']."я</b></th>"; 
+                echo "<th><b>".$_lang['stDICTNAMEUSER']."</b></th>"; 
                 echo "<th><b>".$_lang['stDICTTABLE']."</b></th>"; 
                 echo "<th><b>".$_lang['stDICTSORTBY']."</b></th>"; 
           
