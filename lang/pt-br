@@ -267,5 +267,6 @@ $_lang['stDICTTABLE']="Dict table";
 $_lang['stDICTSORTBY']="Dict order by";
 $_lang['stDICTFIELDS']="Fields";
 
+$_lang['stCLEARFILTER']="Reset";
 
 ?>
