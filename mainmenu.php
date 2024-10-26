@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> mainmenu.php </#FN>                                                    
 *                         File Birth   > <!#FB> 2021/10/18 22:59:04.068 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/10/26 22:55:50.354 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/06/25 20:54:00.398 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.8.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.7.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -338,9 +338,10 @@ echo "
     tree.add(new WebFXTreeItem('DONATE','javascript:GoInternetLink(\'https://yoomoney.ru/fundraise/oKUtNAI3bP8.231009\')','','',''));
     tree.add(new WebFXTreeItem('Wiki','javascript:GoInternetLink(\'https://sourceforge.net/p/screen-squid/wiki/Home/\')','','',''));
 ";
-
+if ((file_exists("".$globalSS['root_dir']."/modules/PrivateAuth/enabled")) )
+{
 echo "tree.add(new WebFXTreeItem('Logout','javascript:GoLink(\'".$globalSS['root_http']."/modules/PrivateAuth/logout.php\')','','',''));";
-
+}
 
 
 
