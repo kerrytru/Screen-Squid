@@ -31,7 +31,9 @@ function pathUrl($dir = __DIR__){
     return $root;
 }
 
-$linkto=pathUrl();	
+$linkto=pathUrl();
+
+$linkto=str_replace('install/','',$linkto);
 
 		#write config from step2
 			if(isset($_POST['submit'])){
