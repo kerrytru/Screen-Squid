@@ -7,6 +7,32 @@
 $start=microtime(true);
 
 
+function pathUrl($dir = __DIR__){
+
+    $root = "";
+    $dir = str_replace('\\', '/', realpath($dir));
+
+    //HTTPS or HTTP
+    $root .= !empty($_SERVER['HTTPS']) ? 'https' : 'http';
+
+    //HOST
+    $root .= '://' . $_SERVER['HTTP_HOST'];
+
+    //ALIAS
+    if(!empty($_SERVER['CONTEXT_PREFIX'])) {
+        $root .= $_SERVER['CONTEXT_PREFIX'];
+        $root .= substr($dir, strlen($_SERVER[ 'CONTEXT_DOCUMENT_ROOT' ]));
+    } else {
+        $root .= substr($dir, strlen($_SERVER[ 'DOCUMENT_ROOT' ]));
+    }
+
+    $root .= '/';
+
+    return $root;
+}
+
+$linkto=pathUrl();	
+
 		#write config from step2
 			if(isset($_POST['submit'])){
 				if($_POST['enabled']=='on')
@@ -25,7 +51,6 @@ $start=microtime(true);
 				$config['srvdbtype']=$_POST['srvdbtype'];
 
 					
-				file_put_contents('../conf/db'.$start.'.php', '<?php return '. var_export($config, true) . ';?>');
 			}
 			#set default config as new config
 		
@@ -59,6 +84,10 @@ $start=microtime(true);
 						
 						echo "Error: Cant execute query." . PHP_EOL;
 						
+						else 				
+						
+						file_put_contents('../conf/db'.$start.'.php', '<?php return '. var_export($config, true) . ';?>');
+
 						
 					
 					}
@@ -88,6 +117,10 @@ $start=microtime(true);
 						
 						echo "Error: Cant execute query." . PHP_EOL;
 						
+						else
+
+						file_put_contents('../conf/db'.$start.'.php', '<?php return '. var_export($config, true) . ';?>');
+
 						
 					
 					}
@@ -151,7 +184,7 @@ preg_match('/(.*)\install/',$referer,$link);
 <br/>
   <div >
 	  
-      Process complete. The installation process has completed, at your request database tables were created. Config file has been reset and all pre-installation tests have passed. Thank you, and here is your <a href="<?php echo $link[1];  ?>">Screen Squid</a>. If something went wrong, you can type in address string http://your_ip/path_where_screen_squid_installed.
+      Process complete. The installation process has completed, at your request database tables were created. Config file has been reset and all pre-installation tests have passed. Thank you, and here is your <a href="<?php echo $linkto;  ?>">Screen Squid</a>. If something went wrong, you can type in address string http://your_ip/path_where_screen_squid_installed.
     </div>
 
 	</article>
