@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.getreport.php </#FN>                                          
 *                         File Birth   > <!#FB> 2021/12/06 22:19:13.464 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/06/25 22:16:25.416 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/26 22:42:57.325 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.5.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.6.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -428,11 +428,14 @@ function doGetStatistics($globalSS) {
     $queryCountRowsIpaddress="select count(*) from scsq_ipaddress";
     $queryMinMaxDateTraffic="select from_unixtime(t.mindate,'%d-%m-%Y %H:%i:%s'),from_unixtime(t.maxdate,'%d-%m-%Y %H:%i:%s') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
     
-    if($globalSS['connectionParams']['dbtype']==1) #postgres 
+    if($globalSS['connectionParams']['dbtype']==1) {
+    #postgres 
     $queryMinMaxDateTraffic="select to_char(to_timestamp(t.mindate),'DD-MM-YYYY HH24:MI:SS'),to_char(to_timestamp(t.maxdate),'DD-MM-YYYY HH24:MI:SS') from ( select min(date) as mindate,max(date) as maxdate from scsq_traffic) t";
     
-    $queryCountRowsTraffic="
-SELECT reltuples::bigint FROM pg_class WHERE relname = 'scsq_traffic';";
+    $queryCountRowsTraffic="SELECT reltuples::bigint FROM pg_class WHERE relname = 'scsq_traffic';";
+
+    }
+
     $querySumSizeTraffic="select sum(sizeinbytes) from scsq_quicktraffic where par=1";
     $queryCountObjectsTraffic1="select count(id) from scsq_traffic where sizeinbytes<=1000";
     $queryCountObjectsTraffic2="select count(id) from scsq_traffic where sizeinbytes>1000 and sizeinbytes<=5000";
