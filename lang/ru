@@ -260,4 +260,10 @@ $_lang['stITEMDELETED']="1 элемент удален";
 $_lang['stEDIT']="Редактирование";
 $_lang['stADD']="Добавить";
 
+$_lang['stDICTNAME']="Имя справочника в системе";
+$_lang['stDICTNAMEUSER']="Имя справочника для пользователя";
+$_lang['stDICTTABLE']="Имя таблицы справочника";
+$_lang['stDICTSORTBY']="Сортировка по полю";
+$_lang['stDICTFIELDS']="Поля";
+
 ?>

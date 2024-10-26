@@ -258,4 +258,10 @@ $_lang['stITEMDELETED']="1 item deleted";
 $_lang['stEDIT']="Edit";
 $_lang['stADD']="Add";
 
+$_lang['stDICTNAME']="Dict system name";
+$_lang['stDICTNAMEUSER']="Dict name for user";
+$_lang['stDICTTABLE']="Dict table";
+$_lang['stDICTSORTBY']="Dict order by";
+$_lang['stDICTFIELDS']="Fields";
+
 ?>

@@ -64,3 +64,9 @@ function UpdatePageDict(srv,id,dict,status)
 		parent.right.location.href='?srv='+srv+'&id='+id+'&dname='+dict+'&status='+status+'';
 
 }
+
+function UpdatePageDicts(srv,id,actid,status)
+{
+		parent.right.location.href='?srv='+srv+'&id='+id+'&actid='+actid+'&status='+status+'';
+
+}

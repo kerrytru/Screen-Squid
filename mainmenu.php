@@ -250,7 +250,10 @@ $sqlquery="select field_dictrealname, field_dictname from scsq_dicts";
 $result=doFetchQuery($globalSS,$sqlquery);
 
 foreach($result as $line)
+if(isset($_lang[$line[1]]))
 echo "dictmodule.add(new WebFXTreeItem('".$_lang[$line[1]]."','javascript:GoDicts(".$srv.",10,\'".$line[1]."\')','','img/themes/default/User.png','img/themes/default/User.png'));";
+else
+echo "dictmodule.add(new WebFXTreeItem('".$line[1]."','javascript:GoDicts(".$srv.",10,\'".$line[1]."\')','','img/themes/default/User.png','img/themes/default/User.png'));";
 
 //echo "dictmodule.add(new WebFXTreeItem('".$line[0]."','javascript:GoDicts(".$srv.",10,'".$line[1]."')','','img/themes/default/User.png','img/themes/default/User.png'));";
 

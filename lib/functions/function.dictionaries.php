@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> function.dictionaries.php </#FN>                                       
 *                         File Birth   > <!#FB> 2024/10/10 19:32:31.139 </#FB>                                         *
-*                         File Mod     > <!#FT> 2024/10/12 22:26:41.687 </#FT>                                         *
+*                         File Mod     > <!#FT> 2024/10/26 20:58:57.523 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 1.1.0 </#FV>                                                           
+*                         File Version > <!#FV> 1.2.0 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 */
@@ -689,17 +689,17 @@ function doPrintAllDicts($globalSS){
     $result = doFetchQuery($globalSS,$queryAllItems);
 
     $numrow=1;
-    echo 	"<h2>Справочники:</h2>";
+    echo 	"<h2>".$_lang['stDICTIONARY'].":</h2>";
     echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&actid=11>".$_lang['stADD']."</a>";
     echo "<br /><br />";
 
     echo "<table class=\"datatable\">
             <tr>
               <th ><b>#</b></th>";
-                echo "<th><b>Имя справочника в системе</b></th>"; 
-                echo "<th><b>Имя справочника для пользователя</b></th>"; 
-                echo "<th><b>Имя таблицы справочника</b></th>"; 
-                echo "<th><b>Сортировка по полю</b></th>"; 
+                echo "<th><b>".$_lang['stDICTNAME']."</b></th>"; 
+                echo "<th><b>".$_lang['stDICTNAMEUSER']."я</b></th>"; 
+                echo "<th><b>".$_lang['stDICTTABLE']."</b></th>"; 
+                echo "<th><b>".$_lang['stDICTSORTBY']."</b></th>"; 
           
               
     echo "   
@@ -763,16 +763,16 @@ function doPrintFormAddDict($globalSS){
        <table class=datatable>';
 
     
-         echo '<tr><td><b>Имя справочника в системе</b></td><td><input type="text"  name="field_dictname"></td></tr>'; 
-         echo '<tr><td><b>Имя справочника для пользователя</b></td><td><input type="text"  name="field_dictrealname"></td></tr>'; 
-         echo '<tr><td><b>Имя таблицы справочника</b></td><td><input type="text"  name="field_dicttable"></td></tr>'; 
-         echo '<tr><td><b>Поля</b></td>
+         echo '<tr><td><b>'.$_lang['stDICTNAME'].'</b></td><td><input type="text"  name="field_dictname"></td></tr>'; 
+         echo '<tr><td><b>'.$_lang['stDICTNAMEUSER'].'</b></td><td><input type="text"  name="field_dictrealname"></td></tr>'; 
+         echo '<tr><td><b>'.$_lang['stDICTTABLE'].'</b></td><td><input type="text"  name="field_dicttable"></td></tr>'; 
+         echo '<tr><td><b>'.$_lang['stDICTFIELDS'].'</b></td>
          <td><textarea
          name="field_fields"
          rows="5"
          cols="30"
-         placeholder="Поля"></textarea></td></tr>'; 
-         echo '<tr><td><b>Сортировка по полю</b></td><td><input type="text"  name="field_order"></td></tr>'; 
+         placeholder="'.$_lang['stDICTFIELDS'].'"></textarea></td></tr>'; 
+         echo '<tr><td><b>'.$_lang['stDICTSORTBY'].'</b></td><td><input type="text"  name="field_order"></td></tr>'; 
    
        
 echo '      
@@ -822,13 +822,14 @@ echo '
          die('Error: Can`t insert new dict');
         }
 
-         echo "".$_lang['stADDED']."<br /><br />";
+#         echo "".$_lang['stADDED']."<br /><br />";
+echo "<script language='javascript'>UpdatePageDicts(".$globalSS['connectionParams']['srv'].",10,10,'1itemadded')</script>"; 
 
 //         if(isset($_POST['field_ismodal']))
   //       echo "Закройте это окно и продолжите работу.";
     //     else 
 
-         echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&actid=10 >".$_lang['stBACK']."</a>";
+#         echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&actid=10 >".$_lang['stBACK']."</a>";
  
        }
        
@@ -864,16 +865,16 @@ echo '
        <form action="?srv='.$globalSS['connectionParams']['srv'].'&id=10&actid=14&itemid='.$itemid.'" method="post">
        <table class=datatable>';
 
-       echo '<tr><td><b>Имя справочника в системе</b></td><td><input type="text" value="'.$line[1].'"  name="field_dictname"></td></tr>'; 
-       echo '<tr><td><b>Имя справочника для пользователя</b></td><td><input type="text" value="'.$line[2].'"  name="field_dictrealname"></td></tr>'; 
-       echo '<tr><td><b>Имя таблицы справочника</b></td><td><input type="text" value="'.$line[3].'"  name="field_dicttable"></td></tr>'; 
-       echo '<tr><td><b>Поля</b></td>
+       echo '<tr><td><b>'.$_lang['stDICTNAME'].'</b></td><td><input type="text" value="'.$line[1].'"  name="field_dictname"></td></tr>'; 
+       echo '<tr><td><b>'.$_lang['stDICTNAMEUSER'].'</b></td><td><input type="text" value="'.$line[2].'"  name="field_dictrealname"></td></tr>'; 
+       echo '<tr><td><b>'.$_lang['stDICTTABLE'].'</b></td><td><input type="text" value="'.$line[3].'"  name="field_dicttable"></td></tr>'; 
+       echo '<tr><td><b>'.$_lang['stDICTFIELDS'].'</b></td>
        <td><textarea
        name="field_fields"
        rows="5"
        cols="30"
        >'.$line[4].'</textarea></td></tr>'; 
-       echo '<tr><td><b>Сортировка по полю</b></td><td><input type="text" value="'.$line[5].'"  name="field_order"></td></tr>'; 
+       echo '<tr><td><b>'.$_lang['stDICTSORTBY'].'</b></td><td><input type="text" value="'.$line[5].'"  name="field_order"></td></tr>'; 
  
 
 echo '              
@@ -928,8 +929,11 @@ echo '
          die('Error: Cant update one');
        }
        
-       echo "".$_lang['stUPDATED']."<br /><br />";
-       echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&actid=10 >".$_lang['stBACK']."</a>";
+       echo "<script language='javascript'>UpdatePageDicts(".$globalSS['connectionParams']['srv'].",10,10,'1itemupdated')</script>"; 
+
+
+#       echo "".$_lang['stUPDATED']."<br /><br />";
+#       echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&actid=10 >".$_lang['stBACK']."</a>";
        
        
        
@@ -953,8 +957,10 @@ echo '
        die('Error: Cant delete one dict');
        }
        
-       echo "".$_lang['stDELETED']."<br /><br />";
-       echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&actid=10 >".$_lang['stBACK']."</a><br />";
+       echo "<script language='javascript'>UpdatePageDicts(".$globalSS['connectionParams']['srv'].",10,10,'1itemdeleted')</script>"; 
+
+      # echo "".$_lang['stDELETED']."<br /><br />";
+      # echo "<a href=?srv=".$globalSS['connectionParams']['srv']."&id=10&actid=10 >".$_lang['stBACK']."</a><br />";
        
        
        }
