@@ -347,8 +347,8 @@ ALTER TABLE scsq_dicts
 
 
 INSERT INTO scsq_dicts (id, field_dictname, field_dictrealname, field_dicttable, field_fields, field_order) VALUES
-(10, 'stLOGINS', 'stLOGINS', 'scsq_logins', 'name;Login;text', 'name asc'),
-(11, 'stIPADDRESS', 'stIPADDRESS', 'scsq_ipaddress', 'name;IP address;text', 'name asc');
+(1, 'stLOGINS', 'stLOGINS', 'scsq_logins', 'name;Login;text', 'name asc'),
+(2, 'stIPADDRESS', 'stIPADDRESS', 'scsq_ipaddress', 'name;IP address;text', 'name asc');
 
 INSERT INTO scsq_modules_param (id, module, param, val, switch, comment) VALUES
 (1, 'Cache', 'enabled', 'on', 1, 'Enable module'),

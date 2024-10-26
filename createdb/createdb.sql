@@ -241,6 +241,29 @@ INSERT INTO `scsq_users` (`id`, `login`, `pass`, `active`, `email`, `hash`, `com
 -- Dumping data for table `scsq_modules_param`
 --
 
+--
+-- Структура таблицы `scsq_dicts`
+--
+
+CREATE TABLE IF NOT EXISTS `scsq_dicts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `field_dictname` varchar(60) DEFAULT NULL,
+  `field_dictrealname` varchar(100) DEFAULT NULL,
+  `field_dicttable` varchar(70) DEFAULT NULL,
+  `field_fields` text DEFAULT NULL,
+  `field_order` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+--
+-- Дамп данных таблицы `scsq_dicts`
+--
+
+INSERT INTO scsq_dicts (id, field_dictname, field_dictrealname, field_dicttable, field_fields, field_order) VALUES
+(1, 'stLOGINS', 'stLOGINS', 'scsq_logins', 'name;Login;text', 'name asc'),
+(2, 'stIPADDRESS', 'stIPADDRESS', 'scsq_ipaddress', 'name;IP address;text', 'name asc');
+
+
 INSERT INTO `scsq_modules_param` (`id`, `module`, `param`, `val`, `switch`, `comment`) VALUES
 (1, 'Cache', 'enabled', 'on', 1, 'Enable module'),
 (2, 'Global', 'language', 'en', 0, 'Global language'),
