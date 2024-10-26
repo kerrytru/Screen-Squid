@@ -26,6 +26,9 @@ include("../../../config.php");
 
 $srv=$_COOKIE['srv'];
 
+if(!isset($_GET['idreport']))
+$_GET['idreport']=$_COOKIE['idreport'];
+
 $addr=$address[$srv];
 $usr=$user[$srv];
 $psw=$pass[$srv];
@@ -88,11 +91,15 @@ if((($_GET['idreport']>=25) and ($_GET['idreport']<=29)) or ($_GET['idreport']==
 else
     $query = "SELECT id,hash FROM scsq_alias WHERE id = '".intval($_COOKIE['idalias'])."' LIMIT 1";
 
-
+echo $query;
 
 $row=doFetchOneQuery($globalSS, $query);
   
 
+echo "row1=".$row[1]."<br>"; 
+echo "hash=".$_COOKIE['hash']."<br>"; 
+echo "row0=".$row[0]."<br>"; 
+echo "idalias=".$_COOKIE['idalias']."<br>"; 
 
 #    if(($row['hash'] !== $_COOKIE['hash']) or ($row['id'] !== $_COOKIE['id']))
     if((trim($row[1]) !== trim($_COOKIE['hash'])) or (trim($row[0]) !== trim($_COOKIE['idalias'])))
@@ -100,8 +107,8 @@ $row=doFetchOneQuery($globalSS, $query);
     {
         setcookie("idalias", "", 0, "/");
         setcookie("hash", "", 0, "/");
-		header("Location: index.php"); exit();
-      // something going wrong
+//		header("Location: index.php"); exit();
+// something going wrong
 	}
 	
 }
