@@ -91,7 +91,6 @@ if((($_GET['idreport']>=25) and ($_GET['idreport']<=29)) or ($_GET['idreport']==
 else
     $query = "SELECT id,hash FROM scsq_alias WHERE id = '".intval($_COOKIE['idalias'])."' LIMIT 1";
 
-echo $query;
 
 $row=doFetchOneQuery($globalSS, $query);
   
