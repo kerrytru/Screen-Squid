@@ -234,7 +234,8 @@ function doWriteToLogTable($globalSS, $params){
 
   include_once(''.$globalSS['root_dir'].'/lib/functions/function.database.php');
  
-  $sqlquery="insert into scsq_logtable (datestart,dateend,message) VALUES ('".$params['datestart']."','".$params['dateend']."','".$params['message']."');";
+    $sqlquery="insert into scsq_logtable (datestart,dateend,message) VALUES (".$params['datestart'].",".$params['dateend'].",'".$params['message']."');";
+
 
   doQuery($globalSS,$sqlquery);
 
