@@ -10,12 +10,12 @@
 * -------------------------------------------------------------------------------------------------------------------- *
 *                         File Name    > <!#FN> fetch.pl </#FN>                                                        
 *                         File Birth   > <!#FB> 2021/06/24 20:04:51.210 </#FB>                                         *
-*                         File Mod     > <!#FT> 2023/03/02 21:26:16.431 </#FT>                                         *
+*                         File Mod     > <!#FT> 2025/01/31 23:02:50.618 </#FT>                                         *
 *                         License      > <!#LT> ERROR: no License name provided! </#LT>                                
 *                                        <!#LU>  </#LU>                                                                
 *                                        <!#LD> MIT License                                                            
 *                                        GNU General Public License version 3.0 (GPLv3) </#LD>                         
-*                         File Version > <!#FV> 2.7.0 </#FV>                                                           
+*                         File Version > <!#FV> 2.7.1 </#FV>                                                           
 *                                                                                                                      *
 </#CR>
 =cut
@@ -122,7 +122,7 @@ sub doDeleteOldData {
   #$sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy."";
 
 #delete 1 day for one launch
-$sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy." id IN
+$sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy." and id IN
  (
     SELECT id FROM (
         SELECT id  FROM scsq_traffic where date< (select min(date)+86400*1 from scsq_traffic)
@@ -130,6 +130,18 @@ $sqlquery="delete from scsq_traffic where date<$deldate and numproxy=".$numproxy
 );";
 
   doQueryToDatabase($sqlquery);
+
+
+#delete 1 day for one launch
+$sqlquery="delete from scsq_quicktraffic where date<$deldate and numproxy=".$numproxy." and id IN
+ (
+    SELECT id FROM (
+        SELECT id  FROM scsq_quicktraffic where date< (select min(date)+86400*1 from scsq_quicktraffic)
+    ) AS p
+);";
+
+  doQueryToDatabase($sqlquery);
+
 
 }
 
